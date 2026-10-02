@@ -1295,7 +1295,7 @@ const RECIPES_MASTER = [
       "calories": "263",
       "protein": "23g",
       "carbs": "29g",
-      "fat": "400g",
+      "fat": "4g",
       "sugar": "26g",
       "fiber": "0g"
     },
@@ -5662,7 +5662,7 @@ const RECIPES_MASTER = [
       "calories": "250",
       "protein": "31g",
       "carbs": "14g",
-      "fat": "400g",
+      "fat": "4g",
       "sugar": "13g",
       "fiber": "2g"
     },
@@ -12316,7 +12316,7 @@ const RECIPES_MASTER = [
       "calories": "233",
       "protein": "23g",
       "carbs": "29g",
-      "fat": "400g",
+      "fat": "4g",
       "sugar": "18g",
       "fiber": "1g"
     },

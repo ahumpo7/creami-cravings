@@ -2731,3 +2731,432 @@ body {
   font-size: 0.85rem;
 }
 
+/* ==========================================================================
+   Creami Roulette ("Surprise Me" Spin the Wheel)
+   ========================================================================== */
+.btn-roulette {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #ec4899 0%, #a855f7 50%, #6366f1 100%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: var(--radius-md);
+  color: #ffffff;
+  font-family: var(--font-body);
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 3px 14px rgba(236, 72, 153, 0.35);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  white-space: nowrap;
+}
+
+.btn-roulette:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 20px rgba(236, 72, 153, 0.55);
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+.btn-roulette:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.btn-roulette .roulette-icon {
+  font-size: 1.15rem;
+  display: inline-block;
+  transition: transform 0.4s ease;
+}
+
+.btn-roulette.spinning .roulette-icon {
+  animation: rouletteSpinAnimation 0.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes rouletteSpinAnimation {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Roulette Spin Modal */
+.roulette-modal-content {
+  max-width: 480px;
+  text-align: center;
+  padding: 32px 28px;
+  border: 1px solid rgba(236, 72, 153, 0.3);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 35px rgba(236, 72, 153, 0.2);
+}
+
+.roulette-title-badge {
+  display: inline-block;
+  padding: 4px 14px;
+  background: rgba(236, 72, 153, 0.15);
+  border: 1px solid rgba(236, 72, 153, 0.35);
+  border-radius: 999px;
+  color: #f472b6;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  margin-bottom: 10px;
+}
+
+.roulette-headline {
+  font-family: var(--font-heading);
+  font-size: 1.6rem;
+  font-weight: 800;
+  margin-bottom: 6px;
+  background: linear-gradient(135deg, #ffffff, #f472b6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.roulette-subtext {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+
+.roulette-slot-machine {
+  background: var(--bg-input);
+  border: 2px solid rgba(236, 72, 153, 0.4);
+  border-radius: var(--radius-lg);
+  padding: 26px 20px;
+  margin: 16px 0 24px;
+  box-shadow: inset 0 4px 18px rgba(0, 0, 0, 0.5), 0 0 15px rgba(236, 72, 153, 0.15);
+  overflow: hidden;
+  position: relative;
+}
+
+.slot-item {
+  font-family: var(--font-heading);
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--text-main);
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.1s ease;
+  line-height: 1.25;
+}
+
+.slot-item.blur {
+  filter: blur(2.5px);
+  opacity: 0.75;
+  transform: translateY(2px) scale(0.97);
+}
+
+.roulette-winner-announcement {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin-top: 10px;
+  animation: fadeInDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.roulette-winner-badge {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #34d399;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+}
+
+.roulette-winner-title {
+  font-family: var(--font-heading);
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 4px;
+}
+
+.roulette-winner-meta {
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.roulette-winner-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+/* Modal Winner Banner (When opened from Roulette) */
+.roulette-winner-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.16), rgba(168, 85, 247, 0.16));
+  border: 1px solid rgba(236, 72, 153, 0.4);
+  border-radius: var(--radius-md);
+  margin-bottom: 18px;
+  gap: 12px;
+}
+
+.roulette-winner-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: #f472b6;
+}
+
+.btn-modal-spin-again {
+  padding: 5px 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border-radius: 999px;
+  background: var(--bg-glass);
+  border: 1px solid rgba(236, 72, 153, 0.4);
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+}
+
+.btn-modal-spin-again:hover {
+  background: linear-gradient(135deg, #ec4899, #8b5cf6);
+  border-color: transparent;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   Craving Filter Chips (Roadmap Item 12)
+   ========================================================================== */
+.chip-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--border-glass);
+  margin: 0 4px;
+  display: inline-block;
+  align-self: center;
+}
+
+.filter-chip.craving-chip {
+  background: rgba(236, 72, 153, 0.08);
+  border-color: rgba(236, 72, 153, 0.25);
+  color: var(--text-main);
+}
+
+.filter-chip.craving-chip:hover {
+  background: rgba(236, 72, 153, 0.18);
+  border-color: #ec4899;
+  transform: translateY(-1px);
+}
+
+.filter-chip.craving-chip.active {
+  background: linear-gradient(135deg, #f43f5e 0%, #ec4899 100%);
+  border-color: transparent;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(244, 63, 94, 0.4);
+}
+
+/* ==========================================================================
+   Fitness & Macro Target Filters Panel (Roadmap Item 10)
+   ========================================================================== */
+.macro-toggle-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border-color: rgba(59, 130, 246, 0.4);
+  background: rgba(59, 130, 246, 0.08);
+  color: #60a5fa;
+}
+
+.macro-toggle-chip:hover {
+  background: rgba(59, 130, 246, 0.18);
+  border-color: #3b82f6;
+  color: #93c5fd;
+}
+
+.macro-toggle-chip.active-panel {
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.25);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+}
+
+.macro-active-indicator {
+  width: 8px;
+  height: 8px;
+  background: #10b981;
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 0 8px #10b981;
+}
+
+.macro-sliders-panel {
+  background: var(--bg-item);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  margin-bottom: 18px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+  animation: fadeInDown 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.macro-sliders-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.macro-sliders-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.macro-header-icon {
+  font-size: 1.4rem;
+}
+
+.macro-header-title {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  color: var(--text-main);
+}
+
+.macro-sliders-sub {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.macro-sliders-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.macro-filter-summary {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #60a5fa;
+}
+
+.macro-sliders-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .macro-sliders-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+.macro-slider-card {
+  background: var(--bg-glass);
+  border: 1px solid var(--border-item);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.macro-slider-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.slider-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.slider-display {
+  font-family: var(--font-heading);
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.macro-range-input {
+  width: 100%;
+  accent-color: var(--primary);
+  cursor: pointer;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--bg-input);
+  outline: none;
+}
+
+.macro-slider-ticks {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   1-Tap Macro Clipboard Export (Roadmap Item 10)
+   ========================================================================== */
+.macro-export-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: -16px;
+  margin-bottom: 22px;
+  padding: 8px 14px;
+  background: var(--bg-glass);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.btn-copy-macros {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 14px;
+  background: var(--bg-item);
+  border: 1px solid var(--border-item);
+  border-radius: var(--radius-sm);
+  color: var(--text-main);
+  font-size: 0.82rem;
+  font-weight: 700;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-copy-macros:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--primary-glow);
+}
+
+.btn-copy-macros.copied {
+  background: var(--success);
+  border-color: var(--success);
+  color: #ffffff;
+}
+
+.macro-export-hint {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+

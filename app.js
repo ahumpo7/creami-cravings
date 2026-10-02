@@ -113,6 +113,26 @@
   let timerSecondsLeft = 60;
   let timerRunning = false;
 
+  // Fitness & Macro Target Filters (Roadmap Item 10)
+  let macroFilters = {
+    minProtein: 0,
+    maxCalories: 450,
+    maxFat: 20
+  };
+
+  // Creami Roulette State (Roadmap Item 12)
+  let lastRouletteWinner = null;
+  let rouletteSpinInterval = null;
+  let isCurrentModalRoulette = false;
+
+  // Craving Keywords for Flavor Matching (Roadmap Item 12)
+  const CRAVING_KEYWORDS = {
+    chocolate: ['chocolate', 'cocoa', 'fudge', 'oreo', 'brownie', 'choc', 'nutella', 'cacao'],
+    fruit: ['fruit', 'berry', 'strawberr', 'banana', 'mango', 'peach', 'lemon', 'orange', 'pineapple', 'apple', 'cherry', 'blueberry', 'raspberry', 'blackberry', 'lime', 'sorbet', 'citrus', 'passionfruit', 'coconut', 'watermelon'],
+    bakery: ['cookie', 'dough', 'cake', 'cheesecake', 'pie', 'graham', 'cinnamon', 'waffle', 'biscuit', 'muffin', 'caramel', 'vanilla bean', 'snickerdoodle', 'shortbread', 'crisp', 'crumble', 'batter', 'donut', 'cereal'],
+    coffee: ['coffee', 'espresso', 'latte', 'mocha', 'cappuccino', 'cold brew', 'caffeine', 'java', 'macchiato']
+  };
+
   // DOM Elements
   const statTotalRecipes = document.getElementById('statTotalRecipes');
   const statReadyRecipes = document.getElementById('statReadyRecipes');
@@ -141,6 +161,31 @@
   const recipeModalOverlay = document.getElementById('recipeModalOverlay');
   const recipeModalBody = document.getElementById('recipeModalBody');
   const modalCloseBtn = document.getElementById('modalCloseBtn');
+
+  // Creami Roulette Elements (Item 12)
+  const rouletteBtn = document.getElementById('rouletteBtn');
+  const rouletteModalOverlay = document.getElementById('rouletteModalOverlay');
+  const rouletteModalCloseBtn = document.getElementById('rouletteModalCloseBtn');
+  const rouletteSlotItem = document.getElementById('rouletteSlotItem');
+  const rouletteSubtext = document.getElementById('rouletteSubtext');
+  const rouletteWinnerCard = document.getElementById('rouletteWinnerCard');
+  const rouletteWinnerTitle = document.getElementById('rouletteWinnerTitle');
+  const rouletteWinnerMeta = document.getElementById('rouletteWinnerMeta');
+  const btnRouletteOpenWinner = document.getElementById('btnRouletteOpenWinner');
+  const btnRouletteSpinAgain = document.getElementById('btnRouletteSpinAgain');
+
+  // Fitness & Macro Target Elements (Item 10)
+  const toggleMacroSlidersBtn = document.getElementById('toggleMacroSlidersBtn');
+  const macroActiveIndicator = document.getElementById('macroActiveIndicator');
+  const macroSlidersPanel = document.getElementById('macroSlidersPanel');
+  const macroFilterSummary = document.getElementById('macroFilterSummary');
+  const resetMacroSlidersBtn = document.getElementById('resetMacroSlidersBtn');
+  const minProteinSlider = document.getElementById('minProteinSlider');
+  const minProteinDisplay = document.getElementById('minProteinDisplay');
+  const maxCaloriesSlider = document.getElementById('maxCaloriesSlider');
+  const maxCaloriesDisplay = document.getElementById('maxCaloriesDisplay');
+  const maxFatSlider = document.getElementById('maxFatSlider');
+  const maxFatDisplay = document.getElementById('maxFatDisplay');
   
   const shoppingModalOverlay = document.getElementById('shoppingModalOverlay');
   const shoppingModalBody = document.getElementById('shoppingModalBody') || document.getElementById('shoppingListBody');
@@ -1047,6 +1092,20 @@
       // Base Only filter
       if (baseOnlyFilter && !match.isBaseReady) return false;
 
+      // Fitness & Macro Target Sliders (Roadmap Item 10)
+      if (macroFilters.minProtein > 0) {
+        const pro = parseInt(recipe.macros.protein) || 0;
+        if (pro < macroFilters.minProtein) return false;
+      }
+      if (macroFilters.maxCalories < 450) {
+        const cal = parseInt(recipe.macros.calories) || 999;
+        if (cal > macroFilters.maxCalories) return false;
+      }
+      if (macroFilters.maxFat < 20) {
+        const fat = parseInt(recipe.macros.fat) || 0;
+        if (fat > macroFilters.maxFat) return false;
+      }
+
       // Quick Filter Chips
       if (activeQuickFilter === 'high_protein') {
         const pro = parseInt(recipe.macros.protein) || 0;
@@ -1057,10 +1116,21 @@
       } else if (activeQuickFilter === 'low_carb') {
         const carbs = parseInt(recipe.macros.carbs) || 999;
         if (carbs > 10) return false;
+      } else if (activeQuickFilter === 'low_fat') {
+        const fat = parseInt(recipe.macros.fat) || 0;
+        if (fat > 5) return false;
       } else if (activeQuickFilter === 'my_rated') {
         if (!userRecipeData[recipe.id] || !userRecipeData[recipe.id].rating) return false;
       } else if (activeQuickFilter === 'pro_tips') {
         if (!recipe.proTip) return false;
+      } else if (activeQuickFilter === 'craving_chocolate') {
+        if (!matchesCraving(recipe, 'chocolate')) return false;
+      } else if (activeQuickFilter === 'craving_fruit') {
+        if (!matchesCraving(recipe, 'fruit')) return false;
+      } else if (activeQuickFilter === 'craving_bakery') {
+        if (!matchesCraving(recipe, 'bakery')) return false;
+      } else if (activeQuickFilter === 'craving_coffee') {
+        if (!matchesCraving(recipe, 'coffee')) return false;
       }
 
       // Search Query
@@ -1117,25 +1187,29 @@
       return 0;
     });
 
-    // Update Results Summary
+    // Update Results Summary & Active Hint
     resultsSummary.textContent = `Showing ${filtered.length} of ${allRecipes.length} recipes`;
-    if (readyOnlyFilter) {
-      activePantryHint.textContent = `• Filtered by 100% Ready to Make`;
-    } else if (baseOnlyFilter) {
-      activePantryHint.textContent = `• Filtered by Base Ready to Freeze`;
-    } else if (activeQuickFilter === 'high_protein') {
-      activePantryHint.textContent = `• Filtered by High Protein (≥35g)`;
-    } else if (activeQuickFilter === 'low_cal') {
-      activePantryHint.textContent = `• Filtered by Low Calorie (<200 cal)`;
-    } else if (activeQuickFilter === 'low_carb') {
-      activePantryHint.textContent = `• Filtered by Low Carb (≤10g)`;
-    } else if (activeQuickFilter === 'my_rated') {
-      activePantryHint.textContent = `• Showing My Rated Recipes`;
-    } else if (activeQuickFilter === 'pro_tips') {
-      activePantryHint.textContent = `• Filtered by Official Author Pro Tips (${filtered.length} recipes)`;
-    } else {
-      activePantryHint.textContent = ``;
-    }
+    const hintParts = [];
+    if (readyOnlyFilter) hintParts.push('⚡ 100% Ready to Make');
+    if (baseOnlyFilter) hintParts.push('🥣 Base Ready to Freeze');
+    if (activeQuickFilter === 'high_protein') hintParts.push('💪 High Protein (≥35g)');
+    if (activeQuickFilter === 'low_cal') hintParts.push('🔥 Low Calorie (<200 cal)');
+    if (activeQuickFilter === 'low_carb') hintParts.push('🥑 Low Carb (≤10g)');
+    if (activeQuickFilter === 'low_fat') hintParts.push('🧈 Low Fat (≤5g)');
+    if (activeQuickFilter === 'my_rated') hintParts.push('⭐ My Rated');
+    if (activeQuickFilter === 'pro_tips') hintParts.push(`💡 Official Author Pro Tips (${filtered.length} recipes)`);
+    if (activeQuickFilter === 'craving_chocolate') hintParts.push('🍫 Chocolate Craving');
+    if (activeQuickFilter === 'craving_fruit') hintParts.push('🍓 Fruity & Refreshing');
+    if (activeQuickFilter === 'craving_bakery') hintParts.push('🍪 Bakery, Cookie & Dough');
+    if (activeQuickFilter === 'craving_coffee') hintParts.push('☕ Coffee & Latte');
+
+    const macroParts = [];
+    if (macroFilters.minProtein > 0) macroParts.push(`≥${macroFilters.minProtein}g P`);
+    if (macroFilters.maxCalories < 450) macroParts.push(`≤${macroFilters.maxCalories} Cal`);
+    if (macroFilters.maxFat < 20) macroParts.push(`≤${macroFilters.maxFat}g Fat`);
+    if (macroParts.length > 0) hintParts.push(`🎯 Targets: ${macroParts.join(', ')}`);
+
+    activePantryHint.textContent = hintParts.length > 0 ? `• Filtered by ${hintParts.join(' • ')}` : '';
 
     updateCategoryCounts();
     updateShoppingListBadge();
@@ -1476,6 +1550,184 @@
     }
   }
 
+  // 1-Tap Clipboard Copy Helper (Roadmap Item 10)
+  function copyTextToClipboard(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(text);
+    } else {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      return new Promise((resolve, reject) => {
+        try {
+          const successful = document.execCommand('copy');
+          textArea.remove();
+          successful ? resolve() : reject(new Error('ExecCommand copy failed'));
+        } catch (err) {
+          textArea.remove();
+          reject(err);
+        }
+      });
+    }
+  }
+
+  // Craving / Mood Flavor Matching (Roadmap Item 12)
+  function matchesCraving(recipe, cravingType) {
+    const kws = CRAVING_KEYWORDS[cravingType];
+    if (!kws) return false;
+    const text = (
+      recipe.name + ' ' + 
+      (recipe.spinSetting || '') + ' ' + 
+      (recipe.ingredients || []).map(i => i.name + ' ' + (i.notes || '')).join(' ')
+    ).toLowerCase();
+    return kws.some(k => text.includes(k));
+  }
+
+  // Creami Roulette: "Surprise Me / Spin the Wheel" (Roadmap Item 12)
+  function spinCreamiRoulette() {
+    if (!allRecipes || allRecipes.length === 0) {
+      showToast('No recipes available to spin!');
+      return;
+    }
+
+    if (rouletteBtn) {
+      rouletteBtn.classList.add('spinning');
+    }
+
+    // Determine candidate pool: prioritize ready-to-make recipes from pantry
+    const readyRecipes = allRecipes.filter(r => computeRecipeMatch(r).isReady);
+    const baseReadyRecipes = allRecipes.filter(r => computeRecipeMatch(r).isBaseReady);
+    
+    let candidates = [];
+    let poolType = 'any';
+
+    if (readyRecipes.length > 0) {
+      candidates = readyRecipes;
+      poolType = 'ready';
+    } else if (baseReadyRecipes.length > 0) {
+      candidates = baseReadyRecipes;
+      poolType = 'base';
+    } else {
+      candidates = allRecipes;
+      poolType = 'any';
+    }
+
+    const winner = candidates[Math.floor(Math.random() * candidates.length)];
+    lastRouletteWinner = winner;
+    const winnerMatch = computeRecipeMatch(winner);
+
+    // If modal overlay exists, trigger the animated slot machine ticker
+    if (rouletteModalOverlay && rouletteSlotItem) {
+      rouletteModalOverlay.classList.add('active');
+      rouletteModalOverlay.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+
+      if (rouletteWinnerCard) rouletteWinnerCard.style.display = 'none';
+      if (rouletteSubtext) {
+        rouletteSubtext.textContent = poolType === 'ready' 
+          ? '🎰 Spinning exclusively from your 100% ready-to-make recipes...'
+          : (poolType === 'base' ? '🥣 Spinning from recipes where base ingredients are ready...' : 'Selecting a winning recipe from the full cookbook...');
+      }
+
+      if (rouletteSpinInterval) clearInterval(rouletteSpinInterval);
+
+      let ticks = 0;
+      rouletteSpinInterval = setInterval(() => {
+        const tempR = candidates[Math.floor(Math.random() * candidates.length)];
+        rouletteSlotItem.textContent = `🍨 ${tempR.name}`;
+        rouletteSlotItem.classList.add('blur');
+        ticks++;
+
+        if (ticks >= 8) {
+          clearInterval(rouletteSpinInterval);
+          rouletteSpinInterval = null;
+          rouletteSlotItem.classList.remove('blur');
+          rouletteSlotItem.textContent = `🎉 ${winner.name}`;
+
+          if (rouletteBtn) rouletteBtn.classList.remove('spinning');
+
+          let metaText = '';
+          if (winnerMatch.isReady) {
+            metaText = '⚡ 100% Ready to make right now with items in your pantry!';
+          } else if (winnerMatch.isBaseReady) {
+            metaText = `🥣 Base Ready to freeze! (Missing ${winnerMatch.missing.length} mix-ins)`;
+          } else {
+            metaText = `Missing ${winnerMatch.missing.length} ingredient${winnerMatch.missing.length > 1 ? 's' : ''}`;
+          }
+
+          if (rouletteWinnerTitle) rouletteWinnerTitle.textContent = winner.name;
+          if (rouletteWinnerMeta) rouletteWinnerMeta.textContent = metaText;
+          if (rouletteWinnerCard) rouletteWinnerCard.style.display = 'block';
+
+          showToast(`🎰 Creami Roulette picked: "${winner.name}"!`);
+        }
+      }, 80);
+    } else {
+      if (rouletteBtn) rouletteBtn.classList.remove('spinning');
+      openRecipeModal(winner, true);
+      showToast(`🎰 Creami Roulette picked: "${winner.name}"!`);
+    }
+  }
+
+  function closeRouletteModal() {
+    if (rouletteSpinInterval) {
+      clearInterval(rouletteSpinInterval);
+      rouletteSpinInterval = null;
+    }
+    if (rouletteBtn) rouletteBtn.classList.remove('spinning');
+    if (rouletteModalOverlay) {
+      rouletteModalOverlay.classList.remove('active');
+      rouletteModalOverlay.setAttribute('aria-hidden', 'true');
+    }
+    if (!recipeModalOverlay || !recipeModalOverlay.classList.contains('active')) {
+      document.body.style.overflow = '';
+    }
+  }
+
+  // Fitness & Macro Target Panel Helpers (Roadmap Item 10)
+  function toggleMacroSliders() {
+    if (!macroSlidersPanel) return;
+    const isHidden = macroSlidersPanel.style.display === 'none';
+    macroSlidersPanel.style.display = isHidden ? 'block' : 'none';
+    if (toggleMacroSlidersBtn) {
+      toggleMacroSlidersBtn.classList.toggle('active-panel', isHidden);
+    }
+  }
+
+  function updateMacroFiltersUI() {
+    if (minProteinDisplay) {
+      minProteinDisplay.textContent = macroFilters.minProtein > 0 ? `≥ ${macroFilters.minProtein}g` : 'Any (≥0g)';
+    }
+    if (maxCaloriesDisplay) {
+      maxCaloriesDisplay.textContent = macroFilters.maxCalories < 450 ? `≤ ${macroFilters.maxCalories} kcal` : 'Any (≤450)';
+    }
+    if (maxFatDisplay) {
+      maxFatDisplay.textContent = macroFilters.maxFat < 20 ? `≤ ${macroFilters.maxFat}g` : 'Any (≤20g)';
+    }
+
+    const hasActive = macroFilters.minProtein > 0 || macroFilters.maxCalories < 450 || macroFilters.maxFat < 20;
+    if (macroActiveIndicator) {
+      macroActiveIndicator.style.display = hasActive ? 'inline-block' : 'none';
+    }
+
+    if (macroFilterSummary) {
+      if (!hasActive) {
+        macroFilterSummary.textContent = 'No filters active';
+      } else {
+        const parts = [];
+        if (macroFilters.minProtein > 0) parts.push(`≥${macroFilters.minProtein}g P`);
+        if (macroFilters.maxCalories < 450) parts.push(`≤${macroFilters.maxCalories} Cal`);
+        if (macroFilters.maxFat < 20) parts.push(`≤${macroFilters.maxFat}g Fat`);
+        macroFilterSummary.textContent = parts.join(' • ');
+      }
+    }
+  }
+
   function formatProTip(rawTip) {
     if (!rawTip || typeof rawTip !== 'string') return { title: 'Author Pro Tip', body: '' };
     const text = rawTip.trim();
@@ -1534,8 +1786,9 @@
   }
 
   // --- Recipe Detail Modal ---
-  function openRecipeModal(recipe) {
+  function openRecipeModal(recipe, isRoulettePick = false) {
     currentModalRecipe = recipe;
+    isCurrentModalRoulette = Boolean(isRoulettePick);
     if (timerInterval) {
       clearInterval(timerInterval);
       timerInterval = null;
@@ -1575,6 +1828,16 @@
     const isPersonal = Boolean(recipe.isPersonal || (recipe.id && recipe.id.startsWith('custom_')));
 
     recipeModalBody.innerHTML = `
+      ${isCurrentModalRoulette ? `
+        <div class="roulette-winner-banner">
+          <div class="roulette-winner-text">
+            <span>🎰</span>
+            <span>Creami Roulette Pick: <strong>${recipe.name}</strong></span>
+          </div>
+          <button class="btn-modal-spin-again" id="modalSpinAgainBtn">🎲 Spin Again</button>
+        </div>
+      ` : ''}
+
       <div class="modal-header">
         <div class="modal-meta-row">
           ${isPersonal ? `<span class="book-tag custom">🔒 Personal Recipe</span>` : (recipe.categories && recipe.categories.length > 0 ? recipe.categories : [recipe.category]).map(cat => {
@@ -1646,6 +1909,15 @@
           <div class="macro-val">${scaleMacroVal(recipe.macros.fiber, modalScale) || '0g'}</div>
           <div class="macro-lbl">Fiber</div>
         </div>
+      </div>
+
+      <!-- 1-Tap Macro Clipboard Export (Roadmap Item 10) -->
+      <div class="macro-export-container">
+        <button class="btn-copy-macros" id="btnCopyMacros" title="Copy formatted macros for MyFitnessPal, MacroFactor, or Cronometer">
+          <span>📋</span>
+          <span id="copyMacrosBtnText">Copy Macros for Fitness Tracker</span>
+        </button>
+        <span class="macro-export-hint">✨ Formatted for MyFitnessPal &amp; MacroFactor (${modalScale === 1.5 ? '24 oz Deluxe' : '16 oz Standard'})</span>
       </div>
 
       <!-- Missing Items Callout -->
@@ -2122,6 +2394,44 @@
       });
     }
 
+    // 1-Tap Macro Clipboard Export (Roadmap Item 10)
+    const btnCopyMacros = recipeModalBody.querySelector('#btnCopyMacros');
+    if (btnCopyMacros) {
+      btnCopyMacros.addEventListener('click', () => {
+        const cal = scaleMacroVal(recipe.macros.calories, modalScale) || '0';
+        const pro = scaleMacroVal(recipe.macros.protein, modalScale) || '0g';
+        const carbs = scaleMacroVal(recipe.macros.carbs, modalScale) || '0g';
+        const fat = scaleMacroVal(recipe.macros.fat, modalScale) || '0g';
+        const sugar = scaleMacroVal(recipe.macros.sugar, modalScale) || '0g';
+        const fiber = scaleMacroVal(recipe.macros.fiber, modalScale) || '0g';
+        const sizeStr = modalScale === 1.5 ? '24 oz Deluxe' : '16 oz Standard';
+
+        const macroString = `🍨 ${recipe.name} (${sizeStr}): ${cal} kcal | ${pro} P | ${carbs} C | ${fat} F (Sugar: ${sugar}, Fiber: ${fiber})`;
+
+        copyTextToClipboard(macroString).then(() => {
+          btnCopyMacros.classList.add('copied');
+          const btnText = recipeModalBody.querySelector('#copyMacrosBtnText');
+          if (btnText) btnText.textContent = '✓ Macros Copied!';
+          showToast(`📋 Copied macros for "${recipe.name}"!`);
+          setTimeout(() => {
+            btnCopyMacros.classList.remove('copied');
+            if (btnText) btnText.textContent = 'Copy Macros for Fitness Tracker';
+          }, 2500);
+        }).catch(() => {
+          showToast('Failed to copy macros to clipboard');
+        });
+      });
+    }
+
+    // Modal Spin Again Button (Roadmap Item 12)
+    const modalSpinAgainBtn = recipeModalBody.querySelector('#modalSpinAgainBtn');
+    if (modalSpinAgainBtn) {
+      modalSpinAgainBtn.addEventListener('click', () => {
+        closeRecipeModal();
+        spinCreamiRoulette();
+      });
+    }
+
     // Done Button
     const modalDoneBtn = recipeModalBody.querySelector('#modalDoneBtn');
     if (modalDoneBtn) {
@@ -2165,6 +2475,7 @@
     }
     timerRunning = false;
     timerSecondsLeft = 60;
+    isCurrentModalRoulette = false;
     recipeModalOverlay.classList.remove('active');
     recipeModalOverlay.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
@@ -2570,13 +2881,82 @@
       });
     }
 
+    // Creami Roulette (Roadmap Item 12)
+    if (rouletteBtn) {
+      rouletteBtn.addEventListener('click', spinCreamiRoulette);
+    }
+    if (rouletteModalCloseBtn) {
+      rouletteModalCloseBtn.addEventListener('click', closeRouletteModal);
+    }
+    if (rouletteModalOverlay) {
+      rouletteModalOverlay.addEventListener('click', (e) => {
+        if (e.target === rouletteModalOverlay) closeRouletteModal();
+      });
+    }
+    if (btnRouletteOpenWinner) {
+      btnRouletteOpenWinner.addEventListener('click', () => {
+        if (lastRouletteWinner) {
+          closeRouletteModal();
+          openRecipeModal(lastRouletteWinner, true);
+        }
+      });
+    }
+    if (btnRouletteSpinAgain) {
+      btnRouletteSpinAgain.addEventListener('click', spinCreamiRoulette);
+    }
+
+    // Fitness & Macro Target Sliders (Roadmap Item 10)
+    if (toggleMacroSlidersBtn) {
+      toggleMacroSlidersBtn.addEventListener('click', toggleMacroSliders);
+    }
+
+    if (minProteinSlider) {
+      minProteinSlider.addEventListener('input', (e) => {
+        macroFilters.minProtein = parseInt(e.target.value) || 0;
+        updateMacroFiltersUI();
+        renderRecipes();
+      });
+    }
+
+    if (maxCaloriesSlider) {
+      maxCaloriesSlider.addEventListener('input', (e) => {
+        macroFilters.maxCalories = parseInt(e.target.value) || 450;
+        updateMacroFiltersUI();
+        renderRecipes();
+      });
+    }
+
+    if (maxFatSlider) {
+      maxFatSlider.addEventListener('input', (e) => {
+        macroFilters.maxFat = parseInt(e.target.value) || 20;
+        updateMacroFiltersUI();
+        renderRecipes();
+      });
+    }
+
+    if (resetMacroSlidersBtn) {
+      resetMacroSlidersBtn.addEventListener('click', () => {
+        macroFilters.minProtein = 0;
+        macroFilters.maxCalories = 450;
+        macroFilters.maxFat = 20;
+        if (minProteinSlider) minProteinSlider.value = 0;
+        if (maxCaloriesSlider) maxCaloriesSlider.value = 450;
+        if (maxFatSlider) maxFatSlider.value = 20;
+        updateMacroFiltersUI();
+        renderRecipes();
+        showToast('🎯 Macro target filters reset');
+      });
+    }
+
     // Quick Nutrition & Macro Filter Chips
     const quickFilterChipsBar = document.getElementById('quickFilterChipsBar');
     if (quickFilterChipsBar) {
       quickFilterChipsBar.addEventListener('click', (e) => {
         const btn = e.target.closest('.filter-chip');
-        if (!btn) return;
-        quickFilterChipsBar.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+        if (!btn || btn.id === 'toggleMacroSlidersBtn') return;
+        quickFilterChipsBar.querySelectorAll('.filter-chip').forEach(b => {
+          if (b.id !== 'toggleMacroSlidersBtn') b.classList.remove('active');
+        });
         btn.classList.add('active');
         activeQuickFilter = btn.dataset.filter;
         renderRecipes();
@@ -2594,8 +2974,22 @@
         baseOnlyFilter = false;
         activeCategory = 'all';
         activeQuickFilter = 'all';
+
+        // Reset macro target sliders
+        macroFilters.minProtein = 0;
+        macroFilters.maxCalories = 450;
+        macroFilters.maxFat = 20;
+        if (minProteinSlider) minProteinSlider.value = 0;
+        if (maxCaloriesSlider) maxCaloriesSlider.value = 450;
+        if (maxFatSlider) maxFatSlider.value = 20;
+        updateMacroFiltersUI();
+        if (macroSlidersPanel) macroSlidersPanel.style.display = 'none';
+        if (toggleMacroSlidersBtn) toggleMacroSlidersBtn.classList.remove('active-panel');
+
         if (quickFilterChipsBar) {
-          quickFilterChipsBar.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+          quickFilterChipsBar.querySelectorAll('.filter-chip').forEach(b => {
+            if (b.id !== 'toggleMacroSlidersBtn') b.classList.remove('active');
+          });
           const allChip = quickFilterChipsBar.querySelector('[data-filter="all"]');
           if (allChip) allChip.classList.add('active');
         }
@@ -2641,6 +3035,7 @@
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         closeRecipeModal();
+        closeRouletteModal();
         closeShoppingListModal();
         closeCustomRecipeModal();
         closeGoogleAuthModal();

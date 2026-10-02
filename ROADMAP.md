@@ -54,20 +54,22 @@ A prioritized checklist of fixes, features, and refinements for the Creami Cravi
 - [ ] **Dynamic Scaling ($1.5\times$):** Automatically scale ingredient quantities (grams, tablespoons, scoops, milliliters) with clean culinary rounding.
 - [ ] **Dynamic Macro Calculation:** Recalculate full calories, protein, carbs, and fat automatically for the 24 oz Deluxe pint.
 
-### 10. 📊 Fitness & Macro Power Features
-- [ ] **1-Tap Macro Clipboard Export:** "Copy Macros" button in the recipe modal copying clean nutrition strings (e.g. `Oreo McFlurry: 310 kcal | 38g P | 24g C | 5g F`) for instant pasting into MyFitnessPal, MacroFactor, or Cronometer.
-- [ ] **Target Nutrition Filter Sliders:** Filter recipes by customizable ranges:
-  - Minimum Protein (e.g., $\ge 30\text{g}$)
-  - Maximum Calories (e.g., $\le 300\text{ kcal}$)
-  - Low Fat filter (e.g., $\le 5\text{g}$)
+### 10. 📊 Fitness & Macro Power Features (Completed ✅)
+- [x] **1-Tap Macro Clipboard Export:** "Copy Macros" button in the recipe modal copying clean nutrition strings (e.g. `Oreo McFlurry (16 oz Standard): 233 kcal | 23g P | 29g C | 4g F (Sugar: 18g, Fiber: 1g)`) for instant pasting into MyFitnessPal, MacroFactor, or Cronometer.
+- [x] **Target Nutrition Filter Sliders:** Interactive, collapsible Fitness & Macro Targets panel:
+  - Minimum Protein slider (0 to 50g+)
+  - Maximum Calories slider (150 to 450 kcal)
+  - Maximum Fat slider (2 to 20g)
+  - Quick-action "🧈 Low Fat (≤5g)" filter chip
+  - Active target indicator dot and instant reset
 
 ### 11. 📱 Grocery & Mobile Experience
 - [ ] **Full PWA Offline Support:** Install a Web App Manifest and Service Worker so all 149+ recipes and images load 100% offline in grocery stores with zero signal.
 - [ ] **Shopping List Export:** 1-click export of missing ingredients to Apple Notes, Apple Reminders, Google Keep, or clipboard text.
 
-### 12. 🎰 Fun & Discovery ("Creami Roulette")
-- [ ] **"Surprise Me / Spin the Wheel":** Random recipe picker that chooses a ready-to-make pint from your matched ingredients when you have decision paralysis.
-- [ ] **Craving / Mood Filter Chips:** Quick filter tags for specific flavor cravings:
+### 12. 🎰 Fun & Discovery ("Creami Roulette") (Completed ✅)
+- [x] **"Surprise Me / Spin the Wheel":** Animated Creami Roulette slot machine modal that picks a winning recipe—intelligently prioritizing 100% ready-to-make recipes from your pantry, with instant "Spin Again" and recipe opening.
+- [x] **Craving / Mood Filter Chips:** Instant flavor filter chips with comprehensive keyword matching:
   - 🍫 Chocolate Craving
   - 🍓 Fruity & Refreshing
   - 🍪 Bakery, Cookie & Dough

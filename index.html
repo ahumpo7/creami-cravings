@@ -194,6 +194,12 @@
                 <option value="book_asc">Sort: By Cookbook</option>
               </select>
             </div>
+
+            <!-- Creami Roulette (Surprise Me) -->
+            <button id="rouletteBtn" class="btn-roulette" title="Decision paralysis? Let Creami Roulette pick the perfect pint from your pantry!">
+              <span class="roulette-icon">🎰</span>
+              <span>Creami Roulette</span>
+            </button>
           </div>
         </div>
 
@@ -204,8 +210,85 @@
           <button class="filter-chip" data-filter="high_protein">💪 High Protein (≥35g)</button>
           <button class="filter-chip" data-filter="low_cal">🔥 Low Calorie (&lt;200 cal)</button>
           <button class="filter-chip" data-filter="low_carb">🥑 Low Carb (&le;10g)</button>
+          <button class="filter-chip" data-filter="low_fat">🧈 Low Fat (&le;5g)</button>
           <button class="filter-chip" data-filter="my_rated">⭐ My Rated</button>
           <button class="filter-chip" data-filter="pro_tips">💡 Pro Tips</button>
+          
+          <span class="chip-divider"></span>
+          <span class="quick-filter-label">Cravings:</span>
+          <button class="filter-chip craving-chip" data-filter="craving_chocolate">🍫 Chocolate</button>
+          <button class="filter-chip craving-chip" data-filter="craving_fruit">🍓 Fruity</button>
+          <button class="filter-chip craving-chip" data-filter="craving_bakery">🍪 Bakery &amp; Cookie</button>
+          <button class="filter-chip craving-chip" data-filter="craving_coffee">☕ Coffee &amp; Latte</button>
+
+          <span class="chip-divider"></span>
+          <button class="filter-chip macro-toggle-chip" id="toggleMacroSlidersBtn" title="Customize target protein, calorie, and fat ranges">
+            <span>🎯 Macro Targets</span>
+            <span class="macro-active-indicator" id="macroActiveIndicator" style="display: none;"></span>
+          </button>
+        </div>
+
+        <!-- Collapsible Fitness & Macro Sliders Panel -->
+        <div class="macro-sliders-panel" id="macroSlidersPanel" style="display: none;">
+          <div class="macro-sliders-header">
+            <div class="macro-sliders-title">
+              <span class="macro-header-icon">🎯</span>
+              <div>
+                <strong class="macro-header-title">Fitness &amp; Macro Target Filters</strong>
+                <div class="macro-sliders-sub">Dial in exact nutritional macros to hit your daily fitness targets</div>
+              </div>
+            </div>
+            <div class="macro-sliders-actions">
+              <span class="macro-filter-summary" id="macroFilterSummary">No filters active</span>
+              <button class="btn-xs btn-outline" id="resetMacroSlidersBtn">Reset Targets</button>
+            </div>
+          </div>
+          <div class="macro-sliders-grid">
+            <!-- Min Protein Slider -->
+            <div class="macro-slider-card">
+              <div class="macro-slider-label-row">
+                <span class="slider-title">💪 Min Protein</span>
+                <span class="slider-display" id="minProteinDisplay">Any (≥0g)</span>
+              </div>
+              <input type="range" class="macro-range-input" id="minProteinSlider" min="0" max="50" step="5" value="0">
+              <div class="macro-slider-ticks">
+                <span>0g</span>
+                <span>15g</span>
+                <span>30g</span>
+                <span>50g+</span>
+              </div>
+            </div>
+
+            <!-- Max Calories Slider -->
+            <div class="macro-slider-card">
+              <div class="macro-slider-label-row">
+                <span class="slider-title">🔥 Max Calories</span>
+                <span class="slider-display" id="maxCaloriesDisplay">Any (≤450)</span>
+              </div>
+              <input type="range" class="macro-range-input" id="maxCaloriesSlider" min="150" max="450" step="25" value="450">
+              <div class="macro-slider-ticks">
+                <span>150</span>
+                <span>250</span>
+                <span>350</span>
+                <span>450 (Any)</span>
+              </div>
+            </div>
+
+            <!-- Max Fat Slider -->
+            <div class="macro-slider-card">
+              <div class="macro-slider-label-row">
+                <span class="slider-title">🧈 Max Fat</span>
+                <span class="slider-display" id="maxFatDisplay">Any (≤20g)</span>
+              </div>
+              <input type="range" class="macro-range-input" id="maxFatSlider" min="2" max="20" step="1" value="20">
+              <div class="macro-slider-ticks">
+                <span>2g</span>
+                <span>5g (Low Fat)</span>
+                <span>10g</span>
+                <span>20g (Any)</span>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Cookbook Category Filter Tabs -->
@@ -275,6 +358,32 @@
     <div class="modal-content recipe-modal-content">
       <button class="modal-close" id="modalCloseBtn" aria-label="Close modal">&times;</button>
       <div id="recipeModalBody"></div>
+    </div>
+  </div>
+
+  <!-- Creami Roulette Spin Modal -->
+  <div class="modal-overlay" id="rouletteModalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-content roulette-modal-content">
+      <button class="modal-close" id="rouletteModalCloseBtn" aria-label="Close modal">&times;</button>
+      <div class="roulette-modal-header">
+        <div class="roulette-title-badge">🎰 CREAMY ROULETTE</div>
+        <h2 class="roulette-headline">Spinning The Flavor Wheel!</h2>
+        <p class="roulette-subtext" id="rouletteSubtext">Matching a winning recipe from your kitchen pantry...</p>
+      </div>
+      <div class="roulette-slot-machine">
+        <div class="slot-reel" id="rouletteSlotReel">
+          <div class="slot-item" id="rouletteSlotItem">🎲 Spinning...</div>
+        </div>
+      </div>
+      <div class="roulette-winner-announcement" id="rouletteWinnerCard" style="display: none;">
+        <div class="roulette-winner-badge">🏆 Winner Selected!</div>
+        <div class="roulette-winner-title" id="rouletteWinnerTitle">Recipe Name</div>
+        <div class="roulette-winner-meta" id="rouletteWinnerMeta">⚡ 100% Ready to make right now</div>
+        <div class="roulette-winner-actions">
+          <button class="btn-primary" id="btnRouletteOpenWinner">🍨 Open Recipe</button>
+          <button class="btn-secondary" id="btnRouletteSpinAgain">🎲 Spin Again</button>
+        </div>
+      </div>
     </div>
   </div>
 
