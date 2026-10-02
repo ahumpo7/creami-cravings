@@ -190,16 +190,6 @@
       savePantry();
     }
 
-    // Favorites
-    const savedFavs = localStorage.getItem(FAVORITES_STORAGE_KEY);
-    if (savedFavs) {
-      try {
-        favoritesState = new Set(JSON.parse(savedFavs));
-      } catch (e) {
-        favoritesState = new Set();
-      }
-    }
-
     // Google User Profile / Auth (Loaded first so user identity is known)
     const savedUser = localStorage.getItem(USER_AUTH_STORAGE_KEY);
     if (savedUser) {
@@ -208,6 +198,25 @@
       } catch (e) {
         currentUser = null;
       }
+    }
+
+    // Favorites: strictly tied to logged-in user account
+    if (currentUser && currentUser.id) {
+      const userFavKey = `${FAVORITES_STORAGE_KEY}_${currentUser.id}`;
+      const savedFavs = localStorage.getItem(userFavKey) || localStorage.getItem(FAVORITES_STORAGE_KEY);
+      if (savedFavs) {
+        try {
+          favoritesState = new Set(JSON.parse(savedFavs));
+          localStorage.setItem(userFavKey, JSON.stringify(Array.from(favoritesState)));
+        } catch (e) {
+          favoritesState = new Set();
+        }
+      } else {
+        favoritesState = new Set();
+      }
+    } else {
+      // Guest mode: favorites require login
+      favoritesState = new Set();
     }
 
     // Custom Recipes: strictly tied to logged-in user account
@@ -296,7 +305,11 @@
   }
 
   function saveFavorites() {
-    localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(Array.from(favoritesState)));
+    if (currentUser && currentUser.id) {
+      const userFavKey = `${FAVORITES_STORAGE_KEY}_${currentUser.id}`;
+      localStorage.setItem(userFavKey, JSON.stringify(Array.from(favoritesState)));
+    }
+    localStorage.removeItem(FAVORITES_STORAGE_KEY);
     updateCategoryCounts();
     triggerCloudSync();
   }
@@ -524,13 +537,15 @@
   function logoutUser() {
     currentUser = null;
     saveUserAuth();
-    // Hide personal custom recipes upon sign-out
+    // Hide personal custom recipes and clear favorites upon sign-out
     customRecipesState = [];
+    favoritesState = new Set();
     localStorage.removeItem(CUSTOM_RECIPES_STORAGE_KEY);
     mergeRecipes();
     calculateIngredientUsage();
     renderPantryList();
-    if (activeCategory === 'Custom') {
+    updateCategoryCounts();
+    if (activeCategory === 'Custom' || activeCategory === 'favorites') {
       activeCategory = 'all';
       if (categoryTabs) {
         categoryTabs.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -540,7 +555,7 @@
     }
     updateAuthUI();
     renderRecipes();
-    showToast('Signed out of Google account. Personal recipes hidden.');
+    showToast('Signed out of Google account. Personal data hidden.');
   }
 
   function updateAuthUI() {
@@ -1183,7 +1198,6 @@
             ${isPersonal ? `<span class="book-tag custom" title="Personal custom recipe saved to your Google account">🔒 Personal Recipe</span>` : categories.map(c => `<span class="book-tag ${getCategoryClass(c)}">${c}</span>`).join('')}
           </div>
           <div class="card-actions-top">
-            ${recipe.proTip ? `<span class="card-protip-badge" title="Includes Official Author Pro Tip">💡 Pro Tip</span>` : ''}
             ${!isPersonal ? `
               <span class="card-community-rating" title="Community rating: ${commAvg.toFixed(1)} / 5.0 (${commCount} reviews)">
                 ★ ${commAvg.toFixed(1)} <span class="rating-sub">(${commCount})</span>
@@ -1286,6 +1300,11 @@
   }
 
   function toggleFavorite(recipeId) {
+    if (!currentUser) {
+      openGoogleAuthModal();
+      showToast('🔒 Please sign in to save your favorite recipes!');
+      return;
+    }
     if (favoritesState.has(recipeId)) {
       favoritesState.delete(recipeId);
       showToast('Removed from favorites');
@@ -2539,6 +2558,11 @@
       categoryTabs.addEventListener('click', (e) => {
         const btn = e.target.closest('.tab-btn');
         if (!btn) return;
+        if (btn.dataset.category === 'favorites' && !currentUser) {
+          openGoogleAuthModal();
+          showToast('🔒 Please sign in to view your favorite recipes!');
+          return;
+        }
         categoryTabs.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         activeCategory = btn.dataset.category;

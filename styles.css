@@ -1772,9 +1772,9 @@ body {
   border-radius: 999px;
 }
 
-/* Recipe Card Author Pro Tip Indicator Badge */
+/* Recipe Card Author Pro Tip Indicator Badge (Hidden on main screen per user request) */
 .card-protip-badge {
-  display: inline-flex;
+  display: none !important;
   align-items: center;
   gap: 3px;
   font-size: 0.72rem;
