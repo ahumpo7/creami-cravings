@@ -3458,14 +3458,18 @@ body::before {
 @media (max-width: 768px) {
   html {
     scrollbar-gutter: auto;
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
   }
 
   body {
-    padding-bottom: calc(85px + env(safe-area-inset-bottom, 0px)) !important;
+    padding-bottom: calc(90px + env(safe-area-inset-bottom, 0px)) !important;
+    font-size: 1rem;
+    line-height: 1.5;
   }
 
   .container {
-    padding: 12px 14px;
+    padding: 14px 14px;
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
@@ -3478,11 +3482,11 @@ body::before {
     max-width: 100% !important;
     min-width: 0 !important;
     grid-template-columns: minmax(0, 1fr) !important;
-    gap: 14px;
+    gap: 16px;
   }
 
   .panel {
-    padding: 18px 14px;
+    padding: 20px 16px;
     border-radius: var(--radius-lg);
     width: 100% !important;
     max-width: 100% !important;
@@ -3492,7 +3496,7 @@ body::before {
 
   /* Header & Top Bar */
   .main-header {
-    margin-bottom: 20px;
+    margin-bottom: 22px;
   }
 
   .header-top-bar {
@@ -3504,8 +3508,9 @@ body::before {
 
   .header-badge {
     text-align: center;
-    font-size: 0.78rem;
-    padding: 4px 12px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    padding: 6px 14px;
   }
 
   .header-actions {
@@ -3518,47 +3523,51 @@ body::before {
   }
 
   .theme-toggle-btn {
-    padding: 7px 10px;
-    min-height: 40px;
+    padding: 8px 12px;
+    min-height: 44px;
+    font-size: 1.1rem;
   }
 
   .theme-label {
-    display: none; /* Hide label to save horizontal space */
+    display: none;
   }
 
   .btn-secondary-action {
-    padding: 7px 12px;
-    font-size: 0.8rem;
-    min-height: 40px;
+    padding: 8px 14px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    min-height: 44px;
   }
 
   .btn-google-signin {
-    padding: 7px 12px;
-    font-size: 0.8rem;
-    min-height: 40px;
+    padding: 8px 14px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    min-height: 44px;
   }
 
   /* Hero Content */
   .hero-content {
-    margin-bottom: 16px;
+    margin-bottom: 18px;
   }
 
   .hero-title {
-    font-size: 1.85rem;
+    font-size: 2.1rem;
+    font-weight: 800;
     line-height: 1.2;
     margin-bottom: 8px;
   }
 
   .hero-subtitle {
-    font-size: 0.88rem;
-    line-height: 1.45;
+    font-size: 0.98rem;
+    line-height: 1.5;
   }
 
   /* Compact Stats Dashboard Bar */
   .stats-bar {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 10px;
-    margin-top: 16px;
+    margin-top: 18px;
     width: 100%;
     max-width: 100%;
     min-width: 0;
@@ -3566,32 +3575,34 @@ body::before {
   }
 
   .stat-card-highlight {
-    grid-column: 1 / -1; /* Spans across top of stats for prominence */
+    grid-column: 1 / -1;
   }
 
   .stat-card {
-    padding: 10px 12px;
-    gap: 10px;
+    padding: 12px 14px;
+    gap: 12px;
     min-width: 0;
     box-sizing: border-box;
     overflow: hidden;
   }
 
   .stat-icon {
-    width: 36px;
-    height: 36px;
-    font-size: 1.15rem;
+    width: 42px;
+    height: 42px;
+    font-size: 1.35rem;
   }
 
   .stat-num {
-    font-size: 1.35rem;
+    font-size: 1.6rem;
+    font-weight: 800;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
   .stat-label {
-    font-size: 0.72rem;
+    font-size: 0.82rem;
+    font-weight: 600;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -3600,6 +3611,27 @@ body::before {
   /* Mobile Section Switcher & Bottom Nav Display */
   .mobile-section-switcher {
     display: flex;
+    padding: 6px;
+    margin-bottom: 20px;
+    gap: 8px;
+  }
+
+  .mobile-tab-btn {
+    font-size: 1.05rem;
+    font-weight: 800;
+    min-height: 50px;
+    padding: 12px 16px;
+    gap: 8px;
+  }
+
+  .mobile-tab-icon {
+    font-size: 1.25rem;
+  }
+
+  .mobile-tab-count {
+    font-size: 0.82rem;
+    font-weight: 800;
+    padding: 3px 9px;
   }
 
   .mobile-bottom-nav {
@@ -3630,8 +3662,8 @@ body::before {
 
   /* Recipes Explorer Controls */
   .recipes-controls-bar {
-    gap: 10px;
-    margin-bottom: 14px;
+    gap: 12px;
+    margin-bottom: 16px;
     width: 100%;
     max-width: 100%;
     min-width: 0;
@@ -3643,15 +3675,22 @@ body::before {
     min-width: 0 !important;
   }
 
+  .recipe-search-box input {
+    font-size: 1rem !important;
+    min-height: 48px;
+    padding: 12px 16px 12px 42px;
+  }
+
   .filter-toggles-row {
     width: 100%;
     justify-content: space-between;
-    gap: 8px;
+    gap: 10px;
   }
 
   .toggle-container {
-    font-size: 0.82rem;
-    min-height: 40px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    min-height: 44px;
   }
 
   .sort-select-wrapper {
@@ -3660,19 +3699,23 @@ body::before {
 
   .sort-select-wrapper select {
     width: 100%;
-    min-height: 44px;
+    min-height: 48px;
+    font-size: 0.95rem !important;
+    font-weight: 700;
+    padding: 10px 14px;
   }
 
   .btn-roulette {
     width: 100%;
     justify-content: center;
-    min-height: 44px;
-    font-size: 0.92rem;
+    min-height: 48px;
+    font-size: 1rem;
+    font-weight: 800;
   }
 
   /* Smooth Horizontal Scroll for Tabs & Filter Chips with Rubber-Banding Prevention */
   .category-tabs-bar {
-    margin-bottom: 14px;
+    margin-bottom: 16px;
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
@@ -3689,6 +3732,7 @@ body::before {
     min-width: 0 !important;
     box-sizing: border-box !important;
     overscroll-behavior-x: contain !important;
+    gap: 10px;
   }
 
   .category-tabs::-webkit-scrollbar {
@@ -3697,8 +3741,10 @@ body::before {
 
   .tab-btn {
     flex-shrink: 0;
-    min-height: 42px;
-    padding: 8px 14px;
+    min-height: 44px;
+    padding: 10px 18px;
+    font-size: 0.95rem;
+    font-weight: 700;
   }
 
   .quick-filter-chips-bar {
@@ -3712,16 +3758,24 @@ body::before {
     min-width: 0 !important;
     box-sizing: border-box !important;
     overscroll-behavior-x: contain !important;
+    gap: 8px;
   }
 
   .quick-filter-chips-bar::-webkit-scrollbar {
     display: none;
   }
 
+  .quick-filter-label {
+    font-size: 0.85rem;
+    font-weight: 800;
+  }
+
   .filter-chip {
     flex-shrink: 0;
-    min-height: 40px;
-    padding: 8px 14px;
+    min-height: 42px;
+    padding: 9px 16px;
+    font-size: 0.92rem;
+    font-weight: 700;
   }
 
   .chip-divider {
@@ -3729,17 +3783,28 @@ body::before {
   }
 
   /* Preset Chips in Pantry Horizontal Scroll */
+  .presets-section {
+    margin-bottom: 14px;
+  }
+
+  .presets-label {
+    font-size: 0.88rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
   .preset-chips {
     flex-wrap: nowrap !important;
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-    padding-bottom: 4px;
+    padding-bottom: 6px;
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
     box-sizing: border-box !important;
     overscroll-behavior-x: contain !important;
+    gap: 8px;
   }
 
   .preset-chips::-webkit-scrollbar {
@@ -3748,8 +3813,10 @@ body::before {
 
   .preset-chips .chip {
     flex-shrink: 0;
-    min-height: 38px;
-    padding: 6px 12px;
+    min-height: 42px;
+    padding: 8px 16px;
+    font-size: 0.92rem;
+    font-weight: 700;
   }
 
   /* Single Column Recipe Grid on Mobile / Tablets */
@@ -3759,7 +3826,7 @@ body::before {
     max-width: 100% !important;
     min-width: 0 !important;
     box-sizing: border-box !important;
-    gap: 14px;
+    gap: 16px;
   }
 
   .recipe-card {
@@ -3767,34 +3834,172 @@ body::before {
     max-width: 100% !important;
     min-width: 0 !important;
     box-sizing: border-box !important;
-    padding: 16px;
+    padding: 20px 18px;
+  }
+
+  .recipe-card-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    line-height: 1.3;
+    margin-bottom: 12px;
+  }
+
+  .book-tag {
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 5px 12px;
+  }
+
+  .match-badge {
+    font-size: 0.88rem;
+    font-weight: 700;
+    padding: 4px 10px;
+  }
+
+  .match-percent {
+    font-size: 0.88rem;
+    font-weight: 700;
+  }
+
+  .macro-pills {
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .macro-pill {
+    padding: 8px 4px;
+  }
+
+  .macro-pill-val {
+    font-size: 1.02rem;
+    font-weight: 800;
+  }
+
+  .macro-pill-label {
+    font-size: 0.74rem;
+    font-weight: 700;
+  }
+
+  .card-made-row .made-pill {
+    font-size: 0.8rem;
+    padding: 4px 10px;
+  }
+
+  .card-ing-item {
+    font-size: 0.92rem;
+    padding: 2px 0;
+  }
+
+  .card-ing-status {
+    font-size: 0.95rem;
+  }
+
+  .card-more-ings {
+    font-size: 0.82rem;
+  }
+
+  .spin-tag {
+    font-size: 0.84rem;
+    font-weight: 600;
   }
 
   .btn-view-recipe {
-    min-height: 44px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    min-height: 46px;
+    padding: 10px 18px;
   }
 
-  /* Touch Targets for Pantry Checkboxes */
-  .ingredient-checkbox-item {
-    padding: 10px 12px;
-    min-height: 44px;
-    font-size: 0.9rem;
-    touch-action: manipulation;
+  /* Touch Targets & Generous Sizing for Pantry Checkboxes */
+  .panel-title {
+    font-size: 1.35rem;
+    font-weight: 800;
   }
 
-  .custom-checkbox {
-    width: 22px;
-    height: 22px;
-    border-radius: 6px;
+  .pantry-header-buttons button {
+    min-height: 38px;
+    padding: 6px 14px;
+    font-size: 0.88rem;
+    font-weight: 700;
   }
 
-  .custom-checkbox::after {
-    font-size: 0.85rem;
+  .search-box input#ingredientSearch {
+    font-size: 1rem !important;
+    min-height: 48px;
+    padding: 12px 16px 12px 42px;
   }
 
   .category-header {
-    min-height: 48px;
-    padding: 12px 14px;
+    min-height: 52px;
+    padding: 14px 16px;
+  }
+
+  .category-header-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+  }
+
+  .category-in-stock-badge {
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 3px 9px;
+  }
+
+  .category-chevron {
+    font-size: 0.85rem;
+  }
+
+  .ingredient-checkbox-item {
+    padding: 13px 14px;
+    min-height: 50px;
+    font-size: 1.02rem;
+    touch-action: manipulation;
+    gap: 14px;
+  }
+
+  .custom-checkbox {
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    border-radius: 7px;
+    border-width: 2px;
+  }
+
+  .custom-checkbox::after {
+    font-size: 0.95rem;
+    font-weight: 800;
+  }
+
+  .ingredient-name-text {
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  .ingredient-recipe-count {
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
+
+  /* Bottom Navigation Touch Sizing */
+  .bottom-nav-item {
+    min-height: 54px;
+    padding: 6px 4px;
+  }
+
+  .bottom-nav-icon {
+    font-size: 1.35rem;
+  }
+
+  .bottom-nav-label {
+    font-size: 0.76rem;
+    font-weight: 700;
+  }
+
+  .bottom-nav-badge {
+    font-size: 0.72rem;
+    min-width: 18px;
+    height: 18px;
   }
 
   /* Prevent iOS Safari Viewport Auto-Zoom on Input Focus */
