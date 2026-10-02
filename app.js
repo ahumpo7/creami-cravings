@@ -1057,8 +1057,6 @@
   function renderRecipes() {
     if (!recipeGrid) return;
 
-    recipeGrid.innerHTML = '';
-
     const q = recipeSearchQuery.toLowerCase().trim();
     let readyCount = 0;
     let baseReadyCount = 0;
@@ -1214,20 +1212,117 @@
     updateCategoryCounts();
     updateShoppingListBadge();
 
-    // Render Cards or Empty State
+    // Render Cards or Empty State (Flicker-Free Atomic Update)
     if (filtered.length === 0) {
       emptyState.style.display = 'block';
       recipeGrid.style.display = 'none';
+      recipeGrid.replaceChildren();
       return;
     }
 
     emptyState.style.display = 'none';
     recipeGrid.style.display = 'grid';
 
-    filtered.forEach(({ recipe, match }) => {
-      const card = createRecipeCard(recipe, match);
-      recipeGrid.appendChild(card);
+    const cardsToDisplay = filtered.map(({ recipe, match }) => getOrCreateRecipeCard(recipe, match));
+    recipeGrid.replaceChildren(...cardsToDisplay);
+  }
+
+  // Card DOM Node Cache for zero layout-shift & instant rendering
+  const recipeCardCache = new Map();
+
+  function getOrCreateRecipeCard(recipe, match) {
+    let card = recipeCardCache.get(recipe.id);
+    if (!card) {
+      card = createRecipeCard(recipe, match);
+      recipeCardCache.set(recipe.id, card);
+    } else {
+      updateRecipeCard(card, recipe, match);
+    }
+    return card;
+  }
+
+  function updateRecipeCard(card, recipe, match) {
+    card.className = `recipe-card ${match.isReady ? 'ready-to-make' : ''}`;
+
+    // Update Favorite Button
+    const favBtn = card.querySelector('.favorite-btn');
+    if (favBtn) {
+      const isFav = favoritesState.has(recipe.id);
+      favBtn.className = `favorite-btn ${isFav ? 'is-favorite' : ''}`;
+      favBtn.textContent = isFav ? '💖' : '🤍';
+    }
+
+    // Update Match Status
+    const matchRow = card.querySelector('.match-status-row');
+    if (matchRow) {
+      let matchBadgeHtml = '';
+      if (match.isReady) {
+        matchBadgeHtml = `<span class="match-badge ready">⚡ Ready to Make</span>`;
+      } else if (match.missing.length === 1) {
+        matchBadgeHtml = `<span class="match-badge partial">Missing 1 item</span>`;
+      } else if (match.isBaseReady) {
+        matchBadgeHtml = `<span class="match-badge partial">🥣 Base Ready (${match.missing.length} mix-ins missing)</span>`;
+      } else {
+        matchBadgeHtml = `<span class="match-badge low">Missing ${match.missing.length} items</span>`;
+      }
+      matchRow.innerHTML = `
+        ${matchBadgeHtml}
+        <span class="match-percent">${match.matchPercent}%</span>
+      `;
+    }
+
+    const progressFill = card.querySelector('.match-progress-fill');
+    if (progressFill) {
+      progressFill.className = `match-progress-fill ${match.isReady ? 'ready' : ''}`;
+      progressFill.style.width = `${match.matchPercent}%`;
+    }
+
+    // Update Ingredient Previews (has vs miss)
+    const ingItems = card.querySelectorAll('.card-ing-item');
+    const ings = recipe.ingredients || [];
+    ingItems.forEach((item, idx) => {
+      if (ings[idx]) {
+        const has = pantryState.has(ings[idx].id);
+        item.className = `card-ing-item ${has ? 'has' : 'miss'}`;
+        const statusSpan = item.querySelector('.card-ing-status');
+        if (statusSpan) {
+          statusSpan.className = `card-ing-status ${has ? 'has' : 'miss'}`;
+          statusSpan.textContent = has ? '✓' : '○';
+        }
+      }
     });
+
+    // Update User Rating if present
+    const userFeedback = userRecipeData[recipe.id] || {};
+    let userRatingEl = card.querySelector('.recipe-card-rating');
+    if (userFeedback.rating) {
+      if (userRatingEl) {
+        userRatingEl.textContent = `⭐ You: ${userFeedback.rating}★`;
+      } else {
+        const actionsTop = card.querySelector('.card-actions-top');
+        if (actionsTop) {
+          const span = document.createElement('span');
+          span.className = 'recipe-card-rating';
+          span.title = `Your rating: ${userFeedback.rating} stars`;
+          span.textContent = `⭐ You: ${userFeedback.rating}★`;
+          actionsTop.insertBefore(span, actionsTop.querySelector('.favorite-btn'));
+        }
+      }
+    } else if (userRatingEl) {
+      userRatingEl.remove();
+    }
+
+    // Update Made & Batch Tracker Pills if present
+    const madeRow = card.querySelector('.card-made-row');
+    if (madeRow) {
+      const userMade = recipeMadeCounts[recipe.id] || 0;
+      const commMade = communityStats.madeCounts[recipe.id] ?? (12 + (Math.abs(hashString(recipe.id)) % 30));
+      const isPersonal = Boolean(recipe.isPersonal || (recipe.id && recipe.id.startsWith('custom_')));
+      madeRow.innerHTML = `
+        ${userMade > 0 ? `<span class="made-pill personal" title="You have spun this ${userMade} times">🍨 You spun ${userMade}×</span>` : ''}
+        ${!isPersonal ? `<span class="made-pill community" title="Spun ${commMade} times across all users">🔥 ${commMade} community spin${commMade === 1 ? '' : 's'}</span>` : ''}
+      `;
+    }
   }
 
   function createRecipeCard(recipe, match) {
@@ -1379,7 +1474,8 @@
       showToast('🔒 Please sign in to save your favorite recipes!');
       return;
     }
-    if (favoritesState.has(recipeId)) {
+    const isNowFav = !favoritesState.has(recipeId);
+    if (!isNowFav) {
       favoritesState.delete(recipeId);
       showToast('Removed from favorites');
     } else {
@@ -1387,7 +1483,21 @@
       showToast('💖 Added to favorites!');
     }
     saveFavorites();
-    renderRecipes();
+
+    if (activeCategory === 'favorites') {
+      renderRecipes();
+    } else {
+      const card = recipeCardCache.get(recipeId);
+      if (card) {
+        const favBtn = card.querySelector('.favorite-btn');
+        if (favBtn) {
+          favBtn.className = `favorite-btn ${isNowFav ? 'is-favorite' : ''}`;
+          favBtn.textContent = isNowFav ? '💖' : '🤍';
+          favBtn.title = isNowFav ? 'Remove from favorites' : 'Add to favorites';
+        }
+      }
+      updateCategoryCounts();
+    }
   }
 
   function updateCategoryCounts() {
@@ -2910,10 +3020,26 @@
       toggleMacroSlidersBtn.addEventListener('click', toggleMacroSliders);
     }
 
+    let macroRafId = null;
+    function scheduleMacroRender() {
+      if (macroRafId) return;
+      macroRafId = requestAnimationFrame(() => {
+        macroRafId = null;
+        renderRecipes();
+      });
+    }
+
     if (minProteinSlider) {
       minProteinSlider.addEventListener('input', (e) => {
         macroFilters.minProtein = parseInt(e.target.value) || 0;
         updateMacroFiltersUI();
+        scheduleMacroRender();
+      });
+      minProteinSlider.addEventListener('change', () => {
+        if (macroRafId) {
+          cancelAnimationFrame(macroRafId);
+          macroRafId = null;
+        }
         renderRecipes();
       });
     }
@@ -2922,6 +3048,13 @@
       maxCaloriesSlider.addEventListener('input', (e) => {
         macroFilters.maxCalories = parseInt(e.target.value) || 450;
         updateMacroFiltersUI();
+        scheduleMacroRender();
+      });
+      maxCaloriesSlider.addEventListener('change', () => {
+        if (macroRafId) {
+          cancelAnimationFrame(macroRafId);
+          macroRafId = null;
+        }
         renderRecipes();
       });
     }
@@ -2930,12 +3063,23 @@
       maxFatSlider.addEventListener('input', (e) => {
         macroFilters.maxFat = parseInt(e.target.value) || 20;
         updateMacroFiltersUI();
+        scheduleMacroRender();
+      });
+      maxFatSlider.addEventListener('change', () => {
+        if (macroRafId) {
+          cancelAnimationFrame(macroRafId);
+          macroRafId = null;
+        }
         renderRecipes();
       });
     }
 
     if (resetMacroSlidersBtn) {
       resetMacroSlidersBtn.addEventListener('click', () => {
+        if (macroRafId) {
+          cancelAnimationFrame(macroRafId);
+          macroRafId = null;
+        }
         macroFilters.minProtein = 0;
         macroFilters.maxCalories = 450;
         macroFilters.maxFat = 20;

@@ -103,23 +103,35 @@
 }
 
 /* Global Reset & Base */
-* {
+*, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+html {
+  scrollbar-gutter: stable;
 }
 
 body {
   font-family: var(--font-body);
   background-color: var(--bg-main);
   color: var(--text-main);
-  background-image: var(--bg-gradient);
-  background-attachment: fixed;
   min-height: 100vh;
   padding-bottom: 60px;
   line-height: 1.6;
-  transition: background-color 0.3s ease, color 0.3s ease;
   overflow-x: hidden;
+  position: relative;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: var(--bg-gradient);
+  pointer-events: none;
+  z-index: -1;
+  will-change: transform;
 }
 
 /* Custom Smooth Scrollbar */
@@ -856,6 +868,7 @@ body {
   margin-bottom: 18px;
   font-size: 0.9rem;
   color: var(--text-muted);
+  min-height: 26px;
 }
 
 .results-summary {
@@ -865,6 +878,8 @@ body {
 .active-pantry-hint {
   font-size: 0.82rem;
   color: var(--text-dim);
+  min-height: 18px;
+  line-height: 1.4;
 }
 
 /* Recipe Grid */
@@ -872,6 +887,8 @@ body {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 20px;
+  min-height: 400px;
+  contain: layout style;
 }
 
 /* Recipe Card */
@@ -2999,6 +3016,18 @@ body {
   margin-bottom: 18px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
   animation: fadeInDown 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .macro-sliders-header {
