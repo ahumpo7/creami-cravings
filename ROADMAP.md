@@ -49,10 +49,10 @@ A prioritized checklist of fixes, features, and refinements for the Creami Cravi
 - [ ] **Readiness Indicator:** Real-time visual status badges: `Chilling (X hours left)` $\rightarrow$ `Ready to Spin! 🍨`.
 - [ ] **One-Tap Spin Logging:** Mark a frozen pint as "Spun & Enjoyed" to automatically increment your batch counter.
 
-### 9. 🥣 16 oz Standard $\leftrightarrow$ 24 oz Deluxe Sizing Toggle
-- [ ] **Machine Switcher:** Simple toggle on recipe cards and detail modals switching between Standard (16 oz / NC300) and Deluxe (24 oz / NC500) models.
-- [ ] **Dynamic Scaling ($1.5\times$):** Automatically scale ingredient quantities (grams, tablespoons, scoops, milliliters) with clean culinary rounding.
-- [ ] **Dynamic Macro Calculation:** Recalculate full calories, protein, carbs, and fat automatically for the 24 oz Deluxe pint.
+### 9. 🥣 16 oz Standard $\leftrightarrow$ 24 oz Deluxe Sizing Toggle (Completed in Modal ✅)
+- [x] **Machine Switcher:** Simple toggle in recipe detail modals switching between Standard (16 oz / NC300) and Deluxe (24 oz / NC500) models.
+- [x] **Dynamic Scaling ($1.5\times$):** Automatically scale ingredient quantities (grams, tablespoons, scoops, milliliters) with clean culinary rounding.
+- [x] **Dynamic Macro Calculation:** Recalculate full calories, protein, carbs, and fat automatically for the 24 oz Deluxe pint.
 
 ### 10. 📊 Fitness & Macro Power Features (Completed ✅)
 - [x] **1-Tap Macro Clipboard Export:** "Copy Macros" button in the recipe modal copying clean nutrition strings (e.g. `Oreo McFlurry (16 oz Standard): 233 kcal | 23g P | 29g C | 4g F (Sugar: 18g, Fiber: 1g)`) for instant pasting into MyFitnessPal, MacroFactor, or Cronometer.
@@ -63,7 +63,7 @@ A prioritized checklist of fixes, features, and refinements for the Creami Cravi
   - Quick-action "🧈 Low Fat (≤5g)" filter chip
   - Active target indicator dot and instant reset
 
-### 11. 📱 Grocery & Mobile Experience
+### 11. 📦 Grocery PWA & Offline Support
 - [ ] **Full PWA Offline Support:** Install a Web App Manifest and Service Worker so all 149+ recipes and images load 100% offline in grocery stores with zero signal.
 - [ ] **Shopping List Export:** 1-click export of missing ingredients to Apple Notes, Apple Reminders, Google Keep, or clipboard text.
 
@@ -74,3 +74,25 @@ A prioritized checklist of fixes, features, and refinements for the Creami Cravi
   - 🍓 Fruity & Refreshing
   - 🍪 Bakery, Cookie & Dough
   - ☕ Coffee & Latte
+
+### 13. 📱 Increased Mobile Friendliness & Touch Optimization
+- [ ] **Touch & Tap Target Sizing:** Minimum 44×44px comfortable tap targets for all mobile buttons, pantry checkboxes, modal close icons, and filter chips.
+- [ ] **Sticky Mobile Bottom Navigation / Action Bar:** Floating quick-access mobile toolbar for 1-tap jumping between Recipes, Pantry Drawer, Shopping List, and Roulette without scrolling.
+- [ ] **Mobile Bottom-Sheet Modals:** Responsive slide-up sheet presentation on mobile screens with iOS safe-area support (`env(safe-area-inset-bottom)`).
+- [ ] **Prevent iOS Safari Auto-Zoom:** Enforce 16px minimum base font sizes on search inputs and notes textareas to prevent annoying iOS viewport auto-zooming.
+- [ ] **Touch-Optimized Sliders:** Smooth mobile touch targets on macro range sliders with `touch-action: pan-y` to prevent vertical page stuttering while dragging.
+- [ ] **Horizontal Scroll Momentum:** Smooth swipeable filter chip rows with subtle edge fade gradients.
+
+---
+
+## 🏆 Remaining Items Ranked by Easiest to Hardest
+
+| Rank | Task | Why & Scope | Est. Effort |
+| :---: | :--- | :--- | :---: |
+| **1** | **Item 3: Reset Counts & Community Rankings** | Clean data wipe of mock/seed numbers in `db_recipe_stats.json`, `db_ratings.json`, and initial seed constants so counts start at 0. | 🟢 ~5 mins |
+| **2** | **Item 4: Fix Shopping List Populating "Weird Things"** | Add ingredient blacklist/sanitization (exclude water, ice, non-grocery prep notes) and user-curated missing item rules. | 🟢 ~10–15 mins |
+| **3** | **Item 7: Fix Ingredient Categories in Pantry** | Reorganize pantry drawer taxonomy in `recipes-data.js` into intuitive grocery aisles (baking, sweeteners, extracts, powders, etc.). | 🟡 ~15–20 mins |
+| **4** | **Item 13: Increased Mobile Friendliness & Touch UX** | Touch targets (44px), sticky bottom navigation bar, iOS zoom prevention, touch-slider ergonomics, and bottom-sheet styling. | 🟡 ~25–35 mins |
+| **5** | **Item 8: 🧊 "Pints in Freezer" Tracker & 16-Hr Timer** | New freezer inventory manager, 16-hour countdown calculation, status badges, and 1-tap spin logging. | 🟡 ~35–45 mins |
+| **6** | **Item 11: 📦 Grocery PWA & Offline Support** | Web App Manifest, Service Worker offline caching strategy, and 1-click export to Apple Notes/Reminders/Keep. | 🟠 ~35–45 mins |
+| **7** | **Item 1: Finish Google Sign-In** | Requires generating OAuth 2.0 Client ID in Google Cloud Console and setting authorized origins. | ⚪ External Credential |
