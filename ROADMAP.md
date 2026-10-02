@@ -112,6 +112,31 @@ A prioritized checklist of fixes, features, and refinements for the Creami Cravi
   - Opening a locked recipe presents a teaser card with a friendly "Locked Recipe — Contact Admin / Upgrade Access" prompt instead of full instructions.
   - Quick filter toggle to "Show Only My Accessible Recipes" or preview all available recipes.
 
+### 16. 🔄 1-Tap Smart Ingredient Substitutions ("What Can I Swap?")
+- [ ] **Modal Swap Inspector:** Tapping or clicking any ingredient in the recipe detail modal reveals tested, recommended substitutions.
+- [ ] **Curated Creami Swaps Database:**
+  - Fairlife milk $\leftrightarrow$ Unsweetened almond milk + 1 tbsp heavy cream (reduces calories by ~60 while retaining creamy fat emulsion) or 2% milk.
+  - Xanthan gum $\leftrightarrow$ Sugar-Free Jell-O Instant Pudding Mix (7g) or guar gum.
+  - Whey protein $\leftrightarrow$ Whey/casein blend (explains why casein yields thicker soft-serve body) or plant protein.
+  - Granulated sugar $\leftrightarrow$ Allulose, erythritol/monk fruit blend, or stevia.
+  - PB2 powdered peanut butter $\leftrightarrow$ Creamy peanut butter (with macro adjustment note).
+- [ ] **Texture & Macro Delta Hints:** Explains how each swap shifts texture (iciness, thickness) and approximate calorie/protein trade-offs.
+
+### 17. 🔔 Native Push Notifications for 16-Hour Freeze Timer
+- [ ] **PWA / Android Notification Integration:** Prompts for notification permission when the user logs a chilling pint and starts the 16-hour countdown.
+- [ ] **Background Readiness Alert:** Fires a local push notification when the timer elapses:
+  - *"🍨 Ding! Your [Recipe Name] pint has chilled for 16 hours. Time to spin and enjoy!"*
+- [ ] **Direct Spin Shortcut:** Tapping the notification opens Creami Cravings directly to that recipe card with recommended spin cycle and batch logger.
+
+### 18. 🧪 "Build-A-Pint" Custom Recipe Balancing Wizard & Creaminess Score
+- [ ] **Guided 4-Step Pint Creator:** Step-by-step interactive builder to formulate balanced custom recipes:
+  - Step 1: Base Liquid (Almond milk, Fairlife, coconut milk, oat milk)
+  - Step 2: Protein & Flavor Powders (Whey, casein, cocoa, peanut butter powder)
+  - Step 3: Stabilizer & Emulsifier (Xanthan gum, sugar-free pudding mix, cream cheese, cottage cheese)
+  - Step 4: Sweeteners & Mix-Ins (Allulose, stevia, monk fruit, Oreos, chocolate chips)
+- [ ] **Real-Time "Creaminess Score" (1 to 10):** Evaluates fat, total dissolved solids, and stabilizer ratios to warn if the pint will freeze into an icy block or turn powdery.
+- [ ] **Automatic Macro Computation:** Recalculates total calories, protein, carbs, and fat per pint, with 1-click save to "My Recipes".
+
 ---
 
 ## 🏆 Remaining Items Ranked by Easiest to Hardest
@@ -121,8 +146,11 @@ A prioritized checklist of fixes, features, and refinements for the Creami Cravi
 | **🥇 1** | **Item 3: Reset Counts & Community Rankings** | Clean data wipe of mock/seed numbers in `db_recipe_stats.json`, `db_ratings.json`, and initial seed constants so counts start at 0. | 🟢 ~5 mins |
 | **🥈 2** | **Item 4: Fix Shopping List Populating "Weird Things"** | Add ingredient blacklist/sanitization (exclude water, ice, non-grocery prep notes) and user-curated missing item rules. | 🟢 ~10–15 mins |
 | **🥉 3** | **Item 7: Fix Ingredient Categories in Pantry** | Reorganize pantry drawer taxonomy in `recipes-data.js` into intuitive grocery aisles (baking, sweeteners, extracts, powders, etc.). | 🟡 ~15–20 mins |
-| **4** | **Item 8: 🧊 "Pints in Freezer" Tracker & 16-Hr Timer** | New freezer inventory manager, 16-hour countdown calculation, status badges, and 1-tap spin logging. | 🟡 ~35–45 mins |
-| **5** | **Item 11: 📦 Grocery PWA & Offline Support** | Web App Manifest, Service Worker offline caching strategy, and 1-click export to Apple Notes/Reminders/Keep. *(Prerequisite for Android Store App)* | 🟠 ~30–40 mins |
-| **6** | **Item 15: 👥 User Management & Tiered Recipe Access** | Admin portal, user database, Google auth role assignment, and category-based recipe gating/locks. | 🟠 ~40–50 mins |
-| **7** | **Item 14: 🤖 Google Play Store Android App (Bubblewrap)** | Generate signed `.aab` bundle, deploy `assetlinks.json`, generate $1024\times500$ banner and $512\times512$ store icon, and prepare `/privacy.html`. | 🟠 ~30–45 mins |
-| **8** | **Item 1: Finish Google Sign-In** | Requires generating OAuth 2.0 Client ID in Google Cloud Console and setting authorized origins. | ⚪ External Credential |
+| **4** | **Item 16: 🔄 1-Tap Smart Ingredient Substitutions** | Modal swap popup with tested substitutions for milks, gums, proteins, and sweeteners with texture/macro delta hints. | 🟡 ~20–30 mins |
+| **5** | **Item 8: 🧊 "Pints in Freezer" Tracker & 16-Hr Timer** | New freezer inventory manager, 16-hour countdown calculation, status badges, and 1-tap spin logging. | 🟡 ~35–45 mins |
+| **6** | **Item 17: 🔔 Freeze Timer Push Notifications** | Web/Android notification trigger when 16-hour freeze timer reaches zero. *(Hooks into Item 8 & PWA)* | 🟡 ~25–35 mins |
+| **7** | **Item 11: 📦 Grocery PWA & Offline Support** | Web App Manifest, Service Worker offline caching strategy, and 1-click export to Apple Notes/Reminders/Keep. *(Prerequisite for Android App)* | 🟠 ~30–40 mins |
+| **8** | **Item 18: 🧪 "Build-A-Pint" Balancing Wizard** | 4-step custom recipe creator with real-time Creaminess Score (1-10) and auto-calculated macros. | 🟠 ~35–45 mins |
+| **9** | **Item 15: 👥 User Management & Tiered Recipe Access** | Admin portal, user database, Google auth role assignment, and category-based recipe gating/locks. | 🟠 ~40–50 mins |
+| **10** | **Item 14: 🤖 Google Play Store Android App (Bubblewrap)** | Generate signed `.aab` bundle, deploy `assetlinks.json`, generate $1024\times500$ banner and $512\times512$ store icon, and prepare `/privacy.html`. | 🟠 ~30–45 mins |
+| **11** | **Item 1: Finish Google Sign-In** | Requires generating OAuth 2.0 Client ID in Google Cloud Console and setting authorized origins. | ⚪ External Credential |
