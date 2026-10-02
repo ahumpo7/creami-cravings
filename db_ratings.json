@@ -1,0 +1,1902 @@
+{
+  "shamrock_shake": {
+    "seed_user_1": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_1",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_2": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_2",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_3": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_3",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_4": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_4",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_5": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_5",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_6": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_6",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_7": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_7",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_8": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_8",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_9": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_9",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_10": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_10",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_11": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_11",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_12": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_12",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_13": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_13",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_14": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_14",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_15": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_15",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_16": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_16",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_17": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_17",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_18": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_18",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_19": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_19",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_20": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_20",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_21": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_21",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_22": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_22",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_23": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_23",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_24": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_24",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_25": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_25",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_26": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_26",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_27": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_27",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_28": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_28",
+      "updatedAt": "2026-09-15"
+    },
+    "user_g_google_1": {
+      "rating": 5,
+      "notes": "Best ever!",
+      "userName": "Alex Test",
+      "updatedAt": "2026-10-01 13:55"
+    }
+  },
+  "oreo_mcflurry": {
+    "seed_user_1": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_1",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_2": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_2",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_3": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_3",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_4": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_4",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_5": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_5",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_6": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_6",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_7": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_7",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_8": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_8",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_9": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_9",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_10": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_10",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_11": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_11",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_12": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_12",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_13": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_13",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_14": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_14",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_15": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_15",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_16": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_16",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_17": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_17",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_18": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_18",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_19": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_19",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_20": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_20",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_21": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_21",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_22": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_22",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_23": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_23",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_24": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_24",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_25": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_25",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_26": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_26",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_27": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_27",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_28": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_28",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_29": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_29",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_30": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_30",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_31": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_31",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_32": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_32",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_33": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_33",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_34": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_34",
+      "updatedAt": "2026-09-15"
+    }
+  },
+  "cake_batter": {
+    "seed_user_1": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_1",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_2": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_2",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_3": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_3",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_4": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_4",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_5": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_5",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_6": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_6",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_7": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_7",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_8": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_8",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_9": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_9",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_10": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_10",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_11": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_11",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_12": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_12",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_13": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_13",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_14": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_14",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_15": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_15",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_16": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_16",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_17": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_17",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_18": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_18",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_19": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_19",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_20": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_20",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_21": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_21",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_22": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_22",
+      "updatedAt": "2026-09-15"
+    }
+  },
+  "mint_chocolate_chip": {
+    "seed_user_1": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_1",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_2": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_2",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_3": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_3",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_4": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_4",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_5": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_5",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_6": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_6",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_7": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_7",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_8": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_8",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_9": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_9",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_10": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_10",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_11": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_11",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_12": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_12",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_13": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_13",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_14": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_14",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_15": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_15",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_16": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_16",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_17": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_17",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_18": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_18",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_19": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_19",
+      "updatedAt": "2026-09-15"
+    }
+  },
+  "biscoff_cookie_butter": {
+    "seed_user_1": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_1",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_2": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_2",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_3": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_3",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_4": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_4",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_5": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_5",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_6": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_6",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_7": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_7",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_8": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_8",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_9": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_9",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_10": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_10",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_11": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_11",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_12": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_12",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_13": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_13",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_14": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_14",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_15": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_15",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_16": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_16",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_17": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_17",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_18": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_18",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_19": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_19",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_20": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_20",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_21": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_21",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_22": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_22",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_23": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_23",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_24": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_24",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_25": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_25",
+      "updatedAt": "2026-09-15"
+    }
+  },
+  "dr_pepper_float": {
+    "seed_user_1": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_1",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_2": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_2",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_3": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_3",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_4": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_4",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_5": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_5",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_6": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_6",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_7": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_7",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_8": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_8",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_9": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_9",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_10": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_10",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_11": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_11",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_12": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_12",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_13": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_13",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_14": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_14",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_15": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_15",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_16": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_16",
+      "updatedAt": "2026-09-15"
+    }
+  },
+  "vanilla": {
+    "seed_user_1": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_1",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_2": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_2",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_3": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_3",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_4": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_4",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_5": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_5",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_6": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_6",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_7": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_7",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_8": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_8",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_9": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_9",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_10": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_10",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_11": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_11",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_12": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_12",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_13": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_13",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_14": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_14",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_15": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_15",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_16": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_16",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_17": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_17",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_18": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_18",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_19": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_19",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_20": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_20",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_21": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_21",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_22": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_22",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_23": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_23",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_24": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_24",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_25": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_25",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_26": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_26",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_27": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_27",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_28": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_28",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_29": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_29",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_30": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_30",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_31": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_31",
+      "updatedAt": "2026-09-15"
+    }
+  },
+  "chocolate": {
+    "seed_user_1": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_1",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_2": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_2",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_3": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_3",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_4": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_4",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_5": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_5",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_6": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_6",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_7": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_7",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_8": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_8",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_9": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_9",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_10": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_10",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_11": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_11",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_12": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_12",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_13": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_13",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_14": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_14",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_15": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_15",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_16": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_16",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_17": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_17",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_18": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_18",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_19": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_19",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_20": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_20",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_21": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_21",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_22": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_22",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_23": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_23",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_24": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_24",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_25": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_25",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_26": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_26",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_27": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_27",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_28": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_28",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_29": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_29",
+      "updatedAt": "2026-09-15"
+    }
+  },
+  "salted_peanut_butter": {
+    "seed_user_1": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_1",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_2": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_2",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_3": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_3",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_4": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_4",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_5": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_5",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_6": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_6",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_7": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_7",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_8": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_8",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_9": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_9",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_10": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_10",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_11": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_11",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_12": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_12",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_13": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_13",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_14": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_14",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_15": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_15",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_16": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_16",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_17": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_17",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_18": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_18",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_19": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_19",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_20": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_20",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_21": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_21",
+      "updatedAt": "2026-09-15"
+    }
+  },
+  "s_mores_blizzard": {
+    "seed_user_1": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_1",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_2": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_2",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_3": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_3",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_4": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_4",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_5": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_5",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_6": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_6",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_7": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_7",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_8": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_8",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_9": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_9",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_10": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_10",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_11": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_11",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_12": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_12",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_13": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_13",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_14": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_14",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_15": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_15",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_16": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_16",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_17": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_17",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_18": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_18",
+      "updatedAt": "2026-09-15"
+    }
+  },
+  "cotton_candy_blizzard": {
+    "seed_user_1": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_1",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_2": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_2",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_3": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_3",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_4": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_4",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_5": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_5",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_6": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_6",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_7": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_7",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_8": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_8",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_9": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_9",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_10": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_10",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_11": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_11",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_12": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_12",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_13": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_13",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_14": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_14",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_15": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_15",
+      "updatedAt": "2026-09-15"
+    }
+  },
+  "baked_alaska": {
+    "seed_user_1": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_1",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_2": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_2",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_3": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_3",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_4": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_4",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_5": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_5",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_6": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_6",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_7": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_7",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_8": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_8",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_9": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_9",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_10": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_10",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_11": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_11",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_12": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_12",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_13": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_13",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_14": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_14",
+      "updatedAt": "2026-09-15"
+    }
+  },
+  "peanut_butter_cup": {
+    "seed_user_1": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_1",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_2": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_2",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_3": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_3",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_4": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_4",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_5": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_5",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_6": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_6",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_7": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_7",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_8": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_8",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_9": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_9",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_10": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_10",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_11": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_11",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_12": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_12",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_13": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_13",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_14": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_14",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_15": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_15",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_16": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_16",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_17": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_17",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_18": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_18",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_19": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_19",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_20": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_20",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_21": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_21",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_22": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_22",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_23": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_23",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_24": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_24",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_25": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_25",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_26": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_26",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_27": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_27",
+      "updatedAt": "2026-09-15"
+    }
+  },
+  "matcha": {
+    "seed_user_1": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_1",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_2": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_2",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_3": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_3",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_4": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_4",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_5": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_5",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_6": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_6",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_7": {
+      "rating": 4,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_7",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_8": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_8",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_9": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_9",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_10": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_10",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_11": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_11",
+      "updatedAt": "2026-09-15"
+    },
+    "seed_user_12": {
+      "rating": 5,
+      "notes": "Spun on Lite Ice Cream, perfect texture!",
+      "userName": "CreamiFan_12",
+      "updatedAt": "2026-09-15"
+    }
+  }
+}

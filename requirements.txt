@@ -1,0 +1,2 @@
+# Standard library only - zero external runtime dependencies needed for server.py
+# (build_recipes_data.py is an offline generation tool and does not run in production)

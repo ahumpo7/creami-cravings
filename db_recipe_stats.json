@@ -1,0 +1,50 @@
+{
+  "shamrock_shake": {
+    "totalMade": 44
+  },
+  "oreo_mcflurry": {
+    "totalMade": 56
+  },
+  "cake_batter": {
+    "totalMade": 38
+  },
+  "mint_chocolate_chip": {
+    "totalMade": 31
+  },
+  "biscoff_cookie_butter": {
+    "totalMade": 44
+  },
+  "dr_pepper_float": {
+    "totalMade": 27
+  },
+  "vanilla": {
+    "totalMade": 65
+  },
+  "chocolate": {
+    "totalMade": 58
+  },
+  "salted_peanut_butter": {
+    "totalMade": 35
+  },
+  "s_mores_blizzard": {
+    "totalMade": 29
+  },
+  "cotton_candy_blizzard": {
+    "totalMade": 24
+  },
+  "baked_alaska": {
+    "totalMade": 22
+  },
+  "peanut_butter_cup": {
+    "totalMade": 49
+  },
+  "matcha": {
+    "totalMade": 19
+  },
+  "almond_joy": {
+    "totalMade": 0
+  },
+  "americone_dream": {
+    "totalMade": 0
+  }
+}
