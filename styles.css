@@ -910,6 +910,7 @@ body {
   align-items: flex-start;
   margin-bottom: 12px;
   gap: 8px;
+  min-height: 26px;
 }
 
 .card-book-tags {
@@ -917,6 +918,8 @@ body {
   flex-wrap: wrap;
   align-items: center;
   gap: 5px;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .book-tag {
@@ -968,6 +971,9 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
+  flex-shrink: 0;
+  margin-left: auto;
+  white-space: nowrap;
 }
 
 .favorite-btn {
@@ -978,6 +984,13 @@ body {
   color: var(--text-dim);
   transition: transform 0.15s ease, color 0.15s ease;
   line-height: 1;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
 }
 
 .favorite-btn:hover {
@@ -1763,13 +1776,18 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  font-size: 0.76rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: #fbbf24;
   background: rgba(251, 191, 36, 0.12);
   border: 1px solid rgba(251, 191, 36, 0.3);
-  padding: 2px 7px;
+  padding: 3px 8px;
   border-radius: 999px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  height: 24px;
+  box-sizing: border-box;
+  line-height: 1;
 }
 
 /* Recipe Card Author Pro Tip Indicator Badge (Hidden on main screen per user request) */
@@ -2417,14 +2435,20 @@ body {
   color: #fbbf24;
   background: rgba(251, 191, 36, 0.12);
   border: 1px solid rgba(251, 191, 36, 0.35);
-  padding: 2px 7px;
+  padding: 3px 8px;
   border-radius: 999px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  height: 24px;
+  box-sizing: border-box;
+  line-height: 1;
 }
 
 .card-community-rating .rating-sub {
   font-size: 0.68rem;
   color: var(--text-muted);
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .card-made-row {

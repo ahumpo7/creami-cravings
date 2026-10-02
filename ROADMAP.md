@@ -30,9 +30,9 @@ A prioritized checklist of fixes, features, and refinements for the Creami Cravi
 - [x] **Card Streamlining:** Remove or hide the "Pro Tip" badge / banner from individual recipe cards in the main grid view.
 - [x] **Move to Modal:** Keep tips accessible inside the Recipe Detail modal where they are helpful, without cluttering the recipe overview browse view.
 
-### 6. Fix Rating Size Inconsistency Across Recipe Tags
-- [ ] **Card Layout Uniformity:** Fix the flexbox / CSS layout in `styles.css` where the star rating badge shrinks or expands depending on how many category badges (e.g. "Keto", "High Protein", "No Protein Powder") are present.
-- [ ] **Consistent Positioning:** Lock rating badge dimensions and align bottom action bars across all recipe cards regardless of title length or tag count.
+### 6. Fix Rating Size Inconsistency Across Recipe Tags (Completed)
+- [x] **Card Layout Uniformity:** Fix the flexbox / CSS layout in `styles.css` where the star rating badge shrinks or expands depending on how many category badges (e.g. "Keto", "High Protein", "No Protein Powder") are present.
+- [x] **Consistent Positioning:** Lock rating badge dimensions and align bottom action bars across all recipe cards regardless of title length or tag count.
 
 ### 7. Fix Ingredient Categories
 - [ ] **Audit Categorization:** Review `INGREDIENTS_MASTER` in `recipes-data.js` and `build_recipes_data.py`.
