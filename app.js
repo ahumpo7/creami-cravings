@@ -1364,7 +1364,7 @@
     const commMade = communityStats.madeCounts[recipe.id] ?? (12 + (Math.abs(hashString(recipe.id)) % 30));
 
     card.innerHTML = `
-      <div>
+      <div class="recipe-card-body">
         <div class="recipe-card-top">
           <div class="card-book-tags">
             ${isPersonal ? `<span class="book-tag custom" title="Personal custom recipe saved to your Google account">🔒 Personal Recipe</span>` : categories.map(c => `<span class="book-tag ${getCategoryClass(c)}">${c}</span>`).join('')}
