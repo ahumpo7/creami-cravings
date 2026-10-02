@@ -95,6 +95,23 @@ A prioritized checklist of fixes, features, and refinements for the Creami Cravi
 - [ ] **Privacy Policy Page:** Deploy a clean, minimal `/privacy.html` compliance page on Render required by Google Play Console policies.
 - [ ] **Over-The-Air (OTA) Sync:** Verify that web app changes pushed to GitHub automatically reflect inside the installed Android app without requiring new Play Store binary submissions.
 
+### 15. 👥 User Management & Tiered Recipe Access (Admin Portal & Gated Categories)
+- [ ] **Admin Account & Roles:**
+  - Designate admin account(s) by verified Google email in server config.
+  - Automatically grant admin privileges upon signing in with that verified Google email.
+- [ ] **User Directory & Permissions Store (`db_users.json`):**
+  - Track all registered users who sign in with Google (email, name, avatar, date joined, role, allowed categories).
+  - Configurable default access tier for new sign-ups (e.g. "Fan Favorites" pack enabled by default).
+- [ ] **Admin Dashboard / Management Portal:**
+  - Admin-only management portal accessible exclusively to designated admin accounts.
+  - Searchable user table displaying all registered users, last active date, and current category access.
+  - 1-click category permission toggles per user (e.g. grant/revoke "Keto", "No Protein Powder", "Lactose-Free", "Fan Favorites", or "Full All-Access Pass").
+- [ ] **Recipe Gating & Lock UI:**
+  - Recipe cards check the authenticated user's assigned permissions against recipe category tags.
+  - Gated recipe cards display a sleek lock indicator (e.g. `🔒 Keto Pack Required`).
+  - Opening a locked recipe presents a teaser card with a friendly "Locked Recipe — Contact Admin / Upgrade Access" prompt instead of full instructions.
+  - Quick filter toggle to "Show Only My Accessible Recipes" or preview all available recipes.
+
 ---
 
 ## 🏆 Remaining Items Ranked by Easiest to Hardest
@@ -105,6 +122,7 @@ A prioritized checklist of fixes, features, and refinements for the Creami Cravi
 | **🥈 2** | **Item 4: Fix Shopping List Populating "Weird Things"** | Add ingredient blacklist/sanitization (exclude water, ice, non-grocery prep notes) and user-curated missing item rules. | 🟢 ~10–15 mins |
 | **🥉 3** | **Item 7: Fix Ingredient Categories in Pantry** | Reorganize pantry drawer taxonomy in `recipes-data.js` into intuitive grocery aisles (baking, sweeteners, extracts, powders, etc.). | 🟡 ~15–20 mins |
 | **4** | **Item 8: 🧊 "Pints in Freezer" Tracker & 16-Hr Timer** | New freezer inventory manager, 16-hour countdown calculation, status badges, and 1-tap spin logging. | 🟡 ~35–45 mins |
-| **5** | **Item 11: 📦 Grocery PWA & Offline Support** | Web App Manifest, Service Worker offline caching strategy, and 1-click export to Apple Notes/Reminders/Keep. *(Direct prerequisite for Android Store App)* | 🟠 ~30–40 mins |
-| **6** | **Item 14: 🤖 Google Play Store Android App (Bubblewrap)** | Generate signed `.aab` bundle, deploy `assetlinks.json`, generate $1024\times500$ banner and $512\times512$ store icon, and prepare `/privacy.html`. | 🟠 ~30–45 mins |
-| **7** | **Item 1: Finish Google Sign-In** | Requires generating OAuth 2.0 Client ID in Google Cloud Console and setting authorized origins. | ⚪ External Credential |
+| **5** | **Item 11: 📦 Grocery PWA & Offline Support** | Web App Manifest, Service Worker offline caching strategy, and 1-click export to Apple Notes/Reminders/Keep. *(Prerequisite for Android Store App)* | 🟠 ~30–40 mins |
+| **6** | **Item 15: 👥 User Management & Tiered Recipe Access** | Admin portal, user database, Google auth role assignment, and category-based recipe gating/locks. | 🟠 ~40–50 mins |
+| **7** | **Item 14: 🤖 Google Play Store Android App (Bubblewrap)** | Generate signed `.aab` bundle, deploy `assetlinks.json`, generate $1024\times500$ banner and $512\times512$ store icon, and prepare `/privacy.html`. | 🟠 ~30–45 mins |
+| **8** | **Item 1: Finish Google Sign-In** | Requires generating OAuth 2.0 Client ID in Google Cloud Console and setting authorized origins. | ⚪ External Credential |
