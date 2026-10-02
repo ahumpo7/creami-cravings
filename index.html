@@ -115,6 +115,20 @@
       </div>
     </header>
 
+    <!-- Mobile View Switcher (Visible on <= 768px) -->
+    <div class="mobile-section-switcher" id="mobileSectionSwitcher" role="tablist" aria-label="Section Switcher">
+      <button class="mobile-tab-btn active" data-view="recipes" id="mobileTabRecipes" role="tab" aria-selected="true">
+        <span class="mobile-tab-icon">🍨</span>
+        <span class="mobile-tab-title">Recipes</span>
+        <span class="mobile-tab-count" id="mobileTabRecipeCount">149</span>
+      </button>
+      <button class="mobile-tab-btn" data-view="pantry" id="mobileTabPantry" role="tab" aria-selected="false">
+        <span class="mobile-tab-icon">📦</span>
+        <span class="mobile-tab-title">My Pantry</span>
+        <span class="mobile-tab-count" id="mobileTabPantryCount">0</span>
+      </button>
+    </div>
+
     <!-- Main Split Screen Layout -->
     <div class="main-layout">
       
@@ -356,6 +370,7 @@
   <!-- Recipe Detail Modal -->
   <div class="modal-overlay" id="recipeModalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="modal-content recipe-modal-content">
+      <div class="modal-handle-bar" aria-hidden="true"></div>
       <button class="modal-close" id="modalCloseBtn" aria-label="Close modal">&times;</button>
       <div id="recipeModalBody"></div>
     </div>
@@ -364,6 +379,7 @@
   <!-- Creami Roulette Spin Modal -->
   <div class="modal-overlay" id="rouletteModalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="modal-content roulette-modal-content">
+      <div class="modal-handle-bar" aria-hidden="true"></div>
       <button class="modal-close" id="rouletteModalCloseBtn" aria-label="Close modal">&times;</button>
       <div class="roulette-modal-header">
         <div class="roulette-title-badge">🎰 CREAMY ROULETTE</div>
@@ -390,6 +406,7 @@
   <!-- Shopping List Modal -->
   <div class="modal-overlay" id="shoppingModalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="modal-content shopping-modal-content">
+      <div class="modal-handle-bar" aria-hidden="true"></div>
       <button class="modal-close" id="shoppingModalCloseBtn" aria-label="Close modal">&times;</button>
       <div class="modal-header">
         <h2 class="modal-title">🛒 Missing Ingredients Shopping List</h2>
@@ -406,6 +423,7 @@
   <!-- Custom Recipe Modal -->
   <div class="modal-overlay" id="customRecipeModalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="modal-content custom-modal-content">
+      <div class="modal-handle-bar" aria-hidden="true"></div>
       <button class="modal-close" id="customModalCloseBtn" aria-label="Close modal">&times;</button>
       <div class="modal-header">
         <h2 class="modal-title">🧑‍🍳 Create Personal Custom Recipe</h2>
@@ -487,6 +505,7 @@
   <!-- Google Sign-In & Cloud Sync Modal -->
   <div class="modal-overlay" id="googleAuthModalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="modal-content auth-modal-content">
+      <div class="modal-handle-bar" aria-hidden="true"></div>
       <button class="modal-close" id="authModalCloseBtn" aria-label="Close modal">&times;</button>
       
       <div class="modal-header auth-modal-header">
@@ -549,6 +568,32 @@
       </form>
     </div>
   </div>
+
+  <!-- Sticky Mobile Bottom Navigation (Visible on <= 768px) -->
+  <nav class="mobile-bottom-nav" id="mobileBottomNav" aria-label="Mobile Navigation">
+    <button class="bottom-nav-item active" data-action="view-recipes" id="navItemRecipes" aria-label="Recipes">
+      <span class="bottom-nav-icon">🍨</span>
+      <span class="bottom-nav-label">Recipes</span>
+    </button>
+    <button class="bottom-nav-item" data-action="view-pantry" id="navItemPantry" aria-label="Pantry">
+      <span class="bottom-nav-icon">📦</span>
+      <span class="bottom-nav-label">Pantry</span>
+      <span class="bottom-nav-badge" id="navPantryBadge" style="display: none;">0</span>
+    </button>
+    <button class="bottom-nav-item" data-action="open-shopping" id="navItemShopping" aria-label="Shopping List">
+      <span class="bottom-nav-icon">🛒</span>
+      <span class="bottom-nav-label">Shopping</span>
+      <span class="bottom-nav-badge" id="navShopBadge" style="display: none;">0</span>
+    </button>
+    <button class="bottom-nav-item" data-action="open-roulette" id="navItemRoulette" aria-label="Roulette">
+      <span class="bottom-nav-icon">🎰</span>
+      <span class="bottom-nav-label">Roulette</span>
+    </button>
+    <button class="bottom-nav-item" data-action="toggle-macros" id="navItemMacros" aria-label="Macros">
+      <span class="bottom-nav-icon">🎯</span>
+      <span class="bottom-nav-label">Macros</span>
+    </button>
+  </nav>
 
   <!-- Toast Notification Container -->
   <div class="toast-container" id="toastContainer" aria-live="polite"></div>

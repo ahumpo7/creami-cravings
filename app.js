@@ -218,6 +218,9 @@
     renderRecipes();
     fetchCommunityStats();
     initGoogleAuth();
+    if (window.innerWidth <= 768) {
+      setMobileView('recipes');
+    }
   }
 
   // --- Storage Management ---
@@ -1543,6 +1546,56 @@
   function updateStats() {
     if (statPantryCount) statPantryCount.textContent = pantryState.size;
     if (pantryInStockCount) pantryInStockCount.textContent = `${pantryState.size} items in stock`;
+    const tabRecipeCount = document.getElementById('mobileTabRecipeCount');
+    const tabPantryCount = document.getElementById('mobileTabPantryCount');
+    const navPantryBadge = document.getElementById('navPantryBadge');
+    if (tabRecipeCount) tabRecipeCount.textContent = allRecipes.length;
+    if (tabPantryCount) tabPantryCount.textContent = pantryState.size;
+    if (navPantryBadge) {
+      navPantryBadge.textContent = pantryState.size;
+      navPantryBadge.style.display = pantryState.size > 0 ? 'inline-block' : 'none';
+    }
+  }
+
+  // --- Mobile View Switcher & Bottom Nav (Roadmap Item 13) ---
+  let activeMobileView = 'recipes'; // 'recipes' or 'pantry'
+
+  function setMobileView(view) {
+    activeMobileView = view;
+    const pantryPanel = document.getElementById('pantryPanel');
+    const recipesPanel = document.querySelector('.recipes-panel');
+    const tabRecipes = document.getElementById('mobileTabRecipes');
+    const tabPantry = document.getElementById('mobileTabPantry');
+    const navRecipes = document.getElementById('navItemRecipes');
+    const navPantry = document.getElementById('navItemPantry');
+
+    if (view === 'recipes') {
+      if (pantryPanel) pantryPanel.classList.add('mobile-panel-hidden');
+      if (recipesPanel) recipesPanel.classList.remove('mobile-panel-hidden');
+      if (tabRecipes) {
+        tabRecipes.classList.add('active');
+        tabRecipes.setAttribute('aria-selected', 'true');
+      }
+      if (tabPantry) {
+        tabPantry.classList.remove('active');
+        tabPantry.setAttribute('aria-selected', 'false');
+      }
+      if (navRecipes) navRecipes.classList.add('active');
+      if (navPantry) navPantry.classList.remove('active');
+    } else {
+      if (recipesPanel) recipesPanel.classList.add('mobile-panel-hidden');
+      if (pantryPanel) pantryPanel.classList.remove('mobile-panel-hidden');
+      if (tabRecipes) {
+        tabRecipes.classList.remove('active');
+        tabRecipes.setAttribute('aria-selected', 'false');
+      }
+      if (tabPantry) {
+        tabPantry.classList.add('active');
+        tabPantry.setAttribute('aria-selected', 'true');
+      }
+      if (navRecipes) navRecipes.classList.remove('active');
+      if (navPantry) navPantry.classList.add('active');
+    }
   }
 
   // --- Recipe Helper Functions ---
@@ -2717,6 +2770,11 @@
       });
     });
     if (shoppingListBadge) shoppingListBadge.textContent = missingTotal;
+    const navShopBadge = document.getElementById('navShopBadge');
+    if (navShopBadge) {
+      navShopBadge.textContent = missingTotal;
+      navShopBadge.style.display = missingTotal > 0 ? 'inline-block' : 'none';
+    }
   }
 
   function copyShoppingList() {
@@ -3188,6 +3246,52 @@
 
     // Theme Toggle
     if (themeToggleBtn) themeToggleBtn.addEventListener('click', toggleTheme);
+
+    // Mobile Bottom Navigation Bar & View Switcher (Roadmap Item 13)
+    const mobileBottomNav = document.getElementById('mobileBottomNav');
+    if (mobileBottomNav) {
+      mobileBottomNav.addEventListener('click', (e) => {
+        const item = e.target.closest('.bottom-nav-item');
+        if (!item) return;
+        const action = item.dataset.action;
+        if (action === 'view-recipes') {
+          setMobileView('recipes');
+          const switcher = document.getElementById('mobileSectionSwitcher');
+          if (switcher) switcher.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else if (action === 'view-pantry') {
+          setMobileView('pantry');
+          const switcher = document.getElementById('mobileSectionSwitcher');
+          if (switcher) switcher.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else if (action === 'open-shopping') {
+          openShoppingListModal();
+        } else if (action === 'open-roulette') {
+          spinCreamiRoulette();
+        } else if (action === 'toggle-macros') {
+          setMobileView('recipes');
+          if (macroSlidersPanel && macroSlidersPanel.style.display === 'none') {
+            toggleMacroSliders();
+          }
+          if (macroSlidersPanel) {
+            macroSlidersPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }
+      });
+    }
+
+    const mobileSectionSwitcher = document.getElementById('mobileSectionSwitcher');
+    if (mobileSectionSwitcher) {
+      mobileSectionSwitcher.addEventListener('click', (e) => {
+        const btn = e.target.closest('.mobile-tab-btn');
+        if (!btn) return;
+        setMobileView(btn.dataset.view);
+      });
+    }
+
+    window.addEventListener('resize', () => {
+      if (window.innerWidth <= 768) {
+        setMobileView(activeMobileView);
+      }
+    });
   }
 
   // Run on DOM Ready

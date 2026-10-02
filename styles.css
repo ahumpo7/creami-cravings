@@ -3188,4 +3188,551 @@ body::before {
   gap: 5px;
 }
 
+/* ==========================================================================
+   Mobile Friendliness, Bottom Sheet Modals & Touch Ergonomics (Roadmap Item 13)
+   ========================================================================== */
+
+/* Modal Drag Handle (for mobile sheet view) */
+.modal-handle-bar {
+  display: none;
+  width: 44px;
+  height: 5px;
+  background: var(--border-glass);
+  border-radius: 999px;
+  margin: 0 auto 16px;
+  transition: background-color 0.2s ease;
+}
+
+/* Mobile View Switcher (Above Main Layout) */
+.mobile-section-switcher {
+  display: none;
+  background: var(--bg-card);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-lg);
+  padding: 5px;
+  margin-bottom: 18px;
+  gap: 6px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+}
+
+.mobile-tab-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 44px;
+  touch-action: manipulation;
+}
+
+.mobile-tab-btn.active {
+  background: var(--primary-gradient);
+  color: #ffffff;
+  box-shadow: 0 4px 14px var(--primary-glow);
+}
+
+.mobile-tab-count {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.25);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.mobile-tab-btn.active .mobile-tab-count {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Sticky Mobile Bottom Navigation Bar */
+.mobile-bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--bg-modal);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border-glass);
+  z-index: 950;
+  padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px));
+  box-shadow: 0 -4px 25px rgba(0, 0, 0, 0.5);
+}
+
+.bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 6px 4px;
+  border-radius: var(--radius-md);
+  position: relative;
+  flex: 1;
+  min-height: 48px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.15s ease, transform 0.1s ease;
+}
+
+.bottom-nav-item:active {
+  transform: scale(0.92);
+}
+
+.bottom-nav-item.active {
+  color: var(--primary);
+}
+
+.bottom-nav-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.bottom-nav-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  font-family: var(--font-body);
+}
+
+.bottom-nav-badge {
+  position: absolute;
+  top: 2px;
+  right: 18%;
+  background: var(--primary);
+  color: #ffffff;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 1px 5px;
+  border-radius: 999px;
+  min-width: 16px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+/* Touch Ergonomics on Range Inputs */
+.macro-range-input {
+  touch-action: pan-y;
+  height: 8px;
+}
+
+.macro-range-input::-webkit-slider-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--primary);
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(236, 72, 153, 0.5);
+  border: 2px solid #ffffff;
+  -webkit-appearance: none;
+}
+
+.macro-range-input::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--primary);
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(236, 72, 153, 0.5);
+  border: 2px solid #ffffff;
+}
+
+/* Responsive Rules for Tablets and Phones (<= 768px) */
+@media (max-width: 768px) {
+  body {
+    padding-bottom: calc(85px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  .container {
+    padding: 14px 16px;
+  }
+
+  .panel {
+    padding: 18px 16px;
+    border-radius: var(--radius-lg);
+  }
+
+  /* Header & Top Bar */
+  .main-header {
+    margin-bottom: 20px;
+  }
+
+  .header-top-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .header-badge {
+    text-align: center;
+    font-size: 0.78rem;
+    padding: 4px 12px;
+  }
+
+  .header-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .theme-toggle-btn {
+    padding: 7px 10px;
+    min-height: 40px;
+  }
+
+  .theme-label {
+    display: none; /* Hide label to save horizontal space */
+  }
+
+  .btn-secondary-action {
+    padding: 7px 12px;
+    font-size: 0.8rem;
+    min-height: 40px;
+  }
+
+  .btn-google-signin {
+    padding: 7px 12px;
+    font-size: 0.8rem;
+    min-height: 40px;
+  }
+
+  /* Hero Content */
+  .hero-content {
+    margin-bottom: 16px;
+  }
+
+  .hero-title {
+    font-size: 1.85rem;
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+
+  .hero-subtitle {
+    font-size: 0.88rem;
+    line-height: 1.45;
+  }
+
+  /* Compact Stats Dashboard Bar */
+  .stats-bar {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .stat-card-highlight {
+    grid-column: 1 / -1; /* Spans across top of stats for prominence */
+  }
+
+  .stat-card {
+    padding: 12px 14px;
+    gap: 12px;
+  }
+
+  .stat-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1.25rem;
+  }
+
+  .stat-num {
+    font-size: 1.45rem;
+  }
+
+  .stat-label {
+    font-size: 0.76rem;
+  }
+
+  /* Mobile Section Switcher & Bottom Nav Display */
+  .mobile-section-switcher {
+    display: flex;
+  }
+
+  .mobile-bottom-nav {
+    display: flex;
+  }
+
+  /* Panel Switching on Mobile */
+  .pantry-panel.mobile-panel-hidden,
+  .recipes-panel.mobile-panel-hidden {
+    display: none !important;
+  }
+
+  .pantry-panel {
+    position: static;
+    max-height: none;
+  }
+
+  /* Recipes Explorer Controls */
+  .recipes-controls-bar {
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .recipe-search-box {
+    width: 100%;
+    min-width: 100%;
+  }
+
+  .filter-toggles-row {
+    width: 100%;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .toggle-container {
+    font-size: 0.82rem;
+    min-height: 40px;
+  }
+
+  .sort-select-wrapper {
+    width: 100%;
+  }
+
+  .sort-select-wrapper select {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  .btn-roulette {
+    width: 100%;
+    justify-content: center;
+    min-height: 44px;
+    font-size: 0.92rem;
+  }
+
+  /* Smooth Horizontal Scroll for Tabs & Filter Chips */
+  .category-tabs-bar {
+    margin-bottom: 14px;
+  }
+
+  .category-tabs {
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 6px;
+    width: 100%;
+  }
+
+  .category-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tab-btn {
+    flex-shrink: 0;
+    min-height: 42px;
+    padding: 8px 14px;
+  }
+
+  .quick-filter-chips-bar {
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 6px;
+    width: 100%;
+  }
+
+  .quick-filter-chips-bar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .filter-chip {
+    flex-shrink: 0;
+    min-height: 40px;
+    padding: 8px 14px;
+  }
+
+  .chip-divider {
+    display: none;
+  }
+
+  /* Preset Chips in Pantry Horizontal Scroll */
+  .preset-chips {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+  }
+
+  .preset-chips::-webkit-scrollbar {
+    display: none;
+  }
+
+  .preset-chips .chip {
+    flex-shrink: 0;
+    min-height: 38px;
+    padding: 6px 12px;
+  }
+
+  /* Touch Targets for Pantry Checkboxes */
+  .ingredient-checkbox-item {
+    padding: 10px 12px;
+    min-height: 44px;
+    font-size: 0.9rem;
+    touch-action: manipulation;
+  }
+
+  .custom-checkbox {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+  }
+
+  .custom-checkbox::after {
+    font-size: 0.85rem;
+  }
+
+  .category-header {
+    min-height: 48px;
+    padding: 12px 14px;
+  }
+
+  /* Prevent iOS Safari Viewport Auto-Zoom on Input Focus */
+  input[type="text"],
+  input[type="search"],
+  input[type="email"],
+  input[type="number"],
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
+/* Bottom Sheet Modal Transform on Small Screens (<= 640px) */
+@media (max-width: 640px) {
+  .modal-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .modal-content {
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    max-height: 88vh;
+    width: 100%;
+    padding: 20px 18px calc(24px + env(safe-area-inset-bottom, 0px));
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+  }
+
+  .modal-overlay.active .modal-content {
+    transform: translateY(0);
+  }
+
+  .modal-handle-bar {
+    display: block;
+  }
+
+  .modal-close {
+    top: 14px;
+    right: 14px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-glass);
+    border-radius: 999px;
+    font-size: 1.5rem;
+  }
+
+  .modal-title {
+    font-size: 1.35rem;
+    padding-right: 32px; /* ensure no overlap with close button */
+  }
+
+  .modal-subtitle {
+    font-size: 0.84rem;
+  }
+
+  .modal-options-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .segment-btn-group {
+    width: 100%;
+  }
+
+  .segment-btn {
+    flex: 1;
+    min-height: 40px;
+    text-align: center;
+  }
+
+  .modal-macro-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 12px 10px;
+  }
+
+  .btn-copy-macros {
+    width: 100%;
+    justify-content: center;
+    min-height: 44px;
+  }
+
+  .modal-footer {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .modal-footer button,
+  .modal-footer .btn-primary,
+  .modal-footer .btn-secondary {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  /* Single Column Recipe Grid on Phones */
+  .recipe-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .recipe-card {
+    padding: 16px;
+  }
+
+  .btn-view-recipe {
+    min-height: 44px;
+  }
+}
+
+/* Desktop Guarantee: Always show both panels side-by-side above 768px */
+@media (min-width: 769px) {
+  .mobile-section-switcher,
+  .mobile-bottom-nav {
+    display: none !important;
+  }
+
+  .pantry-panel,
+  .recipes-panel {
+    display: flex !important;
+  }
+}
+
+
 

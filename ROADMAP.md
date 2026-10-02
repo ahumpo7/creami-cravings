@@ -75,13 +75,14 @@ A prioritized checklist of fixes, features, and refinements for the Creami Cravi
   - 🍪 Bakery, Cookie & Dough
   - ☕ Coffee & Latte
 
-### 13. 📱 Increased Mobile Friendliness & Touch Optimization
-- [ ] **Touch & Tap Target Sizing:** Minimum 44×44px comfortable tap targets for all mobile buttons, pantry checkboxes, modal close icons, and filter chips.
-- [ ] **Sticky Mobile Bottom Navigation / Action Bar:** Floating quick-access mobile toolbar for 1-tap jumping between Recipes, Pantry Drawer, Shopping List, and Roulette without scrolling.
-- [ ] **Mobile Bottom-Sheet Modals:** Responsive slide-up sheet presentation on mobile screens with iOS safe-area support (`env(safe-area-inset-bottom)`).
-- [ ] **Prevent iOS Safari Auto-Zoom:** Enforce 16px minimum base font sizes on search inputs and notes textareas to prevent annoying iOS viewport auto-zooming.
-- [ ] **Touch-Optimized Sliders:** Smooth mobile touch targets on macro range sliders with `touch-action: pan-y` to prevent vertical page stuttering while dragging.
-- [ ] **Horizontal Scroll Momentum:** Smooth swipeable filter chip rows with subtle edge fade gradients.
+### 13. 📱 Increased Mobile Friendliness & Touch Optimization (Completed ✅)
+- [x] **Touch & Tap Target Sizing:** Minimum 44×44px comfortable tap targets for all mobile buttons, pantry checkboxes, modal close icons, and filter chips.
+- [x] **Sticky Mobile Bottom Navigation / Action Bar:** Floating quick-access mobile toolbar for 1-tap jumping between Recipes, Pantry Drawer, Shopping List, and Roulette without scrolling.
+- [x] **Mobile Bottom-Sheet Modals:** Responsive slide-up sheet presentation on mobile screens with iOS safe-area support (`env(safe-area-inset-bottom)`).
+- [x] **Prevent iOS Safari Auto-Zoom:** Enforce 16px minimum base font sizes on search inputs and notes textareas to prevent annoying iOS viewport auto-zooming.
+- [x] **Touch-Optimized Sliders:** Smooth mobile touch targets on macro range sliders with `touch-action: pan-y` to prevent vertical page stuttering while dragging.
+- [x] **Horizontal Scroll Momentum:** Smooth swipeable filter chip rows with subtle edge fade gradients.
+- [x] **Mobile View Switcher:** Fast segmented toggle between Recipes and My Pantry on screens $\le 768px$.
 
 ---
 
@@ -89,10 +90,9 @@ A prioritized checklist of fixes, features, and refinements for the Creami Cravi
 
 | Rank | Task | Why & Scope | Est. Effort |
 | :---: | :--- | :--- | :---: |
-| **1** | **Item 3: Reset Counts & Community Rankings** | Clean data wipe of mock/seed numbers in `db_recipe_stats.json`, `db_ratings.json`, and initial seed constants so counts start at 0. | 🟢 ~5 mins |
-| **2** | **Item 4: Fix Shopping List Populating "Weird Things"** | Add ingredient blacklist/sanitization (exclude water, ice, non-grocery prep notes) and user-curated missing item rules. | 🟢 ~10–15 mins |
-| **3** | **Item 7: Fix Ingredient Categories in Pantry** | Reorganize pantry drawer taxonomy in `recipes-data.js` into intuitive grocery aisles (baking, sweeteners, extracts, powders, etc.). | 🟡 ~15–20 mins |
-| **4** | **Item 13: Increased Mobile Friendliness & Touch UX** | Touch targets (44px), sticky bottom navigation bar, iOS zoom prevention, touch-slider ergonomics, and bottom-sheet styling. | 🟡 ~25–35 mins |
-| **5** | **Item 8: 🧊 "Pints in Freezer" Tracker & 16-Hr Timer** | New freezer inventory manager, 16-hour countdown calculation, status badges, and 1-tap spin logging. | 🟡 ~35–45 mins |
-| **6** | **Item 11: 📦 Grocery PWA & Offline Support** | Web App Manifest, Service Worker offline caching strategy, and 1-click export to Apple Notes/Reminders/Keep. | 🟠 ~35–45 mins |
-| **7** | **Item 1: Finish Google Sign-In** | Requires generating OAuth 2.0 Client ID in Google Cloud Console and setting authorized origins. | ⚪ External Credential |
+| **🥇 1** | **Item 3: Reset Counts & Community Rankings** | Clean data wipe of mock/seed numbers in `db_recipe_stats.json`, `db_ratings.json`, and initial seed constants so counts start at 0. | 🟢 ~5 mins |
+| **🥈 2** | **Item 4: Fix Shopping List Populating "Weird Things"** | Add ingredient blacklist/sanitization (exclude water, ice, non-grocery prep notes) and user-curated missing item rules. | 🟢 ~10–15 mins |
+| **🥉 3** | **Item 7: Fix Ingredient Categories in Pantry** | Reorganize pantry drawer taxonomy in `recipes-data.js` into intuitive grocery aisles (baking, sweeteners, extracts, powders, etc.). | 🟡 ~15–20 mins |
+| **4** | **Item 8: 🧊 "Pints in Freezer" Tracker & 16-Hr Timer** | New freezer inventory manager, 16-hour countdown calculation, status badges, and 1-tap spin logging. | 🟡 ~35–45 mins |
+| **5** | **Item 11: 📦 Grocery PWA & Offline Support** | Web App Manifest, Service Worker offline caching strategy, and 1-click export to Apple Notes/Reminders/Keep. | 🟠 ~35–45 mins |
+| **6** | **Item 1: Finish Google Sign-In** | Requires generating OAuth 2.0 Client ID in Google Cloud Console and setting authorized origins. | ⚪ External Credential |
