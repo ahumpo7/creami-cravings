@@ -75,7 +75,7 @@ A prioritized checklist of fixes, features, and refinements for the Creami Cravi
   - 🍪 Bakery, Cookie & Dough
   - ☕ Coffee & Latte
 
-### 13. 📱 Increased Mobile Friendliness & Touch Optimization (Completed ✅)
+#### 13. 📱 Increased Mobile Friendliness & Touch Optimization (Completed ✅)
 - [x] **Touch & Tap Target Sizing:** Minimum 44×44px comfortable tap targets for all mobile buttons, pantry checkboxes, modal close icons, and filter chips.
 - [x] **Sticky Mobile Bottom Navigation / Action Bar:** Floating quick-access mobile toolbar for 1-tap jumping between Recipes, Pantry Drawer, Shopping List, and Roulette without scrolling.
 - [x] **Mobile Bottom-Sheet Modals:** Responsive slide-up sheet presentation on mobile screens with iOS safe-area support (`env(safe-area-inset-bottom)`).
@@ -84,15 +84,27 @@ A prioritized checklist of fixes, features, and refinements for the Creami Cravi
 - [x] **Horizontal Scroll Momentum:** Smooth swipeable filter chip rows with subtle edge fade gradients.
 - [x] **Mobile View Switcher:** Fast segmented toggle between Recipes and My Pantry on screens $\le 768px$.
 
+### 14. 🤖 Google Play Store Android App (TWA via Bubblewrap)
+- [ ] **Prerequisite Foundation (PWA):** Leverages the `manifest.json` and `service-worker.js` built in Item 11.
+- [ ] **Bubblewrap TWA Generation:** Use Google's official `@bubblewrap/cli` to generate a production-ready Android App Bundle (`.aab`) signed with a release keystore.
+- [ ] **Digital Asset Links Verification:** Deploy `/.well-known/assetlinks.json` on Render containing the app's SHA-256 fingerprint so Android verifies ownership and eliminates any browser framing.
+- [ ] **Play Store Assets Preparation:**
+  - High-res App Icon ($512 \times 512$ PNG)
+  - Feature Graphic Banner ($1024 \times 500$ PNG)
+  - Mobile phone screenshots (pantry, recipe cards, macro tracker, roulette)
+- [ ] **Privacy Policy Page:** Deploy a clean, minimal `/privacy.html` compliance page on Render required by Google Play Console policies.
+- [ ] **Over-The-Air (OTA) Sync:** Verify that web app changes pushed to GitHub automatically reflect inside the installed Android app without requiring new Play Store binary submissions.
+
 ---
 
 ## 🏆 Remaining Items Ranked by Easiest to Hardest
 
 | Rank | Task | Why & Scope | Est. Effort |
-| :---: | :--- | :--- | :---: |
+| :---: | :--- | :--- | :--- |
 | **🥇 1** | **Item 3: Reset Counts & Community Rankings** | Clean data wipe of mock/seed numbers in `db_recipe_stats.json`, `db_ratings.json`, and initial seed constants so counts start at 0. | 🟢 ~5 mins |
 | **🥈 2** | **Item 4: Fix Shopping List Populating "Weird Things"** | Add ingredient blacklist/sanitization (exclude water, ice, non-grocery prep notes) and user-curated missing item rules. | 🟢 ~10–15 mins |
 | **🥉 3** | **Item 7: Fix Ingredient Categories in Pantry** | Reorganize pantry drawer taxonomy in `recipes-data.js` into intuitive grocery aisles (baking, sweeteners, extracts, powders, etc.). | 🟡 ~15–20 mins |
 | **4** | **Item 8: 🧊 "Pints in Freezer" Tracker & 16-Hr Timer** | New freezer inventory manager, 16-hour countdown calculation, status badges, and 1-tap spin logging. | 🟡 ~35–45 mins |
-| **5** | **Item 11: 📦 Grocery PWA & Offline Support** | Web App Manifest, Service Worker offline caching strategy, and 1-click export to Apple Notes/Reminders/Keep. | 🟠 ~35–45 mins |
-| **6** | **Item 1: Finish Google Sign-In** | Requires generating OAuth 2.0 Client ID in Google Cloud Console and setting authorized origins. | ⚪ External Credential |
+| **5** | **Item 11: 📦 Grocery PWA & Offline Support** | Web App Manifest, Service Worker offline caching strategy, and 1-click export to Apple Notes/Reminders/Keep. *(Direct prerequisite for Android Store App)* | 🟠 ~30–40 mins |
+| **6** | **Item 14: 🤖 Google Play Store Android App (Bubblewrap)** | Generate signed `.aab` bundle, deploy `assetlinks.json`, generate $1024\times500$ banner and $512\times512$ store icon, and prepare `/privacy.html`. | 🟠 ~30–45 mins |
+| **7** | **Item 1: Finish Google Sign-In** | Requires generating OAuth 2.0 Client ID in Google Cloud Console and setting authorized origins. | ⚪ External Credential |
