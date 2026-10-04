@@ -2935,7 +2935,10 @@
     // Build Modal HTML
     let html = `
       <div class="shopping-quick-add-wrap">
-        <input type="text" id="shopQuickAddInput" class="shopping-quick-add-input" placeholder="Quick add grocery item (e.g. Fairlife 2% Milk)..." />
+        <div class="shopping-quick-add-input-box">
+          <input type="text" id="shopQuickAddInput" class="shopping-quick-add-input" placeholder="Quick add grocery item (e.g. Fairlife 2% Milk)..." autocomplete="off" />
+          <div id="shopQuickAddDropdown" class="shopping-autocomplete-dropdown" style="display: none;"></div>
+        </div>
         <button type="button" id="shopQuickAddBtn" class="btn-xs btn-primary">+ Add</button>
       </div>
     `;
@@ -3062,32 +3065,197 @@
       });
     });
 
-    // 3. Quick Add Custom Item
+    // 3. Quick Add Custom Item with Autocomplete from Pantry Database
     const quickInput = shoppingModalBody.querySelector('#shopQuickAddInput');
     const quickBtn = shoppingModalBody.querySelector('#shopQuickAddBtn');
-    const handleQuickAdd = () => {
-      if (!quickInput) return;
-      const rawVal = quickInput.value.trim();
+    const quickDropdown = shoppingModalBody.querySelector('#shopQuickAddDropdown');
+    let activeSuggestionIndex = -1;
+
+    // Build autocomplete candidates list from INGREDIENTS_MASTER + custom recipe ingredients
+    const candidateMap = new Map();
+    if (typeof INGREDIENTS_MASTER !== 'undefined' && Array.isArray(INGREDIENTS_MASTER)) {
+      INGREDIENTS_MASTER.forEach(ing => {
+        if (!isShoppingExcluded(ing)) {
+          const clean = sanitizeShoppingItemName(ing.name);
+          if (!candidateMap.has(clean.toLowerCase())) {
+            const cat = ing.category || getIngredientCategoryKey(clean);
+            candidateMap.set(clean.toLowerCase(), {
+              name: clean,
+              icon: CATEGORY_ICONS[cat] || '🛒',
+              category: cat,
+              catTitle: INGREDIENT_CATEGORIES[cat] || 'Groceries'
+            });
+          }
+        }
+      });
+    }
+
+    if (Array.isArray(customRecipesState)) {
+      customRecipesState.forEach(r => {
+        (r.ingredients || []).forEach(ing => {
+          if (!isShoppingExcluded(ing)) {
+            const clean = sanitizeShoppingItemName(ing.name);
+            if (!candidateMap.has(clean.toLowerCase())) {
+              const cat = getIngredientCategoryKey(clean);
+              candidateMap.set(clean.toLowerCase(), {
+                name: clean,
+                icon: CATEGORY_ICONS[cat] || '🛒',
+                category: cat,
+                catTitle: INGREDIENT_CATEGORIES[cat] || 'Groceries'
+              });
+            }
+          }
+        });
+      });
+    }
+
+    const allCandidates = Array.from(candidateMap.values());
+
+    function hideQuickDropdown() {
+      if (quickDropdown) {
+        quickDropdown.style.display = 'none';
+        quickDropdown.innerHTML = '';
+        activeSuggestionIndex = -1;
+      }
+    }
+
+    function addGroceryItem(rawVal) {
       if (!rawVal) return;
-      if (isShoppingExcluded(rawVal)) {
-        showToast(`"${rawVal}" is a common household staple and is already excluded`);
-        quickInput.value = '';
+      const trimmed = rawVal.trim();
+      if (!trimmed) return;
+      if (isShoppingExcluded(trimmed)) {
+        showToast(`"${trimmed}" is a common household staple and is already excluded`);
+        if (quickInput) quickInput.value = '';
+        hideQuickDropdown();
         return;
       }
-      const cleanVal = sanitizeShoppingItemName(rawVal);
+      const cleanVal = sanitizeShoppingItemName(trimmed);
       manualShoppingList.add(cleanVal);
       saveManualShoppingList();
+      hideQuickDropdown();
       showToast(`🛒 Added "${cleanVal}" to grocery list!`);
       openShoppingListModal();
-    };
+    }
+
+    function renderAutocomplete(query) {
+      if (!quickDropdown) return;
+      const q = (query || '').toLowerCase().trim();
+      if (!q || q.length < 1) {
+        hideQuickDropdown();
+        return;
+      }
+
+      const matches = allCandidates.filter(item => {
+        return item.name.toLowerCase().includes(q);
+      }).sort((a, b) => {
+        const aName = a.name.toLowerCase();
+        const bName = b.name.toLowerCase();
+        const aStarts = aName.startsWith(q);
+        const bStarts = bName.startsWith(q);
+        if (aStarts && !bStarts) return -1;
+        if (!aStarts && bStarts) return 1;
+
+        const aWordStarts = aName.split(/\s+/).some(w => w.startsWith(q));
+        const bWordStarts = bName.split(/\s+/).some(w => w.startsWith(q));
+        if (aWordStarts && !bWordStarts) return -1;
+        if (!aWordStarts && bWordStarts) return 1;
+
+        return aName.localeCompare(bName);
+      }).slice(0, 8);
+
+      if (matches.length === 0) {
+        hideQuickDropdown();
+        return;
+      }
+
+      activeSuggestionIndex = -1;
+      quickDropdown.innerHTML = matches.map((item, idx) => {
+        const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`(${escaped})`, 'gi');
+        const highlightedName = item.name.replace(regex, '<span class="shopping-autocomplete-match">$1</span>');
+
+        return `
+          <div class="shopping-autocomplete-item" data-index="${idx}" data-name="${item.name}">
+            <span class="shopping-autocomplete-icon">${item.icon}</span>
+            <div class="shopping-autocomplete-text">
+              <div class="shopping-autocomplete-name">${highlightedName}</div>
+              <div class="shopping-autocomplete-cat">${item.catTitle}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      quickDropdown.style.display = 'flex';
+
+      quickDropdown.querySelectorAll('.shopping-autocomplete-item').forEach(el => {
+        el.addEventListener('mousedown', (e) => {
+          e.preventDefault();
+          const chosenName = el.dataset.name;
+          addGroceryItem(chosenName);
+        });
+      });
+    }
+
+    if (quickInput) {
+      quickInput.addEventListener('input', (e) => {
+        renderAutocomplete(e.target.value);
+      });
+
+      quickInput.addEventListener('focus', (e) => {
+        if (e.target.value.trim().length > 0) {
+          renderAutocomplete(e.target.value);
+        }
+      });
+
+      quickInput.addEventListener('keydown', (e) => {
+        if (!quickDropdown || quickDropdown.style.display === 'none') {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            addGroceryItem(quickInput.value);
+          }
+          return;
+        }
+
+        const items = quickDropdown.querySelectorAll('.shopping-autocomplete-item');
+        if (items.length === 0) {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            addGroceryItem(quickInput.value);
+          }
+          return;
+        }
+
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          activeSuggestionIndex = (activeSuggestionIndex + 1) % items.length;
+          items.forEach((it, i) => it.classList.toggle('active', i === activeSuggestionIndex));
+          items[activeSuggestionIndex].scrollIntoView({ block: 'nearest' });
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          activeSuggestionIndex = (activeSuggestionIndex - 1 + items.length) % items.length;
+          items.forEach((it, i) => it.classList.toggle('active', i === activeSuggestionIndex));
+          items[activeSuggestionIndex].scrollIntoView({ block: 'nearest' });
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          if (activeSuggestionIndex >= 0 && activeSuggestionIndex < items.length) {
+            const chosen = items[activeSuggestionIndex].dataset.name;
+            addGroceryItem(chosen);
+          } else {
+            addGroceryItem(quickInput.value);
+          }
+        } else if (e.key === 'Escape') {
+          hideQuickDropdown();
+        }
+      });
+
+      quickInput.addEventListener('blur', () => {
+        setTimeout(hideQuickDropdown, 200);
+      });
+    }
 
     if (quickBtn && quickInput) {
-      quickBtn.addEventListener('click', handleQuickAdd);
-      quickInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          handleQuickAdd();
-        }
+      quickBtn.addEventListener('click', () => {
+        addGroceryItem(quickInput.value);
       });
     }
 
