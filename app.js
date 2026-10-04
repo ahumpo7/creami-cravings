@@ -530,21 +530,143 @@
   }
 
   // --- Storage Management ---
-  function loadStorage() {
-    // Pantry
-    const savedPantry = localStorage.getItem(PANTRY_STORAGE_KEY);
-    if (savedPantry) {
+  function isPwaStandalone() {
+    return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || 
+           (window.matchMedia && window.matchMedia('(display-mode: fullscreen)').matches) ||
+           window.navigator.standalone === true || 
+           (document.referrer && document.referrer.includes('android-app://'));
+  }
+
+  function getPantryStorageKey() {
+    if (currentUser && currentUser.id) {
+      return `${PANTRY_STORAGE_KEY}_${currentUser.id}`;
+    }
+    return isPwaStandalone() 
+      ? `${PANTRY_STORAGE_KEY}_guest_pwa` 
+      : `${PANTRY_STORAGE_KEY}_guest_web`;
+  }
+
+  function getShoppingStorageKey() {
+    if (currentUser && currentUser.id) {
+      return `${MANUAL_SHOPPING_STORAGE_KEY}_${currentUser.id}`;
+    }
+    return isPwaStandalone() 
+      ? `${MANUAL_SHOPPING_STORAGE_KEY}_guest_pwa` 
+      : `${MANUAL_SHOPPING_STORAGE_KEY}_guest_web`;
+  }
+
+  function getUserRecipeDataKey() {
+    if (currentUser && currentUser.id) {
+      return `${USER_RECIPE_DATA_KEY}_${currentUser.id}`;
+    }
+    return isPwaStandalone() 
+      ? `${USER_RECIPE_DATA_KEY}_guest_pwa` 
+      : `${USER_RECIPE_DATA_KEY}_guest_web`;
+  }
+
+  function getRecipeMadeStorageKey() {
+    if (currentUser && currentUser.id) {
+      return `${RECIPE_MADE_STORAGE_KEY}_${currentUser.id}`;
+    }
+    return isPwaStandalone() 
+      ? `${RECIPE_MADE_STORAGE_KEY}_guest_pwa` 
+      : `${RECIPE_MADE_STORAGE_KEY}_guest_web`;
+  }
+
+  function loadPantryForCurrentSession() {
+    const key = getPantryStorageKey();
+    const savedPantry = localStorage.getItem(key);
+    if (savedPantry !== null) {
       try {
         pantryState = new Set(JSON.parse(savedPantry));
       } catch (e) {
         pantryState = new Set(DEFAULT_STAPLES);
       }
     } else {
-      pantryState = new Set(DEFAULT_STAPLES);
-      savePantry();
+      // Legacy migration only for guest if un-scoped key exists
+      const legacyPantry = localStorage.getItem(PANTRY_STORAGE_KEY);
+      if (legacyPantry !== null && !currentUser) {
+        try {
+          pantryState = new Set(JSON.parse(legacyPantry));
+        } catch (e) {
+          pantryState = new Set(DEFAULT_STAPLES);
+        }
+      } else {
+        pantryState = new Set(DEFAULT_STAPLES);
+      }
+      localStorage.setItem(key, JSON.stringify(Array.from(pantryState)));
     }
+  }
 
-    // Google User Profile / Auth (Loaded first so user identity is known)
+  function loadShoppingListForCurrentSession() {
+    const key = getShoppingStorageKey();
+    const savedShop = localStorage.getItem(key);
+    if (savedShop !== null) {
+      try {
+        const parsed = JSON.parse(savedShop);
+        if (Array.isArray(parsed)) {
+          manualShoppingList = new Set(
+            parsed
+              .filter(item => !isShoppingExcluded(item))
+              .map(item => sanitizeShoppingItemName(item))
+          );
+        } else {
+          manualShoppingList = new Set();
+        }
+      } catch (e) {
+        manualShoppingList = new Set();
+      }
+    } else {
+      const legacyShop = localStorage.getItem(MANUAL_SHOPPING_STORAGE_KEY);
+      if (legacyShop !== null && !currentUser) {
+        try {
+          const parsed = JSON.parse(legacyShop);
+          manualShoppingList = new Set(
+            Array.isArray(parsed)
+              ? parsed.filter(item => !isShoppingExcluded(item)).map(item => sanitizeShoppingItemName(item))
+              : []
+          );
+        } catch (e) {
+          manualShoppingList = new Set();
+        }
+      } else {
+        manualShoppingList = new Set();
+      }
+      localStorage.setItem(key, JSON.stringify(Array.from(manualShoppingList)));
+    }
+    updateShoppingListBadge();
+  }
+
+  function loadUserRecipeDataForCurrentSession() {
+    const key = getUserRecipeDataKey();
+    const savedUserData = localStorage.getItem(key);
+    if (savedUserData !== null) {
+      try {
+        userRecipeData = JSON.parse(savedUserData);
+      } catch (e) {
+        userRecipeData = {};
+      }
+    } else {
+      userRecipeData = {};
+    }
+  }
+
+  function loadRecipeMadeCountsForCurrentSession() {
+    const key = getRecipeMadeStorageKey();
+    const savedMade = localStorage.getItem(key);
+    if (savedMade !== null) {
+      try {
+        recipeMadeCounts = JSON.parse(savedMade);
+      } catch (e) {
+        recipeMadeCounts = {};
+      }
+    } else {
+      recipeMadeCounts = {};
+    }
+  }
+
+  function loadStorage() {
+    // 1. Google User Profile / Auth (MUST be loaded first so user identity is known!)
     const savedUser = localStorage.getItem(USER_AUTH_STORAGE_KEY);
     if (savedUser) {
       try {
@@ -567,7 +689,10 @@
       }
     }
 
-    // Favorites: strictly tied to logged-in user account
+    // 2. Load Pantry (strictly scoped to currentUser or isolated guest session)
+    loadPantryForCurrentSession();
+
+    // 3. Favorites: strictly tied to logged-in user account
     if (currentUser && currentUser.id) {
       const userFavKey = `${FAVORITES_STORAGE_KEY}_${currentUser.id}`;
       const savedFavs = localStorage.getItem(userFavKey) || localStorage.getItem(FAVORITES_STORAGE_KEY);
@@ -582,11 +707,10 @@
         favoritesState = new Set();
       }
     } else {
-      // Guest mode: favorites require login
       favoritesState = new Set();
     }
 
-    // Custom Recipes: strictly tied to logged-in user account
+    // 4. Custom Recipes: strictly tied to logged-in user account
     if (currentUser && currentUser.id) {
       const userCustomKey = `${CUSTOM_RECIPES_STORAGE_KEY}_${currentUser.id}`;
       const savedCustom = localStorage.getItem(userCustomKey);
@@ -597,7 +721,6 @@
           customRecipesState = [];
         }
       } else {
-        // One-time migration of any legacy local custom recipes to this signed-in user
         const legacyCustom = localStorage.getItem(CUSTOM_RECIPES_STORAGE_KEY);
         if (legacyCustom) {
           try {
@@ -612,51 +735,20 @@
         }
       }
     } else {
-      // Offline / guest mode: personal recipes are hidden
       customRecipesState = [];
       localStorage.removeItem(CUSTOM_RECIPES_STORAGE_KEY);
     }
 
-    // Manual Shopping List
-    const savedShop = localStorage.getItem(MANUAL_SHOPPING_STORAGE_KEY);
-    if (savedShop) {
-      try {
-        const parsed = JSON.parse(savedShop);
-        if (Array.isArray(parsed)) {
-          manualShoppingList = new Set(
-            parsed
-              .filter(item => !isShoppingExcluded(item))
-              .map(item => sanitizeShoppingItemName(item))
-          );
-        } else {
-          manualShoppingList = new Set();
-        }
-      } catch (e) {
-        manualShoppingList = new Set();
-      }
-    }
+    // 5. Manual Shopping List (strictly scoped to user or isolated guest session)
+    loadShoppingListForCurrentSession();
 
-    // User Recipe Ratings & Notes
-    const savedUserData = localStorage.getItem(USER_RECIPE_DATA_KEY);
-    if (savedUserData) {
-      try {
-        userRecipeData = JSON.parse(savedUserData);
-      } catch (e) {
-        userRecipeData = {};
-      }
-    }
+    // 6. User Recipe Ratings & Notes (strictly scoped to user or isolated guest session)
+    loadUserRecipeDataForCurrentSession();
 
-    // Personal Recipe Made Batch Counts
-    const savedMade = localStorage.getItem(RECIPE_MADE_STORAGE_KEY);
-    if (savedMade) {
-      try {
-        recipeMadeCounts = JSON.parse(savedMade);
-      } catch (e) {
-        recipeMadeCounts = {};
-      }
-    }
+    // 7. Personal Recipe Made Batch Counts (strictly scoped to user or isolated guest session)
+    loadRecipeMadeCountsForCurrentSession();
 
-    // Cached Community Stats
+    // 8. Cached Community Stats
     const savedCommStats = localStorage.getItem(COMMUNITY_STATS_CACHE_KEY);
     if (savedCommStats) {
       try {
@@ -668,12 +760,10 @@
           totalSpins: parsed.totalSpins || 0,
           totalUsers: parsed.totalUsers || 1
         };
-      } catch (e) {
-        // default remains
-      }
+      } catch (e) {}
     }
 
-    // Freezer Pints (Roadmap Item 8)
+    // 9. Freezer Pints (Roadmap Item 8)
     if (currentUser && currentUser.id) {
       const userFreezerKey = `${FREEZER_STORAGE_KEY}_${currentUser.id}`;
       const savedFreezer = localStorage.getItem(userFreezerKey) || localStorage.getItem(FREEZER_STORAGE_KEY);
@@ -688,18 +778,11 @@
         freezerPintsState = [];
       }
     } else {
-      const savedFreezer = localStorage.getItem(FREEZER_STORAGE_KEY);
-      if (savedFreezer) {
-        try {
-          freezerPintsState = JSON.parse(savedFreezer);
-        } catch (e) {
-          freezerPintsState = [];
-        }
-        freezerPintsState = [];
-      }
+      freezerPintsState = [];
+      localStorage.removeItem(FREEZER_STORAGE_KEY);
     }
 
-    // Active Recipe Substitutions (Roadmap Item 16)
+    // 10. Active Recipe Substitutions
     const savedSwaps = localStorage.getItem('creami_active_swaps_v1');
     if (savedSwaps) {
       try {
@@ -717,7 +800,11 @@
   }
 
   function savePantry() {
-    localStorage.setItem(PANTRY_STORAGE_KEY, JSON.stringify(Array.from(pantryState)));
+    const key = getPantryStorageKey();
+    localStorage.setItem(key, JSON.stringify(Array.from(pantryState)));
+    if (currentUser) {
+      localStorage.removeItem(PANTRY_STORAGE_KEY);
+    }
     updateStats();
     triggerCloudSync();
   }
@@ -733,13 +820,21 @@
   }
 
   function saveManualShoppingList() {
-    localStorage.setItem(MANUAL_SHOPPING_STORAGE_KEY, JSON.stringify(Array.from(manualShoppingList)));
+    const key = getShoppingStorageKey();
+    localStorage.setItem(key, JSON.stringify(Array.from(manualShoppingList)));
+    if (currentUser) {
+      localStorage.removeItem(MANUAL_SHOPPING_STORAGE_KEY);
+    }
     updateShoppingListBadge();
     triggerCloudSync();
   }
 
   function saveUserRecipeData() {
-    localStorage.setItem(USER_RECIPE_DATA_KEY, JSON.stringify(userRecipeData));
+    const key = getUserRecipeDataKey();
+    localStorage.setItem(key, JSON.stringify(userRecipeData));
+    if (currentUser) {
+      localStorage.removeItem(USER_RECIPE_DATA_KEY);
+    }
     triggerCloudSync();
   }
 
@@ -753,7 +848,11 @@
   }
 
   function saveRecipeMadeCounts() {
-    localStorage.setItem(RECIPE_MADE_STORAGE_KEY, JSON.stringify(recipeMadeCounts));
+    const key = getRecipeMadeStorageKey();
+    localStorage.setItem(key, JSON.stringify(recipeMadeCounts));
+    if (currentUser) {
+      localStorage.removeItem(RECIPE_MADE_STORAGE_KEY);
+    }
     triggerCloudSync();
   }
 
@@ -930,24 +1029,39 @@
     };
     saveUserAuth();
 
-    // Restore & merge user's stored kitchen data from Google cloud
-    if (data.user.pantry && data.user.pantry.length > 0) {
-      data.user.pantry.forEach(id => pantryState.add(id));
-      savePantry();
-      renderPantryList();
+    // 1. Restore & switch to authenticated user's pantry (STRICT ISOLATION - do not merge with guest session!)
+    if (data.user && Array.isArray(data.user.pantry)) {
+      pantryState = new Set(data.user.pantry);
+    } else {
+      const userPantryKey = `${PANTRY_STORAGE_KEY}_${currentUser.id}`;
+      const savedUserPantry = localStorage.getItem(userPantryKey);
+      if (savedUserPantry !== null) {
+        try {
+          pantryState = new Set(JSON.parse(savedUserPantry));
+        } catch (e) {
+          pantryState = new Set(DEFAULT_STAPLES);
+        }
+      } else {
+        pantryState = new Set(DEFAULT_STAPLES);
+      }
     }
-    if (data.user.favorites && data.user.favorites.length > 0) {
-      data.user.favorites.forEach(id => favoritesState.add(id));
-      saveFavorites();
-    }
-    if (data.user.madeCounts) {
-      recipeMadeCounts = { ...recipeMadeCounts, ...data.user.madeCounts };
-      saveRecipeMadeCounts();
-    }
-    if (data.user.ratings) {
-      userRecipeData = { ...userRecipeData, ...data.user.ratings };
-      saveUserRecipeData();
-    }
+    savePantry();
+    updatePantryCheckboxVisuals();
+    renderPantryList();
+
+    // 2. Restore user's favorites
+    favoritesState = new Set(Array.isArray(data.user.favorites) ? data.user.favorites : []);
+    saveFavorites();
+
+    // 3. Restore made counts
+    recipeMadeCounts = (data.user.madeCounts && typeof data.user.madeCounts === 'object') ? { ...data.user.madeCounts } : {};
+    saveRecipeMadeCounts();
+
+    // 4. Restore ratings
+    userRecipeData = (data.user.ratings && typeof data.user.ratings === 'object') ? { ...data.user.ratings } : {};
+    saveUserRecipeData();
+
+    // 5. Restore custom recipes
     if (data.user.customRecipes && Array.isArray(data.user.customRecipes)) {
       customRecipesState = data.user.customRecipes;
       const userCustomKey = `${CUSTOM_RECIPES_STORAGE_KEY}_${currentUser.id}`;
@@ -958,21 +1072,26 @@
     } else {
       customRecipesState = [];
     }
-    if (data.user.shoppingList && data.user.shoppingList.length > 0) {
-      data.user.shoppingList.forEach(item => {
-        if (!isShoppingExcluded(item)) {
-          manualShoppingList.add(sanitizeShoppingItemName(item));
-        }
-      });
+
+    // 6. Restore shopping list (STRICT ISOLATION - do not merge!)
+    if (data.user.shoppingList && Array.isArray(data.user.shoppingList)) {
+      manualShoppingList = new Set(
+        data.user.shoppingList
+          .filter(item => !isShoppingExcluded(item))
+          .map(item => sanitizeShoppingItemName(item))
+      );
+      saveManualShoppingList();
+    } else {
+      manualShoppingList = new Set();
       saveManualShoppingList();
     }
+
+    // 7. Restore freezer pints
     if (data.user.freezerPints && Array.isArray(data.user.freezerPints)) {
-      const existingIds = new Set(freezerPintsState.map(p => p.id));
-      data.user.freezerPints.forEach(p => {
-        if (!existingIds.has(p.id)) {
-          freezerPintsState.push(p);
-        }
-      });
+      freezerPintsState = data.user.freezerPints;
+      saveFreezerPints();
+    } else {
+      freezerPintsState = [];
       saveFreezerPints();
     }
 
@@ -987,14 +1106,30 @@
   }
 
   function logoutUser() {
+    if (currentUser && currentUser.id) {
+      savePantry();
+      saveManualShoppingList();
+      saveUserRecipeData();
+      saveRecipeMadeCounts();
+    }
     currentUser = null;
     saveUserAuth();
-    // Hide personal custom recipes and clear favorites upon sign-out
+
+    // Reset personal custom recipes and clear favorites upon sign-out
     customRecipesState = [];
     favoritesState = new Set();
     freezerPintsState = [];
     updateFreezerBadges();
     localStorage.removeItem(CUSTOM_RECIPES_STORAGE_KEY);
+    localStorage.removeItem(FREEZER_STORAGE_KEY);
+
+    // Switch immediately to this environment's local guest session pantry & shopping list
+    loadPantryForCurrentSession();
+    loadShoppingListForCurrentSession();
+    loadUserRecipeDataForCurrentSession();
+    loadRecipeMadeCountsForCurrentSession();
+
+    updatePantryCheckboxVisuals();
     mergeRecipes();
     calculateIngredientUsage();
     renderPantryList();
@@ -1009,7 +1144,7 @@
     }
     updateAuthUI();
     renderRecipes();
-    showToast('Signed out of Google account. Personal data hidden.');
+    showToast('Signed out of Google account. Switched to local session pantry.');
   }
 
   function updateAuthUI() {
@@ -8428,6 +8563,10 @@
       return;
     }
 
+    localStorage.removeItem(getPantryStorageKey());
+    localStorage.removeItem(getShoppingStorageKey());
+    localStorage.removeItem(getUserRecipeDataKey());
+    localStorage.removeItem(getRecipeMadeStorageKey());
     localStorage.removeItem(PANTRY_STORAGE_KEY);
     localStorage.removeItem(FAVORITES_STORAGE_KEY);
     localStorage.removeItem(CUSTOM_RECIPES_STORAGE_KEY);
@@ -8435,6 +8574,11 @@
     localStorage.removeItem(USER_RECIPE_DATA_KEY);
     localStorage.removeItem(RECIPE_MADE_STORAGE_KEY);
     localStorage.removeItem(MANUAL_SHOPPING_STORAGE_KEY);
+    if (currentUser && currentUser.id) {
+      localStorage.removeItem(`${FAVORITES_STORAGE_KEY}_${currentUser.id}`);
+      localStorage.removeItem(`${CUSTOM_RECIPES_STORAGE_KEY}_${currentUser.id}`);
+      localStorage.removeItem(`${FREEZER_STORAGE_KEY}_${currentUser.id}`);
+    }
 
     pantryState = new Set(DEFAULT_STAPLES);
     favoritesState = new Set();
