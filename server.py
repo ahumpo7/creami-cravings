@@ -212,6 +212,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 'ratings': user.get('ratings', {}),
                 'customRecipes': user.get('customRecipes', []),
                 'shoppingList': user.get('shoppingList', []),
+                'freezerPints': user.get('freezerPints', []),
                 'subscriptions': user.get('subscriptions', ["Fan Favorites"])
             })
 
@@ -308,6 +309,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                     'ratings': {},
                     'customRecipes': [],
                     'shoppingList': [],
+                    'freezerPints': [],
                     'subscriptions': list(ALL_SUBSCRIPTIONS),
                     'token': new_token
                 }
@@ -341,6 +343,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                     'ratings': user.get('ratings', {}),
                     'customRecipes': user.get('customRecipes', []),
                     'shoppingList': user.get('shoppingList', []),
+                    'freezerPints': user.get('freezerPints', []),
                     'subscriptions': user.get('subscriptions', list(ALL_SUBSCRIPTIONS))
                 }
             })
@@ -381,6 +384,8 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 user['customRecipes'] = data['customRecipes']
             if 'shoppingList' in data and isinstance(data['shoppingList'], list):
                 user['shoppingList'] = data['shoppingList']
+            if 'freezerPints' in data and isinstance(data['freezerPints'], list):
+                user['freezerPints'] = data['freezerPints']
 
             save_json_file(USERS_DB_FILE, users_db)
             self._send_json({'status': 'ok', 'success': True})

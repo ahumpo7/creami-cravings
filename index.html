@@ -32,6 +32,9 @@
       <div class="header-top-bar">
         <div class="header-badge">🍦 Ninja Creami Cookbook Companion</div>
         <div class="header-actions">
+          <button id="openFreezerTrackerBtn" class="btn-secondary-action" title="View Pints in the Freezer & 16-Hour Timer">
+            🧊 Freezer <span class="badge-count" id="freezerBadge">0</span>
+          </button>
           <button id="openShoppingListBtn" class="btn-secondary-action" title="View Shopping List for Missing Items">
             🛒 Shopping List <span class="badge-count" id="shoppingListBadge">0</span>
           </button>
@@ -421,6 +424,88 @@
     </div>
   </div>
 
+  <!-- Freezer Inventory & 16-Hour Timer Modal (Roadmap Item 8) -->
+  <div class="modal-overlay" id="freezerModalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-content freezer-modal-content">
+      <div class="modal-handle-bar" aria-hidden="true"></div>
+      <button class="modal-close" id="freezerModalCloseBtn" aria-label="Close modal">&times;</button>
+      
+      <div class="modal-header freezer-modal-header">
+        <div class="freezer-title-row">
+          <div class="freezer-icon-badge">🧊</div>
+          <div>
+            <h2 class="modal-title">Pints in the Freezer &amp; 16-Hr Timer</h2>
+            <p class="modal-subtitle">Track pints chilling in your freezer. Ninja Creami bases need 16 hours to freeze solid before spinning.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Add / Log a Chilling Pint Card -->
+      <div class="freezer-add-section">
+        <button class="freezer-toggle-add-btn" id="freezerToggleAddBtn" type="button">
+          <span class="btn-icon">➕</span>
+          <span id="freezerToggleAddText">Log a Chilling Pint</span>
+        </button>
+
+        <form id="freezerAddForm" class="freezer-add-form" style="display: none;">
+          <div class="form-row">
+            <div class="form-group flex-2">
+              <label for="freezerRecipeNameInput">Recipe or Custom Pint Name *</label>
+              <input type="text" id="freezerRecipeNameInput" list="freezerRecipeDatalist" required placeholder="Choose recipe or type custom name...">
+              <datalist id="freezerRecipeDatalist"></datalist>
+            </div>
+            <div class="form-group flex-1">
+              <label for="freezerPintScale">Pint Size</label>
+              <select id="freezerPintScale">
+                <option value="1.0">Standard 16 oz (NC300)</option>
+                <option value="1.5">Deluxe 24 oz (NC500)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group flex-2">
+              <label>When Did You Mix &amp; Freeze It?</label>
+              <div class="freezer-time-presets" id="freezerTimePresets">
+                <button type="button" class="btn-time-preset active" data-offset="0">Just now</button>
+                <button type="button" class="btn-time-preset" data-offset="4">4h ago</button>
+                <button type="button" class="btn-time-preset" data-offset="8">8h ago</button>
+                <button type="button" class="btn-time-preset" data-offset="12">12h ago</button>
+                <button type="button" class="btn-time-preset" data-offset="16">16h+ (Ready)</button>
+              </div>
+            </div>
+            <div class="form-group flex-1">
+              <label for="freezerCustomTime">Or Custom Mixed Time</label>
+              <input type="datetime-local" id="freezerCustomTime">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="freezerNotes">Custom Tweaks or Flavor Notes (Optional)</label>
+            <input type="text" id="freezerNotes" placeholder="e.g. Subbed Fairlife for almond milk, added extra chocolate chips">
+          </div>
+
+          <div class="freezer-form-actions">
+            <button type="button" class="btn-secondary" id="freezerCancelAddBtn">Cancel</button>
+            <button type="submit" class="btn-primary" id="freezerSubmitAddBtn">🧊 Freeze Pint &amp; Start 16h Timer</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Live Chilling Pints List Header -->
+      <div class="freezer-list-header">
+        <h3 class="freezer-section-title">
+          <span>Currently Chilling</span>
+          <span class="count-pill" id="freezerPintsCount">0 Pints</span>
+        </h3>
+        <span class="freezer-timer-legend">⏱️ 16-Hour Countdown Calibrated</span>
+      </div>
+
+      <!-- Pints Cards Grid / Empty State -->
+      <div class="freezer-pints-list" id="freezerPintsList"></div>
+    </div>
+  </div>
+
   <!-- Custom Recipe Modal -->
   <div class="modal-overlay" id="customRecipeModalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="modal-content custom-modal-content">
@@ -580,6 +665,11 @@
       <span class="bottom-nav-icon">📦</span>
       <span class="bottom-nav-label">Pantry</span>
       <span class="bottom-nav-badge" id="navPantryBadge" style="display: none;">0</span>
+    </button>
+    <button class="bottom-nav-item" data-action="open-freezer" id="navItemFreezer" aria-label="Freezer">
+      <span class="bottom-nav-icon">🧊</span>
+      <span class="bottom-nav-label">Freezer</span>
+      <span class="bottom-nav-badge" id="navFreezerBadge" style="display: none;">0</span>
     </button>
     <button class="bottom-nav-item" data-action="open-shopping" id="navItemShopping" aria-label="Shopping List">
       <span class="bottom-nav-icon">🛒</span>

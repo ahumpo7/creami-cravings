@@ -15,6 +15,7 @@
   const USER_AUTH_STORAGE_KEY = 'creami_user_auth_v2';
   const RECIPE_MADE_STORAGE_KEY = 'creami_recipe_made_v2';
   const COMMUNITY_STATS_CACHE_KEY = 'creami_community_stats_v2';
+  const FREEZER_STORAGE_KEY = 'creami_freezer_pints_v2';
 
   // Default Staples Checked for New Users
   const DEFAULT_STAPLES = [
@@ -309,6 +310,12 @@
     coffee: ['coffee', 'espresso', 'latte', 'mocha', 'cappuccino', 'cold brew', 'caffeine', 'java', 'macchiato']
   };
 
+  // Pints in the Freezer & 16-Hour Timer State (Roadmap Item 8)
+  let freezerPintsState = [];
+  const FREEZE_DURATION_MS = 16 * 60 * 60 * 1000; // 16 hours calibrated
+  let freezerTickerInterval = null;
+  let freezerSelectedTimeOffset = 0; // 0, 4, 8, 12, 16 hours
+
   // DOM Elements
   const statTotalRecipes = document.getElementById('statTotalRecipes');
   const statReadyRecipes = document.getElementById('statReadyRecipes');
@@ -377,6 +384,27 @@
   const addCustomRecipeBtn = document.getElementById('addCustomRecipeBtn');
   const cancelCustomRecipeBtn = document.getElementById('cancelCustomRecipeBtn');
   const customRecipeForm = document.getElementById('customRecipeForm');
+
+  // Freezer Tracker Elements (Item 8)
+  const openFreezerTrackerBtn = document.getElementById('openFreezerTrackerBtn');
+  const freezerBadge = document.getElementById('freezerBadge');
+  const navItemFreezer = document.getElementById('navItemFreezer');
+  const navFreezerBadge = document.getElementById('navFreezerBadge');
+  const freezerModalOverlay = document.getElementById('freezerModalOverlay');
+  const freezerModalCloseBtn = document.getElementById('freezerModalCloseBtn');
+  const freezerToggleAddBtn = document.getElementById('freezerToggleAddBtn');
+  const freezerToggleAddText = document.getElementById('freezerToggleAddText');
+  const freezerAddForm = document.getElementById('freezerAddForm');
+  const freezerRecipeNameInput = document.getElementById('freezerRecipeNameInput');
+  const freezerRecipeDatalist = document.getElementById('freezerRecipeDatalist');
+  const freezerPintScale = document.getElementById('freezerPintScale');
+  const freezerTimePresets = document.getElementById('freezerTimePresets');
+  const freezerCustomTime = document.getElementById('freezerCustomTime');
+  const freezerNotes = document.getElementById('freezerNotes');
+  const freezerCancelAddBtn = document.getElementById('freezerCancelAddBtn');
+  const freezerSubmitAddBtn = document.getElementById('freezerSubmitAddBtn');
+  const freezerPintsCount = document.getElementById('freezerPintsCount');
+  const freezerPintsList = document.getElementById('freezerPintsList');
   
   const themeToggleBtn = document.getElementById('themeToggleBtn');
   const themeToggleLabel = document.getElementById('themeToggleLabel');
@@ -395,6 +423,9 @@
     renderRecipes();
     fetchCommunityStats();
     initGoogleAuth();
+    populateFreezerRecipeDatalist();
+    updateFreezerBadges();
+    startFreezerTicker();
     if (window.innerWidth <= 768) {
       setMobileView('recipes');
     }
@@ -530,6 +561,33 @@
         // default remains
       }
     }
+
+    // Freezer Pints (Roadmap Item 8)
+    if (currentUser && currentUser.id) {
+      const userFreezerKey = `${FREEZER_STORAGE_KEY}_${currentUser.id}`;
+      const savedFreezer = localStorage.getItem(userFreezerKey) || localStorage.getItem(FREEZER_STORAGE_KEY);
+      if (savedFreezer) {
+        try {
+          freezerPintsState = JSON.parse(savedFreezer);
+          localStorage.setItem(userFreezerKey, JSON.stringify(freezerPintsState));
+        } catch (e) {
+          freezerPintsState = [];
+        }
+      } else {
+        freezerPintsState = [];
+      }
+    } else {
+      const savedFreezer = localStorage.getItem(FREEZER_STORAGE_KEY);
+      if (savedFreezer) {
+        try {
+          freezerPintsState = JSON.parse(savedFreezer);
+        } catch (e) {
+          freezerPintsState = [];
+        }
+      } else {
+        freezerPintsState = [];
+      }
+    }
   }
 
   function savePantry() {
@@ -590,6 +648,17 @@
     triggerCloudSync();
   }
 
+  function saveFreezerPints() {
+    if (currentUser && currentUser.id) {
+      const userFreezerKey = `${FREEZER_STORAGE_KEY}_${currentUser.id}`;
+      localStorage.setItem(userFreezerKey, JSON.stringify(freezerPintsState));
+    } else {
+      localStorage.setItem(FREEZER_STORAGE_KEY, JSON.stringify(freezerPintsState));
+    }
+    updateFreezerBadges();
+    triggerCloudSync();
+  }
+
   // --- Background Cloud Sync to Google Account ---
   let syncTimeout = null;
   function triggerCloudSync() {
@@ -607,7 +676,8 @@
             madeCounts: recipeMadeCounts,
             ratings: userRecipeData,
             customRecipes: customRecipesState,
-            shoppingList: Array.from(manualShoppingList)
+            shoppingList: Array.from(manualShoppingList),
+            freezerPints: freezerPintsState
           })
         });
       } catch (err) {
@@ -762,9 +832,19 @@
       });
       saveManualShoppingList();
     }
+    if (data.user.freezerPints && Array.isArray(data.user.freezerPints)) {
+      const existingIds = new Set(freezerPintsState.map(p => p.id));
+      data.user.freezerPints.forEach(p => {
+        if (!existingIds.has(p.id)) {
+          freezerPintsState.push(p);
+        }
+      });
+      saveFreezerPints();
+    }
 
     closeGoogleAuthModal();
     updateAuthUI();
+    updateFreezerBadges();
     renderRecipes();
     showToast(`✨ Welcome back, ${currentUser.name || 'Ice Cream Craver'}! All data synced.`);
     
@@ -778,6 +858,8 @@
     // Hide personal custom recipes and clear favorites upon sign-out
     customRecipesState = [];
     favoritesState = new Set();
+    freezerPintsState = [];
+    updateFreezerBadges();
     localStorage.removeItem(CUSTOM_RECIPES_STORAGE_KEY);
     mergeRecipes();
     calculateIngredientUsage();
@@ -2125,6 +2207,307 @@
     }
   }
 
+  // --- Freezer Inventory & 16-Hour Timer Engine (Roadmap Item 8) ---
+  function computePintStatus(pint) {
+    const now = Date.now();
+    const frozenAt = pint.frozenAt || now;
+    const elapsedMs = Math.max(0, now - frozenAt);
+    const remainingMs = Math.max(0, FREEZE_DURATION_MS - elapsedMs);
+    const isReady = remainingMs <= 0;
+    const percent = Math.min(100, Math.max(0, Math.round((elapsedMs / FREEZE_DURATION_MS) * 100)));
+
+    const hoursLeft = Math.floor(remainingMs / (1000 * 60 * 60));
+    const minsLeft = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
+
+    let timeRemainingLabel = '';
+    if (isReady) {
+      timeRemainingLabel = 'Ready to Spin! 🍨';
+    } else if (hoursLeft > 0) {
+      timeRemainingLabel = `${hoursLeft}h ${minsLeft}m left`;
+    } else {
+      timeRemainingLabel = `${minsLeft}m left`;
+    }
+
+    const mixedDate = new Date(frozenAt);
+    const dateFormatted = mixedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const isToday = mixedDate.toDateString() === new Date().toDateString();
+    const mixedLabel = isToday ? `Today at ${dateFormatted}` : `${mixedDate.toLocaleDateString([], { month: 'short', day: 'numeric' })} at ${dateFormatted}`;
+
+    return {
+      isReady,
+      percent,
+      hoursLeft,
+      minsLeft,
+      timeRemainingLabel,
+      mixedLabel
+    };
+  }
+
+  function updateFreezerBadges() {
+    const total = freezerPintsState.length;
+    let readyCount = 0;
+    freezerPintsState.forEach(p => {
+      if (computePintStatus(p).isReady) readyCount++;
+    });
+
+    if (freezerBadge) {
+      freezerBadge.textContent = total;
+      freezerBadge.classList.toggle('ready', readyCount > 0);
+      if (readyCount > 0) {
+        freezerBadge.title = `${readyCount} pint${readyCount === 1 ? '' : 's'} ready to spin!`;
+      } else {
+        freezerBadge.title = `${total} pint${total === 1 ? '' : 's'} in freezer`;
+      }
+    }
+
+    if (navFreezerBadge) {
+      navFreezerBadge.textContent = total;
+      navFreezerBadge.style.display = total > 0 ? 'inline-block' : 'none';
+      navFreezerBadge.classList.toggle('ready', readyCount > 0);
+    }
+
+    if (freezerPintsCount) {
+      freezerPintsCount.textContent = `${total} Pint${total === 1 ? '' : 's'}`;
+    }
+  }
+
+  function startFreezerTicker() {
+    if (freezerTickerInterval) clearInterval(freezerTickerInterval);
+    // Refresh countdown every 30 seconds
+    freezerTickerInterval = setInterval(() => {
+      updateFreezerBadges();
+      if (freezerModalOverlay && freezerModalOverlay.classList.contains('active')) {
+        renderFreezerModal();
+      }
+    }, 30000);
+  }
+
+  function populateFreezerRecipeDatalist() {
+    if (!freezerRecipeDatalist) return;
+    freezerRecipeDatalist.replaceChildren();
+    allRecipes.forEach(r => {
+      const opt = document.createElement('option');
+      opt.value = r.name;
+      freezerRecipeDatalist.appendChild(opt);
+    });
+  }
+
+  function openFreezerModal() {
+    populateFreezerRecipeDatalist();
+    renderFreezerModal();
+    if (freezerModalOverlay) {
+      freezerModalOverlay.classList.add('active');
+      freezerModalOverlay.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function closeFreezerModal() {
+    if (freezerModalOverlay) {
+      freezerModalOverlay.classList.remove('active');
+      freezerModalOverlay.setAttribute('aria-hidden', 'true');
+    }
+    if (!recipeModalOverlay || !recipeModalOverlay.classList.contains('active')) {
+      document.body.style.overflow = '';
+    }
+  }
+
+  function toggleFreezerAddForm(show) {
+    if (!freezerAddForm) return;
+    const isVisible = freezerAddForm.style.display !== 'none';
+    const nextState = show !== undefined ? show : !isVisible;
+    freezerAddForm.style.display = nextState ? 'block' : 'none';
+    if (freezerToggleAddText) {
+      freezerToggleAddText.textContent = nextState ? 'Close Form' : 'Log a Chilling Pint';
+    }
+    if (nextState) {
+      if (freezerRecipeNameInput) freezerRecipeNameInput.focus();
+    }
+  }
+
+  function addFreezerPint({ recipeId, recipeName, scale, notes, frozenAt }) {
+    if (!recipeName || !recipeName.trim()) return;
+    const finalFrozenAt = frozenAt || Date.now();
+    const finalScale = scale || 1.0;
+
+    let matchedRecipeId = recipeId;
+    if (!matchedRecipeId) {
+      const match = allRecipes.find(r => r.name.toLowerCase() === recipeName.trim().toLowerCase());
+      if (match) matchedRecipeId = match.id;
+    }
+
+    const newPint = {
+      id: `freezer_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+      recipeId: matchedRecipeId || null,
+      recipeName: recipeName.trim(),
+      scale: finalScale,
+      sizeLabel: finalScale === 1.5 ? '24 oz Deluxe' : '16 oz Standard',
+      frozenAt: finalFrozenAt,
+      notes: (notes || '').trim()
+    };
+
+    freezerPintsState.unshift(newPint);
+    saveFreezerPints();
+    renderFreezerModal();
+    toggleFreezerAddForm(false);
+
+    const calc = computePintStatus(newPint);
+    if (calc.isReady) {
+      showToast(`🎉 "${newPint.recipeName}" logged as Ready to Spin! 🍨`);
+    } else {
+      showToast(`🧊 Logged "${newPint.recipeName}" in freezer! 16h timer started (${calc.timeRemainingLabel}).`);
+    }
+  }
+
+  function removeFreezerPint(pintId) {
+    const pint = freezerPintsState.find(p => p.id === pintId);
+    freezerPintsState = freezerPintsState.filter(p => p.id !== pintId);
+    saveFreezerPints();
+    renderFreezerModal();
+    if (pint) {
+      showToast(`Removed "${pint.recipeName}" from freezer.`);
+    }
+  }
+
+  function spinAndEnjoyFreezerPint(pintId) {
+    const pint = freezerPintsState.find(p => p.id === pintId);
+    if (!pint) return;
+
+    // Log batch made count for recipe if linked
+    if (pint.recipeId) {
+      logRecipeBatch(pint.recipeId, 1);
+    }
+
+    // Remove from freezer
+    freezerPintsState = freezerPintsState.filter(p => p.id !== pintId);
+    saveFreezerPints();
+    renderFreezerModal();
+
+    showToast(`🍨 Spun & Enjoyed "${pint.recipeName}"! +1 Batch logged 🎉`);
+  }
+
+  function renderFreezerModal() {
+    if (!freezerPintsList) return;
+    updateFreezerBadges();
+
+    if (freezerPintsState.length === 0) {
+      freezerPintsList.innerHTML = `
+        <div class="freezer-empty-state">
+          <div class="freezer-empty-icon">🧊</div>
+          <h4 class="freezer-empty-title">Your freezer is empty!</h4>
+          <p class="freezer-empty-desc">
+            Mix up your favorite recipe base and log it here to start the 16-hour countdown timer. We'll let you know the moment it's frozen solid and ready to spin!
+          </p>
+          <button class="btn-primary" id="btnEmptyLogPint">➕ Log a Chilling Pint</button>
+        </div>
+      `;
+      const btnEmpty = freezerPintsList.querySelector('#btnEmptyLogPint');
+      if (btnEmpty) {
+        btnEmpty.addEventListener('click', () => toggleFreezerAddForm(true));
+      }
+      return;
+    }
+
+    // Sort: Ready pints first, then by remaining time ascending
+    const sorted = [...freezerPintsState].sort((a, b) => {
+      const statusA = computePintStatus(a);
+      const statusB = computePintStatus(b);
+      if (statusA.isReady && !statusB.isReady) return -1;
+      if (!statusA.isReady && statusB.isReady) return 1;
+      return a.frozenAt - b.frozenAt;
+    });
+
+    freezerPintsList.innerHTML = sorted.map(pint => {
+      const status = computePintStatus(pint);
+      const isDeluxe = pint.scale === 1.5 || (pint.sizeLabel && pint.sizeLabel.includes('24 oz'));
+      const hasRecipe = Boolean(pint.recipeId && allRecipes.some(r => r.id === pint.recipeId));
+
+      return `
+        <div class="freezer-pint-card ${status.isReady ? 'ready' : ''}" data-id="${pint.id}">
+          <div class="freezer-card-top-row">
+            <div class="freezer-pint-title-group">
+              <div class="freezer-pint-title">${pint.recipeName}</div>
+              <div class="freezer-meta-tags">
+                <span class="freezer-tag ${isDeluxe ? 'size-deluxe' : 'size-standard'}">
+                  ${isDeluxe ? '🥣 24 oz Deluxe' : '🍨 16 oz Standard'}
+                </span>
+                <span class="freezer-tag">Mixed: ${status.mixedLabel}</span>
+              </div>
+            </div>
+            <div>
+              <span class="freezer-status-badge ${status.isReady ? 'ready' : 'chilling'}">
+                ${status.isReady ? 'Ready to Spin! 🍨' : `❄️ Chilling (${status.timeRemainingLabel})`}
+              </span>
+            </div>
+          </div>
+
+          <!-- 16-Hour Countdown Progress Bar -->
+          <div class="freezer-countdown-row">
+            <div class="freezer-progress-info">
+              <span>${status.isReady ? '100% Solid &amp; Ready' : `${status.percent}% Frozen`}</span>
+              <span>${status.isReady ? '16+ Hours Chilled' : `${status.hoursLeft}h ${status.minsLeft}m until ready`}</span>
+            </div>
+            <div class="freezer-progress-track">
+              <div class="freezer-progress-fill ${status.isReady ? 'ready' : ''}" style="width: ${status.percent}%;"></div>
+            </div>
+          </div>
+
+          ${pint.notes ? `<div class="freezer-notes-snippet">💡 ${pint.notes}</div>` : ''}
+
+          <!-- Card Actions -->
+          <div class="freezer-card-actions">
+            <div class="freezer-card-actions-left">
+              <button class="btn-spin-enjoyed" data-action="spin" title="Mark this pint as spun and add +1 to your batch counter">
+                <span>🍨 Spun &amp; Enjoyed (+1 Made)</span>
+              </button>
+              ${hasRecipe ? `
+                <button class="btn-freezer-recipe" data-action="view-recipe" title="View recipe and spin instructions">
+                  📖 View Recipe
+                </button>
+              ` : ''}
+            </div>
+            <button class="btn-freezer-discard" data-action="delete" title="Remove pint without logging batch">
+              🗑️
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Bind Pint Card Buttons
+    freezerPintsList.querySelectorAll('.freezer-pint-card').forEach(card => {
+      const pintId = card.dataset.id;
+      const pint = freezerPintsState.find(p => p.id === pintId);
+      if (!pint) return;
+
+      const spinBtn = card.querySelector('[data-action="spin"]');
+      if (spinBtn) {
+        spinBtn.addEventListener('click', () => spinAndEnjoyFreezerPint(pintId));
+      }
+
+      const viewBtn = card.querySelector('[data-action="view-recipe"]');
+      if (viewBtn) {
+        viewBtn.addEventListener('click', () => {
+          const rec = allRecipes.find(r => r.id === pint.recipeId);
+          if (rec) {
+            closeFreezerModal();
+            modalScale = pint.scale || 1.0;
+            openRecipeModal(rec);
+          }
+        });
+      }
+
+      const delBtn = card.querySelector('[data-action="delete"]');
+      if (delBtn) {
+        delBtn.addEventListener('click', () => {
+          if (confirm(`Remove "${pint.recipeName}" from your freezer inventory?`)) {
+            removeFreezerPint(pintId);
+          }
+        });
+      }
+    });
+  }
+
   function formatProTip(rawTip) {
     if (!rawTip || typeof rawTip !== 'string') return { title: 'Author Pro Tip', body: '' };
     const text = rawTip.trim();
@@ -2224,6 +2607,7 @@
     };
 
     const isPersonal = Boolean(recipe.isPersonal || (recipe.id && recipe.id.startsWith('custom_')));
+    const pintsInFreezer = freezerPintsState.filter(p => p.recipeId === recipe.id || p.recipeName.toLowerCase() === recipe.name.toLowerCase());
 
     recipeModalBody.innerHTML = `
       ${isCurrentModalRoulette ? `
@@ -2254,6 +2638,26 @@
           </div>
         ` : ''}
       </div>
+
+      ${pintsInFreezer.length > 0 ? (() => {
+        const hasReady = pintsInFreezer.some(p => computePintStatus(p).isReady);
+        const topPint = pintsInFreezer[0];
+        const topStatus = computePintStatus(topPint);
+        return `
+          <div class="recipe-modal-freezer-banner ${hasReady ? 'ready' : ''}">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 1.25rem;">${hasReady ? '🎉' : '🧊'}</span>
+              <div>
+                <strong>${hasReady ? 'Ready to Spin!' : 'Chilling in Freezer:'}</strong>
+                <span>${topStatus.isReady ? 'Frozen solid & ready to spin right now! 🍨' : `${topStatus.timeRemainingLabel} until 16-hr freeze complete`} (${pintsInFreezer.length} pint${pintsInFreezer.length === 1 ? '' : 's'})</span>
+              </div>
+            </div>
+            <button class="btn-freezer-recipe" id="modalViewInFreezerBtn" style="font-size: 0.78rem; padding: 5px 12px; white-space: nowrap;">
+              🧊 Open Freezer
+            </button>
+          </div>
+        `;
+      })() : ''}
 
       <!-- Scaling & Unit Mode Selector -->
       <div class="modal-options-bar">
@@ -2506,8 +2910,11 @@
         </div>
       </div>
 
-      <div class="modal-footer" style="margin-top: 16px; display: flex; align-items: center; justify-content: space-between;">
-        <div style="display: flex; gap: 8px; align-items: center;">
+      <div class="modal-footer" style="margin-top: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+          <button class="btn-freeze-pint-action" id="modalFreezeThisPintBtn" title="Log this recipe in your freezer and start the 16-hour countdown timer">
+            🧊 Freeze This Pint
+          </button>
           <button class="btn-secondary" id="modalFavBtn">
             ${isFav ? '💖 Favorited' : '🤍 Add to Favorites'}
           </button>
@@ -2525,6 +2932,29 @@
   }
 
   function bindRecipeModalEvents(recipe) {
+    // Freeze This Pint Button (Roadmap Item 8)
+    const freezePintBtn = recipeModalBody.querySelector('#modalFreezeThisPintBtn');
+    if (freezePintBtn) {
+      freezePintBtn.addEventListener('click', () => {
+        addFreezerPint({
+          recipeId: recipe.id,
+          recipeName: recipe.name,
+          scale: modalScale,
+          notes: `Mixed from recipe • ${modalScale === 1.5 ? '24 oz Deluxe' : '16 oz Standard'}`,
+          frozenAt: Date.now()
+        });
+        renderRecipeModalContent(recipe);
+      });
+    }
+
+    // View in Freezer Tracker Button (Roadmap Item 8)
+    const viewInFreezerBtn = recipeModalBody.querySelector('#modalViewInFreezerBtn');
+    if (viewInFreezerBtn) {
+      viewInFreezerBtn.addEventListener('click', () => {
+        openFreezerModal();
+      });
+    }
+
     // Pint Scale Selector
     const scaleGroup = recipeModalBody.querySelector('#modalScaleGroup');
     if (scaleGroup) {
@@ -3878,6 +4308,74 @@
     if (printShoppingListBtn) printShoppingListBtn.addEventListener('click', printShoppingList);
     if (clearShoppingListBtn) clearShoppingListBtn.addEventListener('click', clearShoppingList);
 
+    // Freezer Tracker Modal & Add Form (Roadmap Item 8)
+    if (openFreezerTrackerBtn) openFreezerTrackerBtn.addEventListener('click', openFreezerModal);
+    if (freezerModalCloseBtn) freezerModalCloseBtn.addEventListener('click', closeFreezerModal);
+    if (freezerModalOverlay) {
+      freezerModalOverlay.addEventListener('click', (e) => {
+        if (e.target === freezerModalOverlay) closeFreezerModal();
+      });
+    }
+
+    if (freezerToggleAddBtn) {
+      freezerToggleAddBtn.addEventListener('click', () => toggleFreezerAddForm());
+    }
+    if (freezerCancelAddBtn) {
+      freezerCancelAddBtn.addEventListener('click', () => toggleFreezerAddForm(false));
+    }
+
+    if (freezerTimePresets) {
+      freezerTimePresets.addEventListener('click', (e) => {
+        const btn = e.target.closest('.btn-time-preset');
+        if (!btn) return;
+        freezerTimePresets.querySelectorAll('.btn-time-preset').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        freezerSelectedTimeOffset = parseFloat(btn.dataset.offset) || 0;
+        if (freezerCustomTime) freezerCustomTime.value = '';
+      });
+    }
+
+    if (freezerCustomTime) {
+      freezerCustomTime.addEventListener('input', () => {
+        if (freezerCustomTime.value && freezerTimePresets) {
+          freezerTimePresets.querySelectorAll('.btn-time-preset').forEach(b => b.classList.remove('active'));
+        }
+      });
+    }
+
+    if (freezerAddForm) {
+      freezerAddForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = (freezerRecipeNameInput ? freezerRecipeNameInput.value : '').trim();
+        if (!name) return;
+        const scale = parseFloat(freezerPintScale ? freezerPintScale.value : '1.0') || 1.0;
+        const notes = (freezerNotes ? freezerNotes.value : '').trim();
+
+        let frozenAt = Date.now();
+        if (freezerCustomTime && freezerCustomTime.value) {
+          const parsed = new Date(freezerCustomTime.value).getTime();
+          if (!isNaN(parsed)) frozenAt = parsed;
+        } else if (freezerSelectedTimeOffset > 0) {
+          frozenAt = Date.now() - (freezerSelectedTimeOffset * 3600 * 1000);
+        }
+
+        addFreezerPint({
+          recipeName: name,
+          scale: scale,
+          notes: notes,
+          frozenAt: frozenAt
+        });
+
+        freezerAddForm.reset();
+        freezerSelectedTimeOffset = 0;
+        if (freezerTimePresets) {
+          freezerTimePresets.querySelectorAll('.btn-time-preset').forEach(b => {
+            b.classList.toggle('active', b.dataset.offset === '0');
+          });
+        }
+      });
+    }
+
     if (addCustomRecipeBtn) addCustomRecipeBtn.addEventListener('click', openCustomRecipeModal);
     if (customModalCloseBtn) customModalCloseBtn.addEventListener('click', closeCustomRecipeModal);
     if (cancelCustomRecipeBtn) cancelCustomRecipeBtn.addEventListener('click', closeCustomRecipeModal);
@@ -3894,6 +4392,7 @@
         closeRecipeModal();
         closeRouletteModal();
         closeShoppingListModal();
+        closeFreezerModal();
         closeCustomRecipeModal();
         closeGoogleAuthModal();
       }
@@ -3917,6 +4416,8 @@
           setMobileView('pantry');
           const switcher = document.getElementById('mobileSectionSwitcher');
           if (switcher) switcher.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else if (action === 'open-freezer') {
+          openFreezerModal();
         } else if (action === 'open-shopping') {
           openShoppingListModal();
         } else if (action === 'open-roulette') {
