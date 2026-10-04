@@ -174,41 +174,43 @@ A prioritized checklist of fixes, features, and refinements for the Creami Cravi
 - [x] **Real-Time "Creaminess Score" (1 to 10):** Evaluates fat, total dissolved solids, and stabilizer ratios with live meter bar, grade badge, and science-backed diagnostic tips.
 - [x] **Automatic Macro Computation & Spin Recommendation:** Live recalculation of total calories, protein, carbs, and fat per pint, auto-recommended spin setting (Lite Ice Cream vs Ice Cream), auto-namer, and 1-click save to "My Recipes".
 
-### 19. 🛡️ Store Compliance, Legal Pages & 1-Tap PWA Install Banner
-- [ ] **Privacy Policy Page (`/privacy.html`):**
+### 19. 🛡️ Store Compliance, Legal Pages & 1-Tap PWA Install Banner (Completed ✅)
+- [x] **Privacy Policy Page (`/privacy.html`):**
   - Full Google Play Console and GDPR compliance policy.
   - Explains local storage caching, Google Sign-In profile usage (email, name, avatar), and zero third-party data tracking.
   - Official trademark & food safety disclaimer: *"Ninja® and Ninja Creami® are registered trademarks of SharkNinja Operating LLC. Creami Cravings is an independent recipe companion app and is not affiliated with, endorsed by, or sponsored by SharkNinja."*
-- [ ] **Terms of Use Page (`/terms.html`):**
+- [x] **Terms of Use Page (`/terms.html`):**
   - Companion legal disclaimer, user-generated custom recipes guidelines, and nutritional estimates disclaimer.
-- [ ] **1-Tap PWA Install Engine:**
+- [x] **1-Tap PWA Install Engine:**
   - Capture the browser `beforeinstallprompt` event on Chromium / Android browsers.
   - Display a sleek `📲 Install App` header action button when the app is installable.
   - Responsive iOS Safari install modal walkthrough ("Tap Share ⎋ → Add to Home Screen ⊞") for iPhone/iPad users.
-- [ ] **Footer Navigation:**
-  - Clean footer with copyright, links to `/privacy.html`, `/terms.html`, and PWA install trigger.
+- [x] **Footer Navigation:**
+  - Clean footer with copyright, links to `/privacy.html`, `/terms.html`, backup & restore modal, and PWA install trigger.
 
-### 20. 🔊 Sensory Delight: Web Audio, Haptics & Local Data Backup
-- [ ] **Offline Web Audio Engine:**
+### 20. 🔊 Sensory Delight: Web Audio, Haptics & Local Data Backup (Completed ✅)
+- [x] **Offline Web Audio Engine:**
   - Pure synthetic Web Audio API sound effects (no external audio files required; functions 100% offline).
-  - Slot machine ticking and triumphant winning chime for Creami Roulette.
-  - Crisp bell / chime alert when the 60-second warm water bath or 16-hour freeze timer reaches zero.
-- [ ] **Tactile Haptic Feedback:**
+  - Mechanical slot machine ticking and triumphant winning chord fanfare for Creami Roulette.
+  - Crisp resonant dual-bell chime alert when the 60-second warm water bath or 16-hour freeze timer reaches zero.
+  - Pleasant completion dings when logging batches or enjoying pints.
+- [x] **Tactile Haptic Feedback:**
   - Native device vibrations (`navigator.vibrate`) on supported mobile devices for Roulette spins, batch logs, and timer completion.
-  - Header or settings toggle to easily mute/unmute audio and haptics anytime.
-- [ ] **Data Backup & Restore (JSON Export / Import):**
+  - Header toggle (`🔊` / `🔇`) to easily mute/unmute audio and haptics anytime with persistent state in `localStorage`.
+- [x] **Data Backup & Restore (JSON Export / Import):**
   - 1-Click "Download Kitchen Backup" generating a timestamped `.json` file of all personal custom recipes, pantry staples, freezer pints, and tasting notes.
   - "Restore Backup" file picker with safety validation and merge/overwrite options, allowing frictionless data migration without requiring sign-in.
+  - Factory reset safety tool to clear local kitchen caches.
 
 ---
 
 ## 🏆 Remaining Items Ranked by Logical Order
 
-| Step | Task | Why & Scope | Est. Effort |
-| :---: | :--- | :--- | :--- |
-| **Step 5** | **Item 19: 🛡️ Store Compliance & 1-Tap PWA Install** | Compliance `/privacy.html` (mandatory for Play Store), `/terms.html`, trademark disclaimers, and 1-tap `📲 Install App` prompt. | 🟢 ~15–20 mins |
-| **Step 6** | **Item 20: 🔊 Audio, Haptics & Local Data Backup** | Web Audio slot sounds/timer chimes, mobile haptics, and JSON export/import for disaster recovery. | 🟢 ~20–25 mins |
-| **Step 7** | **Item 1: 🔑 Finish Google Sign-In** | Configure production Google Cloud Console OAuth 2.0 Client ID and authorized origins. *(Authentication backbone)* | ⚪ External Credential |
-| **Step 8** | **Item 14: 🤖 Google Play Store Android App (Bubblewrap)** | Generate signed `.aab` bundle, deploy `assetlinks.json`, generate $1024\times500$ banner and $512\times512$ store icon. | 🟠 ~30–45 mins |
+| Step | Task | Why & Scope | Est. Effort | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| **Step 5** | **Item 19: 🛡️ Store Compliance & 1-Tap PWA Install** | Compliance `/privacy.html` (mandatory for Play Store), `/terms.html`, trademark disclaimers, and 1-tap `📲 Install App` prompt. | 🟢 ~15–20 mins | ✅ **Done** |
+| **Step 6** | **Item 20: 🔊 Audio, Haptics & Local Data Backup** | Web Audio slot sounds/timer chimes, mobile haptics, and JSON export/import for disaster recovery. | 🟢 ~20–25 mins | ✅ **Done** |
+| **Step 7** | **Item 1: 🔑 Finish Google Sign-In** | Configure production Google Cloud Console OAuth 2.0 Client ID and authorized origins. *(Authentication backbone)* | ⚪ External Credential | ⏳ **Next** |
+| **Step 8** | **Item 14: 🤖 Google Play Store Android App (Bubblewrap)** | Generate signed `.aab` bundle, deploy `assetlinks.json`, generate $1024\times500$ banner and $512\times512$ store icon. | 🟠 ~30–45 mins | ⏳ **Final** |
 
 

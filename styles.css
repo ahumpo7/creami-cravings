@@ -6602,4 +6602,220 @@ body.modal-open {
   border-color: #ef4444;
 }
 
+/* --- Header Sound Toggle & PWA Install Button (Roadmap Items 19 & 20) --- */
+.btn-sound-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  padding: 0;
+  font-size: 1.05rem;
+}
+
+.btn-install-pwa {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.82rem;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(236, 72, 153, 0.35);
+  transition: all 0.2s ease;
+  animation: pulseInstall 3s infinite ease-in-out;
+}
+
+@keyframes pulseInstall {
+  0%, 100% { transform: scale(1); box-shadow: 0 2px 10px rgba(236, 72, 153, 0.35); }
+  50% { transform: scale(1.04); box-shadow: 0 4px 16px rgba(236, 72, 153, 0.6); }
+}
+
+.btn-install-pwa:hover {
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 0 4px 18px rgba(236, 72, 153, 0.65);
+}
+
+/* --- App Footer (Roadmap Item 19) --- */
+.app-footer {
+  margin-top: 48px;
+  padding: 28px 20px 40px;
+  border-top: 1px solid var(--border-glass);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: center;
+}
+
+.footer-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 900px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.footer-logo {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--text-main);
+}
+
+.footer-version-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  background: var(--bg-item);
+  border: 1px solid var(--border-glass);
+  border-radius: 999px;
+  color: var(--text-dim);
+}
+
+.footer-links {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+}
+
+.footer-link,
+.footer-action-btn {
+  color: var(--text-muted);
+  text-decoration: none;
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.85rem;
+  font-family: var(--font-body);
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.18s ease;
+}
+
+.footer-link:hover,
+.footer-action-btn:hover {
+  color: var(--primary);
+}
+
+.footer-dot {
+  color: var(--text-dim);
+  font-size: 0.75rem;
+}
+
+.footer-disclaimer {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  max-width: 760px;
+  line-height: 1.5;
+}
+
+/* --- Kitchen Data Backup Modal (Roadmap Item 20) --- */
+.backup-modal-content {
+  max-width: 580px;
+}
+
+.backup-card-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 18px 0;
+}
+
+.backup-card {
+  background: var(--bg-item);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.backup-card.danger {
+  border-color: rgba(239, 68, 68, 0.35);
+  background: rgba(239, 68, 68, 0.04);
+}
+
+.backup-card-title {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.backup-card-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.backup-options-row {
+  display: flex;
+  gap: 14px;
+  font-size: 0.85rem;
+  color: var(--text-main);
+  align-items: center;
+}
+
+.backup-file-input {
+  display: none;
+}
+
+/* --- iOS Safari Install Guide Modal --- */
+.ios-install-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 20px 0;
+}
+
+.ios-step-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--bg-item);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+}
+
+.ios-step-num {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+
+.ios-step-text {
+  font-size: 0.92rem;
+  color: var(--text-main);
+  line-height: 1.45;
+}
+
 

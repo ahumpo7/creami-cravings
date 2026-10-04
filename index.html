@@ -57,6 +57,16 @@
             <span class="theme-label" id="themeToggleLabel">Dark</span>
           </button>
 
+          <!-- Audio & Haptics Toggle (Roadmap Item 20) -->
+          <button id="btnSoundToggle" class="btn-secondary-action btn-sound-toggle" aria-label="Toggle Sound Effects & Haptics" title="Sound Effects & Haptics (Active)">
+            🔊
+          </button>
+
+          <!-- 1-Tap PWA Install Button (Roadmap Item 19) -->
+          <button id="btnInstallPwa" class="btn-install-pwa" style="display: none;" title="Install Creami Cravings on this Device">
+            📲 Install App
+          </button>
+
           <!-- Admin Portal Header Button (Roadmap Item 15) -->
           <button id="openAdminPortalBtn" class="btn-secondary-action btn-admin-header" style="display: none;" title="Open Admin Portal (User Management & Tiered Access)">
             👑 Admin Portal
@@ -394,6 +404,28 @@
         </div>
       </main>
     </div>
+
+    <!-- App Footer & Compliance (Roadmap Item 19 & 20) -->
+    <footer class="app-footer">
+      <div class="footer-top-row">
+        <div class="footer-brand">
+          <span class="footer-logo">🍦 Creami Cravings</span>
+          <span class="footer-version-badge">v1.2 PWA</span>
+        </div>
+        <div class="footer-links">
+          <a href="/privacy.html" class="footer-link">Privacy Policy</a>
+          <span class="footer-dot">•</span>
+          <a href="/terms.html" class="footer-link">Terms of Service</a>
+          <span class="footer-dot">•</span>
+          <button type="button" class="footer-action-btn" id="footerBackupBtn">💾 Backup &amp; Restore</button>
+          <span class="footer-dot">•</span>
+          <button type="button" class="footer-action-btn" id="footerInstallBtn">📲 Install App</button>
+        </div>
+      </div>
+      <p class="footer-disclaimer">
+        Creami Cravings is an independent recipe companion and community cookbook. Ninja®, Ninja Creami®, and SharkNinja® are registered trademarks of SharkNinja Operating LLC. Creami Cravings is not affiliated with, endorsed by, or sponsored by SharkNinja Operating LLC. Always follow official manufacturer safety manuals when freezing bases, assembling blades, and spinning pints.
+      </p>
+    </footer>
   </div>
 
   <!-- Recipe Detail Modal -->
@@ -950,6 +982,75 @@
       <!-- User Directory Cards List -->
       <div class="admin-users-list" id="adminUsersList">
         <!-- Rendered dynamically by app.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Kitchen Data Backup & Restore Modal (Roadmap Item 20) -->
+  <div class="modal-overlay" id="backupModalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-content backup-modal-content">
+      <div class="modal-handle-bar" aria-hidden="true"></div>
+      <button class="modal-close" id="backupModalCloseBtn" aria-label="Close modal">&times;</button>
+      <div class="modal-header">
+        <h2 class="modal-title">💾 Kitchen Data Backup &amp; Restore</h2>
+        <p class="modal-subtitle">Safeguard your kitchen pantry, custom recipes, tasting notes, ratings, batch counts, and freezer pints to an offline JSON file.</p>
+      </div>
+
+      <div class="backup-card-grid">
+        <!-- Download Backup -->
+        <div class="backup-card">
+          <div class="backup-card-title">📥 Export Kitchen Backup</div>
+          <p class="backup-card-desc">Download all your pantry items, custom creations, ratings, and freezer records as a timestamped JSON file.</p>
+          <button type="button" class="btn-primary" id="btnDownloadBackup">Download Backup (.json)</button>
+        </div>
+
+        <!-- Restore Backup -->
+        <div class="backup-card">
+          <div class="backup-card-title">📤 Restore from Backup</div>
+          <p class="backup-card-desc">Restore your data from a previously downloaded JSON backup file. Choose whether to merge with your current kitchen data or replace everything.</p>
+          <div class="backup-options-row">
+            <label><input type="radio" name="backupRestoreMode" value="merge" checked> Merge with current</label>
+            <label><input type="radio" name="backupRestoreMode" value="replace"> Overwrite / Replace</label>
+          </div>
+          <input type="file" id="backupFileInput" class="backup-file-input" accept=".json,application/json">
+          <button type="button" class="btn-secondary" id="btnTriggerRestore">Select Backup File &amp; Restore</button>
+        </div>
+
+        <!-- Factory Reset -->
+        <div class="backup-card danger">
+          <div class="backup-card-title">⚠️ Reset Kitchen Data</div>
+          <p class="backup-card-desc">Reset all custom recipes, freezer inventory, batch logs, and ratings back to default settings. (Does not delete built-in recipes).</p>
+          <button type="button" class="btn-danger" id="btnResetKitchenData">Reset All Kitchen Data</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- iOS Safari Install Guide Modal (Roadmap Item 19) -->
+  <div class="modal-overlay" id="iosInstallModalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-content">
+      <div class="modal-handle-bar" aria-hidden="true"></div>
+      <button class="modal-close" id="iosInstallModalCloseBtn" aria-label="Close modal">&times;</button>
+      <div class="modal-header">
+        <h2 class="modal-title">📲 Install Creami Cravings on iOS</h2>
+        <p class="modal-subtitle">Add the app directly to your iPhone or iPad home screen for an ultra-fast, fullscreen offline experience without the App Store.</p>
+      </div>
+      <div class="ios-install-steps">
+        <div class="ios-step-card">
+          <div class="ios-step-num">1</div>
+          <div class="ios-step-text">Tap the <strong>Share</strong> button at the bottom of Safari (the square icon with the arrow pointing up 📤).</div>
+        </div>
+        <div class="ios-step-card">
+          <div class="ios-step-num">2</div>
+          <div class="ios-step-text">Scroll down the share sheet and select <strong>"Add to Home Screen"</strong> (➕).</div>
+        </div>
+        <div class="ios-step-card">
+          <div class="ios-step-num">3</div>
+          <div class="ios-step-text">Tap <strong>"Add"</strong> in the top-right corner. The Creami Cravings icon will now launch fullscreen like a native app!</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-primary" id="btnDismissIosInstall" style="width: 100%;">Got It!</button>
       </div>
     </div>
   </div>

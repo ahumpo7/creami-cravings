@@ -286,6 +286,32 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 self.send_error(404, "File not found")
                 return
 
+        elif self.path in ['/privacy', '/privacy.html']:
+            priv_path = os.path.join(DIRECTORY, 'privacy.html')
+            if os.path.exists(priv_path):
+                self.send_response(200)
+                self.send_header('Content-Type', 'text/html; charset=utf-8')
+                self.end_headers()
+                with open(priv_path, 'rb') as f:
+                    self.wfile.write(f.read())
+                return
+            else:
+                self.send_error(404, "File not found")
+                return
+
+        elif self.path in ['/terms', '/terms.html']:
+            terms_path = os.path.join(DIRECTORY, 'terms.html')
+            if os.path.exists(terms_path):
+                self.send_response(200)
+                self.send_header('Content-Type', 'text/html; charset=utf-8')
+                self.end_headers()
+                with open(terms_path, 'rb') as f:
+                    self.wfile.write(f.read())
+                return
+            else:
+                self.send_error(404, "File not found")
+                return
+
         else:
             super().do_GET()
 

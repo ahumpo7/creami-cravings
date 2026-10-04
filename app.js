@@ -451,6 +451,21 @@
   const themeToggleLabel = document.getElementById('themeToggleLabel');
   const toastContainer = document.getElementById('toastContainer');
 
+  // Sound & PWA Install / Backup Elements (Roadmap Items 19 & 20)
+  const btnSoundToggle = document.getElementById('btnSoundToggle');
+  const btnInstallPwa = document.getElementById('btnInstallPwa');
+  const footerInstallBtn = document.getElementById('footerInstallBtn');
+  const footerBackupBtn = document.getElementById('footerBackupBtn');
+  const backupModalOverlay = document.getElementById('backupModalOverlay');
+  const backupModalCloseBtn = document.getElementById('backupModalCloseBtn');
+  const btnDownloadBackup = document.getElementById('btnDownloadBackup');
+  const btnTriggerRestore = document.getElementById('btnTriggerRestore');
+  const backupFileInput = document.getElementById('backupFileInput');
+  const btnResetKitchenData = document.getElementById('btnResetKitchenData');
+  const iosInstallModalOverlay = document.getElementById('iosInstallModalOverlay');
+  const iosInstallModalCloseBtn = document.getElementById('iosInstallModalCloseBtn');
+  const btnDismissIosInstall = document.getElementById('btnDismissIosInstall');
+
   // --- Initialization ---
   function init() {
     loadStorage();
@@ -461,6 +476,7 @@
     bindAuthEvents();
     updateThemeUI();
     updateAuthUI();
+    updateSoundUI();
     renderRecipes();
     fetchCommunityStats();
     initGoogleAuth();
@@ -468,6 +484,7 @@
     updateFreezerBadges();
     startFreezerTicker();
     initFreezeNotifications();
+    initPwaInstall();
 
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
@@ -1244,6 +1261,11 @@
     const newCount = Math.max(0, currentCount + delta);
     recipeMadeCounts[recipeId] = newCount;
     saveRecipeMadeCounts();
+
+    if (delta > 0) {
+      playAudioSuccess();
+      triggerHaptic(25);
+    }
 
     // Optimistic community update
     const currentComm = communityStats.madeCounts[recipeId] || 0;
@@ -2427,12 +2449,17 @@
         rouletteSlotItem.textContent = `🍨 ${tempR.name}`;
         rouletteSlotItem.classList.add('blur');
         ticks++;
+        playAudioTick();
+        triggerHaptic(12);
 
         if (ticks >= 8) {
           clearInterval(rouletteSpinInterval);
           rouletteSpinInterval = null;
           rouletteSlotItem.classList.remove('blur');
           rouletteSlotItem.textContent = `🎉 ${winner.name}`;
+
+          playAudioJackpot();
+          triggerHaptic([30, 50, 40, 60, 80]);
 
           if (rouletteBtn) rouletteBtn.classList.remove('spinning');
 
@@ -2843,6 +2870,8 @@
     pint.notified = true;
     saveFreezerPints();
     updateFreezerBadges();
+    playAudioChime();
+    triggerHaptic([250, 100, 250, 100, 250]);
     if (freezerModalOverlay && freezerModalOverlay.classList.contains('active')) {
       renderFreezerModal();
     }
@@ -4469,6 +4498,8 @@
               }
               startTimerBtn.textContent = 'Done! Spin Time ❄️';
               startTimerBtn.className = 'btn-timer-action done';
+              playAudioChime();
+              triggerHaptic([100, 50, 100, 50, 200]);
               showToast('❄️ 60-Second Bath complete! Pint is ready to spin!');
             }
           }, 1000);
@@ -7543,6 +7574,63 @@
       }, 350);
     }
 
+    // Sound & Haptics Toggle (Roadmap Item 20)
+    if (btnSoundToggle) {
+      btnSoundToggle.addEventListener('click', () => {
+        toggleSoundState();
+      });
+    }
+
+    // Kitchen Data Backup & Restore Modal Bindings (Roadmap Item 20)
+    if (footerBackupBtn) {
+      footerBackupBtn.addEventListener('click', () => {
+        openBackupModal();
+      });
+    }
+
+    if (backupModalCloseBtn) {
+      backupModalCloseBtn.addEventListener('click', () => {
+        closeBackupModal();
+      });
+    }
+
+    if (backupModalOverlay) {
+      backupModalOverlay.addEventListener('click', (e) => {
+        if (e.target === backupModalOverlay) {
+          closeBackupModal();
+        }
+      });
+    }
+
+    if (btnDownloadBackup) {
+      btnDownloadBackup.addEventListener('click', () => {
+        downloadKitchenBackup();
+      });
+    }
+
+    if (btnTriggerRestore) {
+      btnTriggerRestore.addEventListener('click', () => {
+        if (backupFileInput) backupFileInput.click();
+      });
+    }
+
+    if (backupFileInput) {
+      backupFileInput.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (file) {
+          const selectedMode = document.querySelector('input[name="backupRestoreMode"]:checked')?.value || 'merge';
+          restoreKitchenBackup(file, selectedMode);
+          backupFileInput.value = '';
+        }
+      });
+    }
+
+    if (btnResetKitchenData) {
+      btnResetKitchenData.addEventListener('click', () => {
+        resetAllKitchenData();
+      });
+    }
+
     // Initialize PWA Offline Engine & Service Worker
     initPWA();
   }
@@ -7596,6 +7684,478 @@
           });
       });
     }
+  }
+
+  // --- Synthesized Web Audio & Tactile Haptic Engine (Roadmap Item 20) ---
+  const SOUND_STORAGE_KEY = 'creami_sound_enabled_v1';
+  let soundEnabled = localStorage.getItem(SOUND_STORAGE_KEY) !== 'false';
+  let audioCtx = null;
+
+  function getAudioContext() {
+    if (!audioCtx) {
+      const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtxClass) {
+        audioCtx = new AudioCtxClass();
+      }
+    }
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume().catch(() => {});
+    }
+    return audioCtx;
+  }
+
+  function playAudioTick() {
+    if (!soundEnabled) return;
+    try {
+      const ctx = getAudioContext();
+      if (!ctx) return;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const now = ctx.currentTime;
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(880, now);
+      osc.frequency.exponentialRampToValueAtTime(320, now + 0.035);
+
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.035);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.04);
+    } catch (e) {
+      // Audio autoplay or browser audio permissions handled safely
+    }
+  }
+
+  function playAudioJackpot() {
+    if (!soundEnabled) return;
+    try {
+      const ctx = getAudioContext();
+      if (!ctx) return;
+      // Multi-note triumphant fanfare: C5 (523.25), E5 (659.25), G5 (783.99), C6 (1046.50)
+      const notes = [523.25, 659.25, 783.99, 1046.50];
+      const now = ctx.currentTime;
+      notes.forEach((freq, idx) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        const start = now + (idx * 0.07);
+        const duration = (idx === notes.length - 1) ? 0.35 : 0.12;
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, start);
+
+        gain.gain.setValueAtTime(0.12, start);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + duration);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(start);
+        osc.stop(start + duration + 0.02);
+      });
+    } catch (e) {}
+  }
+
+  function playAudioChime() {
+    if (!soundEnabled) return;
+    try {
+      const ctx = getAudioContext();
+      if (!ctx) return;
+      // Resonant dual-bell chime: E5 (659.25) + B5 (987.77) then decay
+      const chords = [
+        { freq: 659.25, delay: 0, dur: 0.6 },
+        { freq: 987.77, delay: 0.08, dur: 0.7 }
+      ];
+      const now = ctx.currentTime;
+      chords.forEach(c => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        const start = now + c.delay;
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(c.freq, start);
+
+        gain.gain.setValueAtTime(0.14, start);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + c.dur);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(start);
+        osc.stop(start + c.dur + 0.02);
+      });
+    } catch (e) {}
+  }
+
+  function playAudioSuccess() {
+    if (!soundEnabled) return;
+    try {
+      const ctx = getAudioContext();
+      if (!ctx) return;
+      // Pleasant two-tone completion chime: 587.33Hz (D5) -> 880Hz (A5)
+      const now = ctx.currentTime;
+      [
+        { freq: 587.33, delay: 0, dur: 0.14 },
+        { freq: 880.00, delay: 0.1, dur: 0.28 }
+      ].forEach(item => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        const start = now + item.delay;
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(item.freq, start);
+
+        gain.gain.setValueAtTime(0.12, start);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + item.dur);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(start);
+        osc.stop(start + item.dur + 0.02);
+      });
+    } catch (e) {}
+  }
+
+  function triggerHaptic(pattern = 15) {
+    if (!soundEnabled) return;
+    try {
+      if ('vibrate' in navigator) {
+        navigator.vibrate(pattern);
+      }
+    } catch (e) {}
+  }
+
+  function updateSoundUI() {
+    const btn = document.getElementById('btnSoundToggle');
+    if (!btn) return;
+    if (soundEnabled) {
+      btn.textContent = '🔊';
+      btn.setAttribute('title', 'Sound Effects & Haptics (Active - Tap to Mute)');
+      btn.setAttribute('aria-label', 'Sound Effects & Haptics Active');
+    } else {
+      btn.textContent = '🔇';
+      btn.setAttribute('title', 'Sound Effects & Haptics (Muted - Tap to Unmute)');
+      btn.setAttribute('aria-label', 'Sound Effects & Haptics Muted');
+    }
+  }
+
+  function toggleSoundState() {
+    soundEnabled = !soundEnabled;
+    localStorage.setItem(SOUND_STORAGE_KEY, soundEnabled ? 'true' : 'false');
+    updateSoundUI();
+    if (soundEnabled) {
+      getAudioContext();
+      playAudioSuccess();
+      triggerHaptic(20);
+      showToast('🔊 Sound Effects & Haptics Enabled');
+    } else {
+      showToast('🔇 Sound Effects & Haptics Muted');
+    }
+  }
+
+  // --- 1-Tap PWA Install Engine (Roadmap Item 19) ---
+  let deferredPrompt = null;
+  const isIosDevice = /iphone|ipad|ipod/i.test(navigator.userAgent || '');
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+  function initPwaInstall() {
+    const btnInstall = document.getElementById('btnInstallPwa');
+    const footerInstall = document.getElementById('footerInstallBtn');
+    const iosModal = document.getElementById('iosInstallModalOverlay');
+    const iosClose = document.getElementById('iosInstallModalCloseBtn');
+    const iosDismiss = document.getElementById('btnDismissIosInstall');
+
+    if (isStandalone) {
+      if (btnInstall) btnInstall.style.display = 'none';
+      if (footerInstall) footerInstall.style.display = 'none';
+      return;
+    }
+
+    if (isIosDevice) {
+      if (btnInstall) btnInstall.style.display = 'inline-flex';
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      if (btnInstall) btnInstall.style.display = 'inline-flex';
+    });
+
+    window.addEventListener('appinstalled', () => {
+      deferredPrompt = null;
+      if (btnInstall) btnInstall.style.display = 'none';
+      if (footerInstall) footerInstall.style.display = 'none';
+      showToast('🎉 Creami Cravings installed! Enjoy offline cooking.');
+    });
+
+    function handleInstallTrigger() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult && choiceResult.outcome === 'accepted') {
+            showToast('Installing Creami Cravings...');
+          }
+          deferredPrompt = null;
+          if (btnInstall) btnInstall.style.display = 'none';
+        });
+      } else if (isIosDevice) {
+        if (iosModal) {
+          iosModal.classList.add('active');
+          iosModal.setAttribute('aria-hidden', 'false');
+          lockBackgroundScroll();
+        }
+      } else {
+        showToast('💡 Creami Cravings is installable! Click the install/download icon in your browser URL bar.');
+      }
+    }
+
+    if (btnInstall) {
+      btnInstall.addEventListener('click', handleInstallTrigger);
+    }
+    if (footerInstall) {
+      footerInstall.addEventListener('click', handleInstallTrigger);
+    }
+    if (iosClose) {
+      iosClose.addEventListener('click', () => {
+        if (iosModal) {
+          iosModal.classList.remove('active');
+          iosModal.setAttribute('aria-hidden', 'true');
+          unlockBackgroundScroll();
+        }
+      });
+    }
+    if (iosDismiss) {
+      iosDismiss.addEventListener('click', () => {
+        if (iosModal) {
+          iosModal.classList.remove('active');
+          iosModal.setAttribute('aria-hidden', 'true');
+          unlockBackgroundScroll();
+        }
+      });
+    }
+    if (iosModal) {
+      iosModal.addEventListener('click', (e) => {
+        if (e.target === iosModal) {
+          iosModal.classList.remove('active');
+          iosModal.setAttribute('aria-hidden', 'true');
+          unlockBackgroundScroll();
+        }
+      });
+    }
+  }
+
+  // --- Kitchen Data Backup & Restore Engine (Roadmap Item 20) ---
+  function openBackupModal() {
+    const backupModal = document.getElementById('backupModalOverlay');
+    if (backupModal) {
+      backupModal.classList.add('active');
+      backupModal.setAttribute('aria-hidden', 'false');
+      lockBackgroundScroll();
+    }
+  }
+
+  function closeBackupModal() {
+    const backupModal = document.getElementById('backupModalOverlay');
+    if (backupModal) {
+      backupModal.classList.remove('active');
+      backupModal.setAttribute('aria-hidden', 'true');
+      unlockBackgroundScroll();
+    }
+  }
+
+  function downloadKitchenBackup() {
+    try {
+      const backupData = {
+        app: 'Creami Cravings',
+        schemaVersion: '1.2',
+        exportedAt: new Date().toISOString(),
+        pantry: Array.from(pantryState),
+        favorites: Array.from(favoritesState),
+        customRecipes: customRecipesState,
+        freezerPints: freezerPintsState,
+        recipeRatings: userRecipeData,
+        recipeMadeCounts: recipeMadeCounts,
+        manualShoppingList: Array.from(manualShoppingList),
+        macroFilters: macroFilters,
+        soundEnabled: soundEnabled,
+        theme: localStorage.getItem(THEME_STORAGE_KEY) || 'dark'
+      };
+
+      const jsonStr = JSON.stringify(backupData, null, 2);
+      const blob = new Blob([jsonStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const dateSlug = new Date().toISOString().split('T')[0];
+      a.href = url;
+      a.download = `creami-cravings-backup-${dateSlug}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      playAudioSuccess();
+      triggerHaptic(25);
+      showToast('📥 Kitchen backup downloaded successfully!');
+    } catch (err) {
+      console.error('Backup download error:', err);
+      showToast('⚠️ Failed to generate backup file.');
+    }
+  }
+
+  function restoreKitchenBackup(file, mode = 'merge') {
+    if (!file) {
+      showToast('Please select a valid .json backup file.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (!data || typeof data !== 'object') {
+          throw new Error('Invalid JSON structure');
+        }
+
+        if (mode === 'replace') {
+          // Replace pantry
+          if (Array.isArray(data.pantry)) {
+            pantryState = new Set(data.pantry);
+          }
+          // Replace favorites
+          if (Array.isArray(data.favorites)) {
+            favoritesState = new Set(data.favorites);
+          }
+          // Replace custom recipes
+          if (Array.isArray(data.customRecipes)) {
+            customRecipesState = data.customRecipes;
+          }
+          // Replace freezer pints
+          if (Array.isArray(data.freezerPints)) {
+            freezerPintsState = data.freezerPints;
+          }
+          // Replace ratings & notes
+          if (data.recipeRatings && typeof data.recipeRatings === 'object') {
+            userRecipeData = data.recipeRatings;
+          }
+          // Replace batch counts
+          if (data.recipeMadeCounts && typeof data.recipeMadeCounts === 'object') {
+            recipeMadeCounts = data.recipeMadeCounts;
+          }
+          // Replace manual shopping list
+          if (Array.isArray(data.manualShoppingList)) {
+            manualShoppingList = new Set(data.manualShoppingList);
+          }
+        } else {
+          // Merge mode
+          if (Array.isArray(data.pantry)) {
+            data.pantry.forEach(id => pantryState.add(id));
+          }
+          if (Array.isArray(data.favorites)) {
+            data.favorites.forEach(id => favoritesState.add(id));
+          }
+          if (Array.isArray(data.customRecipes)) {
+            data.customRecipes.forEach(incoming => {
+              const existingIdx = customRecipesState.findIndex(r => r.name && incoming.name && r.name.toLowerCase() === incoming.name.toLowerCase());
+              if (existingIdx >= 0) {
+                customRecipesState[existingIdx] = incoming;
+              } else {
+                customRecipesState.push(incoming);
+              }
+            });
+          }
+          if (Array.isArray(data.freezerPints)) {
+            data.freezerPints.forEach(incoming => {
+              if (!freezerPintsState.some(p => p.id === incoming.id)) {
+                freezerPintsState.push(incoming);
+              }
+            });
+          }
+          if (data.recipeRatings && typeof data.recipeRatings === 'object') {
+            Object.assign(userRecipeData, data.recipeRatings);
+          }
+          if (data.recipeMadeCounts && typeof data.recipeMadeCounts === 'object') {
+            Object.entries(data.recipeMadeCounts).forEach(([k, v]) => {
+              recipeMadeCounts[k] = Math.max(recipeMadeCounts[k] || 0, v);
+            });
+          }
+          if (Array.isArray(data.manualShoppingList)) {
+            data.manualShoppingList.forEach(item => manualShoppingList.add(item));
+          }
+        }
+
+        // Save all back to storage
+        savePantry();
+        saveFavorites();
+        saveCustomRecipes();
+        saveFreezerPints();
+        saveUserRecipeData();
+        saveRecipeMadeCounts();
+        saveManualShoppingList();
+
+        // Refresh calculations and UI
+        mergeRecipes();
+        calculateIngredientUsage();
+        renderPantryList();
+        renderRecipes();
+        updateFreezerBadges();
+        updateShoppingListBadge();
+        triggerCloudSync();
+
+        playAudioSuccess();
+        triggerHaptic([30, 50, 40]);
+        closeBackupModal();
+        showToast(`🎉 Kitchen data restored (${mode === 'merge' ? 'merged' : 'replaced'}) successfully!`);
+      } catch (err) {
+        console.error('Backup restore error:', err);
+        showToast('⚠️ Could not restore: file is not a valid Creami Cravings backup.');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function resetAllKitchenData() {
+    if (!window.confirm('⚠️ Are you sure you want to reset all kitchen data?\n\nThis will clear your custom recipes, pantry checkmarks, freezer inventory, and ratings.\n(Default built-in recipes will remain intact).')) {
+      return;
+    }
+
+    localStorage.removeItem(PANTRY_STORAGE_KEY);
+    localStorage.removeItem(FAVORITES_STORAGE_KEY);
+    localStorage.removeItem(CUSTOM_RECIPES_STORAGE_KEY);
+    localStorage.removeItem(FREEZER_STORAGE_KEY);
+    localStorage.removeItem(USER_RECIPE_DATA_KEY);
+    localStorage.removeItem(RECIPE_MADE_STORAGE_KEY);
+    localStorage.removeItem(MANUAL_SHOPPING_STORAGE_KEY);
+
+    pantryState = new Set(DEFAULT_STAPLES);
+    favoritesState = new Set();
+    customRecipesState = [];
+    freezerPintsState = [];
+    userRecipeData = {};
+    recipeMadeCounts = {};
+    manualShoppingList = new Set();
+
+    savePantry();
+    saveFavorites();
+    saveCustomRecipes();
+    saveFreezerPints();
+    saveUserRecipeData();
+    saveRecipeMadeCounts();
+    saveManualShoppingList();
+
+    mergeRecipes();
+    calculateIngredientUsage();
+    renderPantryList();
+    renderRecipes();
+    updateFreezerBadges();
+    updateShoppingListBadge();
+    triggerCloudSync();
+
+    closeBackupModal();
+    showToast('Kitchen data reset to factory defaults.');
   }
 
   // Run on DOM Ready
