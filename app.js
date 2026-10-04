@@ -4325,7 +4325,7 @@
           <span style="font-size: 1.3rem;">${match.isReady ? '🎉' : '🛒'}</span>
           <div style="flex: 1;">
             <strong>${match.isReady ? 'You have all ingredients ready!' : `Missing ${match.missing.length} item${match.missing.length > 1 ? 's' : ''}:`}</strong>
-            <div>${match.isReady ? 'Blend up your base, freeze solid for 16-24 hrs, and get spinning!' : match.missing.map(m => m.name).join(', ')}</div>
+            <div class="missing-items-text">${match.isReady ? 'Blend up your base, freeze solid for 16-24 hrs, and get spinning!' : match.missing.map(m => sanitizeShoppingItemName(m.name)).join(', ')}</div>
             ${!match.isReady && match.missing.length > 0 ? `
               <button class="btn-add-all-missing" id="btnAddAllMissingBtn">🛒 Add All Missing to Grocery List</button>
             ` : ''}
@@ -4625,7 +4625,10 @@
         const inPantry = isItemInPantry(ingId);
         btn.className = `modal-ing-toggle-btn ${inPantry ? 'in-pantry' : ''}`;
         btn.textContent = inPantry ? '✓ In Pantry' : '+ In Stock';
-        btn.closest('.modal-ing-row').className = `modal-ing-row ${inPantry ? 'in-pantry' : ''}`;
+        const row = btn.closest('.modal-ing-row');
+        if (row) {
+          row.classList.toggle('in-pantry', inPantry);
+        }
         
         // Refresh missing callout
         const newMatch = computeRecipeMatch(recipe);
@@ -4636,7 +4639,7 @@
             <span style="font-size: 1.3rem;">${newMatch.isReady ? '🎉' : '🛒'}</span>
             <div style="flex: 1;">
               <strong>${newMatch.isReady ? 'You have all ingredients ready!' : `Missing ${newMatch.missing.length} item${newMatch.missing.length > 1 ? 's' : ''}:`}</strong>
-              <div>${newMatch.isReady ? 'Blend up your base, freeze solid for 16-24 hrs, and get spinning!' : newMatch.missing.map(m => sanitizeShoppingItemName(m.name)).join(', ')}</div>
+              <div class="missing-items-text">${newMatch.isReady ? 'Blend up your base, freeze solid for 16-24 hrs, and get spinning!' : newMatch.missing.map(m => sanitizeShoppingItemName(m.name)).join(', ')}</div>
               ${!newMatch.isReady && newMatch.missing.length > 0 ? `
                 <button class="btn-add-all-missing" id="btnAddAllMissingBtn">🛒 Add All Missing to Grocery List</button>
               ` : ''}
@@ -4962,6 +4965,11 @@
     }
   }
 
+  function formatSubText(text) {
+    if (!text) return '';
+    return text.toLowerCase().replace(/(?:^|\s)\S/g, a => a.toUpperCase());
+  }
+
   function renderModalIngredientRow(ing, recipe) {
     const rec = recipe || currentModalRecipe;
     const cleanName = sanitizeShoppingItemName(ing.name);
@@ -4975,25 +4983,34 @@
     const swapData = getSwapsForIngredient(ing);
     const swapCount = swapData ? swapData.options.length : 0;
 
+    let displayNotes = ing.notes || '';
+    if (subText && displayNotes) {
+      const escapedSub = subText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      displayNotes = displayNotes.replace(new RegExp(`(?:;\\s*)?\\bOR\\s+${escapedSub}\\b`, 'i'), '').trim();
+      displayNotes = displayNotes.replace(/^;\s*|;\s*$/g, '').trim();
+    }
+
     if (activeSwap) {
       return `
         <div class="modal-ing-row ${inPantry ? 'in-pantry' : ''} is-swapped">
-          <div class="modal-ing-info">
-            <div class="modal-ing-name">
-              <span style="text-decoration: line-through; opacity: 0.55; font-size: 0.88em; margin-right: 6px;">${cleanName}</span>
-              <span style="color: #c084fc; font-weight: 700;">🔄 ${activeSwap.name}</span>
+          <div class="modal-ing-main">
+            <div class="modal-ing-info">
+              <div class="modal-ing-name">
+                <span style="text-decoration: line-through; opacity: 0.55; font-size: 0.88em; margin-right: 6px;">${cleanName}</span>
+                <span style="color: #c084fc; font-weight: 700;">🔄 ${activeSwap.name}</span>
+              </div>
+              <div class="ing-active-swap-pill">
+                <span>Ratio: ${activeSwap.ratio}</span>
+                <button type="button" class="btn-ing-revert-swap" data-ing-name="${cleanName}" title="Revert to original ingredient">Revert</button>
+              </div>
+              ${displayNotes ? `<div class="modal-ing-notes">${displayNotes}</div>` : ''}
             </div>
-            <div class="ing-active-swap-pill">
-              <span>Ratio: ${activeSwap.ratio}</span>
-              <button type="button" class="btn-ing-revert-swap" data-ing-name="${cleanName}" title="Revert to original ingredient">Revert</button>
-            </div>
-            ${ing.notes ? `<div class="modal-ing-notes">${ing.notes}</div>` : ''}
-          </div>
-          <div class="modal-ing-right-group">
             <div class="modal-ing-amount-box" title="${modalScale > 1 ? 'Scaled Deluxe (1.5×) amount' : 'Standard amount'}">
               <span class="modal-ing-amount-label">${modalScale > 1 ? 'Deluxe Amt' : 'Amount'}</span>
               <span class="modal-ing-amount-val ${!amountText ? 'empty' : ''}">${amountText || 'As needed'}</span>
             </div>
+          </div>
+          <div class="modal-ing-actions">
             <button type="button" class="ing-swap-badge active-swap" data-ing-name="${cleanName}" title="Modify substitution">
               🔄 Swapped
             </button>
@@ -5010,16 +5027,18 @@
 
     return `
       <div class="modal-ing-row ${inPantry ? 'in-pantry' : ''}">
-        <div class="modal-ing-info">
-          <div class="modal-ing-name">${cleanName}</div>
-          ${subText ? `<div class="ing-sub-chip">💡 Swap: ${subText}</div>` : ''}
-          ${ing.notes ? `<div class="modal-ing-notes">${ing.notes}</div>` : ''}
-        </div>
-        <div class="modal-ing-right-group">
+        <div class="modal-ing-main">
+          <div class="modal-ing-info">
+            <div class="modal-ing-name">${cleanName}</div>
+            ${subText ? `<div class="ing-sub-chip" title="Click to explore substitutions">💡 Swap: ${formatSubText(subText)}</div>` : ''}
+            ${displayNotes ? `<div class="modal-ing-notes">${displayNotes}</div>` : ''}
+          </div>
           <div class="modal-ing-amount-box" title="${modalScale > 1 ? 'Scaled Deluxe (1.5×) amount' : 'Standard amount'}">
             <span class="modal-ing-amount-label">${modalScale > 1 ? 'Deluxe Amt' : 'Amount'}</span>
             <span class="modal-ing-amount-val ${!amountText ? 'empty' : ''}">${amountText || 'As needed'}</span>
           </div>
+        </div>
+        <div class="modal-ing-actions">
           ${(swapCount > 0 || subText) ? `
             <button type="button" class="ing-swap-badge" data-ing-name="${cleanName}" title="Explore ${swapCount || 1} tested substitutions for Ninja Creami">
               🔄 Swap ${swapCount > 0 ? `(${swapCount})` : ''}

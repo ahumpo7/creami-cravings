@@ -1501,6 +1501,8 @@ body.modal-open {
   border-radius: var(--radius-md);
   gap: 14px;
   transition: background-color 0.2s ease, border-color 0.2s ease;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .modal-ing-row:hover {
@@ -1510,6 +1512,14 @@ body.modal-open {
 .modal-ing-row.in-pantry {
   background: rgba(16, 185, 129, 0.08);
   border-color: rgba(16, 185, 129, 0.22);
+}
+
+.modal-ing-main {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
 }
 
 .modal-ing-info {
@@ -1525,19 +1535,14 @@ body.modal-open {
   font-size: 0.96rem;
   color: var(--text-main);
   line-height: 1.3;
+  word-break: break-word;
 }
 
 .modal-ing-notes {
   font-size: 0.78rem;
   color: var(--text-muted);
   line-height: 1.25;
-}
-
-.modal-ing-right-group {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-shrink: 0;
+  word-break: break-word;
 }
 
 .modal-ing-amount-box {
@@ -1549,8 +1554,10 @@ body.modal-open {
   background: var(--bg-glass);
   border: 1px solid var(--border-glass);
   border-radius: var(--radius-sm);
-  min-width: 84px;
+  min-width: 80px;
   text-align: right;
+  flex-shrink: 0;
+  box-sizing: border-box;
   transition: border-color 0.2s ease, background 0.2s ease;
 }
 
@@ -1587,9 +1594,30 @@ body.modal-open {
   color: var(--text-checked);
 }
 
+/* Actions Toolbar */
+.modal-ing-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Legacy group fallback */
+.modal-ing-right-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
 .modal-ing-toggle-btn {
-  padding: 6px 14px;
-  font-size: 0.78rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px 12px;
+  font-size: 0.76rem;
   font-weight: 700;
   border-radius: 999px;
   border: 1px solid var(--border-glass);
@@ -1598,6 +1626,8 @@ body.modal-open {
   cursor: pointer;
   transition: all 0.15s ease;
   white-space: nowrap;
+  box-sizing: border-box;
+  min-height: 30px;
 }
 
 .modal-ing-toggle-btn:hover {
@@ -1616,16 +1646,44 @@ body.modal-open {
   border-color: #059669;
 }
 
-@media (max-width: 520px) {
+@media (max-width: 600px) {
   .modal-ing-row {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+    align-items: stretch;
+    gap: 10px;
+    padding: 10px 12px;
   }
   
+  .modal-ing-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .modal-ing-amount-box {
+    min-width: 72px;
+    padding: 4px 10px;
+  }
+
+  .modal-ing-actions {
+    width: 100%;
+    justify-content: flex-end;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .modal-ing-actions > * {
+    flex: 0 0 auto;
+    max-width: 100%;
+  }
+
   .modal-ing-right-group {
     width: 100%;
     justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
   }
 }
 
@@ -1684,8 +1742,10 @@ body.modal-open {
   border-radius: var(--radius-md);
   margin-bottom: 20px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .missing-items-callout.all-ready {
@@ -1698,6 +1758,14 @@ body.modal-open {
   background: rgba(245, 158, 11, 0.15);
   border: 1px solid rgba(245, 158, 11, 0.35);
   color: #fbbf24;
+}
+
+.missing-items-text {
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+  margin: 3px 0 8px;
+  word-break: break-word;
 }
 
 /* Buttons */
@@ -2325,22 +2393,37 @@ body.modal-open .cookie-consent-banner {
 .ing-sub-chip {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  align-self: flex-start;
+  width: fit-content;
+  max-width: 100%;
+  gap: 5px;
   font-size: 0.72rem;
   font-weight: 600;
   color: #fbbf24;
-  background: rgba(251, 191, 36, 0.1);
-  border: 1px solid rgba(251, 191, 36, 0.25);
-  padding: 2px 7px;
+  background: rgba(251, 191, 36, 0.12);
+  border: 1px solid rgba(251, 191, 36, 0.32);
+  padding: 3px 8px;
   border-radius: 6px;
   margin-top: 3px;
-  line-height: 1.2;
+  line-height: 1.25;
+  box-sizing: border-box;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ing-sub-chip:hover {
+  background: rgba(251, 191, 36, 0.22);
+  border-color: rgba(251, 191, 36, 0.5);
 }
 
 /* One-Click Grocery Button in Modal Ingredient Row */
 .modal-ing-shop-btn {
-  padding: 6px 10px;
-  font-size: 0.78rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px 11px;
+  font-size: 0.76rem;
   font-weight: 700;
   border-radius: 999px;
   border: 1px solid var(--border-glass);
@@ -2349,6 +2432,8 @@ body.modal-open .cookie-consent-banner {
   cursor: pointer;
   transition: all 0.15s ease;
   white-space: nowrap;
+  box-sizing: border-box;
+  min-height: 30px;
 }
 
 .modal-ing-shop-btn:hover {
@@ -2365,21 +2450,27 @@ body.modal-open .cookie-consent-banner {
 
 /* Add All Missing Button in Missing Callout */
 .btn-add-all-missing {
-  padding: 4px 10px;
+  padding: 6px 14px;
   font-size: 0.78rem;
   font-weight: 700;
-  border-radius: var(--radius-sm);
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid var(--border-glass);
-  color: inherit;
+  border-radius: 999px;
+  background: rgba(245, 158, 11, 0.18);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #fbbf24;
   cursor: pointer;
-  margin-top: 6px;
-  display: inline-block;
+  margin-top: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   transition: all 0.15s ease;
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
 .btn-add-all-missing:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(245, 158, 11, 0.3);
+  border-color: #f59e0b;
+  color: #ffffff;
 }
 
 /* ==========================================================================
@@ -4416,6 +4507,7 @@ body.modal-open .cookie-consent-banner {
     border-right: none;
     border-bottom: none;
     overflow-y: auto;
+    overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
   }
@@ -5282,18 +5374,21 @@ body.modal-open .cookie-consent-banner {
 .ing-swap-badge {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 4px;
   background: rgba(168, 85, 247, 0.12);
   border: 1px solid rgba(168, 85, 247, 0.35);
   color: #c084fc;
-  font-size: 0.72rem;
+  font-size: 0.76rem;
   font-weight: 700;
   cursor: pointer;
-  padding: 2px 8px;
+  padding: 6px 11px;
   border-radius: 999px;
   transition: all 0.18s ease;
   white-space: nowrap;
   user-select: none;
+  box-sizing: border-box;
+  min-height: 30px;
 }
 
 .ing-swap-badge:hover {
