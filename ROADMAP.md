@@ -119,22 +119,25 @@ A prioritized checklist of fixes, features, and refinements for the Creami Cravi
 - [ ] **Privacy Policy Page:** Deploy a clean, minimal `/privacy.html` compliance page on Render required by Google Play Console policies.
 - [ ] **Over-The-Air (OTA) Sync:** Verify that web app changes pushed to GitHub automatically reflect inside the installed Android app without requiring new Play Store binary submissions.
 
-### 15. 👥 User Management & Tiered Recipe Access (Admin Portal & Gated Categories)
-- [ ] **Admin Account & Roles:**
-  - Designate admin account(s) by verified Google email in server config.
-  - Automatically grant admin privileges upon signing in with that verified Google email.
-- [ ] **User Directory & Permissions Store (`db_users.json`):**
-  - Track all registered users who sign in with Google (email, name, avatar, date joined, role, allowed categories).
-  - Configurable default access tier for new sign-ups (e.g. "Fan Favorites" pack enabled by default).
-- [ ] **Admin Dashboard / Management Portal:**
-  - Admin-only management portal accessible exclusively to designated admin accounts.
-  - Searchable user table displaying all registered users, last active date, and current category access.
-  - 1-click category permission toggles per user (e.g. grant/revoke "Keto", "No Protein Powder", "Lactose-Free", "Fan Favorites", or "Full All-Access Pass").
-- [ ] **Recipe Gating & Lock UI:**
+### 15. 👥 User Management & Tiered Recipe Access (Admin Portal & Gated Categories) (Completed ✅)
+- [x] **Admin Account & Roles:**
+  - Designate admin account(s) by verified Google email in server config (`ADMIN_EMAILS` env var or defaults including `admin@creamicravings.com`, `ahumpo7@gmail.com`, `ahumpo@gmail.com`, `andrew@gmail.com`).
+  - Automatically grant admin privileges upon signing in with that verified Google email, with protected root accounts preventing accidental deletion or demotion.
+- [x] **User Directory & Permissions Store (`db_users.json`):**
+  - Track all registered users who sign in with Google (email, name, avatar, date joined, role, allowed categories, custom pint counts, and spin totals).
+  - Configurable default access tier for new sign-ups (free universal "Fan Favorites" pack enabled by default).
+- [x] **Admin Dashboard / Management Portal:**
+  - Admin-only management portal (`#adminModalOverlay`) accessible exclusively to designated admin accounts via the `👑 Admin Portal` header button.
+  - Searchable user table displaying all registered users, last active date, pantry counts, and current category access.
+  - Quick summary stat counters: Total Users, Total Admins, and Active All-Access Passes.
+  - 1-click category permission toggles per user (grant/revoke "⭐ Fan Favorites", "🥑 Keto", "💪 No Protein", "🥛 Lactose Free", or "👑 All-Access Pass").
+  - Role switcher (Admin $\leftrightarrow$ Standard User) with automatic protection of root administrator accounts.
+  - User deletion modal action with confirmation safety dialog.
+- [x] **Recipe Gating & Lock UI:**
   - Recipe cards check the authenticated user's assigned permissions against recipe category tags.
-  - Gated recipe cards display a sleek lock indicator (e.g. `🔒 Keto Pack Required`).
-  - Opening a locked recipe presents a teaser card with a friendly "Locked Recipe — Contact Admin / Upgrade Access" prompt instead of full instructions.
-  - Quick filter toggle to "Show Only My Accessible Recipes" or preview all available recipes.
+  - Gated recipe cards display a sleek lock indicator (e.g. `🔒 Keto Pack`, `🔒 No Protein Pack`, `🔒 Lactose Free Pack`).
+  - Opening a locked recipe presents an engaging teaser card with user account status and sign-in / request access prompts instead of revealing full secret ingredients and instructions.
+  - Quick filter toggle (`🔒 Unlocked Only`) allowing users to easily hide locked recipes or preview the entire cookbook catalog.
 
 ### 16. 🔄 1-Tap Smart Ingredient Substitutions ("What Can I Swap?") (Completed ✅)
 - [x] **Modal Swap Inspector:** Tapping or clicking any ingredient row or its `🔄 Swap (count)` badge in the Recipe Detail modal opens the Smart Swap Inspector (`#swapModalOverlay`).

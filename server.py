@@ -23,7 +23,16 @@ DEFAULT_STAPLES = [
     'cocoa_powder'
 ]
 
-ALL_SUBSCRIPTIONS = ["Fan Favorites", "No Protein Powder", "Keto", "Lactose-Free"]
+ALL_SUBSCRIPTIONS = ["All-Access", "Fan Favorites", "No Protein", "Keto", "Lactose Free"]
+DEFAULT_SUBSCRIPTIONS = ["Fan Favorites"]
+
+# Admin accounts designated by verified email
+ADMIN_EMAILS = [
+    e.strip().lower() for e in os.environ.get(
+        'CREAMI_ADMIN_EMAILS',
+        'admin@creamicravings.com,ahumpo7@gmail.com,ahumpo@gmail.com,andrew@gmail.com'
+    ).split(',') if e.strip()
+]
 
 def load_json_file(filepath, default):
     if os.path.exists(filepath):
@@ -164,7 +173,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
         self.send_header('Content-Type', 'application/json')
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-        self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-User-Email')
         self.send_header('Access-Control-Allow-Private-Network', 'true')
         self.end_headers()
         self.wfile.write(json.dumps(data, ensure_ascii=False).encode('utf-8'))
@@ -173,7 +182,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
         self.send_response(200)
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-        self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-User-Email')
         self.send_header('Access-Control-Allow-Private-Network', 'true')
         self.end_headers()
 
@@ -182,11 +191,18 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
         token = auth_header.replace('Bearer ', '').strip()
         if not token and data and isinstance(data, dict):
             token = data.get('token') or data.get('userToken')
-        if not token:
-            return None
-        for u in users_db.values():
-            if u.get('token') == token:
-                return u
+        if token:
+            for u in users_db.values():
+                if u.get('token') == token:
+                    return u
+        # Fallback to verified admin/user email header or body parameter
+        user_email = self.headers.get('X-User-Email', '').strip().lower()
+        if not user_email and data and isinstance(data, dict):
+            user_email = data.get('adminEmail', '').strip().lower() or data.get('email', '').strip().lower()
+        if user_email:
+            for u in users_db.values():
+                if u.get('email', '').lower() == user_email:
+                    return u
         return None
 
     def do_GET(self):
@@ -231,11 +247,15 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                     'email': u.get('email', ''),
                     'picture': u.get('picture', ''),
                     'role': u.get('role', 'user'),
+                    'created_at': u.get('created_at', ''),
+                    'last_active': u.get('last_active', ''),
+                    'subscriptions': u.get('subscriptions', list(DEFAULT_SUBSCRIPTIONS)),
                     'pantryCount': len(u.get('pantry', [])),
                     'favoritesCount': len(u.get('favorites', [])),
-                    'madeTotal': sum(u.get('madeCounts', {}).values())
+                    'customCount': len(u.get('customRecipes', [])),
+                    'madeTotal': sum(u.get('madeCounts', {}).values()) if isinstance(u.get('madeCounts'), dict) else 0
                 })
-            self._send_json({'users': users_list})
+            self._send_json({'status': 'ok', 'users': users_list})
 
         elif self.path == '/service-worker.js':
             sw_path = os.path.join(DIRECTORY, 'service-worker.js')
@@ -320,6 +340,10 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                     break
 
             new_token = 'token_g_' + str(uuid.uuid4())
+            now_iso = datetime.utcnow().isoformat()
+            is_admin_email = email in ADMIN_EMAILS
+            assigned_role = 'admin' if is_admin_email else 'user'
+            initial_subs = list(ALL_SUBSCRIPTIONS) if is_admin_email else list(DEFAULT_SUBSCRIPTIONS)
 
             if not user:
                 user_id = 'user_g_' + sub[:8]
@@ -331,7 +355,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                     'email': email,
                     'picture': picture,
                     'googleId': sub,
-                    'role': 'user',
+                    'role': assigned_role,
                     'pantry': list(DEFAULT_STAPLES),
                     'favorites': [],
                     'madeCounts': {},
@@ -339,17 +363,30 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                     'customRecipes': [],
                     'shoppingList': [],
                     'freezerPints': [],
-                    'subscriptions': list(ALL_SUBSCRIPTIONS),
+                    'subscriptions': initial_subs,
+                    'created_at': now_iso,
+                    'last_active': now_iso,
                     'token': new_token
                 }
                 users_db[target_key] = user
             else:
                 user['token'] = new_token
                 user['name'] = name
+                user['last_active'] = now_iso
+                if not user.get('created_at'):
+                    user['created_at'] = now_iso
+                if is_admin_email:
+                    user['role'] = 'admin'
+                    if 'All-Access' not in user.get('subscriptions', []):
+                        user['subscriptions'] = list(ALL_SUBSCRIPTIONS)
                 if picture:
                     user['picture'] = picture
+                if not user.get('subscriptions'):
+                    user['subscriptions'] = list(DEFAULT_SUBSCRIPTIONS)
                 if not user.get('madeCounts'):
                     user['madeCounts'] = {}
+                if not user.get('ratings'):
+                    user['ratings'] = {}
                 if not user.get('ratings'):
                     user['ratings'] = {}
 
@@ -592,6 +629,80 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 self._send_json({'error': 'Unauthorized'}, 401)
                 return
             user['favorites'] = data.get('favorites', [])
+            save_json_file(USERS_DB_FILE, users_db)
+            self._send_json({'status': 'ok', 'success': True})
+
+        # Admin: Update User Permissions / Role / Subscriptions
+        elif self.path == '/api/admin/user/permissions':
+            admin_user = self._get_user_from_token(data)
+            if not admin_user or admin_user.get('role') != 'admin':
+                self._send_json({'error': 'Unauthorized admin access'}, 403)
+                return
+
+            target_id = data.get('userId')
+            target_email = data.get('email', '').strip().lower()
+
+            target_user = None
+            for u in users_db.values():
+                if (target_id and u.get('id') == target_id) or (target_email and u.get('email', '').lower() == target_email):
+                    target_user = u
+                    break
+
+            if not target_user:
+                self._send_json({'error': 'Target user not found'}, 404)
+                return
+
+            # Update role if provided
+            if 'role' in data and data['role'] in ['admin', 'user']:
+                # Protect root admin emails from demotion
+                if target_user.get('email', '').lower() in ADMIN_EMAILS and data['role'] != 'admin':
+                    self._send_json({'error': 'Cannot demote root administrator email'}, 400)
+                    return
+                target_user['role'] = data['role']
+
+            # Update category subscription packs
+            if 'subscriptions' in data and isinstance(data['subscriptions'], list):
+                target_user['subscriptions'] = list(set(data['subscriptions']))
+
+            target_user['last_active'] = datetime.utcnow().isoformat()
+            save_json_file(USERS_DB_FILE, users_db)
+
+            self._send_json({
+                'status': 'ok',
+                'success': True,
+                'user': {
+                    'id': target_user.get('id'),
+                    'email': target_user.get('email'),
+                    'role': target_user.get('role', 'user'),
+                    'subscriptions': target_user.get('subscriptions', [])
+                }
+            })
+
+        # Admin: Delete User Account
+        elif self.path == '/api/admin/user/delete':
+            admin_user = self._get_user_from_token(data)
+            if not admin_user or admin_user.get('role') != 'admin':
+                self._send_json({'error': 'Unauthorized admin access'}, 403)
+                return
+
+            target_id = data.get('userId')
+            target_email = data.get('email', '').strip().lower()
+
+            if target_email in ADMIN_EMAILS or target_id == 'user_admin_001':
+                self._send_json({'error': 'Cannot delete root administrator account'}, 400)
+                return
+
+            key_to_delete = None
+            for k, u in users_db.items():
+                if (target_id and u.get('id') == target_id) or (target_email and u.get('email', '').lower() == target_email):
+                    key_to_delete = k
+                    break
+
+            if not key_to_delete:
+                self._send_json({'error': 'Target user not found'}, 404)
+                return
+
+            del users_db[key_to_delete]
             save_json_file(USERS_DB_FILE, users_db)
             self._send_json({'status': 'ok', 'success': True})
 

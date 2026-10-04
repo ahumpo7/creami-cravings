@@ -431,6 +431,22 @@
   const swapFocusCard = document.getElementById('swapFocusCard');
   const swapOptionsList = document.getElementById('swapOptionsList');
   
+  // Admin Portal & Gated Access Elements (Roadmap Item 15)
+  const openAdminPortalBtn = document.getElementById('openAdminPortalBtn');
+  const adminModalOverlay = document.getElementById('adminModalOverlay');
+  const adminModalCloseBtn = document.getElementById('adminModalCloseBtn');
+  const adminTotalUsers = document.getElementById('adminTotalUsers');
+  const adminTotalAdmins = document.getElementById('adminTotalAdmins');
+  const adminTotalAllAccess = document.getElementById('adminTotalAllAccess');
+  const adminUserSearchInput = document.getElementById('adminUserSearchInput');
+  const adminRoleFilterPills = document.getElementById('adminRoleFilterPills');
+  const adminRefreshUsersBtn = document.getElementById('adminRefreshUsersBtn');
+  const adminUsersList = document.getElementById('adminUsersList');
+  const filterAccessibleOnly = document.getElementById('filterAccessibleOnly');
+  let adminUsersState = [];
+  let adminFilterRole = 'all';
+  let adminSearchQuery = '';
+
   const themeToggleBtn = document.getElementById('themeToggleBtn');
   const themeToggleLabel = document.getElementById('themeToggleLabel');
   const toastContainer = document.getElementById('toastContainer');
@@ -493,6 +509,19 @@
     if (savedUser) {
       try {
         currentUser = JSON.parse(savedUser);
+        if (currentUser) {
+          const ADMIN_EMAILS = ['admin@creamicravings.com', 'ahumpo7@gmail.com', 'ahumpo@gmail.com', 'andrew@gmail.com'];
+          const userEmail = (currentUser.email || '').toLowerCase();
+          const isAdmin = currentUser.role === 'admin' || ADMIN_EMAILS.includes(userEmail);
+          currentUser.role = isAdmin ? 'admin' : (currentUser.role || 'user');
+          if (!currentUser.subscriptions || !Array.isArray(currentUser.subscriptions)) {
+            currentUser.subscriptions = isAdmin 
+              ? ['All-Access', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free'] 
+              : ['Fan Favorites'];
+          } else if (isAdmin && !currentUser.subscriptions.includes('All-Access')) {
+            currentUser.subscriptions = ['All-Access', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free'];
+          }
+        }
       } catch (e) {
         currentUser = null;
       }
@@ -844,11 +873,19 @@
   }
 
   function applyUserSession(data) {
+    const ADMIN_EMAILS = ['admin@creamicravings.com', 'ahumpo7@gmail.com', 'ahumpo@gmail.com', 'andrew@gmail.com'];
+    const email = (data.user.email || '').toLowerCase();
+    const isAdmin = data.user.role === 'admin' || ADMIN_EMAILS.includes(email);
+
     currentUser = {
       id: data.user.id,
       email: data.user.email,
       name: data.user.name,
       picture: data.user.picture,
+      role: isAdmin ? 'admin' : (data.user.role || 'user'),
+      subscriptions: isAdmin 
+        ? ['All-Access', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free']
+        : (data.user.subscriptions || ['Fan Favorites']),
       token: data.token
     };
     saveUserAuth();
@@ -957,13 +994,86 @@
       if (customTab) {
         customTab.style.display = (customRecipesState.length > 0) ? 'inline-flex' : 'none';
       }
+      if (openAdminPortalBtn) {
+        openAdminPortalBtn.style.display = (currentUser && currentUser.role === 'admin') ? 'inline-flex' : 'none';
+      }
     } else {
       if (signInBtn) signInBtn.style.display = 'inline-flex';
       if (profileWidget) profileWidget.style.display = 'none';
       // Hide + Custom Recipe button when signed out
       if (customActions) customActions.style.display = 'none';
       if (customTab) customTab.style.display = 'none';
+      if (openAdminPortalBtn) {
+        openAdminPortalBtn.style.display = 'none';
+      }
     }
+  }
+
+  // --- Tiered Recipe Access & Gating Helpers (Roadmap Item 15) ---
+  function normalizeCategoryName(cat) {
+    if (!cat) return '';
+    return String(cat).toLowerCase().replace(/[^a-z0-9]/g, '');
+  }
+
+  function getRecipeRequiredTier(recipe) {
+    if (!recipe) return 'Fan Favorites';
+    if (recipe.category === 'Custom' || recipe.isPersonal || (recipe.id && recipe.id.startsWith('custom_'))) {
+      return 'Custom';
+    }
+    const cats = (recipe.categories && recipe.categories.length > 0)
+      ? recipe.categories
+      : [recipe.category || 'Fan Favorites'];
+
+    // Universal free starter tier: Fan Favorites is accessible to all
+    if (cats.some(c => normalizeCategoryName(c).includes('fanfav'))) {
+      return 'Fan Favorites';
+    }
+
+    for (const c of cats) {
+      const norm = normalizeCategoryName(c);
+      if (norm.includes('keto')) return 'Keto';
+      if (norm.includes('lactose')) return 'Lactose Free';
+      if (norm.includes('noprot')) return 'No Protein';
+    }
+    return cats[0] || 'Fan Favorites';
+  }
+
+  function isRecipeAccessible(recipe) {
+    if (!recipe) return true;
+    if (recipe.category === 'Custom' || recipe.isPersonal || (recipe.id && recipe.id.startsWith('custom_'))) {
+      return true;
+    }
+
+    const cats = (recipe.categories && recipe.categories.length > 0)
+      ? recipe.categories
+      : [recipe.category || 'Fan Favorites'];
+
+    // Universal free starter tier: Fan Favorites is always accessible to everyone
+    if (cats.some(c => normalizeCategoryName(c).includes('fanfav'))) {
+      return true;
+    }
+
+    // Admins have all-access
+    if (currentUser && currentUser.role === 'admin') {
+      return true;
+    }
+
+    const subs = (currentUser && Array.isArray(currentUser.subscriptions))
+      ? currentUser.subscriptions
+      : ['Fan Favorites'];
+
+    if (subs.includes('All-Access')) {
+      return true;
+    }
+
+    // Check if any category of the recipe matches an active subscription
+    return cats.some(c => {
+      const normC = normalizeCategoryName(c);
+      return subs.some(s => {
+        const normS = normalizeCategoryName(s);
+        return normS.includes(normC) || normC.includes(normS);
+      });
+    });
   }
 
   // --- Modal Scroll & Overscroll Containment Helpers ---
@@ -1536,6 +1646,9 @@
 
     // Apply active category and filter toggles
     let filtered = scoredRecipes.filter(({ recipe, match }) => {
+      // Unlocked / Accessible Only filter (Roadmap Item 15)
+      if (filterAccessibleOnly && filterAccessibleOnly.checked && !isRecipeAccessible(recipe)) return false;
+
       // Category filter
       if (activeCategory === 'favorites') {
         if (!favoritesState.has(recipe.id)) return false;
@@ -1648,6 +1761,7 @@
     // Update Results Summary & Active Hint
     resultsSummary.textContent = `Showing ${filtered.length} of ${allRecipes.length} recipes`;
     const hintParts = [];
+    if (filterAccessibleOnly && filterAccessibleOnly.checked) hintParts.push('🔒 Unlocked Only');
     if (readyOnlyFilter) hintParts.push('⚡ 100% Ready to Make');
     if (baseOnlyFilter) hintParts.push('🥣 Base Ready to Freeze');
     if (activeQuickFilter === 'high_protein') hintParts.push('💪 High Protein (≥35g)');
@@ -1702,7 +1816,29 @@
   }
 
   function updateRecipeCard(card, recipe, match) {
-    card.className = `recipe-card ${match.isReady ? 'ready-to-make' : ''}`;
+    const isAccessible = isRecipeAccessible(recipe);
+    card.className = `recipe-card ${match.isReady ? 'ready-to-make' : ''} ${!isAccessible ? 'locked' : ''}`;
+
+    const viewBtn = card.querySelector('.btn-view-recipe');
+    if (viewBtn) {
+      viewBtn.textContent = isAccessible ? 'View Recipe' : '🔒 Locked Preview';
+    }
+
+    // Update Locked Badge
+    const bookTags = card.querySelector('.card-book-tags');
+    let lockedBadge = card.querySelector('.locked-badge');
+    if (!isAccessible) {
+      const requiredTier = getRecipeRequiredTier(recipe);
+      if (!lockedBadge && bookTags) {
+        const badge = document.createElement('span');
+        badge.className = 'locked-badge';
+        badge.title = `Exclusive ${requiredTier} pack`;
+        badge.textContent = `🔒 ${requiredTier} Pack`;
+        bookTags.appendChild(badge);
+      }
+    } else if (lockedBadge) {
+      lockedBadge.remove();
+    }
 
     // Update Favorite Button
     const favBtn = card.querySelector('.favorite-btn');
@@ -1810,8 +1946,10 @@
   }
 
   function createRecipeCard(recipe, match) {
+    const isAccessible = isRecipeAccessible(recipe);
+    const requiredTier = getRecipeRequiredTier(recipe);
     const card = document.createElement('div');
-    card.className = `recipe-card ${match.isReady ? 'ready-to-make' : ''}`;
+    card.className = `recipe-card ${match.isReady ? 'ready-to-make' : ''} ${!isAccessible ? 'locked' : ''}`;
     card.dataset.id = recipe.id;
 
     const isFav = favoritesState.has(recipe.id);
@@ -1850,6 +1988,7 @@
         <div class="recipe-card-top">
           <div class="card-book-tags">
             ${isPersonal ? `<span class="book-tag custom" title="Personal custom recipe saved to your Google account">🔒 Personal Recipe</span>` : categories.map(c => `<span class="book-tag ${getCategoryClass(c)}">${c}</span>`).join('')}
+            ${!isAccessible ? `<span class="locked-badge" title="Exclusive ${requiredTier} pack">🔒 ${requiredTier} Pack</span>` : ''}
             ${recipe.creaminessScore ? `<span class="recipe-creaminess-badge" title="Build-A-Pint Creaminess Score">🧪 ${recipe.creaminessScore}/10</span>` : ''}
           </div>
           <div class="card-actions-top">
@@ -1918,7 +2057,7 @@
 
       <div class="recipe-card-bottom">
         <span class="spin-tag" title="Recommended spin cycle">🌀 ${recipe.spinSetting || 'Lite Ice Cream'}</span>
-        <button class="btn-view-recipe">View Recipe</button>
+        <button class="btn-view-recipe">${isAccessible ? 'View Recipe' : '🔒 Locked Preview'}</button>
       </div>
     `;
 
@@ -3728,6 +3867,8 @@
     const match = computeRecipeMatch(recipe);
     const catClass = getCategoryClass(recipe.category);
     const isFav = favoritesState.has(recipe.id);
+    const isAccessible = isRecipeAccessible(recipe);
+    const requiredTier = getRecipeRequiredTier(recipe);
 
     const baseIngs = (recipe.ingredients || []).filter(i => !i.isMixin);
     const mixinIngs = (recipe.ingredients || []).filter(i => i.isMixin);
@@ -3766,6 +3907,7 @@
           ${isPersonal ? `<span class="book-tag custom">🔒 Personal Recipe</span>` : (recipe.categories && recipe.categories.length > 0 ? recipe.categories : [recipe.category]).map(cat => {
             return `<span class="book-tag ${getCategoryClass(cat)}">${cat}</span>`;
           }).join('')}
+          ${!isAccessible ? `<span class="locked-badge" title="Exclusive ${requiredTier} tier recipe pack">🔒 ${requiredTier} Pack</span>` : ''}
           ${recipe.creaminessScore ? `<span class="book-tag" style="background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.4); color: #34d399;">🧪 Creaminess: ${recipe.creaminessScore}/10 (${recipe.creaminessGrade || 'Balanced'})</span>` : ''}
           <span class="book-tag">🌀 ${recipe.spinSetting || 'Lite Ice Cream'}</span>
           <span class="book-tag">⏱️ Prep: ${recipe.prepTime || '2 min'}</span>
@@ -3781,7 +3923,7 @@
         ` : ''}
       </div>
 
-      ${pintsInFreezer.length > 0 ? (() => {
+      ${(pintsInFreezer.length > 0 && isAccessible) ? (() => {
         const hasReady = pintsInFreezer.some(p => computePintStatus(p).isReady);
         const topPint = pintsInFreezer[0];
         const topStatus = computePintStatus(topPint);
@@ -3862,208 +4004,242 @@
         </div>
       </div>
 
-      <!-- 1-Tap Macro Clipboard Export (Roadmap Item 10) -->
-      <div class="macro-export-container">
-        <button class="btn-copy-macros" id="btnCopyMacros" title="Copy formatted macros for MyFitnessPal, MacroFactor, or Cronometer">
-          <span>📋</span>
-          <span id="copyMacrosBtnText">Copy Macros for Fitness Tracker</span>
-        </button>
-        <span class="macro-export-hint">✨ Formatted for MyFitnessPal &amp; MacroFactor (${modalScale === 1.5 ? '24 oz Deluxe' : '16 oz Standard'})</span>
-      </div>
-
-      <!-- Missing Items Callout -->
-      <div class="missing-items-callout ${match.isReady ? 'all-ready' : 'has-missing'}">
-        <span style="font-size: 1.3rem;">${match.isReady ? '🎉' : '🛒'}</span>
-        <div style="flex: 1;">
-          <strong>${match.isReady ? 'You have all ingredients ready!' : `Missing ${match.missing.length} item${match.missing.length > 1 ? 's' : ''}:`}</strong>
-          <div>${match.isReady ? 'Blend up your base, freeze solid for 16-24 hrs, and get spinning!' : match.missing.map(m => m.name).join(', ')}</div>
-          ${!match.isReady && match.missing.length > 0 ? `
-            <button class="btn-add-all-missing" id="btnAddAllMissingBtn">🛒 Add All Missing to Grocery List</button>
-          ` : ''}
+      ${!isAccessible ? `
+        <!-- Locked Recipe Teaser Card (Roadmap Item 15) -->
+        <div class="locked-recipe-teaser">
+          <div class="locked-teaser-icon">🔒</div>
+          <div class="locked-teaser-title">Exclusive ${requiredTier} Pack Recipe</div>
+          <p class="locked-teaser-desc">
+            This exclusive recipe is part of the <strong>${requiredTier} Collection</strong>. To unlock full secret ingredient ratios, step-by-step spin instructions, and author pro hacks, sign in with an authorized account or request pack access from your administrator.
+          </p>
+          <div class="locked-user-status">
+            ${currentUser 
+              ? `Signed in as <strong>${currentUser.email}</strong> • Active packs: <em>${(currentUser.subscriptions || ['Fan Favorites']).join(', ')}</em>`
+              : `Currently browsing as <strong>Guest</strong> (Standard Fan Favorites tier)`}
+          </div>
+          <div class="locked-teaser-actions">
+            ${!currentUser ? `
+              <button class="btn-primary" id="btnLockedSignIn">
+                <span>🔑 Sign In to Unlock</span>
+              </button>
+            ` : `
+              <button class="btn-primary" id="btnLockedRequestAccess">
+                <span>✉️ Request ${requiredTier} Pack Access</span>
+              </button>
+              ${currentUser.role === 'admin' ? '' : `
+                <button class="btn-secondary" id="btnLockedContactAdmin">
+                  <span>👑 Contact Admin</span>
+                </button>
+              `}
+            `}
+          </div>
         </div>
-      </div>
+      ` : `
+        <!-- 1-Tap Macro Clipboard Export (Roadmap Item 10) -->
+        <div class="macro-export-container">
+          <button class="btn-copy-macros" id="btnCopyMacros" title="Copy formatted macros for MyFitnessPal, MacroFactor, or Cronometer">
+            <span>📋</span>
+            <span id="copyMacrosBtnText">Copy Macros for Fitness Tracker</span>
+          </button>
+          <span class="macro-export-hint">✨ Formatted for MyFitnessPal &amp; MacroFactor (${modalScale === 1.5 ? '24 oz Deluxe' : '16 oz Standard'})</span>
+        </div>
 
-      <!-- Base Ingredients List -->
-      <h3 class="modal-section-title">🥣 Base Ingredients (${baseIngs.length})</h3>
-      <div class="modal-ingredients-list">
-        ${baseIngs.map(ing => renderModalIngredientRow(ing, recipe)).join('')}
-      </div>
+        <!-- Missing Items Callout -->
+        <div class="missing-items-callout ${match.isReady ? 'all-ready' : 'has-missing'}">
+          <span style="font-size: 1.3rem;">${match.isReady ? '🎉' : '🛒'}</span>
+          <div style="flex: 1;">
+            <strong>${match.isReady ? 'You have all ingredients ready!' : `Missing ${match.missing.length} item${match.missing.length > 1 ? 's' : ''}:`}</strong>
+            <div>${match.isReady ? 'Blend up your base, freeze solid for 16-24 hrs, and get spinning!' : match.missing.map(m => m.name).join(', ')}</div>
+            ${!match.isReady && match.missing.length > 0 ? `
+              <button class="btn-add-all-missing" id="btnAddAllMissingBtn">🛒 Add All Missing to Grocery List</button>
+            ` : ''}
+          </div>
+        </div>
 
-      <!-- Mix-Ins List -->
-      ${mixinIngs.length > 0 ? `
-        <h3 class="modal-section-title">🍫 Mix-Ins (${mixinIngs.length})</h3>
+        <!-- Base Ingredients List -->
+        <h3 class="modal-section-title">🥣 Base Ingredients (${baseIngs.length})</h3>
         <div class="modal-ingredients-list">
-          ${mixinIngs.map(ing => renderModalIngredientRow(ing, recipe)).join('')}
+          ${baseIngs.map(ing => renderModalIngredientRow(ing, recipe)).join('')}
         </div>
-      ` : ''}
 
-      <!-- Step-by-Step Instructions -->
-      <h3 class="modal-section-title">📝 Instructions</h3>
-      <div class="modal-instructions-list">
-        ${(recipe.instructions && recipe.instructions.length > 0) ? recipe.instructions.map((step, idx) => {
-          const isDefrostStep = step.toUpperCase().includes('HOT WATER') || step.toUpperCase().includes('WARM WATER');
-          return `
-            <div class="modal-step-item">
-              <span class="step-num-badge">${idx + 1}</span>
-              <div style="flex: 1;">
-                <span class="step-text">${step}</span>
-                ${isDefrostStep ? `
-                  <div class="step-timer-widget" id="defrostTimerWidget">
-                    <div class="timer-display">
-                      <span class="timer-icon">⏱️</span>
-                      <span class="timer-countdown ${timerRunning ? 'pulsing' : ''}" id="timerSeconds">${timerSecondsLeft}s</span>
-                      <span class="timer-label">Hot Water Bath</span>
+        <!-- Mix-Ins List -->
+        ${mixinIngs.length > 0 ? `
+          <h3 class="modal-section-title">🍫 Mix-Ins (${mixinIngs.length})</h3>
+          <div class="modal-ingredients-list">
+            ${mixinIngs.map(ing => renderModalIngredientRow(ing, recipe)).join('')}
+          </div>
+        ` : ''}
+
+        <!-- Step-by-Step Instructions -->
+        <h3 class="modal-section-title">📝 Instructions</h3>
+        <div class="modal-instructions-list">
+          ${(recipe.instructions && recipe.instructions.length > 0) ? recipe.instructions.map((step, idx) => {
+            const isDefrostStep = step.toUpperCase().includes('HOT WATER') || step.toUpperCase().includes('WARM WATER');
+            return `
+              <div class="modal-step-item">
+                <span class="step-num-badge">${idx + 1}</span>
+                <div style="flex: 1;">
+                  <span class="step-text">${step}</span>
+                  ${isDefrostStep ? `
+                    <div class="step-timer-widget" id="defrostTimerWidget">
+                      <div class="timer-display">
+                        <span class="timer-icon">⏱️</span>
+                        <span class="timer-countdown ${timerRunning ? 'pulsing' : ''}" id="timerSeconds">${timerSecondsLeft}s</span>
+                        <span class="timer-label">Hot Water Bath</span>
+                      </div>
+                      <div class="timer-controls">
+                        <button class="btn-timer-action ${timerRunning ? 'running' : (timerSecondsLeft === 0 ? 'done' : '')}" id="startTimerBtn">
+                          ${timerRunning ? 'Pause' : (timerSecondsLeft === 0 ? 'Done! Spin Time ❄️' : (timerSecondsLeft === 60 ? 'Start 60s Timer' : 'Resume'))}
+                        </button>
+                        <button class="btn-timer-reset" id="resetTimerBtn" style="${timerSecondsLeft < 60 ? '' : 'display: none;'}">Reset</button>
+                      </div>
                     </div>
-                    <div class="timer-controls">
-                      <button class="btn-timer-action ${timerRunning ? 'running' : (timerSecondsLeft === 0 ? 'done' : '')}" id="startTimerBtn">
-                        ${timerRunning ? 'Pause' : (timerSecondsLeft === 0 ? 'Done! Spin Time ❄️' : (timerSecondsLeft === 60 ? 'Start 60s Timer' : 'Resume'))}
-                      </button>
-                      <button class="btn-timer-reset" id="resetTimerBtn" style="${timerSecondsLeft < 60 ? '' : 'display: none;'}">Reset</button>
-                    </div>
-                  </div>
-                ` : ''}
+                  ` : ''}
+                </div>
               </div>
+            `;
+          }).join('') : `
+            <p style="color: var(--text-muted); font-size: 0.9rem;">1. Blend all base ingredients thoroughly and freeze pint for at least 16-24 hours.<br>2. Run outer pint under warm water for 60 seconds.<br>3. Spin on Lite Ice Cream cycle.<br>4. Add mix-ins and spin on Mix-In cycle.</p>
+          `}
+        </div>
+
+        <!-- Official Author Pro Tip -->
+        ${recipe.proTip ? (() => {
+          const tipObj = formatProTip(recipe.proTip);
+          return `
+            <div class="official-protip-card">
+              <div class="official-protip-header">
+                <span class="protip-badge-pill">💡 Author Pro Tip</span>
+                ${tipObj.title ? `<span class="protip-hack-title">${tipObj.title}</span>` : ''}
+              </div>
+              <div class="official-protip-text">${tipObj.body}</div>
             </div>
           `;
-        }).join('') : `
-          <p style="color: var(--text-muted); font-size: 0.9rem;">1. Blend all base ingredients thoroughly and freeze pint for at least 16-24 hours.<br>2. Run outer pint under warm water for 60 seconds.<br>3. Spin on Lite Ice Cream cycle.<br>4. Add mix-ins and spin on Mix-In cycle.</p>
-        `}
-      </div>
+        })() : ''}
 
-      <!-- Official Author Pro Tip -->
-      ${recipe.proTip ? (() => {
-        const tipObj = formatProTip(recipe.proTip);
-        return `
-          <div class="official-protip-card">
-            <div class="official-protip-header">
-              <span class="protip-badge-pill">💡 Author Pro Tip</span>
-              ${tipObj.title ? `<span class="protip-hack-title">${tipObj.title}</span>` : ''}
+        <!-- Creami Machine & Mix-In Tips -->
+        <div class="spin-troubleshooter-card">
+          <div class="troubleshooter-header">
+            <div class="troubleshooter-title">🌀 Ninja Creami Machine & Mix-In Tips</div>
+          </div>
+          <div class="troubleshooter-grid">
+            <div class="trouble-item">
+              <div class="trouble-q">🧊 Icy outer edges or ring?</div>
+              <div class="trouble-a">Run the outer sides of your pint under warm tap water for 60 seconds before processing, or scrape sides with a butter knife before respinning.</div>
             </div>
-            <div class="official-protip-text">${tipObj.body}</div>
-          </div>
-        `;
-      })() : ''}
-
-      <!-- Creami Machine & Mix-In Tips -->
-      <div class="spin-troubleshooter-card">
-        <div class="troubleshooter-header">
-          <div class="troubleshooter-title">🌀 Ninja Creami Machine & Mix-In Tips</div>
-        </div>
-        <div class="troubleshooter-grid">
-          <div class="trouble-item">
-            <div class="trouble-q">🧊 Icy outer edges or ring?</div>
-            <div class="trouble-a">Run the outer sides of your pint under warm tap water for 60 seconds before processing, or scrape sides with a butter knife before respinning.</div>
-          </div>
-          <div class="trouble-item">
-            <div class="trouble-q">🍫 Adding Mix-Ins?</div>
-            <div class="trouble-a">Always create a 1.5-inch wide hole down to the bottom of the ice cream with a spoon before adding mix-ins, then use the <strong>Mix-In</strong> button (never Respin).</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Recipe Batch & Spin Counter Tracker -->
-      <div class="recipe-batch-tracker-card">
-        <div class="batch-tracker-header">
-          <div class="batch-tracker-title">
-            <span class="batch-tracker-icon">🍨</span>
-            <span>Batch & Spin Counter</span>
-          </div>
-          ${!isPersonal ? `
-            <div class="batch-community-pill" id="modalCommunityBatchesBadge" title="Total times this recipe has been spun across all Creami users">
-              🔥 <span id="modalCommunityBatchesVal">${commMade}</span> community spin${commMade === 1 ? '' : 's'}
+            <div class="trouble-item">
+              <div class="trouble-q">🍫 Adding Mix-Ins?</div>
+              <div class="trouble-a">Always create a 1.5-inch wide hole down to the bottom of the ice cream with a spoon before adding mix-ins, then use the <strong>Mix-In</strong> button (never Respin).</div>
             </div>
-          ` : `<div class="batch-community-pill" style="color: #c084fc; background: rgba(168, 85, 247, 0.14); border-color: rgba(168, 85, 247, 0.35);">🔒 Private to your account</div>`}
-        </div>
-        <div class="batch-counter-controls">
-          <div class="batch-personal-display">
-            <span class="batch-counter-label">You've made this:</span>
-            <span class="batch-count-number" id="modalUserBatchCount">${userMade}</span>
-            <span class="batch-times-label">${userMade === 1 ? 'time' : 'times'}</span>
-          </div>
-          <div class="batch-btn-group">
-            <button class="btn-batch-action btn-batch-minus" id="btnBatchMinus" title="Subtract 1 batch" ${userMade === 0 ? 'disabled' : ''}>−</button>
-            <button class="btn-batch-action btn-batch-plus" id="btnBatchPlus" title="Log a batch (+1 spin)">
-              <span>+ Log Batch</span>
-              <span class="batch-btn-subtext">+1 Made</span>
-            </button>
           </div>
         </div>
-      </div>
 
-      <!-- Overall Community Rating & Reviews System -->
-      <div class="recipe-community-rating-card">
-        ${!isPersonal ? (hasCommRating ? `
-          <div class="community-rating-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-            <span style="font-family: var(--font-heading); font-weight: 700; color: var(--text-main); font-size: 0.95rem;">⭐ Overall Community Rating</span>
-            <span class="comm-badge" id="modalOverallScoreBadge" style="font-weight: 700; color: #fbbf24; background: rgba(251, 191, 36, 0.12); border: 1px solid rgba(251, 191, 36, 0.35); padding: 3px 8px; border-radius: 999px; font-size: 0.8rem;">★ ${commAvg.toFixed(1)} / 5.0</span>
-          </div>
-
-          <div class="community-rating-overview">
-            <div class="comm-score-box">
-              <div class="comm-score-big" id="modalCommBigScore">${commAvg.toFixed(1)}</div>
-              <div class="comm-score-stars" id="modalCommStars">${'★'.repeat(Math.round(commAvg))}${'☆'.repeat(5 - Math.round(commAvg))}</div>
-              <div class="comm-score-count" id="modalCommTotalReviews">${commCount} rating${commCount === 1 ? '' : 's'}</div>
+        <!-- Recipe Batch & Spin Counter Tracker -->
+        <div class="recipe-batch-tracker-card">
+          <div class="batch-tracker-header">
+            <div class="batch-tracker-title">
+              <span class="batch-tracker-icon">🍨</span>
+              <span>Batch & Spin Counter</span>
             </div>
-            <div class="comm-bars-box">
-              ${[5, 4, 3, 2, 1].map(starNum => {
-                const c = commDist[starNum] || 0;
-                const pct = commCount > 0 ? Math.round((c / commCount) * 100) : 0;
-                return `
-                  <div class="comm-bar-row">
-                    <span class="comm-bar-star">${starNum}★</span>
-                    <div class="comm-bar-track">
-                      <div class="comm-bar-fill" style="width: ${pct}%;"></div>
+            ${!isPersonal ? `
+              <div class="batch-community-pill" id="modalCommunityBatchesBadge" title="Total times this recipe has been spun across all Creami users">
+                🔥 <span id="modalCommunityBatchesVal">${commMade}</span> community spin${commMade === 1 ? '' : 's'}
+              </div>
+            ` : `<div class="batch-community-pill" style="color: #c084fc; background: rgba(168, 85, 247, 0.14); border-color: rgba(168, 85, 247, 0.35);">🔒 Private to your account</div>`}
+          </div>
+          <div class="batch-counter-controls">
+            <div class="batch-personal-display">
+              <span class="batch-counter-label">You've made this:</span>
+              <span class="batch-count-number" id="modalUserBatchCount">${userMade}</span>
+              <span class="batch-times-label">${userMade === 1 ? 'time' : 'times'}</span>
+            </div>
+            <div class="batch-btn-group">
+              <button class="btn-batch-action btn-batch-minus" id="btnBatchMinus" title="Subtract 1 batch" ${userMade === 0 ? 'disabled' : ''}>−</button>
+              <button class="btn-batch-action btn-batch-plus" id="btnBatchPlus" title="Log a batch (+1 spin)">
+                <span>+ Log Batch</span>
+                <span class="batch-btn-subtext">+1 Made</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Overall Community Rating & Reviews System -->
+        <div class="recipe-community-rating-card">
+          ${!isPersonal ? (hasCommRating ? `
+            <div class="community-rating-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <span style="font-family: var(--font-heading); font-weight: 700; color: var(--text-main); font-size: 0.95rem;">⭐ Overall Community Rating</span>
+              <span class="comm-badge" id="modalOverallScoreBadge" style="font-weight: 700; color: #fbbf24; background: rgba(251, 191, 36, 0.12); border: 1px solid rgba(251, 191, 36, 0.35); padding: 3px 8px; border-radius: 999px; font-size: 0.8rem;">★ ${commAvg.toFixed(1)} / 5.0</span>
+            </div>
+
+            <div class="community-rating-overview">
+              <div class="comm-score-box">
+                <div class="comm-score-big" id="modalCommBigScore">${commAvg.toFixed(1)}</div>
+                <div class="comm-score-stars" id="modalCommStars">${'★'.repeat(Math.round(commAvg))}${'☆'.repeat(5 - Math.round(commAvg))}</div>
+                <div class="comm-score-count" id="modalCommTotalReviews">${commCount} rating${commCount === 1 ? '' : 's'}</div>
+              </div>
+              <div class="comm-bars-box">
+                ${[5, 4, 3, 2, 1].map(starNum => {
+                  const c = commDist[starNum] || 0;
+                  const pct = commCount > 0 ? Math.round((c / commCount) * 100) : 0;
+                  return `
+                    <div class="comm-bar-row">
+                      <span class="comm-bar-star">${starNum}★</span>
+                      <div class="comm-bar-track">
+                        <div class="comm-bar-fill" style="width: ${pct}%;"></div>
+                      </div>
+                      <span class="comm-bar-pct">${c}</span>
                     </div>
-                    <span class="comm-bar-pct">${c}</span>
-                  </div>
-                `;
-              }).join('')}
+                  `;
+                }).join('')}
+              </div>
             </div>
-          </div>
-        ` : `
-          <div class="community-rating-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-            <span style="font-family: var(--font-heading); font-weight: 700; color: var(--text-main); font-size: 0.95rem;">⭐ Overall Community Rating</span>
-            <span class="comm-badge" id="modalOverallScoreBadge" style="font-weight: 600; color: var(--text-dim); background: var(--bg-glass); border: 1px solid var(--border-item); padding: 3px 8px; border-radius: 999px; font-size: 0.8rem;">No reviews yet</span>
-          </div>
-          <div style="padding: 12px 14px; background: rgba(255, 255, 255, 0.02); border: 1px dashed var(--border-item); border-radius: var(--radius-md); text-align: center; color: var(--text-dim); font-size: 0.88rem; margin-bottom: 16px;">
-            🍦 No community ratings yet for this recipe. Rate it below to be the first!
-          </div>
-        `) : `
-          <div class="community-rating-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-            <span style="font-family: var(--font-heading); font-weight: 700; color: var(--text-main); font-size: 0.95rem;">⭐ My Tasting Score & Notes</span>
-            <span class="comm-badge" style="color: #c084fc; background: rgba(168, 85, 247, 0.12); border: 1px solid rgba(168, 85, 247, 0.35); padding: 3px 8px; border-radius: 999px; font-size: 0.8rem;">🔒 Personal</span>
-          </div>
-        `}
+          ` : `
+            <div class="community-rating-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <span style="font-family: var(--font-heading); font-weight: 700; color: var(--text-main); font-size: 0.95rem;">⭐ Overall Community Rating</span>
+              <span class="comm-badge" id="modalOverallScoreBadge" style="font-weight: 600; color: var(--text-dim); background: var(--bg-glass); border: 1px solid var(--border-item); padding: 3px 8px; border-radius: 999px; font-size: 0.8rem;">No reviews yet</span>
+            </div>
+            <div style="padding: 12px 14px; background: rgba(255, 255, 255, 0.02); border: 1px dashed var(--border-item); border-radius: var(--radius-md); text-align: center; color: var(--text-dim); font-size: 0.88rem; margin-bottom: 16px;">
+              🍦 No community ratings yet for this recipe. Rate it below to be the first!
+            </div>
+          `) : `
+            <div class="community-rating-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <span style="font-family: var(--font-heading); font-weight: 700; color: var(--text-main); font-size: 0.95rem;">⭐ My Tasting Score & Notes</span>
+              <span class="comm-badge" style="color: #c084fc; background: rgba(168, 85, 247, 0.12); border: 1px solid rgba(168, 85, 247, 0.35); padding: 3px 8px; border-radius: 999px; font-size: 0.8rem;">🔒 Personal</span>
+            </div>
+          `}
 
-        <div class="personal-rating-box">
-          <div class="personal-rating-header">
-            <strong>Your Rating & Tasting Notes:</strong>
-            <span class="rating-save-status" id="ratingSaveStatus"></span>
-          </div>
-          <div class="rating-stars-row">
-            <div class="star-rating" id="modalStarRating">
-              ${[1, 2, 3, 4, 5].map(starNum => `
-                <span class="star ${(userFeedback.rating || 0) >= starNum ? 'selected' : ''}" data-val="${starNum}">★</span>
-              `).join('')}
+          <div class="personal-rating-box">
+            <div class="personal-rating-header">
+              <strong>Your Rating & Tasting Notes:</strong>
+              <span class="rating-save-status" id="ratingSaveStatus"></span>
             </div>
-            <span class="rating-text-label" id="modalRatingLabel">
-              ${getRatingLabel(userFeedback.rating || 0)}
-            </span>
-          </div>
-          <div class="recipe-note-wrapper" style="margin-top: 10px;">
-            <textarea id="modalRecipeNotes" placeholder="Write personal tasting notes, tweaks, or favorites (e.g. 'Subbed with almond milk, spun on Lite + 1 Respin, 10/10!')...">${userFeedback.notes || ''}</textarea>
-          </div>
-          <div style="display: flex; justify-content: flex-end; margin-top: 8px;">
-            <button class="btn-primary" id="btnSaveNotes" style="font-size: 0.8rem; padding: 6px 14px;">Save Rating & Notes</button>
+            <div class="rating-stars-row">
+              <div class="star-rating" id="modalStarRating">
+                ${[1, 2, 3, 4, 5].map(starNum => `
+                  <span class="star ${(userFeedback.rating || 0) >= starNum ? 'selected' : ''}" data-val="${starNum}">★</span>
+                `).join('')}
+              </div>
+              <span class="rating-text-label" id="modalRatingLabel">
+                ${getRatingLabel(userFeedback.rating || 0)}
+              </span>
+            </div>
+            <div class="recipe-note-wrapper" style="margin-top: 10px;">
+              <textarea id="modalRecipeNotes" placeholder="Write personal tasting notes, tweaks, or favorites (e.g. 'Subbed with almond milk, spun on Lite + 1 Respin, 10/10!')...">${userFeedback.notes || ''}</textarea>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 8px;">
+              <button class="btn-primary" id="btnSaveNotes" style="font-size: 0.8rem; padding: 6px 14px;">Save Rating & Notes</button>
+            </div>
           </div>
         </div>
-      </div>
+      `}
 
       <div class="modal-footer" style="margin-top: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
         <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-          <button class="btn-freeze-pint-action" id="modalFreezeThisPintBtn" title="Log this recipe in your freezer and start the 16-hour countdown timer">
-            🧊 Freeze This Pint
-          </button>
+          ${isAccessible ? `
+            <button class="btn-freeze-pint-action" id="modalFreezeThisPintBtn" title="Log this recipe in your freezer and start the 16-hour countdown timer">
+              🧊 Freeze This Pint
+            </button>
+          ` : ''}
           <button class="btn-secondary" id="modalFavBtn">
             ${isFav ? '💖 Favorited' : '🤍 Add to Favorites'}
           </button>
@@ -4081,6 +4257,31 @@
   }
 
   function bindRecipeModalEvents(recipe) {
+    // Locked Recipe Teaser Buttons (Roadmap Item 15)
+    const btnLockedSignIn = recipeModalBody.querySelector('#btnLockedSignIn');
+    if (btnLockedSignIn) {
+      btnLockedSignIn.addEventListener('click', () => {
+        closeRecipeModal();
+        openGoogleAuthModal();
+      });
+    }
+
+    const btnLockedRequestAccess = recipeModalBody.querySelector('#btnLockedRequestAccess');
+    if (btnLockedRequestAccess) {
+      btnLockedRequestAccess.addEventListener('click', () => {
+        const requiredTier = getRecipeRequiredTier(recipe);
+        const email = currentUser ? currentUser.email : 'Guest';
+        showToast(`✉️ Access request for "${requiredTier} Pack" submitted for ${email}!`);
+      });
+    }
+
+    const btnLockedContactAdmin = recipeModalBody.querySelector('#btnLockedContactAdmin');
+    if (btnLockedContactAdmin) {
+      btnLockedContactAdmin.addEventListener('click', () => {
+        const requiredTier = getRecipeRequiredTier(recipe);
+        showToast(`Please ask an administrator to grant access to the ${requiredTier} Pack.`);
+      });
+    }
     // Freeze This Pint Button (Roadmap Item 8 & 17)
     const freezePintBtn = recipeModalBody.querySelector('#modalFreezeThisPintBtn');
     if (freezePintBtn) {
@@ -6445,6 +6646,334 @@
     }, 2500);
   }
 
+  // --- Admin Portal & User Management (Roadmap Item 15) ---
+  const ALL_CATEGORY_SUBSCRIPTIONS = ['All-Access', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free'];
+
+  function openAdminPortal() {
+    if (!currentUser || currentUser.role !== 'admin') {
+      showToast('⚠️ Admin privileges required to access the Admin Portal.');
+      return;
+    }
+    if (adminModalOverlay) {
+      adminModalOverlay.classList.add('active');
+      adminModalOverlay.setAttribute('aria-hidden', 'false');
+      lockBackgroundScroll();
+      fetchAdminUsers();
+    }
+  }
+
+  function closeAdminPortal() {
+    if (adminModalOverlay) {
+      adminModalOverlay.classList.remove('active');
+      adminModalOverlay.setAttribute('aria-hidden', 'true');
+      unlockBackgroundScroll();
+    }
+  }
+
+  async function fetchAdminUsers() {
+    if (!currentUser || currentUser.role !== 'admin') return;
+    if (adminUsersList) {
+      adminUsersList.innerHTML = `<div style="text-align: center; padding: 36px 20px; color: var(--text-dim);">Loading user directory...</div>`;
+    }
+
+    try {
+      const res = await fetch('/api/admin/users', {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': currentUser.token ? `Bearer ${currentUser.token}` : '',
+          'X-User-Email': currentUser.email || ''
+        }
+      });
+      const data = await res.json();
+      if (res.ok && data.users) {
+        adminUsersState = data.users;
+        updateAdminStats();
+        renderAdminUsers();
+      } else {
+        showToast('Error loading users: ' + (data.error || 'Server error'));
+        if (adminUsersList) {
+          adminUsersList.innerHTML = `<div style="text-align: center; padding: 30px; color: #f87171;">⚠️ ${data.error || 'Failed to load users.'}</div>`;
+        }
+      }
+    } catch (err) {
+      console.error('Fetch admin users error:', err);
+      showToast('Could not connect to user database.');
+      if (adminUsersList) {
+        adminUsersList.innerHTML = `<div style="text-align: center; padding: 30px; color: #f87171;">⚠️ Connection error. Please verify the server is running.</div>`;
+      }
+    }
+  }
+
+  function updateAdminStats() {
+    if (adminTotalUsers) adminTotalUsers.textContent = adminUsersState.length;
+    const adminCount = adminUsersState.filter(u => u.role === 'admin').length;
+    if (adminTotalAdmins) adminTotalAdmins.textContent = adminCount;
+    const allAccessCount = adminUsersState.filter(u => Array.isArray(u.subscriptions) && u.subscriptions.includes('All-Access')).length;
+    if (adminTotalAllAccess) adminTotalAllAccess.textContent = allAccessCount;
+  }
+
+  function renderAdminUsers() {
+    if (!adminUsersList) return;
+
+    const q = (adminSearchQuery || '').toLowerCase().trim();
+    const roleFilter = adminFilterRole || 'all';
+
+    const filtered = adminUsersState.filter(u => {
+      if (roleFilter !== 'all' && u.role !== roleFilter) return false;
+      if (q) {
+        const nameMatch = (u.name || u.username || '').toLowerCase().includes(q);
+        const emailMatch = (u.email || '').toLowerCase().includes(q);
+        const roleMatch = (u.role || '').toLowerCase().includes(q);
+        const subMatch = (u.subscriptions || []).some(s => s.toLowerCase().includes(q));
+        if (!nameMatch && !emailMatch && !roleMatch && !subMatch) return false;
+      }
+      return true;
+    });
+
+    if (filtered.length === 0) {
+      adminUsersList.innerHTML = `
+        <div style="text-align: center; padding: 40px 20px; color: var(--text-dim);">
+          <div style="font-size: 2rem; margin-bottom: 8px;">🔍</div>
+          <div>No users found matching "${q || roleFilter}".</div>
+        </div>
+      `;
+      return;
+    }
+
+    adminUsersList.innerHTML = filtered.map(u => {
+      const ADMIN_ROOTS = ['admin@creamicravings.com', 'ahumpo7@gmail.com', 'ahumpo@gmail.com', 'andrew@gmail.com'];
+      const userEmail = (u.email || '').toLowerCase();
+      const isRootAdmin = ADMIN_ROOTS.includes(userEmail);
+      const isCurrentAdmin = (currentUser && currentUser.email && currentUser.email.toLowerCase() === userEmail);
+      const subs = Array.isArray(u.subscriptions) ? u.subscriptions : ['Fan Favorites'];
+      const hasAllAccess = subs.includes('All-Access');
+      const avatarUrl = u.picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name || u.username || 'User')}&background=059669&color=fff&bold=true`;
+      
+      const createdDate = u.created_at ? new Date(u.created_at).toLocaleDateString() : 'N/A';
+      const lastActiveDate = u.last_active ? new Date(u.last_active).toLocaleDateString() : 'Active';
+
+      return `
+        <div class="admin-user-card" data-user-id="${u.id}" data-user-email="${u.email}">
+          <div class="admin-user-top">
+            <div class="admin-user-info-cluster">
+              <img src="${avatarUrl}" alt="${u.name || 'User'}" class="admin-user-avatar" onerror="this.src='https://ui-avatars.com/api/?name=U&background=059669&color=fff'">
+              <div>
+                <div class="admin-user-name-row">
+                  <span class="admin-user-name">${u.name || u.username || 'Unnamed User'}</span>
+                  <span class="admin-user-badge ${u.role}">${u.role === 'admin' ? '👑 Admin' : '👤 Standard'}</span>
+                  ${isCurrentAdmin ? `<span class="badge" style="font-size: 0.68rem; background: rgba(5, 150, 105, 0.2); color: #34d399; padding: 2px 6px; border-radius: 4px; font-weight: 700;">You</span>` : ''}
+                </div>
+                <div class="admin-user-email">${u.email || 'No email attached'}</div>
+              </div>
+            </div>
+
+            <div class="admin-user-actions">
+              <button class="btn-role-toggle" data-user-id="${u.id}" data-current-role="${u.role}" ${isRootAdmin ? 'disabled title="Root administrator cannot be demoted"' : `title="Toggle role between Admin and Standard User"`}>
+                ${u.role === 'admin' ? 'Demote to User' : 'Promote to Admin'}
+              </button>
+              ${(!isRootAdmin && !isCurrentAdmin) ? `
+                <button class="btn-admin-del-user" data-user-id="${u.id}" data-user-email="${u.email}" title="Delete user account">
+                  🗑️
+                </button>
+              ` : ''}
+            </div>
+          </div>
+
+          <div class="admin-user-stats-strip">
+            <span>📅 Joined: <strong>${createdDate}</strong></span>
+            <span>⚡ Last Active: <strong>${lastActiveDate}</strong></span>
+            <span>📦 Pantry: <strong>${u.pantryCount || 0}</strong></span>
+            <span>💖 Favs: <strong>${u.favoritesCount || 0}</strong></span>
+            <span>🍨 Spins: <strong>${u.madeTotal || 0}</strong></span>
+            <span>🧑‍🍳 Custom: <strong>${u.customCount || 0}</strong></span>
+          </div>
+
+          <div class="admin-subs-section">
+            <div class="admin-subs-title">📦 Category Pack Subscriptions:</div>
+            <div class="admin-subs-chips-wrap">
+              ${ALL_CATEGORY_SUBSCRIPTIONS.map(subName => {
+                const isActive = hasAllAccess || subs.includes(subName);
+                const isAllAccessChip = (subName === 'All-Access');
+                return `
+                  <button type="button" 
+                    class="btn-sub-chip ${isActive ? 'active' : ''} ${isAllAccessChip ? 'all-access' : ''}" 
+                    data-user-id="${u.id}" 
+                    data-sub="${subName}"
+                    title="${isActive ? 'Click to revoke ' + subName : 'Click to grant ' + subName}">
+                    ${isAllAccessChip ? '👑' : ''} ${subName} ${isActive ? '✓' : '+'}
+                  </button>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    bindAdminUserCardEvents();
+  }
+
+  function bindAdminUserCardEvents() {
+    if (!adminUsersList) return;
+
+    // Role Toggle Buttons
+    adminUsersList.querySelectorAll('.btn-role-toggle').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const userId = btn.dataset.userId;
+        const currentRole = btn.dataset.currentRole;
+        const newRole = currentRole === 'admin' ? 'user' : 'admin';
+        const user = adminUsersState.find(u => u.id === userId);
+        if (!user) return;
+
+        if (!confirm(`Are you sure you want to change ${user.name || user.email}'s role to "${newRole.toUpperCase()}"?`)) {
+          return;
+        }
+
+        await updateUserPermissions(user.id, user.email, user.subscriptions || ['Fan Favorites'], newRole);
+      });
+    });
+
+    // Delete User Buttons
+    adminUsersList.querySelectorAll('.btn-admin-del-user').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const userId = btn.dataset.userId;
+        const userEmail = btn.dataset.userEmail;
+        const user = adminUsersState.find(u => u.id === userId);
+        const displayName = (user ? user.name : '') || userEmail || userId;
+
+        if (!confirm(`⚠️ PERMANENT DELETION: Are you sure you want to delete user account "${displayName}"?\n\nThis will remove their account and all personal data.`)) {
+          return;
+        }
+
+        await deleteUserAccount(userId, userEmail);
+      });
+    });
+
+    // Subscription Chip Toggles
+    adminUsersList.querySelectorAll('.btn-sub-chip').forEach(chip => {
+      chip.addEventListener('click', async () => {
+        const userId = chip.dataset.userId;
+        const subName = chip.dataset.sub;
+        const user = adminUsersState.find(u => u.id === userId);
+        if (!user) return;
+
+        let curSubs = Array.isArray(user.subscriptions) ? [...user.subscriptions] : ['Fan Favorites'];
+
+        if (subName === 'All-Access') {
+          if (curSubs.includes('All-Access')) {
+            // Turn off All-Access, reset to Fan Favorites
+            curSubs = ['Fan Favorites'];
+          } else {
+            // Grant All-Access
+            curSubs = [...ALL_CATEGORY_SUBSCRIPTIONS];
+          }
+        } else {
+          // Individual category pack toggle
+          if (curSubs.includes(subName)) {
+            // Prevent removing Fan Favorites if it's the only one
+            if (subName === 'Fan Favorites' && curSubs.length === 1) {
+              showToast('Fan Favorites is the universal starter pack and cannot be removed.');
+              return;
+            }
+            curSubs = curSubs.filter(s => s !== subName && s !== 'All-Access');
+          } else {
+            curSubs.push(subName);
+            // If all individual packs are active, enable All-Access as well
+            const nonAll = ALL_CATEGORY_SUBSCRIPTIONS.filter(s => s !== 'All-Access');
+            if (nonAll.every(s => curSubs.includes(s))) {
+              curSubs.push('All-Access');
+            }
+          }
+        }
+
+        await updateUserPermissions(user.id, user.email, curSubs, user.role);
+      });
+    });
+  }
+
+  async function updateUserPermissions(userId, email, newSubs, newRole) {
+    try {
+      showToast('Updating permissions...');
+      const res = await fetch('/api/admin/user/permissions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': currentUser.token ? `Bearer ${currentUser.token}` : '',
+          'X-User-Email': currentUser.email || ''
+        },
+        body: JSON.stringify({
+          token: currentUser.token,
+          adminEmail: currentUser.email,
+          userId,
+          email,
+          subscriptions: newSubs,
+          role: newRole
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok && (data.status === 'ok' || data.success)) {
+        showToast('✅ Permissions updated successfully!');
+        // Update local state
+        const idx = adminUsersState.findIndex(u => u.id === userId || (email && u.email === email));
+        if (idx !== -1) {
+          adminUsersState[idx].subscriptions = newSubs;
+          adminUsersState[idx].role = newRole;
+        }
+
+        // If updating the currently signed in user, refresh their session
+        if (currentUser && (currentUser.id === userId || (email && currentUser.email === email))) {
+          currentUser.subscriptions = newSubs;
+          currentUser.role = newRole;
+          saveUserAuth();
+          updateAuthUI();
+          renderRecipes();
+        }
+
+        updateAdminStats();
+        renderAdminUsers();
+      } else {
+        showToast('Error updating permissions: ' + (data.error || 'Server error'));
+      }
+    } catch (err) {
+      console.error('Update user permissions error:', err);
+      showToast('Could not save user permissions.');
+    }
+  }
+
+  async function deleteUserAccount(userId, email) {
+    try {
+      showToast('Deleting user...');
+      const res = await fetch('/api/admin/user/delete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': currentUser.token ? `Bearer ${currentUser.token}` : '',
+          'X-User-Email': currentUser.email || ''
+        },
+        body: JSON.stringify({
+          token: currentUser.token,
+          adminEmail: currentUser.email,
+          userId,
+          email
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok && (data.status === 'ok' || data.success)) {
+        showToast('🗑️ User account deleted.');
+        adminUsersState = adminUsersState.filter(u => u.id !== userId && (!email || u.email !== email));
+        updateAdminStats();
+        renderAdminUsers();
+      } else {
+        showToast('Error deleting user: ' + (data.error || 'Server error'));
+      }
+    } catch (err) {
+      console.error('Delete user error:', err);
+      showToast('Could not delete user account.');
+    }
+  }
+
   // --- Event Bindings ---
   function bindEvents() {
     // Ingredient Search
@@ -6920,6 +7449,57 @@
       }
     });
 
+    // Admin Portal & Gated Access Bindings (Roadmap Item 15)
+    if (openAdminPortalBtn) {
+      openAdminPortalBtn.addEventListener('click', () => {
+        openAdminPortal();
+      });
+    }
+
+    if (adminModalCloseBtn) {
+      adminModalCloseBtn.addEventListener('click', () => {
+        closeAdminPortal();
+      });
+    }
+
+    if (adminModalOverlay) {
+      adminModalOverlay.addEventListener('click', (e) => {
+        if (e.target === adminModalOverlay) {
+          closeAdminPortal();
+        }
+      });
+    }
+
+    if (adminRefreshUsersBtn) {
+      adminRefreshUsersBtn.addEventListener('click', () => {
+        fetchAdminUsers();
+      });
+    }
+
+    if (adminUserSearchInput) {
+      adminUserSearchInput.addEventListener('input', (e) => {
+        adminSearchQuery = e.target.value;
+        renderAdminUsers();
+      });
+    }
+
+    if (adminRoleFilterPills) {
+      adminRoleFilterPills.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-role]');
+        if (!btn) return;
+        adminRoleFilterPills.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        adminFilterRole = btn.dataset.role;
+        renderAdminUsers();
+      });
+    }
+
+    if (filterAccessibleOnly) {
+      filterAccessibleOnly.addEventListener('change', () => {
+        renderRecipes();
+      });
+    }
+
     // Handle PWA App Shortcuts & URL Parameters
     const urlParams = new URLSearchParams(window.location.search);
     const actionParam = urlParams.get('action');
@@ -6929,6 +7509,8 @@
       }, 250);
     } else if (actionParam === 'freezer') {
       setTimeout(() => openFreezerModal(), 300);
+    } else if (actionParam === 'admin') {
+      setTimeout(() => openAdminPortal(), 300);
     } else if (actionParam === 'build') {
       setTimeout(() => openCustomRecipeModal(), 300);
     } else if (actionParam === 'shopping') {

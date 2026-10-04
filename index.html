@@ -57,6 +57,11 @@
             <span class="theme-label" id="themeToggleLabel">Dark</span>
           </button>
 
+          <!-- Admin Portal Header Button (Roadmap Item 15) -->
+          <button id="openAdminPortalBtn" class="btn-secondary-action btn-admin-header" style="display: none;" title="Open Admin Portal (User Management & Tiered Access)">
+            👑 Admin Portal
+          </button>
+
           <!-- Google Auth Profile / Sign-In Button -->
           <div id="authHeaderContainer">
             <button id="headerSignInBtn" class="btn-google-signin" title="Sign in with your Google Account">
@@ -363,8 +368,16 @@
 
         <!-- Recipe Results Header -->
         <div class="results-header">
-          <div class="results-summary" id="resultsSummary">Showing all 243 recipes</div>
-          <div class="active-pantry-hint" id="activePantryHint"></div>
+          <div class="results-summary-group">
+            <div class="results-summary" id="resultsSummary">Showing all 243 recipes</div>
+            <div class="active-pantry-hint" id="activePantryHint"></div>
+          </div>
+          <div class="access-filter-wrap">
+            <label class="access-filter-label" for="filterAccessibleOnly" title="Hide locked recipes and show only recipes accessible with your subscription tier">
+              <input type="checkbox" id="filterAccessibleOnly">
+              <span>🔒 Unlocked Only</span>
+            </label>
+          </div>
         </div>
 
         <!-- Recipe Cards Grid -->
@@ -886,6 +899,58 @@
           <span>Connect Google Account</span>
         </button>
       </form>
+    </div>
+  </div>
+
+  <!-- Admin Portal Modal: User Directory & Tiered Access (Roadmap Item 15) -->
+  <div class="modal-overlay" id="adminModalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-content admin-modal-content">
+      <div class="modal-handle-bar" aria-hidden="true"></div>
+      <button class="modal-close" id="adminModalCloseBtn" aria-label="Close modal">&times;</button>
+      
+      <div class="modal-header admin-modal-header">
+        <div class="admin-title-row">
+          <div class="admin-icon-badge">👑</div>
+          <div>
+            <h2 class="modal-title">Admin Portal: Users &amp; Tiered Access</h2>
+            <p class="modal-subtitle">Manage registered users, assign roles, and grant or revoke recipe pack permissions in real time.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Stats Summary -->
+      <div class="admin-stats-row">
+        <div class="admin-stat-card">
+          <span class="admin-stat-num" id="adminTotalUsers">0</span>
+          <span class="admin-stat-label">Total Users</span>
+        </div>
+        <div class="admin-stat-card">
+          <span class="admin-stat-num" id="adminTotalAdmins">0</span>
+          <span class="admin-stat-label">Admins</span>
+        </div>
+        <div class="admin-stat-card">
+          <span class="admin-stat-num" id="adminTotalAllAccess">0</span>
+          <span class="admin-stat-label">All-Access Passes</span>
+        </div>
+      </div>
+
+      <!-- Search & Filters Toolbar -->
+      <div class="admin-toolbar">
+        <div class="admin-search-wrap">
+          <input type="text" id="adminUserSearchInput" placeholder="Search by name, email, or role..." class="admin-search-input">
+        </div>
+        <div class="admin-filter-pills" id="adminRoleFilterPills">
+          <button type="button" class="btn-time-preset active" data-role="all">All Users</button>
+          <button type="button" class="btn-time-preset" data-role="admin">Admins</button>
+          <button type="button" class="btn-time-preset" data-role="user">Standard</button>
+        </div>
+        <button type="button" class="btn-secondary" id="adminRefreshUsersBtn" title="Refresh user list">🔄 Refresh</button>
+      </div>
+
+      <!-- User Directory Cards List -->
+      <div class="admin-users-list" id="adminUsersList">
+        <!-- Rendered dynamically by app.js -->
+      </div>
     </div>
   </div>
 

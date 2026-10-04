@@ -132,5 +132,38 @@
       "Lactose-Free"
     ],
     "token": "token_g_150fc4db-d120-46cc-a249-843a5d708421"
+  },
+  "ahumpo7@gmail.com": {
+    "id": "user_g_564593bf",
+    "username": "Andrew Admin",
+    "name": "Andrew Admin",
+    "email": "ahumpo7@gmail.com",
+    "picture": "",
+    "googleId": "564593bf",
+    "role": "admin",
+    "pantry": [
+      "fat_free_ultra_filtered_milk",
+      "sweetener",
+      "xanthan_gum",
+      "salt",
+      "vanilla_bean_paste",
+      "cocoa_powder"
+    ],
+    "favorites": [],
+    "madeCounts": {},
+    "ratings": {},
+    "customRecipes": [],
+    "shoppingList": [],
+    "freezerPints": [],
+    "subscriptions": [
+      "All-Access",
+      "Fan Favorites",
+      "No Protein",
+      "Keto",
+      "Lactose Free"
+    ],
+    "created_at": "2026-10-04T19:09:44.349639",
+    "last_active": "2026-10-04T19:09:44.349639",
+    "token": "token_g_2ae9d47f-8e7d-483c-b827-397fd9ba3fce"
   }
 }
