@@ -2,15 +2,17 @@
 
 const INGREDIENT_CATEGORIES = {
   dairy_liquids: "Milk & Liquid Bases",
-  sweeteners_binders: "Sweeteners & Binders",
-  protein_powders: "Protein Powders",
-  extracts_flavors: "Extracts & Flavorings",
+  protein_powders: "Protein Powders & Shakes",
   pudding_mixes: "Pudding Mixes",
+  sweeteners_binders: "Sweeteners & Binders",
+  baking_powders: "Cocoa & Baking Staples",
+  extracts_flavors: "Extracts & Flavorings",
   syrups_sauces: "Syrups & Sauces",
-  produce_fruit: "Fruits, Produce & Drinks",
-  spices_seasonings: "Spices & Seasonings",
   nut_butters_spreads: "Nut Butters & Spreads",
-  mixins_snacks: "Mix-Ins, Cookies & Snacks"
+  produce_fruit: "Fruits & Fresh Produce",
+  beverages_drinks: "Coffee, Tea & Beverages",
+  spices_seasonings: "Spices & Seasonings",
+  mixins_snacks: "Mix-Ins, Cookies & Candies"
 };
 
 const INGREDIENTS_MASTER = [
@@ -37,7 +39,7 @@ const INGREDIENTS_MASTER = [
   {
     "id": "black_cocoa_powder",
     "name": "Black Cocoa Powder",
-    "category": "mixins_snacks"
+    "category": "baking_powders"
   },
   {
     "id": "blue_food_coloring",
@@ -72,7 +74,7 @@ const INGREDIENTS_MASTER = [
   {
     "id": "caramel_protein_shake",
     "name": "Caramel Protein Shake",
-    "category": "dairy_liquids"
+    "category": "protein_powders"
   },
   {
     "id": "caramel_syrup",
@@ -147,7 +149,7 @@ const INGREDIENTS_MASTER = [
   {
     "id": "chocolate_protein_shake",
     "name": "Chocolate Protein Shake",
-    "category": "dairy_liquids"
+    "category": "protein_powders"
   },
   {
     "id": "chocolate_filled_waffle_cone_bites",
@@ -172,7 +174,7 @@ const INGREDIENTS_MASTER = [
   {
     "id": "cocoa_powder",
     "name": "Cocoa Powder",
-    "category": "mixins_snacks"
+    "category": "baking_powders"
   },
   {
     "id": "coconut_extract",
@@ -192,12 +194,12 @@ const INGREDIENTS_MASTER = [
   {
     "id": "diet_dr_pepper",
     "name": "Diet Dr Pepper",
-    "category": "produce_fruit"
+    "category": "beverages_drinks"
   },
   {
     "id": "diet_root_beer",
     "name": "Diet Root Beer",
-    "category": "produce_fruit"
+    "category": "beverages_drinks"
   },
   {
     "id": "egg",
@@ -207,7 +209,7 @@ const INGREDIENTS_MASTER = [
   {
     "id": "espresso",
     "name": "Espresso",
-    "category": "produce_fruit"
+    "category": "beverages_drinks"
   },
   {
     "id": "fat_free_reddi_wip",
@@ -227,7 +229,7 @@ const INGREDIENTS_MASTER = [
   {
     "id": "flour",
     "name": "Flour",
-    "category": "mixins_snacks"
+    "category": "baking_powders"
   },
   {
     "id": "frosted_animal_cookies",
@@ -327,17 +329,17 @@ const INGREDIENTS_MASTER = [
   {
     "id": "instant_coffee",
     "name": "Instant Coffee",
-    "category": "produce_fruit"
+    "category": "beverages_drinks"
   },
   {
     "id": "lactose_free_caramel_protein_shake",
     "name": "Lactose-Free Caramel Protein Shake",
-    "category": "dairy_liquids"
+    "category": "protein_powders"
   },
   {
     "id": "lactose_free_chocolate_protein_shake",
     "name": "Lactose-Free Chocolate Protein Shake",
-    "category": "dairy_liquids"
+    "category": "protein_powders"
   },
   {
     "id": "lactose_free_coffee_creamer",
@@ -347,12 +349,12 @@ const INGREDIENTS_MASTER = [
   {
     "id": "lactose_free_strawberry_protein_shake",
     "name": "Lactose-Free Strawberry Protein Shake",
-    "category": "dairy_liquids"
+    "category": "protein_powders"
   },
   {
     "id": "lactose_free_vanilla_protein_shake",
     "name": "Lactose-Free Vanilla Protein Shake",
-    "category": "dairy_liquids"
+    "category": "protein_powders"
   },
   {
     "id": "lakanto_chocolate_sauce",
@@ -397,7 +399,7 @@ const INGREDIENTS_MASTER = [
   {
     "id": "loose_chai_tea",
     "name": "Loose Chai Tea",
-    "category": "produce_fruit"
+    "category": "beverages_drinks"
   },
   {
     "id": "lorann_cotton_candy_flavoring",
@@ -437,7 +439,7 @@ const INGREDIENTS_MASTER = [
   {
     "id": "malted_milk_powder",
     "name": "Malted Milk Powder",
-    "category": "dairy_liquids"
+    "category": "baking_powders"
   },
   {
     "id": "mango",
@@ -447,12 +449,12 @@ const INGREDIENTS_MASTER = [
   {
     "id": "marshmallow_creme",
     "name": "Marshmallow Creme",
-    "category": "mixins_snacks"
+    "category": "nut_butters_spreads"
   },
   {
     "id": "marshmallow_fluff",
     "name": "Marshmallow Fluff",
-    "category": "mixins_snacks"
+    "category": "nut_butters_spreads"
   },
   {
     "id": "mascarpone",
@@ -462,7 +464,7 @@ const INGREDIENTS_MASTER = [
   {
     "id": "matcha",
     "name": "Matcha",
-    "category": "produce_fruit"
+    "category": "beverages_drinks"
   },
   {
     "id": "mccormick_cake_batter_extract",
@@ -517,7 +519,7 @@ const INGREDIENTS_MASTER = [
   {
     "id": "oats",
     "name": "Oats",
-    "category": "mixins_snacks"
+    "category": "baking_powders"
   },
   {
     "id": "oranges_or_orange_juice",
@@ -537,7 +539,7 @@ const INGREDIENTS_MASTER = [
   {
     "id": "pb_fit",
     "name": "PB Fit",
-    "category": "nut_butters_spreads"
+    "category": "protein_powders"
   },
   {
     "id": "peaches",
@@ -562,7 +564,7 @@ const INGREDIENTS_MASTER = [
   {
     "id": "peanut_butter_powder",
     "name": "Peanut Butter Powder",
-    "category": "nut_butters_spreads"
+    "category": "protein_powders"
   },
   {
     "id": "pecan_pralines",
@@ -652,7 +654,7 @@ const INGREDIENTS_MASTER = [
   {
     "id": "protein_frosting",
     "name": "Protein Frosting",
-    "category": "mixins_snacks"
+    "category": "nut_butters_spreads"
   },
   {
     "id": "pumpkin_cream_cheese",
@@ -747,7 +749,7 @@ const INGREDIENTS_MASTER = [
   {
     "id": "sprite_zero",
     "name": "Sprite Zero",
-    "category": "produce_fruit"
+    "category": "beverages_drinks"
   },
   {
     "id": "strawberries",
@@ -762,7 +764,7 @@ const INGREDIENTS_MASTER = [
   {
     "id": "strawberry_protein_shake",
     "name": "Strawberry Protein Shake",
-    "category": "dairy_liquids"
+    "category": "protein_powders"
   },
   {
     "id": "sugar_free_syrup",
@@ -802,7 +804,7 @@ const INGREDIENTS_MASTER = [
   {
     "id": "thai_tea",
     "name": "Thai Tea",
-    "category": "produce_fruit"
+    "category": "beverages_drinks"
   },
   {
     "id": "toasted_mini_marshmallows",
@@ -837,7 +839,7 @@ const INGREDIENTS_MASTER = [
   {
     "id": "vanilla_protein_shake",
     "name": "Vanilla Protein Shake",
-    "category": "dairy_liquids"
+    "category": "protein_powders"
   },
   {
     "id": "vanilla_pudding_mix",
@@ -872,7 +874,7 @@ const INGREDIENTS_MASTER = [
   {
     "id": "zero_sugar_lemonade",
     "name": "Zero Sugar Lemonade",
-    "category": "produce_fruit"
+    "category": "beverages_drinks"
   }
 ];
 

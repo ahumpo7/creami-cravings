@@ -34,10 +34,23 @@ A prioritized checklist of fixes, features, and refinements for the Creami Cravi
 - [x] **Card Layout Uniformity:** Fix the flexbox / CSS layout in `styles.css` where the star rating badge shrinks or expands depending on how many category badges (e.g. "Keto", "High Protein", "No Protein Powder") are present.
 - [x] **Consistent Positioning:** Lock rating badge dimensions and align bottom action bars across all recipe cards regardless of title length or tag count.
 
-### 7. Fix Ingredient Categories
-- [ ] **Audit Categorization:** Review `INGREDIENTS_MASTER` in `recipes-data.js` and `build_recipes_data.py`.
-- [ ] **Accurate Taxonomy:** Re-categorize misclassified ingredients (e.g. ensure powders, extracts, dairy liquids, mix-ins, and fruit bases are in their intuitive grocery sections).
-- [ ] **Pantry Drawer Organization:** Ensure the collapsible categories in the kitchen pantry drawer make finding and checking off ingredients effortless.
+### 7. Fix Ingredient Categories (Completed ✅)
+- [x] **Audit Categorization:** Audited all 172 ingredients in `INGREDIENTS_MASTER` across `recipes-data.js` and `build_recipes_data.py`.
+- [x] **Accurate Taxonomy:** Re-categorized misclassified ingredients into a clean 12-category grocery aisle taxonomy:
+  - 🥛 **Milk & Liquid Bases (16):** Milk, creamers, Greek yogurts, cream cheese, mascarpone, eggs, butter, almond nog.
+  - 🍦 **Protein Powders & Shakes (11):** Whey powder, all ready-to-drink shakes, and high-protein PB Fit / peanut butter powder.
+  - 🍮 **Pudding Mixes (3):** Sugar-free cheesecake, chocolate, and vanilla Jell-O instant pudding mixes.
+  - 🍯 **Sweeteners & Binders (3):** Allulose/monkfruit sweetener, brown sugar sweetener, and xanthan gum.
+  - 🍫 **Cocoa & Baking Staples (5):** Cocoa powder, black cocoa powder, flour, oats, and malted milk powder.
+  - 🧂 **Extracts & Flavorings (13):** Vanilla extract/bean paste, peppermint extract, cake batter extract, emulsions, and food colorings.
+  - 🥞 **Syrups & Sauces (9):** Syrups, low-calorie ganache, salted caramel sauce/syrup, and chocolate sauce.
+  - 🥜 **Nut Butters & Spreads (7):** Peanut butter, Nutella, pistachio butter, strawberry jam, marshmallow fluff/creme, and protein frosting.
+  - 🍓 **Fruits & Fresh Produce (20):** Fresh and frozen berries, bananas, apples, mango, citrus zest/juice, peaches, and pumpkin.
+  - ☕ **Coffee, Tea & Beverages (9):** Espresso, instant coffee, matcha, loose chai, Thai tea, Diet Dr Pepper, Diet Root Beer, Sprite Zero, and Zero Sugar Lemonade.
+  - 🌿 **Spices & Seasonings (8):** Cinnamon, ground cinnamon, nutmeg, cloves, pumpkin pie spice, cayenne pepper, and flaky salt.
+  - 🍪 **Mix-Ins, Cookies & Candies (68):** Oreos, cookies, candy bars, M&Ms, chocolate chips, cereals, graham crackers, marshmallows, and nuts.
+- [x] **Pantry Drawer Organization:** Collapsible categories in the pantry drawer now display emoji icons, live stock counters (`3/16`), and interactive search filtering.
+- [x] **Ingredient Equivalents:** Bidirectional alias matching for interchangeable ingredients (cinnamon $\leftrightarrow$ ground cinnamon, canned pumpkin $\leftrightarrow$ pure pumpkin, Reese's cups $\leftrightarrow$ peanut butter cups, toasted marshmallows $\leftrightarrow$ mini marshmallows).
 
 ---
 
@@ -144,12 +157,11 @@ A prioritized checklist of fixes, features, and refinements for the Creami Cravi
 | Rank | Task | Why & Scope | Est. Effort |
 | :---: | :--- | :--- | :--- |
 | **🥇 1** | **Item 3: Reset Counts & Community Rankings** | Clean data wipe of mock/seed numbers in `db_recipe_stats.json`, `db_ratings.json`, and initial seed constants so counts start at 0. | 🟢 ~5 mins |
-| **🥈 2** | **Item 7: Fix Ingredient Categories in Pantry** | Reorganize pantry drawer taxonomy in `recipes-data.js` into intuitive grocery aisles (baking, sweeteners, extracts, powders, etc.). | 🟡 ~15–20 mins |
-| **🥉 3** | **Item 16: 🔄 1-Tap Smart Ingredient Substitutions** | Modal swap popup with tested substitutions for milks, gums, proteins, and sweeteners with texture/macro delta hints. | 🟡 ~20–30 mins |
-| **4** | **Item 8: 🧊 "Pints in Freezer" Tracker & 16-Hr Timer** | New freezer inventory manager, 16-hour countdown calculation, status badges, and 1-tap spin logging. | 🟡 ~35–45 mins |
-| **5** | **Item 17: 🔔 Freeze Timer Push Notifications** | Web/Android notification trigger when 16-hour freeze timer reaches zero. *(Hooks into Item 8 & PWA)* | 🟡 ~25–35 mins |
-| **6** | **Item 11: 📦 Grocery PWA & Offline Support** | Web App Manifest, Service Worker offline caching strategy, and 1-click export to Apple Notes/Reminders/Keep. *(Prerequisite for Android App)* | 🟠 ~30–40 mins |
-| **7** | **Item 18: 🧪 "Build-A-Pint" Balancing Wizard** | 4-step custom recipe creator with real-time Creaminess Score (1-10) and auto-calculated macros. | 🟠 ~35–45 mins |
-| **8** | **Item 15: 👥 User Management & Tiered Recipe Access** | Admin portal, user database, Google auth role assignment, and category-based recipe gating/locks. | 🟠 ~40–50 mins |
-| **9** | **Item 14: 🤖 Google Play Store Android App (Bubblewrap)** | Generate signed `.aab` bundle, deploy `assetlinks.json`, generate $1024\times500$ banner and $512\times512$ store icon, and prepare `/privacy.html`. | 🟠 ~30–45 mins |
-| **10** | **Item 1: Finish Google Sign-In** | Requires generating OAuth 2.0 Client ID in Google Cloud Console and setting authorized origins. | ⚪ External Credential |
+| **🥈 2** | **Item 16: 🔄 1-Tap Smart Ingredient Substitutions** | Modal swap popup with tested substitutions for milks, gums, proteins, and sweeteners with texture/macro delta hints. | 🟡 ~20–30 mins |
+| **🥉 3** | **Item 8: 🧊 "Pints in Freezer" Tracker & 16-Hr Timer** | New freezer inventory manager, 16-hour countdown calculation, status badges, and 1-tap spin logging. | 🟡 ~35–45 mins |
+| **4** | **Item 17: 🔔 Freeze Timer Push Notifications** | Web/Android notification trigger when 16-hour freeze timer reaches zero. *(Hooks into Item 8 & PWA)* | 🟡 ~25–35 mins |
+| **5** | **Item 11: 📦 Grocery PWA & Offline Support** | Web App Manifest, Service Worker offline caching strategy, and 1-click export to Apple Notes/Reminders/Keep. *(Prerequisite for Android App)* | 🟠 ~30–40 mins |
+| **6** | **Item 18: 🧪 "Build-A-Pint" Balancing Wizard** | 4-step custom recipe creator with real-time Creaminess Score (1-10) and auto-calculated macros. | 🟠 ~35–45 mins |
+| **7** | **Item 15: 👥 User Management & Tiered Recipe Access** | Admin portal, user database, Google auth role assignment, and category-based recipe gating/locks. | 🟠 ~40–50 mins |
+| **8** | **Item 14: 🤖 Google Play Store Android App (Bubblewrap)** | Generate signed `.aab` bundle, deploy `assetlinks.json`, generate $1024\times500$ banner and $512\times512$ store icon, and prepare `/privacy.html`. | 🟠 ~30–45 mins |
+| **9** | **Item 1: Finish Google Sign-In** | Requires generating OAuth 2.0 Client ID in Google Cloud Console and setting authorized origins. | ⚪ External Credential |

@@ -113,19 +113,30 @@
     vanilla_bean_paste: ['vanilla_extract', 'vanilla_extract_or_vanilla_bean_paste'],
     vanilla_extract: ['vanilla_bean_paste', 'vanilla_extract_or_vanilla_bean_paste'],
     oranges_or_orange_juice: ['oranges', 'orange_juice', 'oranges_or_orange_juice'],
-    peppermint_bark_chocolate_square_or_peppermint_candies: ['peppermint_candies', 'peppermint_bark', 'peppermint_bark_chocolate_square_or_peppermint_candies']
+    peppermint_bark_chocolate_square_or_peppermint_candies: ['peppermint_candies', 'peppermint_bark', 'peppermint_bark_chocolate_square_or_peppermint_candies'],
+    cinnamon: ['ground_cinnamon'],
+    ground_cinnamon: ['cinnamon'],
+    canned_pumpkin: ['pure_pumpkin'],
+    pure_pumpkin: ['canned_pumpkin'],
+    mini_reeses_pb_cups: ['reeses_pb_cups', 'peanut_butter_cups'],
+    reeses_pb_cups: ['mini_reeses_pb_cups', 'peanut_butter_cups'],
+    peanut_butter_cups: ['reeses_pb_cups', 'mini_reeses_pb_cups'],
+    toasted_mini_marshmallows: ['mini_marshmallows'],
+    mini_marshmallows: ['toasted_mini_marshmallows']
   };
 
   const CATEGORY_ICONS = {
     dairy_liquids: '🥛',
-    sweeteners_binders: '🍯',
     protein_powders: '🍦',
-    extracts_flavors: '🧂',
     pudding_mixes: '🍮',
+    sweeteners_binders: '🍯',
+    baking_powders: '🍫',
+    extracts_flavors: '🧂',
     syrups_sauces: '🥞',
-    produce_fruit: '🍓',
-    spices_seasonings: '🌿',
     nut_butters_spreads: '🥜',
+    produce_fruit: '🍓',
+    beverages_drinks: '☕',
+    spices_seasonings: '🌿',
     mixins_snacks: '🍪'
   };
 
@@ -201,15 +212,18 @@
       if (match && match.category) return match.category;
     }
 
-    if (/milk|cream|shake|yogurt|buttermilk/i.test(clean)) return 'dairy_liquids';
+    if (/cocoa powder|flour|oats|malted milk/i.test(clean)) return 'baking_powders';
+    if (/coffee|espresso|tea|matcha|dr pepper|root beer|sprite|lemonade/i.test(clean)) return 'beverages_drinks';
+    if (/protein shake|protein powder|pb fit|peanut butter powder/i.test(clean)) return 'protein_powders';
+    if (/creamer|milk|shake|yogurt|buttermilk|cheese|butter|egg/i.test(clean)) return 'dairy_liquids';
     if (/protein/i.test(clean)) return 'protein_powders';
     if (/pudding/i.test(clean)) return 'pudding_mixes';
     if (/syrup|sauce|ganache/i.test(clean)) return 'syrups_sauces';
     if (/sweetener|sugar|gum|stevia|allulose/i.test(clean)) return 'sweeteners_binders';
     if (/extract|flavor|emulsion|paste|coloring/i.test(clean)) return 'extracts_flavors';
-    if (/berry|fruit|apple|banana|mango|peach|lemon|lime|orange/i.test(clean)) return 'produce_fruit';
     if (/cinnamon|spice|nutmeg|salt|clove/i.test(clean)) return 'spices_seasonings';
-    if (/peanut butter|pb|nutella|spread|jam/i.test(clean)) return 'nut_butters_spreads';
+    if (/peanut butter|pb|nutella|spread|jam|marshmallow fluff|marshmallow creme|frosting/i.test(clean)) return 'nut_butters_spreads';
+    if (/berry|fruit|apple|banana|mango|peach|lemon|lime|orange|pumpkin/i.test(clean)) return 'produce_fruit';
     return 'mixins_snacks';
   }
 
@@ -1086,9 +1100,12 @@
 
       const inStockInCat = items.filter(it => pantryState.has(it.id)).length;
 
+      const catIcon = CATEGORY_ICONS[catKey] || '📦';
+
       groupEl.innerHTML = `
         <div class="category-header">
           <div class="category-header-title">
+            <span class="category-header-icon">${catIcon}</span>
             <span>${catLabel}</span>
           </div>
           <div class="category-header-right">
@@ -2960,10 +2977,12 @@
         'protein_powders',
         'pudding_mixes',
         'sweeteners_binders',
+        'baking_powders',
         'extracts_flavors',
-        'produce_fruit',
-        'nut_butters_spreads',
         'syrups_sauces',
+        'nut_butters_spreads',
+        'produce_fruit',
+        'beverages_drinks',
         'spices_seasonings',
         'mixins_snacks'
       ];

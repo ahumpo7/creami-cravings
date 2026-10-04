@@ -53,65 +53,78 @@ def categorize_ingredient(name):
         return 'syrups_sauces'
     if any(k in n for k in ['lorann cotton candy flavoring', "lorann's cookie butter emulsion"]):
         return 'extracts_flavors'
-    if n in ['matcha']:
-        return 'produce_fruit'
     if 'chocolate covered espresso beans' in n:
         return 'mixins_snacks'
+    if 'malted milk powder' in n:
+        return 'baking_powders'
+    if any(k in n for k in ['marshmallow creme', 'marshmallow fluff', 'protein frosting']):
+        return 'nut_butters_spreads'
         
-    # Check mixins_snacks keywords
+    # Check mixins_snacks keywords (cookies, candies, pastries, cereals, chips, nuts, etc.)
     if any(k in n for k in [
         'brownie', 'muffin', 'cookie', 'cookies', 'pastry', 'cereal', 'pebbles',
         'chips', 'cup', 'cups', 'candies', 'candy', 'bar', 'bars', 'treat', 'pie', 'crust',
         'wafer', 'wafers', 'graham', 'pretzel', 'pretzels', 'marshmallow', 'marshmallows',
-        'sprinkles', 'kataifi', 'oatmeal', 'oats', 'flour', 'almonds', 'pecans', 'walnuts',
+        'sprinkles', 'kataifi', 'oatmeal', 'almonds', 'pecans', 'walnuts',
         'pistachios', 'toffee', 'rolos', 'm&m', 'heath', 'bites', 'hormbles'
     ]):
         return 'mixins_snacks'
         
-    # dairy_liquids
-    if any(k in n for k in ['milk', 'protein shake', 'buttermilk', 'creamer', 'yogurt', 'cream cheese', 'mascarpone', 'reddi-wip', 'almond nog', 'eggnog']):
-        return 'dairy_liquids'
-        
-    # sweeteners_binders
-    if any(k in n for k in ['sweetener', 'xanthan gum']):
-        return 'sweeteners_binders'
-        
-    # protein_powders
-    if any(k in n for k in ['protein powder']):
+    # Protein Powders & Ready-to-drink shakes
+    if any(k in n for k in ['protein powder', 'protein shake', 'pb fit', 'peanut butter powder']):
         return 'protein_powders'
-        
-    # extracts_flavors
-    if any(k in n for k in ['extract', 'emulsion', 'flavoring', 'food coloring', 'vanilla bean paste']):
-        return 'extracts_flavors'
-        
-    # pudding_mixes
-    if any(k in n for k in ['pudding mix']):
-        return 'pudding_mixes'
-        
-    # syrups_sauces
+
+    # Cocoa & Baking Staples
+    if any(k in n for k in ['cocoa powder', 'flour', 'oats']):
+        return 'baking_powders'
+
+    # Syrups & Sauces (placed before spices so Salted Caramel Sauce/Syrup is categorized here)
     if any(k in n for k in ['syrup', 'sauce', 'ganache']):
         return 'syrups_sauces'
-        
-    # spices_seasonings
+
+    # Dairy creamers (placed before coffee so Coffee Creamer is dairy)
+    if 'creamer' in n:
+        return 'dairy_liquids'
+
+    # Coffee, Tea & Beverages
+    if any(k in n for k in [
+        'coffee', 'espresso', 'tea', 'matcha', 
+        'sprite zero', 'diet dr pepper', 'diet root beer', 'lemonade'
+    ]):
+        return 'beverages_drinks'
+
+    # Pudding Mixes
+    if 'pudding mix' in n:
+        return 'pudding_mixes'
+
+    # Sweeteners & Binders
+    if any(k in n for k in ['sweetener', 'xanthan gum']):
+        return 'sweeteners_binders'
+
+    # Extracts & Flavorings
+    if any(k in n for k in ['extract', 'emulsion', 'flavoring', 'food coloring', 'vanilla bean paste']):
+        return 'extracts_flavors'
+
+    # Spices & Seasonings
     if any(k in n for k in ['salt', 'cinnamon', 'nutmeg', 'clove', 'cayenne pepper']):
         return 'spices_seasonings'
 
-    # nut_butters_spreads
-    if any(k in n for k in ['peanut butter', 'pb fit', 'nutella', 'pistachio butter', 'jam']):
+    # Nut Butters & Spreads
+    if any(k in n for k in ['peanut butter', 'nutella', 'pistachio butter', 'jam']):
         return 'nut_butters_spreads'
 
-    # produce_fruit & beverages
+    # Dairy & Liquid Bases
+    if any(k in n for k in ['milk', 'buttermilk', 'creamer', 'yogurt', 'cream cheese', 'mascarpone', 'reddi-wip', 'almond nog', 'eggnog']):
+        return 'dairy_liquids'
+
+    # Fresh Produce & Fruits
     if any(k in n for k in [
         'apple', 'banana', 'berries', 'blueberry', 'blueberries', 'strawberry', 'strawberries',
         'raspberry', 'raspberries', 'cherries', 'cherry', 'mango', 'pineapple', 'peaches', 'peach',
-        'lemon', 'lime', 'orange', 'watermelon', 'grape', 'pumpkin',
-        'coffee', 'espresso', 'tea', 'sprite zero', 'diet dr pepper', 'diet root beer', 'lemonade'
+        'lemon', 'lime', 'orange', 'watermelon', 'grape', 'pumpkin'
     ]):
         return 'produce_fruit'
-        
-    if 'cocoa powder' in n:
-        return 'mixins_snacks'
-        
+
     return 'mixins_snacks'
 
 ingredients_master = []
@@ -361,15 +374,17 @@ with open(output_js, "w", encoding="utf-8") as f:
     # Categories definition
     f.write("const INGREDIENT_CATEGORIES = {\n")
     f.write('  dairy_liquids: "Milk & Liquid Bases",\n')
-    f.write('  sweeteners_binders: "Sweeteners & Binders",\n')
-    f.write('  protein_powders: "Protein Powders",\n')
-    f.write('  extracts_flavors: "Extracts & Flavorings",\n')
+    f.write('  protein_powders: "Protein Powders & Shakes",\n')
     f.write('  pudding_mixes: "Pudding Mixes",\n')
+    f.write('  sweeteners_binders: "Sweeteners & Binders",\n')
+    f.write('  baking_powders: "Cocoa & Baking Staples",\n')
+    f.write('  extracts_flavors: "Extracts & Flavorings",\n')
     f.write('  syrups_sauces: "Syrups & Sauces",\n')
-    f.write('  produce_fruit: "Fruits, Produce & Drinks",\n')
-    f.write('  spices_seasonings: "Spices & Seasonings",\n')
     f.write('  nut_butters_spreads: "Nut Butters & Spreads",\n')
-    f.write('  mixins_snacks: "Mix-Ins, Cookies & Snacks"\n')
+    f.write('  produce_fruit: "Fruits & Fresh Produce",\n')
+    f.write('  beverages_drinks: "Coffee, Tea & Beverages",\n')
+    f.write('  spices_seasonings: "Spices & Seasonings",\n')
+    f.write('  mixins_snacks: "Mix-Ins, Cookies & Candies"\n')
     f.write("};\n\n")
     
     # Ingredients Master
