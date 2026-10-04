@@ -4000,33 +4000,20 @@ body.modal-open .cookie-consent-banner {
     box-sizing: border-box !important;
   }
 
-  /* Header & Top Bar */
+  /* Header & Top Bar - Compact Single Row */
   .main-header {
-    margin-bottom: 22px;
-  }
-
-  .header-top-bar {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
     margin-bottom: 14px;
   }
 
-  .header-badge {
-    text-align: center;
-    font-size: 0.88rem;
-    font-weight: 700;
-    padding: 6px 14px;
-  }
-
   .header-top-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    margin-bottom: 18px;
-    gap: 10px;
-    flex-wrap: nowrap;
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    width: 100% !important;
+    margin-bottom: 10px;
+    gap: 8px;
+    flex-wrap: nowrap !important;
   }
 
   #authHeaderContainer {
@@ -4042,6 +4029,7 @@ body.modal-open .cookie-consent-banner {
     gap: 8px;
     width: auto;
     flex-wrap: nowrap;
+    flex-shrink: 0;
   }
 
   .header-desktop-only {
@@ -4059,13 +4047,13 @@ body.modal-open .cookie-consent-banner {
   .btn-header-icon,
   .btn-sound-toggle,
   .theme-toggle-btn {
-    width: 40px !important;
-    height: 40px !important;
-    min-width: 40px !important;
-    min-height: 40px !important;
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
     padding: 0 !important;
     border-radius: 50% !important;
-    font-size: 1.15rem;
+    font-size: 1.05rem;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -4077,58 +4065,65 @@ body.modal-open .cookie-consent-banner {
   }
 
   .btn-secondary-action {
-    padding: 0 14px;
-    font-size: 0.84rem;
+    padding: 0 12px;
+    font-size: 0.82rem;
     font-weight: 700;
-    height: 40px;
+    height: 36px;
   }
 
   .btn-google-signin {
-    padding: 0 14px;
-    font-size: 0.84rem;
+    padding: 0 12px;
+    font-size: 0.82rem;
     font-weight: 600;
-    height: 40px;
-    min-height: 40px;
+    height: 36px;
+    min-height: 36px;
+    gap: 6px;
+  }
+
+  .btn-google-signin .google-svg {
+    width: 15px;
+    height: 15px;
   }
 
   .user-profile-widget {
-    padding: 3px 10px 3px 5px;
-    height: 38px;
+    padding: 2px 8px 2px 4px;
+    height: 36px;
     gap: 6px;
   }
 
   .user-avatar-circle {
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
   }
 
   .user-name-text {
-    max-width: 80px;
-    font-size: 0.78rem;
+    max-width: 75px;
+    font-size: 0.76rem;
   }
 
-  /* Hero Content */
+  /* Hero Content - Sleek & Compact */
   .hero-content {
-    margin-bottom: 18px;
+    margin-bottom: 12px;
   }
 
   .hero-title {
-    font-size: 2.1rem;
+    font-size: 1.9rem;
     font-weight: 800;
-    line-height: 1.2;
-    margin-bottom: 8px;
+    line-height: 1.15;
+    margin-bottom: 4px;
   }
 
   .hero-subtitle {
-    font-size: 0.98rem;
-    line-height: 1.5;
+    font-size: 0.88rem;
+    line-height: 1.35;
+    margin-bottom: 4px;
   }
 
   /* Compact Stats Dashboard Bar */
   .stats-bar {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 10px;
-    margin-top: 18px;
+    margin-top: 12px;
     width: 100%;
     max-width: 100%;
     min-width: 0;
