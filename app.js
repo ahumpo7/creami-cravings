@@ -80,6 +80,168 @@
     ]
   };
 
+  // Common household staples / freebies excluded from grocery shopping lists
+  const SHOPPING_EXCLUDED_ITEMS = new Set([
+    'salt',
+    'water',
+    'cold_water',
+    'hot_water',
+    'warm_water',
+    'ice',
+    'ice_cubes',
+    'ice_water',
+    'tap_water',
+    'cooking_spray',
+    'spray'
+  ]);
+
+  // Known compound ingredient display aliases for clean grocery presentation
+  const INGREDIENT_DISPLAY_ALIASES = {
+    'Vanilla Extract Or Vanilla Bean Paste': 'Vanilla Extract (or Bean Paste)',
+    'Peppermint Bark Chocolate Square Or Peppermint Candies': 'Peppermint Bark (or Candies)',
+    'Oranges Or Orange Juice': 'Oranges (or Orange Juice)',
+    'Lemon Zest & Juice': 'Fresh Lemons (Zest & Juice)',
+    'Frozen Berries Of Choice': 'Frozen Berries (Your Choice)',
+    'Fruit Of Your Choice': 'Fresh Fruit (Your Choice)',
+    'Nuts Of Choice': 'Mixed Nuts (Your Choice)',
+    'Mini Lucky-Charms-Style Marshmallows': 'Mini Cereal Marshmallows'
+  };
+
+  // Interchangeable ingredients in pantry matcher
+  const INGREDIENT_EQUIVALENTS = {
+    vanilla_extract_or_vanilla_bean_paste: ['vanilla_extract', 'vanilla_bean_paste'],
+    vanilla_bean_paste: ['vanilla_extract', 'vanilla_extract_or_vanilla_bean_paste'],
+    vanilla_extract: ['vanilla_bean_paste', 'vanilla_extract_or_vanilla_bean_paste'],
+    oranges_or_orange_juice: ['oranges', 'orange_juice', 'oranges_or_orange_juice'],
+    peppermint_bark_chocolate_square_or_peppermint_candies: ['peppermint_candies', 'peppermint_bark', 'peppermint_bark_chocolate_square_or_peppermint_candies']
+  };
+
+  const CATEGORY_ICONS = {
+    dairy_liquids: '🥛',
+    sweeteners_binders: '🍯',
+    protein_powders: '🍦',
+    extracts_flavors: '🧂',
+    pudding_mixes: '🍮',
+    syrups_sauces: '🥞',
+    produce_fruit: '🍓',
+    spices_seasonings: '🌿',
+    nut_butters_spreads: '🥜',
+    mixins_snacks: '🍪'
+  };
+
+  function isShoppingExcluded(itemOrName) {
+    if (!itemOrName) return true;
+    let id = '';
+    let name = '';
+    if (typeof itemOrName === 'string') {
+      name = itemOrName.toLowerCase().trim();
+      id = name.replace(/[^a-z0-9]+/g, '_').trim();
+    } else {
+      id = (itemOrName.id || '').toLowerCase().trim();
+      name = (itemOrName.name || '').toLowerCase().trim();
+    }
+
+    if (SHOPPING_EXCLUDED_ITEMS.has(id)) return true;
+
+    if (/^(water|cold water|hot water|warm water|tap water|ice|ice cubes|ice water|cooking spray|salt|table salt|pinch of salt|a pinch of salt)$/i.test(name)) {
+      return true;
+    }
+
+    return false;
+  }
+
+  function sanitizeShoppingItemName(name) {
+    if (!name || typeof name !== 'string') return '';
+    let s = name.trim();
+    if (INGREDIENT_DISPLAY_ALIASES[s]) return INGREDIENT_DISPLAY_ALIASES[s];
+
+    s = s.replace(/\(code[^\)]*\)/gi, '');
+    s = s.replace(/\((mix-in|base|topping|optional|garnish|divided)\)/gi, '');
+    s = s.replace(/^(optional|mix-in|topping|garnish|base):\s*/gi, '');
+    s = s.replace(/^(\d+[\/\-]\d+|\d+(\.\d+)?|a pinch of|a dash of|a splash of)\s*(cups?|c|tbsp|tsp|tbs|t|scoops?|scoop|grams?|g|oz|ml|fl\s*oz|can|cans|pinch|dash|drop|drops)?\s*(of)?\s*/gi, '');
+    s = s.replace(/,\s*(crumbled|melted|chopped|divided|crushed|to taste|for topping|as needed).*$/gi, '');
+    s = s.replace(/\s*\((crumbled|melted|chopped|divided|crushed|optional).*?\)/gi, '');
+    s = s.trim();
+
+    const masterMatch = (typeof INGREDIENTS_MASTER !== 'undefined' && Array.isArray(INGREDIENTS_MASTER)) 
+      ? INGREDIENTS_MASTER.find(i => i.name.toLowerCase() === s.toLowerCase())
+      : null;
+    if (masterMatch) return masterMatch.name;
+
+    if (s === s.toLowerCase() || s === s.toUpperCase()) {
+      s = s.replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+    }
+    return s;
+  }
+
+  function isItemInPantry(ing) {
+    if (!ing) return false;
+    const id = typeof ing === 'string' ? ing : (ing.id || '');
+    if (!id) return false;
+    if (pantryState.has(id)) return true;
+    const equivs = INGREDIENT_EQUIVALENTS[id];
+    if (equivs && equivs.some(eqId => pantryState.has(eqId))) return true;
+
+    const rawName = typeof ing === 'object' ? (ing.name || '') : ing;
+    if (rawName && typeof INGREDIENTS_MASTER !== 'undefined') {
+      const clean = sanitizeShoppingItemName(rawName).toLowerCase();
+      const masterMatch = INGREDIENTS_MASTER.find(m => m.name.toLowerCase() === clean);
+      if (masterMatch && pantryState.has(masterMatch.id)) return true;
+    }
+
+    return false;
+  }
+
+  function getIngredientCategoryKey(nameOrId) {
+    if (!nameOrId) return 'mixins_snacks';
+    const clean = sanitizeShoppingItemName(nameOrId).toLowerCase();
+    const id = clean.replace(/[^a-z0-9]+/g, '_').trim();
+    if (typeof INGREDIENTS_MASTER !== 'undefined') {
+      const match = INGREDIENTS_MASTER.find(i => i.id === id || i.name.toLowerCase() === clean);
+      if (match && match.category) return match.category;
+    }
+
+    if (/milk|cream|shake|yogurt|buttermilk/i.test(clean)) return 'dairy_liquids';
+    if (/protein/i.test(clean)) return 'protein_powders';
+    if (/pudding/i.test(clean)) return 'pudding_mixes';
+    if (/syrup|sauce|ganache/i.test(clean)) return 'syrups_sauces';
+    if (/sweetener|sugar|gum|stevia|allulose/i.test(clean)) return 'sweeteners_binders';
+    if (/extract|flavor|emulsion|paste|coloring/i.test(clean)) return 'extracts_flavors';
+    if (/berry|fruit|apple|banana|mango|peach|lemon|lime|orange/i.test(clean)) return 'produce_fruit';
+    if (/cinnamon|spice|nutmeg|salt|clove/i.test(clean)) return 'spices_seasonings';
+    if (/peanut butter|pb|nutella|spread|jam/i.test(clean)) return 'nut_butters_spreads';
+    return 'mixins_snacks';
+  }
+
+  function markShoppingItemAsBought(ingName) {
+    if (!ingName) return;
+    const cleanName = sanitizeShoppingItemName(ingName);
+    let masterMatch = null;
+    if (typeof INGREDIENTS_MASTER !== 'undefined') {
+      masterMatch = INGREDIENTS_MASTER.find(i => i.name.toLowerCase() === cleanName.toLowerCase());
+      if (!masterMatch) masterMatch = INGREDIENTS_MASTER.find(i => i.name.toLowerCase() === ingName.toLowerCase());
+      if (!masterMatch) {
+        const slug = cleanName.toLowerCase().replace(/[^a-z0-9]+/g, '_').trim();
+        masterMatch = INGREDIENTS_MASTER.find(i => i.id === slug);
+      }
+    }
+
+    if (masterMatch) {
+      pantryState.add(masterMatch.id);
+    } else {
+      const customSlug = cleanName.toLowerCase().replace(/[^a-z0-9]+/g, '_').trim();
+      pantryState.add(customSlug);
+    }
+
+    manualShoppingList.delete(ingName);
+    manualShoppingList.delete(cleanName);
+    savePantry();
+    saveManualShoppingList();
+    renderPantryList();
+    renderRecipes();
+    triggerCloudSync();
+  }
+
   // State
   let pantryState = new Set();
   let favoritesState = new Set();
@@ -194,6 +356,7 @@
   const shoppingListBadge = document.getElementById('shoppingListBadge');
   const copyShoppingListBtn = document.getElementById('copyShoppingListBtn');
   const printShoppingListBtn = document.getElementById('printShoppingListBtn');
+  const clearShoppingListBtn = document.getElementById('clearShoppingListBtn');
   
   const customRecipeModalOverlay = document.getElementById('customRecipeModalOverlay');
   const customModalCloseBtn = document.getElementById('customModalCloseBtn');
@@ -302,7 +465,16 @@
     const savedShop = localStorage.getItem(MANUAL_SHOPPING_STORAGE_KEY);
     if (savedShop) {
       try {
-        manualShoppingList = new Set(JSON.parse(savedShop));
+        const parsed = JSON.parse(savedShop);
+        if (Array.isArray(parsed)) {
+          manualShoppingList = new Set(
+            parsed
+              .filter(item => !isShoppingExcluded(item))
+              .map(item => sanitizeShoppingItemName(item))
+          );
+        } else {
+          manualShoppingList = new Set();
+        }
       } catch (e) {
         manualShoppingList = new Set();
       }
@@ -569,7 +741,11 @@
       customRecipesState = [];
     }
     if (data.user.shoppingList && data.user.shoppingList.length > 0) {
-      data.user.shoppingList.forEach(item => manualShoppingList.add(item));
+      data.user.shoppingList.forEach(item => {
+        if (!isShoppingExcluded(item)) {
+          manualShoppingList.add(sanitizeShoppingItemName(item));
+        }
+      });
       saveManualShoppingList();
     }
 
@@ -1025,7 +1201,7 @@
     const missing = [];
 
     ingredients.forEach(ing => {
-      const hasItem = pantryState.has(ing.id);
+      const hasItem = isItemInPantry(ing);
       if (ing.isMixin) {
         // mixin
       } else {
@@ -1285,7 +1461,7 @@
     const ings = recipe.ingredients || [];
     ingItems.forEach((item, idx) => {
       if (ings[idx]) {
-        const has = pantryState.has(ings[idx].id);
+        const has = isItemInPantry(ings[idx]);
         item.className = `card-ing-item ${has ? 'has' : 'miss'}`;
         const statusSpan = item.querySelector('.card-ing-status');
         if (statusSpan) {
@@ -1421,7 +1597,7 @@
 
         <div class="card-ingredients-preview">
           ${previewIngs.map(ing => {
-            const has = pantryState.has(ing.id);
+            const has = isItemInPantry(ing);
             return `
               <div class="card-ing-item ${has ? 'has' : 'miss'}">
                 <span class="card-ing-status ${has ? 'has' : 'miss'}">${has ? '✓' : '○'}</span>
@@ -2310,7 +2486,7 @@
         e.stopPropagation();
         const ingId = btn.dataset.id;
         togglePantryItem(ingId);
-        const inPantry = pantryState.has(ingId);
+        const inPantry = isItemInPantry(ingId);
         btn.className = `modal-ing-toggle-btn ${inPantry ? 'in-pantry' : ''}`;
         btn.textContent = inPantry ? '✓ In Pantry' : '+ In Stock';
         btn.closest('.modal-ing-row').className = `modal-ing-row ${inPantry ? 'in-pantry' : ''}`;
@@ -2324,7 +2500,7 @@
             <span style="font-size: 1.3rem;">${newMatch.isReady ? '🎉' : '🛒'}</span>
             <div style="flex: 1;">
               <strong>${newMatch.isReady ? 'You have all ingredients ready!' : `Missing ${newMatch.missing.length} item${newMatch.missing.length > 1 ? 's' : ''}:`}</strong>
-              <div>${newMatch.isReady ? 'Blend up your base, freeze solid for 16-24 hrs, and get spinning!' : newMatch.missing.map(m => m.name).join(', ')}</div>
+              <div>${newMatch.isReady ? 'Blend up your base, freeze solid for 16-24 hrs, and get spinning!' : newMatch.missing.map(m => sanitizeShoppingItemName(m.name)).join(', ')}</div>
               ${!newMatch.isReady && newMatch.missing.length > 0 ? `
                 <button class="btn-add-all-missing" id="btnAddAllMissingBtn">🛒 Add All Missing to Grocery List</button>
               ` : ''}
@@ -2333,9 +2509,14 @@
           const addAllBtn = callout.querySelector('#btnAddAllMissingBtn');
           if (addAllBtn) {
             addAllBtn.addEventListener('click', () => {
-              newMatch.missing.forEach(m => manualShoppingList.add(m.name));
+              const cleanMissing = newMatch.missing.filter(m => !isShoppingExcluded(m));
+              if (cleanMissing.length === 0) {
+                showToast('✅ All needed grocery items are already in stock!');
+                return;
+              }
+              cleanMissing.forEach(m => manualShoppingList.add(sanitizeShoppingItemName(m.name)));
               saveManualShoppingList();
-              showToast(`🛒 Added ${newMatch.missing.length} items to shopping list`);
+              showToast(`🛒 Added ${cleanMissing.length} items to shopping list`);
               renderRecipeModalContent(recipe);
             });
           }
@@ -2347,17 +2528,19 @@
     recipeModalBody.querySelectorAll('.modal-ing-shop-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        const ingName = btn.dataset.name;
-        if (manualShoppingList.has(ingName)) {
-          manualShoppingList.delete(ingName);
+        const rawName = btn.dataset.name;
+        const cleanName = sanitizeShoppingItemName(rawName);
+        if (manualShoppingList.has(cleanName) || manualShoppingList.has(rawName)) {
+          manualShoppingList.delete(cleanName);
+          manualShoppingList.delete(rawName);
           btn.className = 'modal-ing-shop-btn';
           btn.textContent = '🛒 + List';
-          showToast(`Removed "${ingName}" from shopping list`);
+          showToast(`Removed "${cleanName}" from shopping list`);
         } else {
-          manualShoppingList.add(ingName);
+          manualShoppingList.add(cleanName);
           btn.className = 'modal-ing-shop-btn in-list';
           btn.textContent = '✓ On List';
-          showToast(`🛒 Added "${ingName}" to shopping list!`);
+          showToast(`🛒 Added "${cleanName}" to shopping list!`);
         }
         saveManualShoppingList();
       });
@@ -2368,9 +2551,14 @@
     if (addAllBtn) {
       addAllBtn.addEventListener('click', () => {
         const match = computeRecipeMatch(recipe);
-        match.missing.forEach(m => manualShoppingList.add(m.name));
+        const cleanMissing = match.missing.filter(m => !isShoppingExcluded(m));
+        if (cleanMissing.length === 0) {
+          showToast('✅ All needed grocery items are already in stock!');
+          return;
+        }
+        cleanMissing.forEach(m => manualShoppingList.add(sanitizeShoppingItemName(m.name)));
         saveManualShoppingList();
-        showToast(`🛒 Added ${match.missing.length} items to shopping list!`);
+        showToast(`🛒 Added ${cleanMissing.length} items to shopping list!`);
         renderRecipeModalContent(recipe);
       });
     }
@@ -2603,15 +2791,16 @@
   }
 
   function renderModalIngredientRow(ing) {
-    const inPantry = pantryState.has(ing.id);
+    const inPantry = isItemInPantry(ing);
     const amountText = formatIngredientAmount(ing, modalScale, modalUnitMode);
     const subText = extractSubstitution(ing.notes);
-    const inShopList = manualShoppingList.has(ing.name);
+    const cleanName = sanitizeShoppingItemName(ing.name);
+    const inShopList = manualShoppingList.has(cleanName) || manualShoppingList.has(ing.name);
 
     return `
       <div class="modal-ing-row ${inPantry ? 'in-pantry' : ''}">
         <div class="modal-ing-info">
-          <div class="modal-ing-name">${ing.name}</div>
+          <div class="modal-ing-name">${cleanName}</div>
           ${subText ? `<div class="ing-sub-chip">💡 Swap: ${subText}</div>` : ''}
           ${ing.notes ? `<div class="modal-ing-notes">${ing.notes}</div>` : ''}
         </div>
@@ -2620,7 +2809,7 @@
             <span class="modal-ing-amount-label">${modalScale > 1 ? 'Deluxe Amt' : 'Amount'}</span>
             <span class="modal-ing-amount-val ${!amountText ? 'empty' : ''}">${amountText || 'As needed'}</span>
           </div>
-          <button class="modal-ing-shop-btn ${inShopList ? 'in-list' : ''}" data-name="${ing.name}" title="${inShopList ? 'Remove from shopping list' : 'Add to shopping list'}">
+          <button class="modal-ing-shop-btn ${inShopList ? 'in-list' : ''}" data-name="${cleanName}" title="${inShopList ? 'Remove from shopping list' : 'Add to shopping list'}">
             ${inShopList ? '✓ On List' : '🛒 + List'}
           </button>
           <button class="modal-ing-toggle-btn ${inPantry ? 'in-pantry' : ''}" data-id="${ing.id}">
@@ -2647,105 +2836,284 @@
 
   // --- Shopping List Modal ---
   function openShoppingListModal() {
-    const missingMap = new Map(); // ingName -> list of recipe names
+    // 1. Sanitize any legacy manual items first
+    let manualChanged = false;
+    const cleanManual = new Set();
+    manualShoppingList.forEach(rawItem => {
+      if (isShoppingExcluded(rawItem)) {
+        manualChanged = true;
+      } else {
+        const clean = sanitizeShoppingItemName(rawItem);
+        cleanManual.add(clean);
+        if (clean !== rawItem) manualChanged = true;
+      }
+    });
+    if (manualChanged) {
+      manualShoppingList = cleanManual;
+      saveManualShoppingList();
+    }
 
-    // Gather missing items from Favorites first, and then general ready-pending
-    const targetRecipes = allRecipes.filter(r => favoritesState.has(r.id) || computeRecipeMatch(r).missing.length <= 2);
+    // 2. Gather missing items from Favorited / Pinned recipes (primary list)
+    const favoritedMissingMap = new Map(); // cleanName -> { recipes: [], category: '' }
+    const favoritedRecipes = allRecipes.filter(r => favoritesState.has(r.id));
 
-    targetRecipes.forEach(r => {
+    favoritedRecipes.forEach(r => {
       const match = computeRecipeMatch(r);
       match.missing.forEach(m => {
-        if (!missingMap.has(m.name)) {
-          missingMap.set(m.name, []);
-        }
-        if (!missingMap.get(m.name).includes(r.name)) {
-          missingMap.get(m.name).push(r.name);
+        if (!isShoppingExcluded(m)) {
+          const cleanName = sanitizeShoppingItemName(m.name);
+          if (!favoritedMissingMap.has(cleanName)) {
+            favoritedMissingMap.set(cleanName, {
+              recipes: [],
+              category: getIngredientCategoryKey(m.name)
+            });
+          }
+          const entry = favoritedMissingMap.get(cleanName);
+          if (!entry.recipes.includes(r.name)) {
+            entry.recipes.push(r.name);
+          }
         }
       });
     });
 
-    const manualItems = Array.from(manualShoppingList);
-    const hasItems = manualItems.length > 0 || missingMap.size > 0;
+    // 3. Gather almost-ready suggestions (recipes missing 1-2 items, not favorited)
+    const suggestedMissingMap = new Map(); // cleanName -> { recipes: [], category: '' }
+    const almostReadyRecipes = allRecipes.filter(r => !favoritesState.has(r.id) && computeRecipeMatch(r).missing.length <= 2 && computeRecipeMatch(r).missing.length > 0);
 
-    if (!hasItems) {
-      shoppingModalBody.innerHTML = `
-        <div style="text-align: center; padding: 40px 10px;">
-          <div style="font-size: 3rem; margin-bottom: 12px;">🎉</div>
-          <h3 style="font-family: var(--font-heading); font-size: 1.3rem; margin-bottom: 8px;">Your Shopping List is Empty!</h3>
-          <p style="color: var(--text-muted); font-size: 0.95rem;">You have all ingredients needed for your target recipes, or haven't added any items to your grocery list yet.</p>
+    almostReadyRecipes.forEach(r => {
+      const match = computeRecipeMatch(r);
+      match.missing.forEach(m => {
+        if (!isShoppingExcluded(m)) {
+          const cleanName = sanitizeShoppingItemName(m.name);
+          // Only suggest if not already in manual or favorited lists
+          if (!manualShoppingList.has(cleanName) && !favoritedMissingMap.has(cleanName)) {
+            if (!suggestedMissingMap.has(cleanName)) {
+              suggestedMissingMap.set(cleanName, {
+                recipes: [],
+                category: getIngredientCategoryKey(m.name)
+              });
+            }
+            const entry = suggestedMissingMap.get(cleanName);
+            if (!entry.recipes.includes(r.name)) {
+              entry.recipes.push(r.name);
+            }
+          }
+        }
+      });
+    });
+
+    // 4. Combine manual items and favorited missing into grouped grocery items
+    const groupedGroceries = {}; // catKey -> [ { name, source, isManual } ]
+    
+    // Add manual items
+    manualShoppingList.forEach(name => {
+      const cat = getIngredientCategoryKey(name);
+      if (!groupedGroceries[cat]) groupedGroceries[cat] = [];
+      groupedGroceries[cat].push({
+        name: name,
+        source: 'Added to your list',
+        isManual: true
+      });
+    });
+
+    // Add favorited missing items (if not already added as manual)
+    favoritedMissingMap.forEach((data, name) => {
+      if (!manualShoppingList.has(name)) {
+        const cat = data.category || getIngredientCategoryKey(name);
+        if (!groupedGroceries[cat]) groupedGroceries[cat] = [];
+        const recList = data.recipes.slice(0, 3).join(', ') + (data.recipes.length > 3 ? ` + ${data.recipes.length - 3} more` : '');
+        groupedGroceries[cat].push({
+          name: name,
+          source: `Needed for: ${recList}`,
+          isManual: false
+        });
+      }
+    });
+
+    const totalPrimaryItems = Object.values(groupedGroceries).reduce((acc, list) => acc + list.length, 0);
+
+    // Build Modal HTML
+    let html = `
+      <div class="shopping-quick-add-wrap">
+        <input type="text" id="shopQuickAddInput" class="shopping-quick-add-input" placeholder="Quick add grocery item (e.g. Fairlife 2% Milk)..." />
+        <button type="button" id="shopQuickAddBtn" class="btn-xs btn-primary">+ Add</button>
+      </div>
+    `;
+
+    if (totalPrimaryItems === 0) {
+      html += `
+        <div class="shopping-empty-state">
+          <div style="font-size: 2.8rem; margin-bottom: 10px;">🛒</div>
+          <h3>Your Grocery List is Empty</h3>
+          <p>Star recipes you plan to make to track their missing ingredients automatically, or type items above to add them to your list.</p>
         </div>
       `;
     } else {
-      let html = '<div class="shopping-list-items">';
+      html += '<div class="shopping-list-items">';
+      
+      // Render sorted categories
+      const categoryOrder = [
+        'dairy_liquids',
+        'protein_powders',
+        'pudding_mixes',
+        'sweeteners_binders',
+        'extracts_flavors',
+        'produce_fruit',
+        'nut_butters_spreads',
+        'syrups_sauces',
+        'spices_seasonings',
+        'mixins_snacks'
+      ];
 
-      // Manual items first
-      if (manualItems.length > 0) {
-        html += `<div style="font-size: 0.8rem; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.05em; margin: 4px 0 6px;">Items Added by You (${manualItems.length})</div>`;
-        manualItems.forEach(name => {
-          html += `
-            <div class="shopping-item-row" data-name="${name}">
-              <div>
-                <div class="shopping-item-name">${name}</div>
-                <div class="shopping-item-recipes">Added from recipe details</div>
-              </div>
-              <div style="display: flex; gap: 8px;">
-                <button class="btn-xs btn-outline add-bought-btn" data-name="${name}">+ In Stock</button>
-                <button class="btn-xs remove-shop-item-btn" data-name="${name}" style="background: transparent; border: 1px solid var(--border-glass); color: var(--text-dim); border-radius: var(--radius-sm); cursor: pointer;" title="Remove from list">✕</button>
-              </div>
+      // Add any custom or remaining categories
+      Object.keys(groupedGroceries).forEach(cat => {
+        if (!categoryOrder.includes(cat)) categoryOrder.push(cat);
+      });
+
+      categoryOrder.forEach(catKey => {
+        const items = groupedGroceries[catKey];
+        if (!items || items.length === 0) return;
+
+        const catTitle = INGREDIENT_CATEGORIES[catKey] || 'Other Groceries';
+        const catIcon = CATEGORY_ICONS[catKey] || '🛒';
+
+        html += `
+          <div class="shopping-category-group">
+            <div class="shopping-category-header">
+              <span class="shopping-cat-icon">${catIcon}</span>
+              <span class="shopping-cat-title">${catTitle}</span>
+              <span class="shopping-cat-count">${items.length}</span>
             </div>
-          `;
-        });
-      }
-
-      // Missing items next
-      if (missingMap.size > 0) {
-        html += `<div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin: 14px 0 6px;">Missing from Selected Recipes (${missingMap.size})</div>`;
-        Array.from(missingMap.entries()).forEach(([ingName, recipes]) => {
-          if (!manualShoppingList.has(ingName)) {
-            html += `
-              <div class="shopping-item-row" data-name="${ingName}">
-                <div>
-                  <div class="shopping-item-name">${ingName}</div>
-                  <div class="shopping-item-recipes">Needed for: ${recipes.slice(0, 3).join(', ')}${recipes.length > 3 ? ` + ${recipes.length - 3} more` : ''}</div>
+            <div class="shopping-category-items">
+              ${items.map(item => `
+                <div class="shopping-item-row" data-name="${item.name}">
+                  <div class="shopping-item-left">
+                    <button type="button" class="shopping-item-check-btn add-bought-btn" data-name="${item.name}" title="Mark as bought (+ In Stock)">
+                      <span class="shop-check-box"></span>
+                    </button>
+                    <div style="min-width: 0;">
+                      <div class="shopping-item-name">${item.name}</div>
+                      <div class="shopping-item-recipes" title="${item.source}">${item.source}</div>
+                    </div>
+                  </div>
+                  <div class="shopping-item-actions">
+                    <button type="button" class="btn-xs btn-outline add-bought-btn" data-name="${item.name}">+ In Stock</button>
+                    ${item.isManual ? `<button type="button" class="btn-xs remove-shop-item-btn" data-name="${item.name}" style="background: transparent; border: 1px solid var(--border-glass); color: var(--text-dim); border-radius: var(--radius-sm); cursor: pointer;" title="Remove from list">✕</button>` : ''}
+                  </div>
                 </div>
-                <button class="btn-xs btn-outline add-bought-btn" data-name="${ingName}">+ In Stock</button>
-              </div>
-            `;
-          }
-        });
-      }
+              `).join('')}
+            </div>
+          </div>
+        `;
+      });
 
       html += '</div>';
-      shoppingModalBody.innerHTML = html;
+    }
 
-      // Event listeners in shopping modal
-      shoppingModalBody.querySelectorAll('.add-bought-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const ingName = btn.dataset.name;
-          const matchItem = INGREDIENTS_MASTER.find(i => i.name === ingName);
-          if (matchItem) {
-            togglePantryItem(matchItem.id);
-            manualShoppingList.delete(ingName);
-            saveManualShoppingList();
-            btn.textContent = '✓ Added to Pantry';
-            btn.style.borderColor = 'var(--success)';
-            btn.style.color = 'var(--success)';
-            setTimeout(() => {
-              openShoppingListModal();
-            }, 500);
-          }
-        });
+    // Render suggestions section if available
+    const suggestedEntries = Array.from(suggestedMissingMap.entries());
+    if (suggestedEntries.length > 0) {
+      html += `
+        <div class="shopping-suggestions-card">
+          <button type="button" class="shopping-suggestions-toggle" id="shopSuggestionsToggle">
+            <span>💡 Recipes You Can Make with 1 More Item (${almostReadyRecipes.length} recipes)</span>
+            <span class="toggle-arrow" id="shopSuggestionsArrow">▾</span>
+          </button>
+          <div class="shopping-suggestions-content" id="shopSuggestionsContent" style="display: none;">
+            ${suggestedEntries.slice(0, 15).map(([ingName, data]) => {
+              const recList = data.recipes.slice(0, 2).join(', ') + (data.recipes.length > 2 ? ` + ${data.recipes.length - 2} more` : '');
+              return `
+                <div class="shopping-suggested-row">
+                  <div>
+                    <div class="shopping-suggested-name">${ingName}</div>
+                    <div class="shopping-suggested-reason">Unlocks: ${recList}</div>
+                  </div>
+                  <button type="button" class="btn-xs btn-primary add-suggestion-btn" data-name="${ingName}">+ Add to List</button>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    shoppingModalBody.innerHTML = html;
+
+    // Attach Event Listeners inside Shopping Modal
+    // 1. Mark as Bought (+ In Stock)
+    shoppingModalBody.querySelectorAll('.add-bought-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const ingName = btn.dataset.name;
+        markShoppingItemAsBought(ingName);
+        showToast(`✓ "${ingName}" added to pantry!`);
+        openShoppingListModal();
       });
+    });
 
-      shoppingModalBody.querySelectorAll('.remove-shop-item-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const ingName = btn.dataset.name;
-          manualShoppingList.delete(ingName);
-          saveManualShoppingList();
-          openShoppingListModal();
-        });
+    // 2. Remove Manual Item
+    shoppingModalBody.querySelectorAll('.remove-shop-item-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const ingName = btn.dataset.name;
+        manualShoppingList.delete(ingName);
+        manualShoppingList.delete(sanitizeShoppingItemName(ingName));
+        saveManualShoppingList();
+        openShoppingListModal();
+        showToast(`Removed "${ingName}" from shopping list`);
+      });
+    });
+
+    // 3. Quick Add Custom Item
+    const quickInput = shoppingModalBody.querySelector('#shopQuickAddInput');
+    const quickBtn = shoppingModalBody.querySelector('#shopQuickAddBtn');
+    const handleQuickAdd = () => {
+      if (!quickInput) return;
+      const rawVal = quickInput.value.trim();
+      if (!rawVal) return;
+      if (isShoppingExcluded(rawVal)) {
+        showToast(`"${rawVal}" is a common household staple and is already excluded`);
+        quickInput.value = '';
+        return;
+      }
+      const cleanVal = sanitizeShoppingItemName(rawVal);
+      manualShoppingList.add(cleanVal);
+      saveManualShoppingList();
+      showToast(`🛒 Added "${cleanVal}" to grocery list!`);
+      openShoppingListModal();
+    };
+
+    if (quickBtn && quickInput) {
+      quickBtn.addEventListener('click', handleQuickAdd);
+      quickInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          handleQuickAdd();
+        }
       });
     }
+
+    // 4. Toggle Suggestions Accordion
+    const suggToggle = shoppingModalBody.querySelector('#shopSuggestionsToggle');
+    const suggContent = shoppingModalBody.querySelector('#shopSuggestionsContent');
+    const suggArrow = shoppingModalBody.querySelector('#shopSuggestionsArrow');
+    if (suggToggle && suggContent) {
+      suggToggle.addEventListener('click', () => {
+        const isOpen = suggContent.style.display !== 'none';
+        suggContent.style.display = isOpen ? 'none' : 'flex';
+        if (suggArrow) suggArrow.textContent = isOpen ? '▾' : '▴';
+      });
+    }
+
+    // 5. Add Suggestion to Primary List
+    shoppingModalBody.querySelectorAll('.add-suggestion-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const ingName = btn.dataset.name;
+        const clean = sanitizeShoppingItemName(ingName);
+        manualShoppingList.add(clean);
+        saveManualShoppingList();
+        showToast(`🛒 Added "${clean}" to your grocery list!`);
+        openShoppingListModal();
+      });
+    });
 
     shoppingModalOverlay.classList.add('active');
     shoppingModalOverlay.setAttribute('aria-hidden', 'false');
@@ -2758,17 +3126,47 @@
     document.body.style.overflow = '';
   }
 
+  function clearShoppingList() {
+    if (manualShoppingList.size === 0) {
+      showToast('Manual shopping list is already empty');
+      return;
+    }
+    const count = manualShoppingList.size;
+    manualShoppingList.clear();
+    saveManualShoppingList();
+    openShoppingListModal();
+    showToast(`🗑️ Cleared ${count} manual item${count === 1 ? '' : 's'} from shopping list`);
+  }
+
   function updateShoppingListBadge() {
-    let missingTotal = manualShoppingList.size;
+    let missingTotal = 0;
     const seen = new Set();
-    allRecipes.filter(r => favoritesState.has(r.id)).forEach(r => {
-      computeRecipeMatch(r).missing.forEach(m => {
-        if (!seen.has(m.id) && !manualShoppingList.has(m.name)) {
-          seen.add(m.id);
+
+    // Count manual items
+    manualShoppingList.forEach(rawItem => {
+      if (!isShoppingExcluded(rawItem)) {
+        const clean = sanitizeShoppingItemName(rawItem);
+        if (!seen.has(clean)) {
+          seen.add(clean);
           missingTotal++;
+        }
+      }
+    });
+
+    // Count missing from favorited recipes
+    allRecipes.filter(r => favoritesState.has(r.id)).forEach(r => {
+      const match = computeRecipeMatch(r);
+      match.missing.forEach(m => {
+        if (!isShoppingExcluded(m)) {
+          const cleanName = sanitizeShoppingItemName(m.name);
+          if (!seen.has(cleanName)) {
+            seen.add(cleanName);
+            missingTotal++;
+          }
         }
       });
     });
+
     if (shoppingListBadge) shoppingListBadge.textContent = missingTotal;
     const navShopBadge = document.getElementById('navShopBadge');
     if (navShopBadge) {
@@ -2778,14 +3176,29 @@
   }
 
   function copyShoppingList() {
-    const items = shoppingModalBody.querySelectorAll('.shopping-item-name');
-    if (items.length === 0) {
+    const categoryGroups = shoppingModalBody.querySelectorAll('.shopping-category-group');
+    if (categoryGroups.length === 0) {
       showToast('Shopping list is empty');
       return;
     }
-    const listText = Array.from(items).map(i => `• ${i.textContent}`).join('\n');
-    navigator.clipboard.writeText(`🛒 Creami Cravings Grocery List:\n${listText}`).then(() => {
-      showToast('📋 Copied shopping list to clipboard!');
+
+    let listText = '🛒 Creami Cravings Grocery List:\n';
+    categoryGroups.forEach(grp => {
+      const title = grp.querySelector('.shopping-cat-title')?.textContent || 'Groceries';
+      const icon = grp.querySelector('.shopping-cat-icon')?.textContent || '🛒';
+      const items = Array.from(grp.querySelectorAll('.shopping-item-name')).map(n => n.textContent.trim());
+      if (items.length > 0) {
+        listText += `\n${icon} ${title}:\n`;
+        items.forEach(it => {
+          listText += `  • ${it}\n`;
+        });
+      }
+    });
+
+    navigator.clipboard.writeText(listText.trim()).then(() => {
+      showToast('📋 Copied organized grocery list to clipboard!');
+    }).catch(() => {
+      showToast('Failed to copy list to clipboard');
     });
   }
 
@@ -2834,11 +3247,15 @@
 
     const parsedIngs = ingredientsRaw.map(line => {
       const isMixin = line.toLowerCase().includes('(mix-in)');
-      const cleanLine = line.replace(/\(mix-in\)/gi, '').trim();
-      const slugId = cleanLine.toLowerCase().replace(/[^a-z0-9]+/g, '_').trim();
+      const cleanLine = sanitizeShoppingItemName(line);
+      let masterMatch = null;
+      if (typeof INGREDIENTS_MASTER !== 'undefined' && Array.isArray(INGREDIENTS_MASTER)) {
+        masterMatch = INGREDIENTS_MASTER.find(i => i.name.toLowerCase() === cleanLine.toLowerCase());
+      }
+      const slugId = masterMatch ? masterMatch.id : cleanLine.toLowerCase().replace(/[^a-z0-9]+/g, '_').trim();
       return {
         id: slugId,
-        name: cleanLine,
+        name: masterMatch ? masterMatch.name : cleanLine,
         quantity: '',
         unit: '',
         raw: line.trim(),
@@ -3222,6 +3639,7 @@
     if (openShoppingListBtn) openShoppingListBtn.addEventListener('click', openShoppingListModal);
     if (copyShoppingListBtn) copyShoppingListBtn.addEventListener('click', copyShoppingList);
     if (printShoppingListBtn) printShoppingListBtn.addEventListener('click', printShoppingList);
+    if (clearShoppingListBtn) clearShoppingListBtn.addEventListener('click', clearShoppingList);
 
     if (addCustomRecipeBtn) addCustomRecipeBtn.addEventListener('click', openCustomRecipeModal);
     if (customModalCloseBtn) customModalCloseBtn.addEventListener('click', closeCustomRecipeModal);

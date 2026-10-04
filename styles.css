@@ -1781,30 +1781,222 @@ body::before {
 .shopping-list-items {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin: 16px 0;
-  max-height: 50vh;
+  gap: 12px;
+  margin: 12px 0 16px;
+  max-height: 55vh;
   overflow-y: auto;
+  padding-right: 4px;
+}
+
+.shopping-quick-add-wrap {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  align-items: center;
+}
+
+.shopping-quick-add-input {
+  flex: 1;
+  background: var(--bg-card);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-sm);
+  padding: 9px 13px;
+  color: var(--text-main);
+  font-size: 0.92rem;
+  font-family: inherit;
+  outline: none;
+  transition: all var(--transition-fast);
+}
+
+.shopping-quick-add-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-glow);
+}
+
+.shopping-category-group {
+  margin-bottom: 12px;
+}
+
+.shopping-category-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border-glass);
+}
+
+.shopping-cat-count {
+  margin-left: auto;
+  font-size: 0.72rem;
+  background: var(--bg-item);
+  border: 1px solid var(--border-glass);
+  padding: 1px 7px;
+  border-radius: 10px;
+  color: var(--text-dim);
+}
+
+.shopping-category-items {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .shopping-item-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 14px;
+  padding: 9px 12px;
   background: var(--bg-item);
   border-radius: var(--radius-sm);
   border: 1px solid var(--border-item);
+  transition: all var(--transition-fast);
+}
+
+.shopping-item-row:hover {
+  border-color: var(--border-hover);
+  background: var(--bg-hover);
+}
+
+.shopping-item-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.shopping-item-check-btn {
+  background: transparent;
+  border: none;
+  padding: 2px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.shop-check-box {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--text-dim);
+  border-radius: 4px;
+  display: inline-block;
+  transition: all var(--transition-fast);
+}
+
+.shopping-item-check-btn:hover .shop-check-box {
+  border-color: var(--primary);
+  background: var(--primary-glow);
 }
 
 .shopping-item-name {
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.93rem;
+  line-height: 1.25;
 }
 
 .shopping-item-recipes {
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   color: var(--text-dim);
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.shopping-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 8px;
+  flex-shrink: 0;
+}
+
+.shopping-suggestions-card {
+  margin-top: 16px;
+  border: 1px dashed var(--border-glass);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  overflow: hidden;
+}
+
+.shopping-suggestions-toggle {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 11px 14px;
+  background: transparent;
+  border: none;
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 0.84rem;
+  cursor: pointer;
+  text-align: left;
+}
+
+.shopping-suggestions-content {
+  padding: 8px 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 1px solid var(--border-glass);
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.shopping-suggested-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border-item);
+}
+
+.shopping-suggested-row:last-child {
+  border-bottom: none;
+}
+
+.shopping-suggested-name {
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+
+.shopping-suggested-reason {
+  font-size: 0.74rem;
+  color: var(--text-dim);
+}
+
+.shopping-empty-state {
+  text-align: center;
+  padding: 32px 14px;
+}
+
+.shopping-empty-state h3 {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  margin-bottom: 8px;
+}
+
+.shopping-empty-state p {
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.shopping-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 /* Toast Container */

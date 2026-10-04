@@ -21,10 +21,10 @@ A prioritized checklist of fixes, features, and refinements for the Creami Cravi
 - [ ] **Remove Seed Batches:** Reset total community batches from 540+ down to real organic user data (or 0).
 - [ ] **Fresh Rankings:** Allow recipe popularities and star ratings to grow organically from real user logs and ratings.
 
-### 4. Fix Shopping List Populating "Weird Things"
-- [ ] **Sanitize Missing Items:** Review missing ingredient extraction logic in `app.js` to prevent non-standard items, compound instructions, or un-slugged strings from entering the shopping list.
-- [ ] **Deduplication:** Ensure pantry staples, water, ice, and optional mix-ins don't inadvertently clutter the shopping list.
-- [ ] **Cleaner Display:** Clean ingredient display names so only recognizable grocery items appear in the shopping list modal.
+### 4. Fix Shopping List Populating "Weird Things" (Completed ✅)
+- [x] **Sanitize Missing Items:** Review missing ingredient extraction logic in `app.js` to prevent non-standard items, compound instructions, or un-slugged strings from entering the shopping list.
+- [x] **Deduplication & Staples Filter:** Common household staples (water, ice, tap water, salt, table salt, pinch of salt, cooking spray) are cleanly excluded from cluttering grocery shopping lists.
+- [x] **Clean Grocery Aisle Display:** Ingredient names are sanitized into recognizable grocery store items (e.g. `Vanilla Extract (or Bean Paste)`, `Peppermint Bark (or Candies)`), grouped with category aisle badges (Dairy, Mix-Ins, Produce, Pudding Mixes, etc.), equipped with 1-tap `+ In Stock` checkoff, quick custom item adder, and organized clipboard copy.
 
 ### 5. Remove "Pro Tip" Badge on All Recipe Screen (Completed ✅)
 - [x] **Card Streamlining:** Remove or hide the "Pro Tip" badge / banner from individual recipe cards in the main grid view.
@@ -144,13 +144,12 @@ A prioritized checklist of fixes, features, and refinements for the Creami Cravi
 | Rank | Task | Why & Scope | Est. Effort |
 | :---: | :--- | :--- | :--- |
 | **🥇 1** | **Item 3: Reset Counts & Community Rankings** | Clean data wipe of mock/seed numbers in `db_recipe_stats.json`, `db_ratings.json`, and initial seed constants so counts start at 0. | 🟢 ~5 mins |
-| **🥈 2** | **Item 4: Fix Shopping List Populating "Weird Things"** | Add ingredient blacklist/sanitization (exclude water, ice, non-grocery prep notes) and user-curated missing item rules. | 🟢 ~10–15 mins |
-| **🥉 3** | **Item 7: Fix Ingredient Categories in Pantry** | Reorganize pantry drawer taxonomy in `recipes-data.js` into intuitive grocery aisles (baking, sweeteners, extracts, powders, etc.). | 🟡 ~15–20 mins |
-| **4** | **Item 16: 🔄 1-Tap Smart Ingredient Substitutions** | Modal swap popup with tested substitutions for milks, gums, proteins, and sweeteners with texture/macro delta hints. | 🟡 ~20–30 mins |
-| **5** | **Item 8: 🧊 "Pints in Freezer" Tracker & 16-Hr Timer** | New freezer inventory manager, 16-hour countdown calculation, status badges, and 1-tap spin logging. | 🟡 ~35–45 mins |
-| **6** | **Item 17: 🔔 Freeze Timer Push Notifications** | Web/Android notification trigger when 16-hour freeze timer reaches zero. *(Hooks into Item 8 & PWA)* | 🟡 ~25–35 mins |
-| **7** | **Item 11: 📦 Grocery PWA & Offline Support** | Web App Manifest, Service Worker offline caching strategy, and 1-click export to Apple Notes/Reminders/Keep. *(Prerequisite for Android App)* | 🟠 ~30–40 mins |
-| **8** | **Item 18: 🧪 "Build-A-Pint" Balancing Wizard** | 4-step custom recipe creator with real-time Creaminess Score (1-10) and auto-calculated macros. | 🟠 ~35–45 mins |
-| **9** | **Item 15: 👥 User Management & Tiered Recipe Access** | Admin portal, user database, Google auth role assignment, and category-based recipe gating/locks. | 🟠 ~40–50 mins |
-| **10** | **Item 14: 🤖 Google Play Store Android App (Bubblewrap)** | Generate signed `.aab` bundle, deploy `assetlinks.json`, generate $1024\times500$ banner and $512\times512$ store icon, and prepare `/privacy.html`. | 🟠 ~30–45 mins |
-| **11** | **Item 1: Finish Google Sign-In** | Requires generating OAuth 2.0 Client ID in Google Cloud Console and setting authorized origins. | ⚪ External Credential |
+| **🥈 2** | **Item 7: Fix Ingredient Categories in Pantry** | Reorganize pantry drawer taxonomy in `recipes-data.js` into intuitive grocery aisles (baking, sweeteners, extracts, powders, etc.). | 🟡 ~15–20 mins |
+| **🥉 3** | **Item 16: 🔄 1-Tap Smart Ingredient Substitutions** | Modal swap popup with tested substitutions for milks, gums, proteins, and sweeteners with texture/macro delta hints. | 🟡 ~20–30 mins |
+| **4** | **Item 8: 🧊 "Pints in Freezer" Tracker & 16-Hr Timer** | New freezer inventory manager, 16-hour countdown calculation, status badges, and 1-tap spin logging. | 🟡 ~35–45 mins |
+| **5** | **Item 17: 🔔 Freeze Timer Push Notifications** | Web/Android notification trigger when 16-hour freeze timer reaches zero. *(Hooks into Item 8 & PWA)* | 🟡 ~25–35 mins |
+| **6** | **Item 11: 📦 Grocery PWA & Offline Support** | Web App Manifest, Service Worker offline caching strategy, and 1-click export to Apple Notes/Reminders/Keep. *(Prerequisite for Android App)* | 🟠 ~30–40 mins |
+| **7** | **Item 18: 🧪 "Build-A-Pint" Balancing Wizard** | 4-step custom recipe creator with real-time Creaminess Score (1-10) and auto-calculated macros. | 🟠 ~35–45 mins |
+| **8** | **Item 15: 👥 User Management & Tiered Recipe Access** | Admin portal, user database, Google auth role assignment, and category-based recipe gating/locks. | 🟠 ~40–50 mins |
+| **9** | **Item 14: 🤖 Google Play Store Android App (Bubblewrap)** | Generate signed `.aab` bundle, deploy `assetlinks.json`, generate $1024\times500$ banner and $512\times512$ store icon, and prepare `/privacy.html`. | 🟠 ~30–45 mins |
+| **10** | **Item 1: Finish Google Sign-In** | Requires generating OAuth 2.0 Client ID in Google Cloud Console and setting authorized origins. | ⚪ External Credential |
