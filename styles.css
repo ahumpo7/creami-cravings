@@ -1336,7 +1336,13 @@ body::before {
   margin: 0 auto 20px;
 }
 
-/* Modals */
+/* Modals & Scroll Containment */
+html.modal-open,
+body.modal-open {
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+}
+
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -1353,11 +1359,13 @@ body::before {
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.25s ease;
+  overscroll-behavior: none;
 }
 
 .modal-overlay.active {
   opacity: 1;
   pointer-events: auto;
+  overscroll-behavior: none;
 }
 
 .modal-content {
@@ -1368,6 +1376,8 @@ body::before {
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   position: relative;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
   padding: 32px;
@@ -3172,6 +3182,8 @@ body::before {
   padding: 32px 28px;
   border: 1px solid rgba(236, 72, 153, 0.3);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 35px rgba(236, 72, 153, 0.2);
+  overscroll-behavior: contain;
+  touch-action: pan-y;
 }
 
 .roulette-title-badge {

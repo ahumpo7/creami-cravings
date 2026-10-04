@@ -935,12 +935,93 @@
     }
   }
 
+  // --- Modal Scroll & Overscroll Containment Helpers ---
+  function lockBackgroundScroll() {
+    document.documentElement.classList.add('modal-open');
+    document.body.classList.add('modal-open');
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+  }
+
+  function unlockBackgroundScroll() {
+    const activeModals = document.querySelectorAll('.modal-overlay.active');
+    if (activeModals.length === 0) {
+      document.documentElement.classList.remove('modal-open');
+      document.body.classList.remove('modal-open');
+      document.documentElement.style.overflow = '';
+      document.body.style.overflow = '';
+    }
+  }
+
+  function setupModalScrollLock(overlay) {
+    if (!overlay) return;
+
+    // Prevent background scrolling via wheel
+    overlay.addEventListener('wheel', (e) => {
+      if (!overlay.classList.contains('active')) return;
+
+      const content = overlay.querySelector('.modal-content');
+      // If wheel event occurs directly on the backdrop or outside modal content
+      if (!content || !content.contains(e.target) || e.target === overlay) {
+        e.preventDefault();
+        return;
+      }
+
+      // If content has no internal scrollable overflow (e.g. roulette popup)
+      const canScroll = content.scrollHeight > content.clientHeight;
+      if (!canScroll) {
+        e.preventDefault();
+        return;
+      }
+
+      // If content can scroll, prevent overscroll chaining at top or bottom limits
+      const isAtTop = content.scrollTop <= 0 && e.deltaY < 0;
+      const isAtBottom = (content.scrollTop + content.clientHeight >= content.scrollHeight - 1) && e.deltaY > 0;
+      if (isAtTop || isAtBottom) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+
+    // Prevent touch-drag background scrolling on mobile
+    let touchStartY = 0;
+    overlay.addEventListener('touchstart', (e) => {
+      if (e.touches && e.touches.length > 0) {
+        touchStartY = e.touches[0].clientY;
+      }
+    }, { passive: true });
+
+    overlay.addEventListener('touchmove', (e) => {
+      if (!overlay.classList.contains('active')) return;
+
+      const content = overlay.querySelector('.modal-content');
+      if (!content || !content.contains(e.target) || e.target === overlay) {
+        e.preventDefault();
+        return;
+      }
+
+      const canScroll = content.scrollHeight > content.clientHeight;
+      if (!canScroll) {
+        e.preventDefault();
+        return;
+      }
+
+      const currentY = e.touches && e.touches.length > 0 ? e.touches[0].clientY : 0;
+      const deltaY = touchStartY - currentY; // positive = scrolling down
+
+      const isAtTop = content.scrollTop <= 0 && deltaY < 0;
+      const isAtBottom = (content.scrollTop + content.clientHeight >= content.scrollHeight - 1) && deltaY > 0;
+      if (isAtTop || isAtBottom) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+  }
+
   function openGoogleAuthModal() {
     const modal = document.getElementById('googleAuthModalOverlay');
     if (modal) {
       modal.classList.add('active');
       modal.setAttribute('aria-hidden', 'false');
-      document.body.style.overflow = 'hidden';
+      lockBackgroundScroll();
       initGoogleAuth();
     }
   }
@@ -950,7 +1031,7 @@
     if (modal) {
       modal.classList.remove('active');
       modal.setAttribute('aria-hidden', 'true');
-      document.body.style.overflow = '';
+      unlockBackgroundScroll();
     }
   }
 
@@ -2134,7 +2215,7 @@
     if (rouletteModalOverlay && rouletteSlotItem) {
       rouletteModalOverlay.classList.add('active');
       rouletteModalOverlay.setAttribute('aria-hidden', 'false');
-      document.body.style.overflow = 'hidden';
+      lockBackgroundScroll();
 
       if (rouletteWinnerCard) rouletteWinnerCard.style.display = 'none';
       if (rouletteSubtext) {
@@ -2193,9 +2274,7 @@
       rouletteModalOverlay.classList.remove('active');
       rouletteModalOverlay.setAttribute('aria-hidden', 'true');
     }
-    if (!recipeModalOverlay || !recipeModalOverlay.classList.contains('active')) {
-      document.body.style.overflow = '';
-    }
+    unlockBackgroundScroll();
   }
 
   // Fitness & Macro Target Panel Helpers (Roadmap Item 10)
@@ -2328,7 +2407,7 @@
     if (freezerModalOverlay) {
       freezerModalOverlay.classList.add('active');
       freezerModalOverlay.setAttribute('aria-hidden', 'false');
-      document.body.style.overflow = 'hidden';
+      lockBackgroundScroll();
     }
   }
 
@@ -2337,9 +2416,7 @@
       freezerModalOverlay.classList.remove('active');
       freezerModalOverlay.setAttribute('aria-hidden', 'true');
     }
-    if (!recipeModalOverlay || !recipeModalOverlay.classList.contains('active')) {
-      document.body.style.overflow = '';
-    }
+    unlockBackgroundScroll();
   }
 
   function toggleFreezerAddForm(show) {
@@ -3039,6 +3116,7 @@
     if (swapModalOverlay) {
       swapModalOverlay.classList.add('active');
       swapModalOverlay.setAttribute('aria-hidden', 'false');
+      lockBackgroundScroll();
     }
   }
 
@@ -3047,6 +3125,7 @@
       swapModalOverlay.classList.remove('active');
       swapModalOverlay.setAttribute('aria-hidden', 'true');
     }
+    unlockBackgroundScroll();
     currentSwapContext = null;
   }
 
@@ -3159,7 +3238,7 @@
 
     recipeModalOverlay.classList.add('active');
     recipeModalOverlay.setAttribute('aria-hidden', 'false');
-    document.body.style.overflow = 'hidden';
+    lockBackgroundScroll();
   }
 
   function renderRecipeModalContent(recipe) {
@@ -3984,7 +4063,7 @@
     isCurrentModalRoulette = false;
     recipeModalOverlay.classList.remove('active');
     recipeModalOverlay.setAttribute('aria-hidden', 'true');
-    document.body.style.overflow = '';
+    unlockBackgroundScroll();
     currentModalRecipe = null;
   }
 
@@ -4441,13 +4520,13 @@
 
     shoppingModalOverlay.classList.add('active');
     shoppingModalOverlay.setAttribute('aria-hidden', 'false');
-    document.body.style.overflow = 'hidden';
+    lockBackgroundScroll();
   }
 
   function closeShoppingListModal() {
     shoppingModalOverlay.classList.remove('active');
     shoppingModalOverlay.setAttribute('aria-hidden', 'true');
-    document.body.style.overflow = '';
+    unlockBackgroundScroll();
   }
 
   function clearShoppingList() {
@@ -4540,13 +4619,13 @@
     customRecipeForm.reset();
     customRecipeModalOverlay.classList.add('active');
     customRecipeModalOverlay.setAttribute('aria-hidden', 'false');
-    document.body.style.overflow = 'hidden';
+    lockBackgroundScroll();
   }
 
   function closeCustomRecipeModal() {
     customRecipeModalOverlay.classList.remove('active');
     customRecipeModalOverlay.setAttribute('aria-hidden', 'true');
-    document.body.style.overflow = '';
+    unlockBackgroundScroll();
   }
 
   function handleCustomRecipeSubmit(e) {
@@ -4982,6 +5061,11 @@
         if (e.target === swapModalOverlay) closeSwapInspector();
       });
     }
+
+    // Modal Background Scroll & Overscroll Containment
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      setupModalScrollLock(overlay);
+    });
 
     if (freezerToggleAddBtn) {
       freezerToggleAddBtn.addEventListener('click', () => toggleFreezerAddForm());
