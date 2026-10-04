@@ -1352,10 +1352,10 @@ body.modal-open {
 
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
   background: var(--bg-modal-overlay);
   backdrop-filter: blur(8px);
   z-index: 999;
@@ -1382,6 +1382,7 @@ body.modal-open {
   max-width: 720px;
   width: 100%;
   max-height: 90vh;
+  max-height: 90dvh;
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
@@ -3184,19 +3185,18 @@ body.modal-open {
 
 /* Roulette Spin Modal */
 #rouletteModalOverlay {
-  overscroll-behavior: none !important;
-  touch-action: none !important;
+  overscroll-behavior: none;
 }
 
 .roulette-modal-content {
   max-width: 480px;
   text-align: center;
-  padding: 32px 28px;
+  padding: 28px 24px;
   border: 1px solid rgba(236, 72, 153, 0.3);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 35px rgba(236, 72, 153, 0.2);
-  overflow: hidden !important;
-  overscroll-behavior: none !important;
-  touch-action: none !important;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .roulette-title-badge {
@@ -4363,18 +4363,86 @@ body.modal-open {
   .modal-overlay {
     align-items: flex-end;
     padding: 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
   .modal-content {
     border-radius: var(--radius-xl) var(--radius-xl) 0 0;
     max-height: 88vh;
+    max-height: 88dvh;
+    max-height: calc(100dvh - 24px);
     width: 100%;
-    padding: 20px 18px calc(24px + env(safe-area-inset-bottom, 0px));
+    padding: 20px 18px max(28px, calc(18px + env(safe-area-inset-bottom, 0px)));
     transform: translateY(100%);
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     border-left: none;
     border-right: none;
     border-bottom: none;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+
+  .roulette-modal-content {
+    padding: 16px 18px max(34px, calc(20px + env(safe-area-inset-bottom, 0px))) !important;
+    max-height: 88dvh;
+    max-height: calc(100dvh - 20px);
+  }
+
+  .roulette-modal-content .roulette-title-badge {
+    margin-bottom: 6px;
+    font-size: 0.72rem;
+    padding: 3px 12px;
+  }
+
+  .roulette-modal-content .roulette-headline {
+    font-size: 1.25rem;
+    margin-bottom: 4px;
+  }
+
+  .roulette-modal-content .roulette-subtext {
+    font-size: 0.8rem;
+    margin-bottom: 10px;
+  }
+
+  .roulette-modal-content .roulette-slot-machine {
+    padding: 12px 14px;
+    margin: 8px 0 10px;
+  }
+
+  .roulette-modal-content .slot-item {
+    font-size: 1.15rem;
+    min-height: 34px;
+  }
+
+  .roulette-modal-content .roulette-winner-announcement {
+    padding: 12px 14px;
+    margin-top: 8px;
+  }
+
+  .roulette-modal-content .roulette-winner-badge {
+    font-size: 0.72rem;
+    margin-bottom: 4px;
+  }
+
+  .roulette-modal-content .roulette-winner-title {
+    font-size: 1.15rem;
+    margin-bottom: 2px;
+  }
+
+  .roulette-modal-content .roulette-winner-meta {
+    font-size: 0.8rem;
+    margin-bottom: 12px;
+  }
+
+  .roulette-modal-content .roulette-winner-actions {
+    gap: 8px;
+  }
+
+  .roulette-modal-content .roulette-winner-actions button {
+    padding: 10px 16px;
+    font-size: 0.88rem;
+    min-height: 42px;
   }
 
   .modal-overlay.active .modal-content {

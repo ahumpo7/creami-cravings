@@ -980,22 +980,7 @@
   function setupModalScrollLock(overlay) {
     if (!overlay) return;
 
-    // Special unconditional lockdown for Roulette modal (it never scrolls)
-    if (overlay.id === 'rouletteModalOverlay') {
-      overlay.addEventListener('wheel', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-      }, { passive: false });
-
-      overlay.addEventListener('touchmove', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-      }, { passive: false });
-
-      return;
-    }
-
-    // For other modals (which may have internal scrollable lists):
+    // Prevent background scrolling via wheel
     overlay.addEventListener('wheel', (e) => {
       if (!overlay.classList.contains('active')) return;
 
