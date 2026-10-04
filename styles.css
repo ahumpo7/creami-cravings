@@ -4121,9 +4121,7 @@ body.modal-open .cookie-consent-banner {
     margin-top: 1px;
   }
 
-  .stats-bar.base-ready-hidden .stat-card:last-child {
-    grid-column: 1 / -1 !important;
-  }
+
 
   /* Mobile Section Switcher & Bottom Nav Display */
   .mobile-section-switcher {
