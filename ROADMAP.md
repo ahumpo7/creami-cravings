@@ -154,11 +154,13 @@ A prioritized checklist of fixes, features, and refinements for the Creami Cravi
 - [x] **1-Tap Dynamic Swap Application & Reversion:** Click "Apply This Swap" to dynamically update the active recipe ingredient and amount in the recipe modal, tag it with an active swap pill, update pantry match calculations, auto-draft a tasting note tag, and persist choices in `localStorage`.
 - [x] **1-Tap Revert:** Easy 1-tap "Revert to Original" button in both the ingredient row and the swap inspector card.
 
-### 17. 🔔 Native Push Notifications for 16-Hour Freeze Timer
-- [ ] **PWA / Android Notification Integration:** Prompts for notification permission when the user logs a chilling pint and starts the 16-hour countdown.
-- [ ] **Background Readiness Alert:** Fires a local push notification when the timer elapses:
-  - *"🍨 Ding! Your [Recipe Name] pint has chilled for 16 hours. Time to spin and enjoy!"*
-- [ ] **Direct Spin Shortcut:** Tapping the notification opens Creami Cravings directly to that recipe card with recommended spin cycle and batch logger.
+### 17. 🔔 Native Push Notifications for 16-Hour Freeze Timer (Completed ✅)
+- [x] **PWA / Android Notification Integration:** Prompts for notification permission when the user logs a chilling pint and starts the 16-hour countdown, with an inline status card (`🔔 Enable Alerts` / `Active 🔔` / `Blocked ⚠️`), permission state recovery, and opt-in checkbox on the pint logging form.
+- [x] **Background Readiness Alert:** Fires a rich local push notification through the Service Worker when the 16-hour freeze timer reaches zero:
+  - *"🍨 Ding! Ready to Spin: [Recipe Name] — Your [16 oz / 24 oz] pint has chilled for 16 hours and is frozen solid! Tap to open spin instructions & log your batch."*
+  - Includes vibration pattern, action buttons (`🍨 Spin & Enjoy`, `📖 View Recipe`), and in-app celebratory visual alerts.
+- [x] **3-Second Lock Screen Test Alert:** "⚡ Test Alert (3s)" button in the Freezer Tracker modal letting users immediately test and experience their lock screen/notification shade alert with sound and vibration.
+- [x] **Direct Spin Shortcut & Dynamic Routing:** Tapping the notification (or action buttons) focuses or opens Creami Cravings directly to that recipe card with recommended spin cycle and batch logger, or 1-tap "Spin & Enjoy Now (+1 Made)" banner right inside the recipe view!
 
 ### 18. 🧪 "Build-A-Pint" Custom Recipe Balancing Wizard & Creaminess Score (Completed ✅)
 - [x] **Guided 4-Step Pint Creator:** Step-by-step interactive builder to formulate balanced custom recipes:
@@ -175,7 +177,7 @@ A prioritized checklist of fixes, features, and refinements for the Creami Cravi
 
 | Rank | Task | Why & Scope | Est. Effort |
 | :---: | :--- | :--- | :--- |
-| **🥇 1** | **Item 17: 🔔 Freeze Timer Push Notifications** | Web/Android local push notifications when 16-hour freeze timer reaches zero. *(Directly hooks into Service Worker)* | 🟡 ~20–30 mins |
+| **🥇 1** | **Item 15: 👥 User Management & Tiered Recipe Access** | Admin portal, user database (`db_users.json`), Google auth role assignment, and category-based recipe gating/locks. | 🟠 ~40–50 mins |
 | **🥈 2** | **Item 1: Finish Google Sign-In** | Configure production Google Cloud Console OAuth 2.0 Client ID and authorized origins. *(Authentication backbone)* | ⚪ External Credential |
-| **🥉 3** | **Item 15: 👥 User Management & Tiered Recipe Access** | Admin portal, user database (`db_users.json`), Google auth role assignment, and category-based recipe gating/locks. | 🟠 ~40–50 mins |
-| **4** | **Item 14: 🤖 Google Play Store Android App (Bubblewrap)** | Generate signed `.aab` bundle, deploy `assetlinks.json`, generate $1024\times500$ banner and $512\times512$ store icon, and prepare `/privacy.html`. | 🟠 ~30–45 mins |
+| **🥉 3** | **Item 14: 🤖 Google Play Store Android App (Bubblewrap)** | Generate signed `.aab` bundle, deploy `assetlinks.json`, generate $1024\times500$ banner and $512\times512$ store icon, and prepare `/privacy.html`. | 🟠 ~30–45 mins |
+

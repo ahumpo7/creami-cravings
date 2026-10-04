@@ -1,5 +1,5 @@
-// Creami Cravings Service Worker (Roadmap Item 11: PWA & Offline Support)
-const CACHE_NAME = 'creami-cravings-v1.0';
+// Creami Cravings Service Worker (Roadmap Items 11 & 17)
+const CACHE_NAME = 'creami-cravings-v1.1';
 
 const PRECACHE_ASSETS = [
   '/',
@@ -136,23 +136,51 @@ self.addEventListener('fetch', (event) => {
   }
 });
 
-// Notification Click Handler (Prerequisite for Item 17)
+// Notification Click Handler (Roadmap Item 17: Native Push Notifications for Freeze Timer)
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const urlToOpen = event.notification.data && event.notification.data.url 
-    ? event.notification.data.url 
-    : '/';
+  const notifData = event.notification.data || {};
+  const action = event.action; // 'spin', 'recipe', or default click
+
+  let targetUrl = notifData.url || '/?action=freezer';
+  if (action === 'spin' && notifData.pintId) {
+    targetUrl = `/?action=freeze-spin&pintId=${encodeURIComponent(notifData.pintId)}${notifData.recipeId ? '&recipeId=' + encodeURIComponent(notifData.recipeId) : ''}`;
+  } else if (action === 'recipe' && notifData.recipeId) {
+    targetUrl = `/?action=freeze-recipe&recipeId=${encodeURIComponent(notifData.recipeId)}`;
+  }
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+      // If a Creami Cravings tab is already open, focus it and post a direct action message
       for (let client of windowClients) {
         if (client.url.includes(self.location.origin) && 'focus' in client) {
+          client.postMessage({
+            type: 'NOTIFICATION_FREEZE_ACTION',
+            action: action || 'open',
+            pintId: notifData.pintId,
+            recipeId: notifData.recipeId,
+            recipeName: notifData.recipeName,
+            scale: notifData.scale || 1.0,
+            targetUrl: targetUrl
+          });
           return client.focus();
         }
       }
+      // If no tab is open, open a fresh window pointing to the target action URL
       if (clients.openWindow) {
-        return clients.openWindow(urlToOpen);
+        return clients.openWindow(targetUrl);
       }
     })
   );
 });
+
+// Service Worker Message Listener (Allow page context to trigger notifications via SW registration)
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SHOW_NOTIFICATION') {
+    const { title, options } = event.data;
+    if (self.registration && typeof self.registration.showNotification === 'function') {
+      event.waitUntil(self.registration.showNotification(title, options));
+    }
+  }
+});
+

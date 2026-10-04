@@ -455,6 +455,29 @@
         </div>
       </div>
 
+      <!-- Native Freeze Timer Push Notification Banner (Roadmap Item 17) -->
+      <div class="freezer-notif-card" id="freezerNotifCard">
+        <div class="freezer-notif-info">
+          <span class="freezer-notif-bell" id="freezerNotifBell">🔔</span>
+          <div class="freezer-notif-details">
+            <div class="freezer-notif-title-row">
+              <strong id="freezerNotifTitle">16-Hour Freeze Timer Notifications</strong>
+              <span class="freezer-notif-badge off" id="freezerNotifStatusBadge">Off</span>
+            </div>
+            <p class="freezer-notif-desc" id="freezerNotifDesc">Get alerted the moment your pints freeze solid and are ready to spin.</p>
+          </div>
+        </div>
+        <div class="freezer-notif-actions">
+          <button type="button" class="btn-notif-test" id="btnTestFreezeNotif" style="display: none;" title="Send a test notification in 3 seconds to verify lock screen alerts">
+            ⚡ Test Alert (3s)
+          </button>
+          <button type="button" class="btn-notif-action" id="btnToggleFreezeNotif">
+            <span id="freezerNotifToggleIcon">🔔</span>
+            <span id="freezerNotifToggleLabel">Enable Alerts</span>
+          </button>
+        </div>
+      </div>
+
       <!-- Quick Add / Log a Chilling Pint Card -->
       <div class="freezer-add-section">
         <button class="freezer-toggle-add-btn" id="freezerToggleAddBtn" type="button">
@@ -498,6 +521,13 @@
           <div class="form-group">
             <label for="freezerNotes">Custom Tweaks or Flavor Notes (Optional)</label>
             <input type="text" id="freezerNotes" placeholder="e.g. Subbed Fairlife for almond milk, added extra chocolate chips">
+          </div>
+
+          <div class="form-group freezer-notif-optin-group">
+            <label class="freezer-checkbox-label" for="freezerNotifyOnReady">
+              <input type="checkbox" id="freezerNotifyOnReady" checked>
+              <span>🔔 Send push notification when this pint is frozen solid (in 16 hours)</span>
+            </label>
           </div>
 
           <div class="freezer-form-actions">

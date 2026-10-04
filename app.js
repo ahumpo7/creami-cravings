@@ -410,6 +410,20 @@
   const freezerPintsCount = document.getElementById('freezerPintsCount');
   const freezerPintsList = document.getElementById('freezerPintsList');
 
+  // Freeze Timer Push Notification Elements (Roadmap Item 17)
+  const freezerNotifCard = document.getElementById('freezerNotifCard');
+  const freezerNotifStatusBadge = document.getElementById('freezerNotifStatusBadge');
+  const freezerNotifTitle = document.getElementById('freezerNotifTitle');
+  const freezerNotifDesc = document.getElementById('freezerNotifDesc');
+  const btnTestFreezeNotif = document.getElementById('btnTestFreezeNotif');
+  const btnToggleFreezeNotif = document.getElementById('btnToggleFreezeNotif');
+  const freezerNotifToggleIcon = document.getElementById('freezerNotifToggleIcon');
+  const freezerNotifToggleLabel = document.getElementById('freezerNotifToggleLabel');
+  const freezerNotifyOnReady = document.getElementById('freezerNotifyOnReady');
+  const NOTIF_STORAGE_KEY = 'creami_freeze_notifs_enabled_v1';
+  let freezeNotifsEnabled = localStorage.getItem(NOTIF_STORAGE_KEY) !== 'false';
+  let pintNotifTimers = new Map();
+
   // Smart Ingredient Substitutions Elements (Item 16)
   const swapModalOverlay = document.getElementById('swapModalOverlay');
   const swapModalCloseBtn = document.getElementById('swapModalCloseBtn');
@@ -437,6 +451,23 @@
     populateFreezerRecipeDatalist();
     updateFreezerBadges();
     startFreezerTicker();
+    initFreezeNotifications();
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        checkAndNotifyReadyPints();
+        updateFreezerBadges();
+        if (freezerModalOverlay && freezerModalOverlay.classList.contains('active')) {
+          renderFreezerModal();
+        }
+      }
+    });
+
+    window.addEventListener('focus', () => {
+      checkAndNotifyReadyPints();
+      updateFreezerBadges();
+    });
+
     if (window.innerWidth <= 768) {
       setMobileView('recipes');
     }
@@ -2405,10 +2436,411 @@
     }
   }
 
+  // --- Freezer Notification Engine (Roadmap Item 17) ---
+  function getNotificationSupportStatus() {
+    if (!('Notification' in window)) return 'unsupported';
+    return Notification.permission; // 'granted', 'denied', or 'default'
+  }
+
+  function updateFreezerNotifUI() {
+    if (!freezerNotifCard || !freezerNotifStatusBadge) return;
+
+    if (!('Notification' in window)) {
+      freezerNotifCard.className = 'freezer-notif-card off';
+      freezerNotifStatusBadge.className = 'freezer-notif-badge off';
+      freezerNotifStatusBadge.textContent = 'Unsupported';
+      if (freezerNotifDesc) {
+        freezerNotifDesc.textContent = 'Push notifications are not supported in this browser environment.';
+      }
+      if (btnToggleFreezeNotif) btnToggleFreezeNotif.style.display = 'none';
+      if (btnTestFreezeNotif) btnTestFreezeNotif.style.display = 'none';
+      return;
+    }
+
+    const perm = Notification.permission;
+    if (perm === 'granted' && freezeNotifsEnabled) {
+      freezerNotifCard.className = 'freezer-notif-card active';
+      freezerNotifStatusBadge.className = 'freezer-notif-badge active';
+      freezerNotifStatusBadge.textContent = 'Active 🔔';
+      if (freezerNotifDesc) {
+        freezerNotifDesc.textContent = 'Push alerts active! We will notify your device the moment your 16-hour freeze completes.';
+      }
+      if (freezerNotifToggleIcon) freezerNotifToggleIcon.textContent = '🔕';
+      if (freezerNotifToggleLabel) freezerNotifToggleLabel.textContent = 'Pause Alerts';
+      if (btnToggleFreezeNotif) {
+        btnToggleFreezeNotif.className = 'btn-notif-action active';
+        btnToggleFreezeNotif.style.display = 'inline-flex';
+      }
+      if (btnTestFreezeNotif) btnTestFreezeNotif.style.display = 'inline-flex';
+    } else if (perm === 'denied') {
+      freezerNotifCard.className = 'freezer-notif-card blocked';
+      freezerNotifStatusBadge.className = 'freezer-notif-badge blocked';
+      freezerNotifStatusBadge.textContent = 'Blocked ⚠️';
+      if (freezerNotifDesc) {
+        freezerNotifDesc.textContent = 'Notifications are blocked in your browser settings. Unblock them in your address bar to receive readiness alerts.';
+      }
+      if (freezerNotifToggleIcon) freezerNotifToggleIcon.textContent = '⚙️';
+      if (freezerNotifToggleLabel) freezerNotifToggleLabel.textContent = 'How to Unblock';
+      if (btnToggleFreezeNotif) {
+        btnToggleFreezeNotif.className = 'btn-notif-action';
+        btnToggleFreezeNotif.style.display = 'inline-flex';
+      }
+      if (btnTestFreezeNotif) btnTestFreezeNotif.style.display = 'none';
+    } else {
+      // Default or granted but paused
+      freezerNotifCard.className = 'freezer-notif-card';
+      freezerNotifStatusBadge.className = 'freezer-notif-badge off';
+      freezerNotifStatusBadge.textContent = 'Off';
+      if (freezerNotifDesc) {
+        freezerNotifDesc.textContent = 'Get alerted on your lock screen the moment your pints freeze solid and are ready to spin.';
+      }
+      if (freezerNotifToggleIcon) freezerNotifToggleIcon.textContent = '🔔';
+      if (freezerNotifToggleLabel) freezerNotifToggleLabel.textContent = 'Enable Alerts';
+      if (btnToggleFreezeNotif) {
+        btnToggleFreezeNotif.className = 'btn-notif-action';
+        btnToggleFreezeNotif.style.display = 'inline-flex';
+      }
+      if (btnTestFreezeNotif) btnTestFreezeNotif.style.display = 'none';
+    }
+  }
+
+  async function requestFreezeNotificationPermission(interactive = true) {
+    if (!('Notification' in window)) {
+      if (interactive) {
+        showToast('ℹ️ Push notifications are not supported on this browser.');
+      }
+      return false;
+    }
+
+    if (Notification.permission === 'granted') {
+      freezeNotifsEnabled = true;
+      localStorage.setItem(NOTIF_STORAGE_KEY, 'true');
+      updateFreezerNotifUI();
+      scheduleAllPendingPintAlerts();
+      if (interactive) {
+        showToast('✅ Freeze Timer notifications are already active!');
+      }
+      return true;
+    }
+
+    if (Notification.permission === 'denied') {
+      freezeNotifsEnabled = false;
+      localStorage.setItem(NOTIF_STORAGE_KEY, 'false');
+      updateFreezerNotifUI();
+      if (interactive) {
+        showToast('⚠️ Notifications are blocked in browser settings. Please allow notifications in site settings to receive freeze alerts.');
+      }
+      return false;
+    }
+
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission === 'granted') {
+        freezeNotifsEnabled = true;
+        localStorage.setItem(NOTIF_STORAGE_KEY, 'true');
+        updateFreezerNotifUI();
+        scheduleAllPendingPintAlerts();
+        showToast('🔔 Freeze alerts enabled! We will notify you when pints are ready to spin.');
+        return true;
+      } else {
+        freezeNotifsEnabled = false;
+        localStorage.setItem(NOTIF_STORAGE_KEY, 'false');
+        updateFreezerNotifUI();
+        return false;
+      }
+    } catch (err) {
+      console.warn('[Notification] requestPermission error:', err);
+      return false;
+    }
+  }
+
+  function toggleFreezeNotifications() {
+    if (!('Notification' in window)) {
+      showToast('⚠️ Push notifications are not supported on this browser.');
+      return;
+    }
+
+    if (Notification.permission === 'default') {
+      requestFreezeNotificationPermission(true);
+      return;
+    }
+
+    if (Notification.permission === 'denied') {
+      showToast('⚠️ Notifications are blocked in browser settings. Please enable them in your address bar or browser site permissions.');
+      return;
+    }
+
+    if (Notification.permission === 'granted') {
+      freezeNotifsEnabled = !freezeNotifsEnabled;
+      localStorage.setItem(NOTIF_STORAGE_KEY, freezeNotifsEnabled ? 'true' : 'false');
+      updateFreezerNotifUI();
+      if (freezeNotifsEnabled) {
+        scheduleAllPendingPintAlerts();
+        showToast('🔔 Freeze Timer notifications turned ON.');
+      } else {
+        pintNotifTimers.forEach(id => clearTimeout(id));
+        pintNotifTimers.clear();
+        showToast('🔕 Freeze Timer notifications paused.');
+      }
+    }
+  }
+
+  function initFreezeNotifications() {
+    updateFreezerNotifUI();
+    if (btnToggleFreezeNotif) {
+      btnToggleFreezeNotif.addEventListener('click', toggleFreezeNotifications);
+    }
+    if (btnTestFreezeNotif) {
+      btnTestFreezeNotif.addEventListener('click', sendTestNotification);
+    }
+    if ('Notification' in window && Notification.permission === 'granted' && freezeNotifsEnabled) {
+      scheduleAllPendingPintAlerts();
+    }
+  }
+
+  function sendTestNotification() {
+    if (!('Notification' in window)) {
+      showToast('⚠️ Notifications are not supported by this browser.');
+      return;
+    }
+
+    if (Notification.permission !== 'granted') {
+      requestFreezeNotificationPermission(true).then(granted => {
+        if (granted) triggerTestCountdown();
+      });
+    } else {
+      triggerTestCountdown();
+    }
+  }
+
+  function triggerTestCountdown() {
+    showToast('🔔 Test alert scheduled in 3 seconds! Lock your screen or switch tabs to test...', 3500);
+    setTimeout(() => {
+      const sampleRecipe = allRecipes[0] || { id: 'test_sample', name: 'Triple Chocolate Gelato' };
+      const title = `🍨 Ding! Test Alert: ${sampleRecipe.name}`;
+      const notifData = {
+        url: `/?action=freeze-ready&recipeId=${encodeURIComponent(sampleRecipe.id)}`,
+        pintId: 'test_sample_pint',
+        recipeId: sampleRecipe.id,
+        recipeName: sampleRecipe.name,
+        scale: 1.0
+      };
+
+      const notifOptions = {
+        body: 'Your 16-Hour Freeze Timer notifications are working! When your chilling pints freeze solid, you will receive this alert.',
+        icon: '/icon-192.png',
+        badge: '/icon-192.png',
+        tag: 'test-freeze-notification',
+        renotify: true,
+        vibrate: [200, 100, 200, 100, 200],
+        data: notifData,
+        actions: [
+          { action: 'recipe', title: '📖 View Recipe' }
+        ]
+      };
+
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.ready.then(reg => {
+          if (reg && reg.showNotification) {
+            reg.showNotification(title, notifOptions);
+          } else {
+            fallbackShowNotification(title, notifOptions);
+          }
+        }).catch(() => fallbackShowNotification(title, notifOptions));
+      } else {
+        fallbackShowNotification(title, notifOptions);
+      }
+    }, 3000);
+  }
+
+  function schedulePintFreezeAlert(pint) {
+    if (!pint || pint.notified) return;
+    if (pintNotifTimers.has(pint.id)) {
+      clearTimeout(pintNotifTimers.get(pint.id));
+      pintNotifTimers.delete(pint.id);
+    }
+
+    if (!freezeNotifsEnabled) return;
+
+    const now = Date.now();
+    const frozenAt = pint.frozenAt || now;
+    const elapsedMs = Math.max(0, now - frozenAt);
+    const remainingMs = Math.max(0, FREEZE_DURATION_MS - elapsedMs);
+
+    if (remainingMs <= 0) {
+      fireFreezeNotification(pint);
+      return;
+    }
+
+    const timerId = setTimeout(() => {
+      fireFreezeNotification(pint);
+      pintNotifTimers.delete(pint.id);
+    }, remainingMs);
+
+    pintNotifTimers.set(pint.id, timerId);
+  }
+
+  function scheduleAllPendingPintAlerts() {
+    if (!freezeNotifsEnabled) return;
+    freezerPintsState.forEach(p => {
+      if (!p.notified) {
+        schedulePintFreezeAlert(p);
+      }
+    });
+  }
+
+  function checkAndNotifyReadyPints() {
+    if (!freezeNotifsEnabled) return;
+    freezerPintsState.forEach(pint => {
+      const status = computePintStatus(pint);
+      if (status.isReady && !pint.notified) {
+        fireFreezeNotification(pint);
+      }
+    });
+  }
+
+  function fireFreezeNotification(pint) {
+    if (!pint || pint.notified) return;
+    pint.notified = true;
+    saveFreezerPints();
+    updateFreezerBadges();
+    if (freezerModalOverlay && freezerModalOverlay.classList.contains('active')) {
+      renderFreezerModal();
+    }
+
+    const isDeluxe = pint.scale === 1.5 || (pint.sizeLabel && pint.sizeLabel.includes('24 oz'));
+    const sizeStr = isDeluxe ? '24 oz Deluxe' : '16 oz Standard';
+    const title = `🍨 Ding! Ready to Spin: ${pint.recipeName}`;
+    const body = `Your ${sizeStr} pint has chilled for 16 hours and is frozen solid! Tap to open spin instructions & log your batch.`;
+
+    const notifData = {
+      url: `/?action=freeze-ready&pintId=${encodeURIComponent(pint.id)}${pint.recipeId ? '&recipeId=' + encodeURIComponent(pint.recipeId) : ''}`,
+      pintId: pint.id,
+      recipeId: pint.recipeId || null,
+      recipeName: pint.recipeName,
+      scale: pint.scale || 1.0
+    };
+
+    const notifOptions = {
+      body: body,
+      icon: '/icon-192.png',
+      badge: '/icon-192.png',
+      tag: `freeze-ready-${pint.id}`,
+      renotify: true,
+      vibrate: [250, 100, 250, 100, 250],
+      data: notifData,
+      actions: [
+        { action: 'spin', title: '🍨 Spin & Enjoy' },
+        { action: 'recipe', title: '📖 View Recipe' }
+      ]
+    };
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.ready.then(reg => {
+        if (reg && reg.showNotification) {
+          return reg.showNotification(title, notifOptions);
+        } else {
+          fallbackShowNotification(title, notifOptions);
+        }
+      }).catch(err => {
+        fallbackShowNotification(title, notifOptions);
+      });
+    } else {
+      fallbackShowNotification(title, notifOptions);
+    }
+
+    showToast(`🍨 Ding! "${pint.recipeName}" is frozen solid and ready to spin!`, 6000);
+  }
+
+  function fallbackShowNotification(title, options) {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      try {
+        const notif = new Notification(title, {
+          body: options.body,
+          icon: options.icon,
+          tag: options.tag,
+          data: options.data
+        });
+        notif.onclick = () => {
+          window.focus();
+          handleFreezeNotificationAction({
+            action: 'open',
+            pintId: options.data.pintId,
+            recipeId: options.data.recipeId,
+            recipeName: options.data.recipeName,
+            scale: options.data.scale
+          });
+          notif.close();
+        };
+      } catch (e) {
+        console.warn('[Notification] Direct Notification fallback error:', e);
+      }
+    }
+  }
+
+  function handleFreezeNotificationAction(data) {
+    if (!data) return;
+    const { action, pintId, recipeId, recipeName, scale } = data;
+
+    if (action === 'spin' && pintId) {
+      const pint = freezerPintsState.find(p => p.id === pintId);
+      if (pint) {
+        spinAndEnjoyFreezerPint(pintId);
+      } else if (recipeId) {
+        logRecipeBatch(recipeId, 1);
+        showToast(`🍨 Spun & Enjoyed! +1 Batch logged 🎉`);
+      }
+      if (recipeId) {
+        const rec = allRecipes.find(r => r.id === recipeId);
+        if (rec) {
+          modalScale = scale || (pint ? pint.scale : 1.0) || 1.0;
+          openRecipeModal(rec);
+          return;
+        }
+      }
+      openFreezerModal();
+      return;
+    }
+
+    if (action === 'recipe' && recipeId) {
+      const rec = allRecipes.find(r => r.id === recipeId);
+      if (rec) {
+        closeFreezerModal();
+        modalScale = scale || 1.0;
+        openRecipeModal(rec);
+        return;
+      }
+    }
+
+    // Default action (or 'open')
+    if (recipeId) {
+      const rec = allRecipes.find(r => r.id === recipeId);
+      if (rec) {
+        closeFreezerModal();
+        modalScale = scale || 1.0;
+        openRecipeModal(rec);
+        return;
+      }
+    }
+
+    openFreezerModal();
+    if (pintId) {
+      setTimeout(() => {
+        const card = freezerPintsList ? freezerPintsList.querySelector(`[data-id="${pintId}"]`) : null;
+        if (card) {
+          card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          card.classList.add('highlight-pulse');
+          setTimeout(() => card.classList.remove('highlight-pulse'), 3000);
+        }
+      }, 350);
+    }
+  }
+
   function startFreezerTicker() {
     if (freezerTickerInterval) clearInterval(freezerTickerInterval);
-    // Refresh countdown every 30 seconds
+    // Refresh countdown every 30 seconds and check for completed pints
     freezerTickerInterval = setInterval(() => {
+      checkAndNotifyReadyPints();
       updateFreezerBadges();
       if (freezerModalOverlay && freezerModalOverlay.classList.contains('active')) {
         renderFreezerModal();
@@ -2457,7 +2889,7 @@
     }
   }
 
-  function addFreezerPint({ recipeId, recipeName, scale, notes, frozenAt }) {
+  async function addFreezerPint({ recipeId, recipeName, scale, notes, frozenAt, requestNotification }) {
     if (!recipeName || !recipeName.trim()) return;
     const finalFrozenAt = frozenAt || Date.now();
     const finalScale = scale || 1.0;
@@ -2475,7 +2907,8 @@
       scale: finalScale,
       sizeLabel: finalScale === 1.5 ? '24 oz Deluxe' : '16 oz Standard',
       frozenAt: finalFrozenAt,
-      notes: (notes || '').trim()
+      notes: (notes || '').trim(),
+      notified: false
     };
 
     freezerPintsState.unshift(newPint);
@@ -2483,16 +2916,30 @@
     renderFreezerModal();
     toggleFreezerAddForm(false);
 
+    // Request notification permission if requested and currently default
+    if (requestNotification && 'Notification' in window && Notification.permission === 'default') {
+      await requestFreezeNotificationPermission(false);
+    }
+
     const calc = computePintStatus(newPint);
     if (calc.isReady) {
       showToast(`🎉 "${newPint.recipeName}" logged as Ready to Spin! 🍨`);
     } else {
-      showToast(`🧊 Logged "${newPint.recipeName}" in freezer! 16h timer started (${calc.timeRemainingLabel}).`);
+      if ('Notification' in window && Notification.permission === 'granted' && freezeNotifsEnabled) {
+        schedulePintFreezeAlert(newPint);
+        showToast(`🧊 Logged "${newPint.recipeName}" in freezer! 16h timer started (${calc.timeRemainingLabel}). Push alert scheduled! 🔔`);
+      } else {
+        showToast(`🧊 Logged "${newPint.recipeName}" in freezer! 16h timer started (${calc.timeRemainingLabel}).`);
+      }
     }
   }
 
   function removeFreezerPint(pintId) {
     const pint = freezerPintsState.find(p => p.id === pintId);
+    if (pintNotifTimers.has(pintId)) {
+      clearTimeout(pintNotifTimers.get(pintId));
+      pintNotifTimers.delete(pintId);
+    }
     freezerPintsState = freezerPintsState.filter(p => p.id !== pintId);
     saveFreezerPints();
     renderFreezerModal();
@@ -2504,6 +2951,11 @@
   function spinAndEnjoyFreezerPint(pintId) {
     const pint = freezerPintsState.find(p => p.id === pintId);
     if (!pint) return;
+
+    if (pintNotifTimers.has(pintId)) {
+      clearTimeout(pintNotifTimers.get(pintId));
+      pintNotifTimers.delete(pintId);
+    }
 
     // Log batch made count for recipe if linked
     if (pint.recipeId) {
@@ -2521,6 +2973,7 @@
   function renderFreezerModal() {
     if (!freezerPintsList) return;
     updateFreezerBadges();
+    updateFreezerNotifUI();
 
     if (freezerPintsState.length === 0) {
       freezerPintsList.innerHTML = `
@@ -2564,6 +3017,11 @@
                   ${isDeluxe ? '🥣 24 oz Deluxe' : '🍨 16 oz Standard'}
                 </span>
                 <span class="freezer-tag">Mixed: ${status.mixedLabel}</span>
+                ${pint.notified 
+                  ? '<span class="freezer-tag notif-tag sent">🔔 Alert Sent</span>' 
+                  : (freezeNotifsEnabled && 'Notification' in window && Notification.permission === 'granted' 
+                    ? '<span class="freezer-tag notif-tag">🔔 Alert Set</span>' 
+                    : '')}
               </div>
             </div>
             <div>
@@ -3336,9 +3794,16 @@
                 <span>${topStatus.isReady ? 'Frozen solid & ready to spin right now! 🍨' : `${topStatus.timeRemainingLabel} until 16-hr freeze complete`} (${pintsInFreezer.length} pint${pintsInFreezer.length === 1 ? '' : 's'})</span>
               </div>
             </div>
-            <button class="btn-freezer-recipe" id="modalViewInFreezerBtn" style="font-size: 0.78rem; padding: 5px 12px; white-space: nowrap;">
-              🧊 Open Freezer
-            </button>
+            <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+              ${hasReady ? `
+                <button class="btn-spin-enjoyed" id="modalQuickSpinBtn" data-pint-id="${topPint.id}" style="font-size: 0.78rem; padding: 5px 12px; white-space: nowrap;">
+                  🍨 Spin &amp; Enjoy (+1)
+                </button>
+              ` : ''}
+              <button class="btn-freezer-recipe" id="modalViewInFreezerBtn" style="font-size: 0.78rem; padding: 5px 12px; white-space: nowrap;">
+                🧊 Open Freezer
+              </button>
+            </div>
           </div>
         `;
       })() : ''}
@@ -3616,7 +4081,7 @@
   }
 
   function bindRecipeModalEvents(recipe) {
-    // Freeze This Pint Button (Roadmap Item 8)
+    // Freeze This Pint Button (Roadmap Item 8 & 17)
     const freezePintBtn = recipeModalBody.querySelector('#modalFreezeThisPintBtn');
     if (freezePintBtn) {
       freezePintBtn.addEventListener('click', () => {
@@ -3625,9 +4090,22 @@
           recipeName: recipe.name,
           scale: modalScale,
           notes: `Mixed from recipe • ${modalScale === 1.5 ? '24 oz Deluxe' : '16 oz Standard'}`,
-          frozenAt: Date.now()
+          frozenAt: Date.now(),
+          requestNotification: true
         });
         renderRecipeModalContent(recipe);
+      });
+    }
+
+    // Quick Spin From Chilling Banner (Roadmap Item 17)
+    const modalQuickSpinBtn = recipeModalBody.querySelector('#modalQuickSpinBtn');
+    if (modalQuickSpinBtn) {
+      modalQuickSpinBtn.addEventListener('click', () => {
+        const pId = modalQuickSpinBtn.dataset.pintId;
+        if (pId) {
+          spinAndEnjoyFreezerPint(pId);
+          renderRecipeModalContent(recipe);
+        }
       });
     }
 
@@ -6335,14 +6813,18 @@
           frozenAt = Date.now() - (freezerSelectedTimeOffset * 3600 * 1000);
         }
 
+        const reqNotif = freezerNotifyOnReady ? freezerNotifyOnReady.checked : true;
+
         addFreezerPint({
           recipeName: name,
           scale: scale,
           notes: notes,
-          frozenAt: frozenAt
+          frozenAt: frozenAt,
+          requestNotification: reqNotif
         });
 
         freezerAddForm.reset();
+        if (freezerNotifyOnReady) freezerNotifyOnReady.checked = true;
         freezerSelectedTimeOffset = 0;
         if (freezerTimePresets) {
           freezerTimePresets.querySelectorAll('.btn-time-preset').forEach(b => {
@@ -6451,13 +6933,39 @@
       setTimeout(() => openCustomRecipeModal(), 300);
     } else if (actionParam === 'shopping') {
       setTimeout(() => openShoppingListModal(), 300);
+    } else if (actionParam === 'freeze-spin') {
+      const pintId = urlParams.get('pintId');
+      const recipeId = urlParams.get('recipeId');
+      setTimeout(() => {
+        handleFreezeNotificationAction({ action: 'spin', pintId, recipeId });
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      }, 350);
+    } else if (actionParam === 'freeze-recipe') {
+      const recipeId = urlParams.get('recipeId');
+      setTimeout(() => {
+        handleFreezeNotificationAction({ action: 'recipe', recipeId });
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      }, 350);
+    } else if (actionParam === 'freeze-ready') {
+      const pintId = urlParams.get('pintId');
+      const recipeId = urlParams.get('recipeId');
+      setTimeout(() => {
+        handleFreezeNotificationAction({ action: 'open', pintId, recipeId });
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      }, 350);
     }
 
     // Initialize PWA Offline Engine & Service Worker
     initPWA();
   }
 
-  // --- Service Worker & PWA Offline Engine (Roadmap Item 11) ---
+  // --- Service Worker & PWA Offline Engine (Roadmap Item 11 & 17) ---
   function initPWA() {
     const offlineBanner = document.getElementById('offlineIndicatorBanner');
 
@@ -6487,10 +6995,19 @@
     }
 
     if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('message', (event) => {
+        if (event.data && event.data.type === 'NOTIFICATION_FREEZE_ACTION') {
+          handleFreezeNotificationAction(event.data);
+        }
+      });
+
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('/service-worker.js')
           .then((registration) => {
             console.log('[PWA] Service Worker registered with scope:', registration.scope);
+            if (freezeNotifsEnabled && 'Notification' in window && Notification.permission === 'granted') {
+              scheduleAllPendingPintAlerts();
+            }
           })
           .catch((error) => {
             console.warn('[PWA] Service Worker registration failed:', error);
