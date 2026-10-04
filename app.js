@@ -1676,12 +1676,20 @@
     const q = recipeSearchQuery.toLowerCase().trim();
     let readyCount = 0;
     let baseReadyCount = 0;
+    let lockedReadyCount = 0;
+    let lockedBaseReadyCount = 0;
 
     // Filter and score recipes
     const scoredRecipes = allRecipes.map(recipe => {
       const match = computeRecipeMatch(recipe);
-      if (match.isReady) readyCount++;
-      if (match.isBaseReady) baseReadyCount++;
+      const accessible = isRecipeAccessible(recipe);
+      if (accessible) {
+        if (match.isReady) readyCount++;
+        if (match.isBaseReady) baseReadyCount++;
+      } else {
+        if (match.isReady) lockedReadyCount++;
+        if (match.isBaseReady) lockedBaseReadyCount++;
+      }
       return { recipe, match };
     });
 
@@ -1692,7 +1700,13 @@
     statTotalRecipes.textContent = accessibleTotal;
     statTotalRecipes.title = `${accessibleTotal} accessible recipes in your library (${lockedTotal} available for purchase)`;
     statReadyRecipes.textContent = readyCount;
+    statReadyRecipes.title = lockedReadyCount > 0 
+      ? `${readyCount} accessible recipe${readyCount === 1 ? '' : 's'} ready now (+${lockedReadyCount} in locked packs)` 
+      : `${readyCount} recipe${readyCount === 1 ? '' : 's'} ready now`;
     statBaseReadyRecipes.textContent = baseReadyCount;
+    statBaseReadyRecipes.title = lockedBaseReadyCount > 0
+      ? `${baseReadyCount} accessible recipe${baseReadyCount === 1 ? '' : 's'} ready to freeze (+${lockedBaseReadyCount} in locked packs)`
+      : `${baseReadyCount} recipe${baseReadyCount === 1 ? '' : 's'} ready to freeze`;
     const tabRecipeCount = document.getElementById('mobileTabRecipeCount');
     if (tabRecipeCount) tabRecipeCount.textContent = accessibleTotal;
 
