@@ -130,15 +130,23 @@ A prioritized checklist of fixes, features, and refinements for the Creami Cravi
   - Opening a locked recipe presents a teaser card with a friendly "Locked Recipe — Contact Admin / Upgrade Access" prompt instead of full instructions.
   - Quick filter toggle to "Show Only My Accessible Recipes" or preview all available recipes.
 
-### 16. 🔄 1-Tap Smart Ingredient Substitutions ("What Can I Swap?")
-- [ ] **Modal Swap Inspector:** Tapping or clicking any ingredient in the recipe detail modal reveals tested, recommended substitutions.
-- [ ] **Curated Creami Swaps Database:**
-  - Fairlife milk $\leftrightarrow$ Unsweetened almond milk + 1 tbsp heavy cream (reduces calories by ~60 while retaining creamy fat emulsion) or 2% milk.
-  - Xanthan gum $\leftrightarrow$ Sugar-Free Jell-O Instant Pudding Mix (7g) or guar gum.
-  - Whey protein $\leftrightarrow$ Whey/casein blend (explains why casein yields thicker soft-serve body) or plant protein.
-  - Granulated sugar $\leftrightarrow$ Allulose, erythritol/monk fruit blend, or stevia.
-  - PB2 powdered peanut butter $\leftrightarrow$ Creamy peanut butter (with macro adjustment note).
-- [ ] **Texture & Macro Delta Hints:** Explains how each swap shifts texture (iciness, thickness) and approximate calorie/protein trade-offs.
+### 16. 🔄 1-Tap Smart Ingredient Substitutions ("What Can I Swap?") (Completed ✅)
+- [x] **Modal Swap Inspector:** Tapping or clicking any ingredient row or its `🔄 Swap (count)` badge in the Recipe Detail modal opens the Smart Swap Inspector (`#swapModalOverlay`).
+- [x] **Curated Creami Swaps Database:** Tested, calibrated substitutions for Ninja Creami freezing mechanics, dual-drive blade shearing, and mouthfeel:
+  - *Milk & Liquid Bases:* Fairlife / Ultra-Filtered $\leftrightarrow$ Unsweetened almond milk + 1 tbsp heavy cream (slashes ~60–80 kcal while maintaining creamy emulsion), Ready-To-Drink Protein Shakes (Core Power/Premier), Barista-blend oat milk, and whole milk.
+  - *Stabilizers & Gels:* Xanthan gum $\leftrightarrow$ Sugar-Free Jell-O Instant Pudding Mix (7–10g modified cornstarch custard gel), Guar gum (cold-hydrating 1:1), and blended low-fat cottage cheese / light cream cheese.
+  - *Protein Powders:* Whey isolate $\leftrightarrow$ Whey/Casein 50/50 blend (explains why casein forms thick gels preventing icy snow), 100% Whey + Greek yogurt, and Plant/Pea-Brown Rice protein (+35ml liquid).
+  - *Sweeteners & Freezing Point Modifiers:* Allulose (pure rare sugar that depresses freezing point identical to table sugar without sub-zero recrystallization), Monk Fruit / Erythritol blend, and Pure Maple Syrup / Raw Honey.
+  - *Nut Butters & Powders:* PB2 / PB Fit powdered peanut butter $\leftrightarrow$ Creamy peanut butter (with macro adjustment note) and Sunflower seed butter (nut-free).
+  - *Cocoa & Chocolate:* Dutch-process cocoa $\leftrightarrow$ Black cocoa powder (the authentic Nabisco Oreo wafer dark chocolate secret).
+  - *Creams, Yogurts & Dairy Fats:* 0% Nonfat Plain Greek Yogurt (slashes ~80 kcal and adds 6g protein) and Canned full-fat coconut cream.
+  - *Mix-Ins & Cookies:* Mini semi-sweet chocolate chips (prevents rock-hard frozen teeth-breakers; shatters into stracciatella flakes), Oreo Thins, and high-protein cereal.
+  - *Fruit & Purees:* 1 medium banana $\leftrightarrow$ 100g pure canned pumpkin puree (miracle volume hack slashing 70 kcal with natural pectin) and wild berries.
+  - *Extracts & Flavorings:* Vanilla extract $\leftrightarrow$ Vanilla bean paste and butter/cake batter extract.
+- [x] **Texture & Macro Delta Hints:** Every substitution card provides dedicated `🍦 Texture Impact`, `🔥 Macro Delta`, `🌀 Spin Tip`, and `💡 Pro Tip`.
+- [x] **Pantry Awareness (`✓ In Your Pantry`):** Real-time emerald green badge indicating if the user already has that substitute in stock in their pantry.
+- [x] **1-Tap Dynamic Swap Application & Reversion:** Click "Apply This Swap" to dynamically update the active recipe ingredient and amount in the recipe modal, tag it with an active swap pill, update pantry match calculations, auto-draft a tasting note tag, and persist choices in `localStorage`.
+- [x] **1-Tap Revert:** Easy 1-tap "Revert to Original" button in both the ingredient row and the swap inspector card.
 
 ### 17. 🔔 Native Push Notifications for 16-Hour Freeze Timer
 - [ ] **PWA / Android Notification Integration:** Prompts for notification permission when the user logs a chilling pint and starts the 16-hour countdown.
@@ -161,10 +169,9 @@ A prioritized checklist of fixes, features, and refinements for the Creami Cravi
 
 | Rank | Task | Why & Scope | Est. Effort |
 | :---: | :--- | :--- | :--- |
-| **🥇 1** | **Item 16: 🔄 1-Tap Smart Ingredient Substitutions** | Modal swap popup with tested substitutions for milks, gums, proteins, and sweeteners with texture/macro delta hints. | 🟡 ~20–30 mins |
-| **🥈 2** | **Item 17: 🔔 Freeze Timer Push Notifications** | Web/Android notification trigger when 16-hour freeze timer reaches zero. *(Hooks into Item 8 & PWA)* | 🟡 ~25–35 mins |
-| **🥉 3** | **Item 11: 📦 Grocery PWA & Offline Support** | Web App Manifest, Service Worker offline caching strategy, and 1-click export to Apple Notes/Reminders/Keep. *(Prerequisite for Android App)* | 🟠 ~30–40 mins |
-| **4** | **Item 18: 🧪 "Build-A-Pint" Balancing Wizard** | 4-step custom recipe creator with real-time Creaminess Score (1-10) and auto-calculated macros. | 🟠 ~35–45 mins |
-| **5** | **Item 15: 👥 User Management & Tiered Recipe Access** | Admin portal, user database, Google auth role assignment, and category-based recipe gating/locks. | 🟠 ~40–50 mins |
-| **6** | **Item 14: 🤖 Google Play Store Android App (Bubblewrap)** | Generate signed `.aab` bundle, deploy `assetlinks.json`, generate $1024\times500$ banner and $512\times512$ store icon, and prepare `/privacy.html`. | 🟠 ~30–45 mins |
-| **7** | **Item 1: Finish Google Sign-In** | Requires generating OAuth 2.0 Client ID in Google Cloud Console and setting authorized origins. | ⚪ External Credential |
+| **🥇 1** | **Item 17: 🔔 Freeze Timer Push Notifications** | Web/Android notification trigger when 16-hour freeze timer reaches zero. *(Hooks into Item 8 & PWA)* | 🟡 ~25–35 mins |
+| **🥈 2** | **Item 11: 📦 Grocery PWA & Offline Support** | Web App Manifest, Service Worker offline caching strategy, and 1-click export to Apple Notes/Reminders/Keep. *(Prerequisite for Android App)* | 🟠 ~30–40 mins |
+| **🥉 3** | **Item 18: 🧪 "Build-A-Pint" Balancing Wizard** | 4-step custom recipe creator with real-time Creaminess Score (1-10) and auto-calculated macros. | 🟠 ~35–45 mins |
+| **4** | **Item 15: 👥 User Management & Tiered Recipe Access** | Admin portal, user database, Google auth role assignment, and category-based recipe gating/locks. | 🟠 ~40–50 mins |
+| **5** | **Item 14: 🤖 Google Play Store Android App (Bubblewrap)** | Generate signed `.aab` bundle, deploy `assetlinks.json`, generate $1024\times500$ banner and $512\times512$ store icon, and prepare `/privacy.html`. | 🟠 ~30–45 mins |
+| **6** | **Item 1: Finish Google Sign-In** | Requires generating OAuth 2.0 Client ID in Google Cloud Console and setting authorized origins. | ⚪ External Credential |

@@ -506,6 +506,39 @@
     </div>
   </div>
 
+  <!-- 1-Tap Smart Ingredient Substitutions Modal (Roadmap Item 16) -->
+  <div class="modal-overlay" id="swapModalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-content swap-modal-content">
+      <div class="modal-handle-bar" aria-hidden="true"></div>
+      <button class="modal-close" id="swapModalCloseBtn" aria-label="Close modal">&times;</button>
+      
+      <div class="modal-header swap-modal-header">
+        <div class="swap-title-row">
+          <div class="swap-icon-badge">🔄</div>
+          <div>
+            <h2 class="modal-title">What Can I Swap?</h2>
+            <p class="modal-subtitle">Tested substitutions calibrated for Ninja Creami texture, freezing point, and macro balance.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Selected Ingredient Focus Card -->
+      <div class="swap-focus-card" id="swapFocusCard"></div>
+
+      <!-- Substitutions Comparison List -->
+      <div class="swap-list-header">
+        <h3 class="swap-section-title">Tested Swaps &amp; Ratios</h3>
+        <span class="swap-legend-pill">🍦 Texture &amp; Macro Deltas</span>
+      </div>
+
+      <div class="swap-options-list" id="swapOptionsList"></div>
+
+      <div class="modal-footer swap-modal-footer">
+        <button class="btn-secondary" id="swapBackToRecipeBtn">Back to Recipe</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Custom Recipe Modal -->
   <div class="modal-overlay" id="customRecipeModalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="modal-content custom-modal-content">

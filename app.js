@@ -316,6 +316,10 @@
   let freezerTickerInterval = null;
   let freezerSelectedTimeOffset = 0; // 0, 4, 8, 12, 16 hours
 
+  // 1-Tap Smart Ingredient Substitutions State (Roadmap Item 16)
+  let activeRecipeSwaps = {}; // { [recipeId]: { [originalIngName]: swapObj } }
+  let currentSwapContext = null; // { ing, recipe, swapData }
+
   // DOM Elements
   const statTotalRecipes = document.getElementById('statTotalRecipes');
   const statReadyRecipes = document.getElementById('statReadyRecipes');
@@ -405,6 +409,13 @@
   const freezerSubmitAddBtn = document.getElementById('freezerSubmitAddBtn');
   const freezerPintsCount = document.getElementById('freezerPintsCount');
   const freezerPintsList = document.getElementById('freezerPintsList');
+
+  // Smart Ingredient Substitutions Elements (Item 16)
+  const swapModalOverlay = document.getElementById('swapModalOverlay');
+  const swapModalCloseBtn = document.getElementById('swapModalCloseBtn');
+  const swapBackToRecipeBtn = document.getElementById('swapBackToRecipeBtn');
+  const swapFocusCard = document.getElementById('swapFocusCard');
+  const swapOptionsList = document.getElementById('swapOptionsList');
   
   const themeToggleBtn = document.getElementById('themeToggleBtn');
   const themeToggleLabel = document.getElementById('themeToggleLabel');
@@ -584,10 +595,25 @@
         } catch (e) {
           freezerPintsState = [];
         }
-      } else {
         freezerPintsState = [];
       }
     }
+
+    // Active Recipe Substitutions (Roadmap Item 16)
+    const savedSwaps = localStorage.getItem('creami_active_swaps_v1');
+    if (savedSwaps) {
+      try {
+        activeRecipeSwaps = JSON.parse(savedSwaps);
+      } catch (e) {
+        activeRecipeSwaps = {};
+      }
+    }
+  }
+
+  function saveActiveSwaps() {
+    try {
+      localStorage.setItem('creami_active_swaps_v1', JSON.stringify(activeRecipeSwaps));
+    } catch (e) {}
   }
 
   function savePantry() {
@@ -1316,7 +1342,11 @@
     const missing = [];
 
     ingredients.forEach(ing => {
-      const hasItem = isItemInPantry(ing);
+      const cleanName = sanitizeShoppingItemName(ing.name);
+      const activeSwap = (recipe && recipe.id && activeRecipeSwaps[recipe.id]) ? activeRecipeSwaps[recipe.id][cleanName] : null;
+      const effectiveItem = activeSwap ? { ...ing, name: activeSwap.name, id: activeSwap.name } : ing;
+      const hasItem = isItemInPantry(effectiveItem);
+
       if (ing.isMixin) {
         // mixin
       } else {
@@ -1327,7 +1357,7 @@
       if (hasItem) {
         inPantryCount++;
       } else {
-        missing.push(ing);
+        missing.push(effectiveItem);
       }
     });
 
@@ -2508,6 +2538,555 @@
     });
   }
 
+  // ==========================================================================
+  // 1-Tap Smart Ingredient Substitutions Database & Engine (Roadmap Item 16)
+  // Tested substitutions specifically calibrated for Ninja Creami freezing
+  // mechanics, high-shear blade dynamics, overrun, and macro targets.
+  // ==========================================================================
+  const CREAMI_SWAPS_DATABASE = [
+    {
+      id: 'milk_bases',
+      categoryLabel: 'Milk & Liquid Bases',
+      roleDescription: 'Forms the liquid volume of your pint. Milk sugars, proteins, and fats govern ice crystal size and blade churn aeration.',
+      pattern: /(?:fairlife|ultra-filtered|skim milk|2% milk|whole milk|\bmilk\b|almond milk|oat milk|protein shake|core power|soy milk|cashew milk)/i,
+      options: [
+        {
+          name: 'Unsweetened Almond Milk + 1 tbsp Heavy Cream',
+          ratio: '1:1 liquid swap + 15g (1 tbsp) heavy whipping cream',
+          textureImpact: 'Heavy cream lipids coat the water ice crystals, preventing almond milk from churning into powdery dry snow.',
+          macroDelta: 'Slashes ~60–80 kcal; -11g protein, +5g fat compared to Fairlife 2%.',
+          spinTip: 'Always run outer sides under warm tap water for 60s. May require 1 Respin cycle for maximum silkiness.',
+          proTip: 'Never spin 100% water-thin almond milk alone without stabilizer or added fat, or it will churn into dry powdery shavings.'
+        },
+        {
+          name: 'Ready-To-Drink Protein Shake (Core Power / Premier / Quest)',
+          ratio: '1:1 direct volume replacement',
+          textureImpact: 'Ultra-creamy custard soft-serve texture. Commercial emulsifiers (gellan/carrageenan) prevent ice crystallization.',
+          macroDelta: 'Boosts protein by +10g to +18g per pint; adds ~30–50 kcal.',
+          spinTip: 'Spins perfectly on Lite Ice Cream. Typically yields thick gelato on pass 1 with 0 respins needed!',
+          proTip: 'You can omit additional xanthan or pudding mix when using RTD shakes—they already contain heavy industrial stabilizers.'
+        },
+        {
+          name: 'Barista-Blend Oat Milk',
+          ratio: '1:1 direct volume replacement',
+          textureImpact: 'Velvety, dense mouthfeel from oat beta-glucan starches and emulsified plant lipids.',
+          macroDelta: '+30–50 kcal, +8g carbs, -8g protein compared to ultra-filtered dairy milk.',
+          spinTip: 'Processes cleanly on standard Ice Cream or Lite Ice Cream setting.',
+          proTip: 'Opt for "Barista" oat milk versions; their higher lipid content produces superior micro-emulsion in sub-zero churning.'
+        },
+        {
+          name: '2% or Whole Dairy Milk',
+          ratio: '1:1 direct volume replacement',
+          textureImpact: 'Classic rich traditional ice cream mouthfeel with natural dairy sweetness from lactose.',
+          macroDelta: '+20–60 kcal, -5g protein, +3g to +6g dairy fat compared to Fairlife Skim/Fat-Free.',
+          spinTip: 'Spins smooth on Lite Ice Cream or Ice Cream cycle with zero chalkiness.',
+          proTip: 'Natural lactose depresses freezing points slightly better than unsweetened nut milks, making the pint less icy.'
+        }
+      ]
+    },
+    {
+      id: 'stabilizers',
+      categoryLabel: 'Stabilizers & Gels',
+      roleDescription: 'Binds free water molecules to prevent hard ice crystallization and create stretchy, scoopable soft-serve.',
+      pattern: /(?:xanthan|guar gum|tara gum|locust bean|stabilizer)/i,
+      options: [
+        {
+          name: 'Sugar-Free Instant Pudding Mix (Jell-O)',
+          ratio: '1/4 tsp gum → 7g to 10g (approx 1 tbsp) dry mix',
+          textureImpact: 'The undisputed gold standard Creami hack. Modified cornstarch swells into a lush pudding gel that whips like soft-serve.',
+          macroDelta: '+25–35 kcal, +6g carbs (slow-digesting modified food starch).',
+          spinTip: 'Whisk into liquid thoroughly before freezing so no dry starch settles at the bottom of the container.',
+          proTip: 'SF White Chocolate or SF Cheesecake pudding mix imparts an incredible gourmet bakery flavor foundation!'
+        },
+        {
+          name: 'Guar Gum (Cold-Hydrating)',
+          ratio: '1:1 by volume (1/4 tsp guar for 1/4 tsp xanthan)',
+          textureImpact: 'Produces a stretchier, gelato-like consistency. Hydrates exceptionally well in near-freezing temperatures.',
+          macroDelta: '0 net calories, 0g sugar, +1g soluble prebiotic fiber.',
+          spinTip: 'Process on Lite Ice Cream cycle.',
+          proTip: 'Guar gum hydrates faster in cold liquids than xanthan gum, making it superior if mixing cold bases right before freezing.'
+        },
+        {
+          name: 'Blended Low-Fat Cottage Cheese or Light Cream Cheese',
+          ratio: '1/4 tsp gum → 30g (2 tbsp) cottage cheese or 15g light cream cheese',
+          textureImpact: 'Natural dairy caseins and phospholipids create dense, decadent New York cheesecake richness.',
+          macroDelta: '+25–35 kcal, +4g protein, +1g fat.',
+          spinTip: 'Must be blended completely smooth with an immersion or counter blender before freezing.',
+          proTip: 'You cannot taste cottage cheese once frozen and spun—it transforms completely into a velvety dairy cream base.'
+        }
+      ]
+    },
+    {
+      id: 'protein_powders',
+      categoryLabel: 'Protein Powders',
+      roleDescription: 'Provides primary structural body, density, and overrun. Blends dictate whether texture is creamy soft-serve or dry snow.',
+      pattern: /(?:protein powder|whey|casein|pea protein|plant protein|vegan protein|isolate)/i,
+      options: [
+        {
+          name: 'Whey / Casein 50/50 Blend (PEScience / Quest)',
+          ratio: '1:1 scoop swap (approx 31g)',
+          textureImpact: 'The holy grail for Ninja Creami. Micellar casein absorbs 3x its weight in liquid into a thick gel, while whey adds airy fluff.',
+          macroDelta: 'Net neutral delta (within ±5 kcal and 1g protein of pure whey).',
+          spinTip: 'Spins thick on pass 1; almost never requires a Respin cycle.',
+          proTip: '100% Whey Isolate aerates too quickly into dry powdery snow; blending with casein locks in commercial ice cream density.'
+        },
+        {
+          name: '100% Whey Isolate + 2 tbsp Nonfat Greek Yogurt',
+          ratio: '1 scoop whey + 30g (2 tbsp) plain Greek yogurt',
+          textureImpact: 'Lactic moisture from Greek yogurt counteracts whey isolate dryness, preventing icy crumbling.',
+          macroDelta: '+18 kcal, +3g protein, 0g fat.',
+          spinTip: '1st spin Lite Ice Cream → add 1 tbsp splash of milk → 1 Respin for maximum velvet whip.',
+          proTip: 'Ideal quick fix if you only have standard whey isolate tubs in your pantry.'
+        },
+        {
+          name: 'Plant / Pea-Brown Rice Protein',
+          ratio: '1:1 scoop swap + add 35ml (2 tbsp) extra milk',
+          textureImpact: 'Plant proteins absorb significantly more water; the extra liquid prevents an overly clay-like or dense dry texture.',
+          macroDelta: '-5 kcal, -2g protein, +1g fiber, 100% dairy-free / vegan.',
+          spinTip: 'Always give a 60-second hot water bath to avoid icy ring on the perimeter.',
+          proTip: 'Plant proteins pair especially well with cocoa powder, peanut butter, or chai spices to mask earthy undertones.'
+        }
+      ]
+    },
+    {
+      id: 'sweeteners',
+      categoryLabel: 'Sweeteners & Freezing Point Modifiers',
+      roleDescription: 'Regulates taste and depresses freezing point so ice crystals remain tiny and sliceable by the high-speed blade.',
+      pattern: /(?:allulose|erythritol|monk fruit|stevia|splenda|sweetener|maple syrup|honey|sugar|truvia|swerve)/i,
+      options: [
+        {
+          name: 'Allulose (Pure Rare Sugar)',
+          ratio: '1:1 with regular sugar, or 1.25:1 with erythritol',
+          textureImpact: 'Freezing science champion! Depresses freezing point identical to table sugar without crystallizing into hard icy grit.',
+          macroDelta: '0 net carbs, <1 kcal/tsp (zero glycemic impact, not absorbed as carbohydrate).',
+          spinTip: 'Spins smoother, softer, and more scoopable straight from the freezer than any other zero-calorie sweetener.',
+          proTip: 'Unlike erythritol, allulose does NOT form crunchy "cooling" crystals when held below 0°F.'
+        },
+        {
+          name: 'Monk Fruit / Erythritol Blend (Lakanto)',
+          ratio: '1:1 replacement for table sugar',
+          textureImpact: 'Clean, neutral sweetness profile. Freezes harder than sugar/allulose, so always pair with a stabilizer.',
+          macroDelta: '0 calories, 0 net carbs.',
+          spinTip: 'Give pint a 60-second hot water bath around the sides to prevent outer icy ring.',
+          proTip: 'If the texture looks powdery like snow after the initial spin, add 1 tbsp of milk and hit Respin!'
+        },
+        {
+          name: 'Pure Maple Syrup or Raw Honey',
+          ratio: '2 tbsp (30g to 40g) per 16 oz pint',
+          textureImpact: 'Natural inverted sugars keep ice crystals microscopic; delivers a glossy sheen and luxurious authentic gelato mouthfeel.',
+          macroDelta: '+100–120 kcal, +28g natural unrefined carbohydrates.',
+          spinTip: 'Spins beautifully on Ice Cream or Gelato setting.',
+          proTip: 'Outstanding choice for whole-food, unrefined clean-eating recipes where non-nutritive sweeteners are avoided.'
+        }
+      ]
+    },
+    {
+      id: 'nut_butters',
+      categoryLabel: 'Nut Butters & Powders',
+      roleDescription: 'Delivers roasted nutty aromatics and natural emulsifying fats that lubricate blade shearing.',
+      pattern: /(?:peanut butter|pb2|pb fit|powdered peanut|almond butter|cashew butter|sunbutter)/i,
+      options: [
+        {
+          name: 'Powdered Peanut Butter (PB2 / PB Fit)',
+          ratio: '2 tbsp regular PB → 2 tbsp PB2 + 1.5 tbsp water or milk',
+          textureImpact: 'Slashes ~85% of fat while preserving rich roasted peanut taste; slightly less dense fat-coating.',
+          macroDelta: 'Slashes ~130 kcal and -13g fat; adds +1g protein per 2 tbsp!',
+          spinTip: 'Whisk PB2 with warm liquid before freezing so powder fully hydrates.',
+          proTip: 'Pair with 1/4 tsp xanthan or pudding mix to replenish the mouthfeel lost from stripping out the peanut oil.'
+        },
+        {
+          name: 'Real Creamy Peanut Butter (Jif / Natural PB)',
+          ratio: '2 tbsp PB2 → 1 tbsp Real PB',
+          textureImpact: 'Decadent, rich mouthfeel; natural peanut oils lubricate the Creami dual-drive blades for gelato consistency.',
+          macroDelta: '+75–90 kcal, +8g healthy mono/polyunsaturated fats.',
+          spinTip: 'Microwave peanut butter for 10s so it whisks smoothly into the cold liquid base.',
+          proTip: 'Or warm it up and drizzle down the core hole during the Mix-In cycle for frozen peanut butter ribbons!'
+        },
+        {
+          name: 'Sunflower Seed Butter (SunButter - Nut-Free)',
+          ratio: '1:1 direct swap for peanut or almond butter',
+          textureImpact: 'Creamy, rich viscosity; 100% allergy-friendly for school lunches or tree nut allergies.',
+          macroDelta: 'Comparable calories and fat (within ±10 kcal).',
+          spinTip: 'Blends seamlessly into base or mix-in channel.',
+          proTip: 'Delivers deep roasted nutty richness with zero peanut or tree nut allergens.'
+        }
+      ]
+    },
+    {
+      id: 'cocoa_chocolate',
+      categoryLabel: 'Cocoa & Chocolate',
+      roleDescription: 'Adds chocolate flavor and starch solids. Alkalization dictates bitterness, acidity, and color depth.',
+      pattern: /(?:cocoa|cacao|chocolate powder|dutch process|black cocoa)/i,
+      options: [
+        {
+          name: 'Black Cocoa Powder (The Oreo Cookie Secret)',
+          ratio: '1:1 swap with regular cocoa (or 50/50 blend)',
+          textureImpact: 'Ultra-alkalized with near-zero acidity; gives unmistakable authentic Nabisco Oreo wafer flavor and midnight jet-black color.',
+          macroDelta: 'Virtually identical calories (~15 kcal/tbsp), rich in prebiotic cocoa solids.',
+          spinTip: 'Whisk thoroughly with warm liquid before freezing.',
+          proTip: 'This is the exact secret ingredient used in commercial cookies & cream ice cream.'
+        },
+        {
+          name: 'Dutch-Process Cocoa Powder (Hershey Special Dark / Guittard)',
+          ratio: '1:1 replacement for natural cocoa or cacao',
+          textureImpact: 'Alkali-treated to eliminate sourness; dissolves smoother in dairy with zero gritty sediment.',
+          macroDelta: 'Identical macros.',
+          spinTip: 'Lite Ice Cream cycle.',
+          proTip: 'Significantly preferred over natural un-Dutched cocoa powder, which can taste sour and sharp when frozen.'
+        }
+      ]
+    },
+    {
+      id: 'creams_yogurts',
+      categoryLabel: 'Creams, Yogurts & Dairy Fats',
+      roleDescription: 'Provides creaminess, emulsified fat globules, and palate coating to temper sub-zero chill.',
+      pattern: /(?:heavy cream|whipping cream|half and half|greek yogurt|cottage cheese|cream cheese|coconut cream)/i,
+      options: [
+        {
+          name: '0% Nonfat Plain Greek Yogurt (Fage / Chobani)',
+          ratio: '1:1 replacement for heavy cream or full-fat yogurt',
+          textureImpact: 'Massive protein boost with thick tangy richness; creates a frozen yogurt or tart gelato body.',
+          macroDelta: 'Slashes ~80 kcal per 1/4 cup; +6g protein, -11g fat!',
+          spinTip: '1 spin on Lite Ice Cream + 1 Respin for maximum fluffy volume.',
+          proTip: 'Lactic cultures add gourmet tartness that elevates fruit, strawberry, and cheesecake bases.'
+        },
+        {
+          name: 'Canned Full-Fat Coconut Milk / Coconut Cream',
+          ratio: '1:1 replacement for dairy cream',
+          textureImpact: 'Plant-based medium-chain triglycerides (MCTs) yield dense, silky scoopability rivaling dairy cream.',
+          macroDelta: '+30 kcal, healthy plant fats, 100% lactose-free and vegan.',
+          spinTip: 'Shake can vigorously or warm gently so fat cap emulsifies into liquid before freezing.',
+          proTip: 'Pairs divinely with chocolate, pineapple, mango, or matcha green tea flavors.'
+        }
+      ]
+    },
+    {
+      id: 'mixins_cookies',
+      categoryLabel: 'Mix-Ins & Cookies',
+      roleDescription: 'Folded in after base spinning to create textural contrast without dulling the blades.',
+      pattern: /(?:oreo|cookie|chips|chocolate chip|graham cracker|cereal|pretzels)/i,
+      options: [
+        {
+          name: 'Mini Semi-Sweet Chocolate Chips',
+          ratio: '1:1 swap with regular standard-size chips',
+          textureImpact: 'Game changer! Regular chips freeze rock-hard like pebbles; mini chips shatter into pleasant stracciatella flakes.',
+          macroDelta: 'Identical macros (saves calories by dispersing more chocolate bites per gram).',
+          spinTip: 'Dedicated Mix-In button ONLY. Never use Respin when mix-ins are inside the container.',
+          proTip: 'Chill or freeze your mini chips before dropping into the core hole so they stay crisp.'
+        },
+        {
+          name: 'Oreo Thins (or High-Protein Sandwich Cookies)',
+          ratio: '2 standard Oreos → 3 Oreo Thins (or 1 Protein Cookie)',
+          textureImpact: 'Higher wafer-to-creme ratio means crispier cookie bits distributed evenly without greasy fat pockets.',
+          macroDelta: '-40 kcal, -3g fat per serving (or +10g protein with protein cookies).',
+          spinTip: 'Spoon out a 1.5-inch wide hole down to the bottom of the spun pint before adding cookies.',
+          proTip: 'For soft doughy cookie bits, let pint rest for 2 minutes after spinning before eating.'
+        },
+        {
+          name: 'High-Protein Cereal (Magic Spoon / Ghost / Premier)',
+          ratio: '15g to 20g mix-in',
+          textureImpact: 'Addictive crunch and nostalgic milk-and-cereal crunch with near-zero sugar.',
+          macroDelta: '+60 kcal, +7g protein, <1g sugar.',
+          spinTip: 'Use Mix-In cycle.',
+          proTip: 'Add half to the core hole for spinning, and sprinkle the rest on top as a crunchy garnish!'
+        }
+      ]
+    },
+    {
+      id: 'fruit_purees',
+      categoryLabel: 'Fruit & Purees',
+      roleDescription: 'Provides natural sweetness, high water volume, and fruit pectins that bind into sorbet consistency.',
+      pattern: /(?:banana|pumpkin|apple sauce|puree|mango|strawberry|blueberries|berries|fruit)/i,
+      options: [
+        {
+          name: '100% Pure Canned Pumpkin Puree (Libby\'s)',
+          ratio: '1 medium banana (100g) → 100g canned pumpkin puree',
+          textureImpact: 'The ultimate volume cheat! Natural pectin gives velvety custard thickness identical to frozen banana with zero banana flavor when sweetened.',
+          macroDelta: 'Slashes ~65–70 kcal! Banana is ~90 kcal vs Pumpkin ~25 kcal (-15g net carbs).',
+          spinTip: 'Process on Lite Ice Cream cycle.',
+          proTip: 'Add 1/2 tsp pumpkin pie spice or cinnamon, and vanilla sweetener—tastes like pumpkin cheesecake!'
+        },
+        {
+          name: 'Frozen Wild Blueberries or Strawberries',
+          ratio: '1:1 fruit swap',
+          textureImpact: 'High skin-to-pulp ratio yields jewel-toned sorbets with vibrant natural tartness.',
+          macroDelta: '-30 kcal compared to tropical fruits (mango/banana), packed with antioxidant anthocyanins.',
+          spinTip: 'Sorbet cycle. Add 1 tbsp lemon juice or almond milk for smooth cutting.',
+          proTip: 'Microwave frozen berries for 15 seconds to release natural juices before blending base.'
+        },
+        {
+          name: 'Unsweetened Applesauce',
+          ratio: '1:1 swap for pureed banana or pumpkin',
+          textureImpact: 'Mild, clean sweetness with soluble pectin that binds water into smooth gelato body.',
+          macroDelta: 'Slashes ~40 kcal compared to banana.',
+          spinTip: 'Lite Ice Cream or Sorbet cycle.',
+          proTip: 'Infuse with cinnamon and nutmeg for an autumn apple pie gelato.'
+        }
+      ]
+    },
+    {
+      id: 'extracts_flavorings',
+      categoryLabel: 'Extracts & Flavorings',
+      roleDescription: 'Volatile aromatic compounds. Freezing subdues sweetness and flavor notes by ~20%, demanding potent carriers.',
+      pattern: /(?:vanilla extract|flavoring|extract|emulsion|cake batter)/i,
+      options: [
+        {
+          name: 'Vanilla Bean Paste',
+          ratio: '1:1 tsp swap with vanilla extract',
+          textureImpact: 'Suspended real vanilla caviar specks give artisanal gelato presentation and rich non-alcoholic flavor.',
+          macroDelta: 'Negligible (±2 kcal).',
+          spinTip: 'Whisk into base liquid before freezing.',
+          proTip: 'Vanilla bean paste withstands freezing temperatures far better than alcohol-based extracts without losing aroma.'
+        },
+        {
+          name: 'Cake Batter or Butter Extract',
+          ratio: '1/2 tsp in place of 1 tsp vanilla',
+          textureImpact: 'Creates the psychological perception of high butterfat richness with zero added fat.',
+          macroDelta: '0 calories, 0g fat.',
+          spinTip: 'Blends into any sweet base.',
+          proTip: 'Start with 1/4 tsp—concentrated extracts are potent!'
+        }
+      ]
+    }
+  ];
+
+  function isSubstituteInPantry(subName) {
+    if (!subName) return false;
+    const clean = sanitizeShoppingItemName(subName).toLowerCase();
+    if (typeof INGREDIENTS_MASTER !== 'undefined' && Array.isArray(INGREDIENTS_MASTER)) {
+      const match = INGREDIENTS_MASTER.find(i => {
+        const iClean = i.name.toLowerCase();
+        return iClean === clean || clean.includes(iClean) || iClean.includes(clean);
+      });
+      if (match && pantryState.has(match.id)) return true;
+    }
+    const slug = clean.replace(/[^a-z0-9]+/g, '_').trim();
+    if (pantryState.has(slug)) return true;
+    return false;
+  }
+
+  function getSwapsForIngredient(ing) {
+    if (!ing) return null;
+    const name = (ing.name || '').trim();
+    const notes = (ing.notes || '').trim();
+    const clean = sanitizeShoppingItemName(name);
+
+    // 1. Search CREAMI_SWAPS_DATABASE by regex matching against name or notes
+    let matchedGroup = null;
+    for (const group of CREAMI_SWAPS_DATABASE) {
+      if (group.pattern.test(clean) || group.pattern.test(name) || (ing.id && group.pattern.test(ing.id))) {
+        matchedGroup = group;
+        break;
+      }
+    }
+
+    // Check if author notes have an explicit substitution
+    const authorSub = extractSubstitution(notes);
+
+    if (matchedGroup) {
+      // Clone group options to avoid mutating original
+      const options = [...matchedGroup.options];
+      
+      // If author notes contain a specific sub not yet present, insert it at top!
+      if (authorSub && !options.some(o => o.name.toLowerCase().includes(authorSub.toLowerCase()))) {
+        options.unshift({
+          name: authorSub,
+          ratio: 'Author-recommended in recipe notes',
+          textureImpact: 'Tested by recipe creator specifically for this formula.',
+          macroDelta: 'Depends on brand used.',
+          spinTip: 'Follow standard recipe spin cycle.',
+          proTip: `Recipe note: "${notes}"`
+        });
+      }
+
+      return {
+        categoryLabel: matchedGroup.categoryLabel,
+        roleDescription: matchedGroup.roleDescription,
+        options: options
+      };
+    }
+
+    // 2. If no database category matched, but recipe notes has an author substitution:
+    if (authorSub) {
+      return {
+        categoryLabel: 'Author Recipe Substitution',
+        roleDescription: 'Component tailored by the creator for this Ninja Creami recipe formula.',
+        options: [
+          {
+            name: authorSub,
+            ratio: 'Author-recommended in recipe notes',
+            textureImpact: 'Calibrated by author for optimal pint consistency.',
+            macroDelta: 'Varies by selected brand.',
+            spinTip: 'Process according to recipe instructions.',
+            proTip: `Recipe note: "${notes}"`
+          }
+        ]
+      };
+    }
+
+    return null;
+  }
+
+  function openSwapInspector(ing, recipe) {
+    if (!ing || !recipe) return;
+    const cleanName = sanitizeShoppingItemName(ing.name);
+    const swapData = getSwapsForIngredient(ing);
+    if (!swapData || swapData.options.length === 0) {
+      showToast(`No specific substitutions registered for "${cleanName}".`);
+      return;
+    }
+
+    currentSwapContext = { ing, recipe, swapData };
+    const activeSwap = (recipe.id && activeRecipeSwaps[recipe.id]) ? activeRecipeSwaps[recipe.id][cleanName] : null;
+
+    // Populate Focus Card
+    if (swapFocusCard) {
+      swapFocusCard.innerHTML = `
+        <div class="swap-focus-top">
+          <div class="swap-focus-name">${cleanName}</div>
+          <span class="swap-focus-category">${swapData.categoryLabel}</span>
+        </div>
+        <div class="swap-focus-role">${swapData.roleDescription}</div>
+        ${activeSwap ? `
+          <div class="swap-active-callout">
+            <div><strong>Applied:</strong> Currently swapped with <em>${activeSwap.name}</em> (${activeSwap.ratio})</div>
+            <button type="button" class="btn-reset-swap" id="btnFocusResetSwap">↩️ Revert to Original</button>
+          </div>
+        ` : ''}
+      `;
+
+      const resetBtn = swapFocusCard.querySelector('#btnFocusResetSwap');
+      if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+          resetSwap(cleanName, recipe);
+          openSwapInspector(ing, recipe);
+        });
+      }
+    }
+
+    // Populate Options List
+    if (swapOptionsList) {
+      swapOptionsList.innerHTML = swapData.options.map((opt, idx) => {
+        const inPantry = isSubstituteInPantry(opt.name);
+        const isCurrentActive = Boolean(activeSwap && activeSwap.name.toLowerCase() === opt.name.toLowerCase());
+        return `
+          <div class="swap-card ${isCurrentActive ? 'is-active-swap' : ''}">
+            <div class="swap-card-top">
+              <div class="swap-card-title-group">
+                <div class="swap-card-title">${opt.name}</div>
+                <div class="swap-card-badges">
+                  <span class="swap-ratio-badge">⚖️ ${opt.ratio}</span>
+                  ${inPantry ? '<span class="swap-pantry-badge">✓ In Your Pantry</span>' : ''}
+                  ${isCurrentActive ? '<span class="swap-ratio-badge" style="background: rgba(168, 85, 247, 0.2); border-color: #a855f7; color: #e9d5ff;">★ Currently Applied</span>' : ''}
+                </div>
+              </div>
+            </div>
+
+            <div class="swap-details-grid">
+              <div class="swap-detail-item">
+                <span style="font-size: 1.1rem;">🍦</span>
+                <div><strong>Texture Impact:</strong> ${opt.textureImpact}</div>
+              </div>
+              <div class="swap-detail-item">
+                <span style="font-size: 1.1rem;">🔥</span>
+                <div><strong>Macro Delta:</strong> ${opt.macroDelta}</div>
+              </div>
+              <div class="swap-detail-item">
+                <span style="font-size: 1.1rem;">🌀</span>
+                <div><strong>Spin Tip:</strong> ${opt.spinTip}</div>
+              </div>
+            </div>
+
+            ${opt.proTip ? `
+              <div class="swap-pro-note">
+                <strong>💡 Pro Tip:</strong> ${opt.proTip}
+              </div>
+            ` : ''}
+
+            <div class="swap-card-footer">
+              ${isCurrentActive ? `
+                <button type="button" class="btn-reset-swap" data-action="reset-swap">↩️ Revert to Original</button>
+              ` : `
+                <button type="button" class="btn-apply-swap" data-action="apply-swap" data-opt-idx="${idx}">
+                  <span>🔄 Apply This Swap</span>
+                </button>
+              `}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Wire apply and reset buttons
+      swapOptionsList.querySelectorAll('[data-action="apply-swap"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = parseInt(btn.dataset.optIdx, 10);
+          const selectedSwap = swapData.options[idx];
+          if (selectedSwap) {
+            applySwap(cleanName, selectedSwap, recipe);
+            openSwapInspector(ing, recipe);
+          }
+        });
+      });
+
+      swapOptionsList.querySelectorAll('[data-action="reset-swap"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          resetSwap(cleanName, recipe);
+          openSwapInspector(ing, recipe);
+        });
+      });
+    }
+
+    if (swapModalOverlay) {
+      swapModalOverlay.classList.add('active');
+      swapModalOverlay.setAttribute('aria-hidden', 'false');
+    }
+  }
+
+  function closeSwapInspector() {
+    if (swapModalOverlay) {
+      swapModalOverlay.classList.remove('active');
+      swapModalOverlay.setAttribute('aria-hidden', 'true');
+    }
+    currentSwapContext = null;
+  }
+
+  function applySwap(originalName, swapObj, recipe) {
+    if (!recipe || !originalName || !swapObj) return;
+    if (!activeRecipeSwaps[recipe.id]) {
+      activeRecipeSwaps[recipe.id] = {};
+    }
+    activeRecipeSwaps[recipe.id][originalName] = swapObj;
+    saveActiveSwaps();
+
+    // Auto-draft note in personal tasting notes if not already noted
+    const swapTag = `[Substituted ${originalName} → ${swapObj.name}]`;
+    if (!userRecipeData[recipe.id]) {
+      userRecipeData[recipe.id] = { rating: 0, notes: '' };
+    }
+    if (!userRecipeData[recipe.id].notes.includes(swapTag)) {
+      userRecipeData[recipe.id].notes = (userRecipeData[recipe.id].notes ? userRecipeData[recipe.id].notes + '\n' : '') + swapTag;
+      saveUserRecipeData();
+    }
+
+    renderRecipeModalContent(recipe);
+    renderRecipes();
+    showToast(`🔄 Applied swap: "${swapObj.name}"!`);
+  }
+
+  function resetSwap(originalName, recipe) {
+    if (!recipe || !originalName) return;
+    if (activeRecipeSwaps[recipe.id] && activeRecipeSwaps[recipe.id][originalName]) {
+      delete activeRecipeSwaps[recipe.id][originalName];
+      if (Object.keys(activeRecipeSwaps[recipe.id]).length === 0) {
+        delete activeRecipeSwaps[recipe.id];
+      }
+      saveActiveSwaps();
+    }
+    renderRecipeModalContent(recipe);
+    renderRecipes();
+    showToast(`↩️ Reverted "${originalName}" to original.`);
+  }
+
   function formatProTip(rawTip) {
     if (!rawTip || typeof rawTip !== 'string') return { title: 'Author Pro Tip', body: '' };
     const text = rawTip.trim();
@@ -2737,14 +3316,14 @@
       <!-- Base Ingredients List -->
       <h3 class="modal-section-title">🥣 Base Ingredients (${baseIngs.length})</h3>
       <div class="modal-ingredients-list">
-        ${baseIngs.map(ing => renderModalIngredientRow(ing)).join('')}
+        ${baseIngs.map(ing => renderModalIngredientRow(ing, recipe)).join('')}
       </div>
 
       <!-- Mix-Ins List -->
       ${mixinIngs.length > 0 ? `
         <h3 class="modal-section-title">🍫 Mix-Ins (${mixinIngs.length})</h3>
         <div class="modal-ingredients-list">
-          ${mixinIngs.map(ing => renderModalIngredientRow(ing)).join('')}
+          ${mixinIngs.map(ing => renderModalIngredientRow(ing, recipe)).join('')}
         </div>
       ` : ''}
 
@@ -3280,6 +3859,40 @@
       });
     }
 
+    // 1-Tap Smart Ingredient Substitutions Trigger Badges (Roadmap Item 16)
+    recipeModalBody.querySelectorAll('.ing-swap-badge').forEach(badge => {
+      badge.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const ingName = badge.dataset.ingName;
+        const ing = (recipe.ingredients || []).find(i => sanitizeShoppingItemName(i.name) === ingName || i.name === ingName);
+        if (ing) {
+          openSwapInspector(ing, recipe);
+        }
+      });
+    });
+
+    // Revert Swap Button inside ingredient row
+    recipeModalBody.querySelectorAll('.btn-ing-revert-swap').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const ingName = btn.dataset.ingName;
+        resetSwap(ingName, recipe);
+      });
+    });
+
+    // Author sub-chip click triggers swap inspector
+    recipeModalBody.querySelectorAll('.ing-sub-chip').forEach(chip => {
+      chip.style.cursor = 'pointer';
+      chip.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const row = chip.closest('.modal-ing-row');
+        const badge = row ? row.querySelector('.ing-swap-badge') : null;
+        if (badge) {
+          badge.click();
+        }
+      });
+    });
+
     // Done Button
     const modalDoneBtn = recipeModalBody.querySelector('#modalDoneBtn');
     if (modalDoneBtn) {
@@ -3287,12 +3900,51 @@
     }
   }
 
-  function renderModalIngredientRow(ing) {
-    const inPantry = isItemInPantry(ing);
+  function renderModalIngredientRow(ing, recipe) {
+    const rec = recipe || currentModalRecipe;
+    const cleanName = sanitizeShoppingItemName(ing.name);
+    const activeSwap = (rec && rec.id && activeRecipeSwaps[rec.id]) ? activeRecipeSwaps[rec.id][cleanName] : null;
+
+    const inPantry = isItemInPantry(activeSwap ? activeSwap.name : ing);
     const amountText = formatIngredientAmount(ing, modalScale, modalUnitMode);
     const subText = extractSubstitution(ing.notes);
-    const cleanName = sanitizeShoppingItemName(ing.name);
-    const inShopList = manualShoppingList.has(cleanName) || manualShoppingList.has(ing.name);
+    const inShopList = manualShoppingList.has(cleanName) || manualShoppingList.has(ing.name) || (activeSwap && manualShoppingList.has(sanitizeShoppingItemName(activeSwap.name)));
+
+    const swapData = getSwapsForIngredient(ing);
+    const swapCount = swapData ? swapData.options.length : 0;
+
+    if (activeSwap) {
+      return `
+        <div class="modal-ing-row ${inPantry ? 'in-pantry' : ''} is-swapped">
+          <div class="modal-ing-info">
+            <div class="modal-ing-name">
+              <span style="text-decoration: line-through; opacity: 0.55; font-size: 0.88em; margin-right: 6px;">${cleanName}</span>
+              <span style="color: #c084fc; font-weight: 700;">🔄 ${activeSwap.name}</span>
+            </div>
+            <div class="ing-active-swap-pill">
+              <span>Ratio: ${activeSwap.ratio}</span>
+              <button type="button" class="btn-ing-revert-swap" data-ing-name="${cleanName}" title="Revert to original ingredient">Revert</button>
+            </div>
+            ${ing.notes ? `<div class="modal-ing-notes">${ing.notes}</div>` : ''}
+          </div>
+          <div class="modal-ing-right-group">
+            <div class="modal-ing-amount-box" title="${modalScale > 1 ? 'Scaled Deluxe (1.5×) amount' : 'Standard amount'}">
+              <span class="modal-ing-amount-label">${modalScale > 1 ? 'Deluxe Amt' : 'Amount'}</span>
+              <span class="modal-ing-amount-val ${!amountText ? 'empty' : ''}">${amountText || 'As needed'}</span>
+            </div>
+            <button type="button" class="ing-swap-badge active-swap" data-ing-name="${cleanName}" title="Modify substitution">
+              🔄 Swapped
+            </button>
+            <button type="button" class="modal-ing-shop-btn ${inShopList ? 'in-list' : ''}" data-name="${sanitizeShoppingItemName(activeSwap.name)}" title="${inShopList ? 'Remove from shopping list' : 'Add to shopping list'}">
+              ${inShopList ? '✓ On List' : '🛒 + List'}
+            </button>
+            <button type="button" class="modal-ing-toggle-btn ${inPantry ? 'in-pantry' : ''}" data-id="${activeSwap.name}">
+              ${inPantry ? '✓ In Pantry' : '+ In Stock'}
+            </button>
+          </div>
+        </div>
+      `;
+    }
 
     return `
       <div class="modal-ing-row ${inPantry ? 'in-pantry' : ''}">
@@ -3306,10 +3958,15 @@
             <span class="modal-ing-amount-label">${modalScale > 1 ? 'Deluxe Amt' : 'Amount'}</span>
             <span class="modal-ing-amount-val ${!amountText ? 'empty' : ''}">${amountText || 'As needed'}</span>
           </div>
-          <button class="modal-ing-shop-btn ${inShopList ? 'in-list' : ''}" data-name="${cleanName}" title="${inShopList ? 'Remove from shopping list' : 'Add to shopping list'}">
+          ${(swapCount > 0 || subText) ? `
+            <button type="button" class="ing-swap-badge" data-ing-name="${cleanName}" title="Explore ${swapCount || 1} tested substitutions for Ninja Creami">
+              🔄 Swap ${swapCount > 0 ? `(${swapCount})` : ''}
+            </button>
+          ` : ''}
+          <button type="button" class="modal-ing-shop-btn ${inShopList ? 'in-list' : ''}" data-name="${cleanName}" title="${inShopList ? 'Remove from shopping list' : 'Add to shopping list'}">
             ${inShopList ? '✓ On List' : '🛒 + List'}
           </button>
-          <button class="modal-ing-toggle-btn ${inPantry ? 'in-pantry' : ''}" data-id="${ing.id}">
+          <button type="button" class="modal-ing-toggle-btn ${inPantry ? 'in-pantry' : ''}" data-id="${ing.id}">
             ${inPantry ? '✓ In Pantry' : '+ In Stock'}
           </button>
         </div>
@@ -4317,6 +4974,15 @@
       });
     }
 
+    // Smart Substitutions Modal (Roadmap Item 16)
+    if (swapModalCloseBtn) swapModalCloseBtn.addEventListener('click', closeSwapInspector);
+    if (swapBackToRecipeBtn) swapBackToRecipeBtn.addEventListener('click', closeSwapInspector);
+    if (swapModalOverlay) {
+      swapModalOverlay.addEventListener('click', (e) => {
+        if (e.target === swapModalOverlay) closeSwapInspector();
+      });
+    }
+
     if (freezerToggleAddBtn) {
       freezerToggleAddBtn.addEventListener('click', () => toggleFreezerAddForm());
     }
@@ -4389,6 +5055,7 @@
     // Escape Key to Close Modals
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
+        closeSwapInspector();
         closeRecipeModal();
         closeRouletteModal();
         closeShoppingListModal();
