@@ -269,8 +269,8 @@
   let communityStats = {
     ratings: {},
     madeCounts: {},
-    totalBatches: 539,
-    totalSpins: 539,
+    totalBatches: 0,
+    totalSpins: 0,
     totalUsers: 1
   };
 
@@ -522,8 +522,8 @@
         communityStats = {
           ratings: parsed.ratings || {},
           madeCounts: parsed.madeCounts || {},
-          totalBatches: parsed.totalBatches || 539,
-          totalSpins: parsed.totalSpins || 539,
+          totalBatches: parsed.totalBatches || 0,
+          totalSpins: parsed.totalSpins || 0,
           totalUsers: parsed.totalUsers || 1
         };
       } catch (e) {
@@ -626,8 +626,8 @@
           communityStats = {
             ratings: data.ratings || {},
             madeCounts: data.madeCounts || {},
-            totalBatches: data.totalBatches || 539,
-            totalSpins: data.totalSpins || 539,
+            totalBatches: data.totalBatches || 0,
+            totalSpins: data.totalSpins || 0,
             totalUsers: data.totalUsers || 1
           };
           saveCommunityStats();
@@ -642,7 +642,7 @@
   function updateCommunityStatsUI() {
     const el = document.getElementById('statCommunityBatches');
     if (el) {
-      el.textContent = (communityStats.totalBatches || 539).toLocaleString();
+      el.textContent = (communityStats.totalBatches || 0).toLocaleString();
     }
   }
 
@@ -894,7 +894,7 @@
     // Optimistic community update
     const currentComm = communityStats.madeCounts[recipeId] || 0;
     communityStats.madeCounts[recipeId] = Math.max(0, currentComm + delta);
-    communityStats.totalBatches = Math.max(0, (communityStats.totalBatches || 539) + delta);
+    communityStats.totalBatches = Math.max(0, (communityStats.totalBatches || 0) + delta);
     saveCommunityStats();
 
     // Persist to backend server
@@ -992,14 +992,30 @@
   }
 
   function updateModalRatingDisplay(recipeId) {
-    const rInfo = communityStats.ratings[recipeId] || { avg: 4.8, count: 5, distribution: { 5: 4, 4: 1, 3: 0, 2: 0, 1: 0 } };
+    const rInfo = communityStats.ratings[recipeId];
     const overallScoreBadge = document.getElementById('modalOverallScoreBadge');
     const bigScore = document.getElementById('modalCommBigScore');
     const totalReviews = document.getElementById('modalCommTotalReviews');
 
-    if (overallScoreBadge) overallScoreBadge.textContent = `★ ${rInfo.avg.toFixed(1)} / 5.0`;
-    if (bigScore) bigScore.textContent = rInfo.avg.toFixed(1);
-    if (totalReviews) totalReviews.textContent = `${rInfo.count} rating${rInfo.count === 1 ? '' : 's'}`;
+    if (rInfo && rInfo.count > 0) {
+      if (overallScoreBadge) {
+        overallScoreBadge.textContent = `★ ${rInfo.avg.toFixed(1)} / 5.0`;
+        overallScoreBadge.style.color = '#fbbf24';
+        overallScoreBadge.style.background = 'rgba(251, 191, 36, 0.12)';
+        overallScoreBadge.style.border = '1px solid rgba(251, 191, 36, 0.35)';
+      }
+      if (bigScore) bigScore.textContent = rInfo.avg.toFixed(1);
+      if (totalReviews) totalReviews.textContent = `${rInfo.count} rating${rInfo.count === 1 ? '' : 's'}`;
+    } else {
+      if (overallScoreBadge) {
+        overallScoreBadge.textContent = 'No reviews yet';
+        overallScoreBadge.style.color = 'var(--text-dim)';
+        overallScoreBadge.style.background = 'var(--bg-glass)';
+        overallScoreBadge.style.border = '1px solid var(--border-item)';
+      }
+      if (bigScore) bigScore.textContent = '—';
+      if (totalReviews) totalReviews.textContent = '0 ratings';
+    }
   }
 
   function hashString(str) {
@@ -1346,13 +1362,13 @@
         }
         return a.recipe.name.localeCompare(b.recipe.name);
       } else if (sortBy === 'rating_desc') {
-        const rateA = communityStats.ratings[a.recipe.id]?.avg ?? (4.5 + (Math.abs(hashString(a.recipe.id)) % 5) * 0.1);
-        const rateB = communityStats.ratings[b.recipe.id]?.avg ?? (4.5 + (Math.abs(hashString(b.recipe.id)) % 5) * 0.1);
+        const rateA = communityStats.ratings[a.recipe.id]?.avg ?? 0;
+        const rateB = communityStats.ratings[b.recipe.id]?.avg ?? 0;
         if (rateB !== rateA) return rateB - rateA;
         return a.recipe.name.localeCompare(b.recipe.name);
       } else if (sortBy === 'community_made_desc') {
-        const commA = communityStats.madeCounts[a.recipe.id] ?? (12 + (Math.abs(hashString(a.recipe.id)) % 30));
-        const commB = communityStats.madeCounts[b.recipe.id] ?? (12 + (Math.abs(hashString(b.recipe.id)) % 30));
+        const commA = communityStats.madeCounts[a.recipe.id] ?? 0;
+        const commB = communityStats.madeCounts[b.recipe.id] ?? 0;
         if (commB !== commA) return commB - commA;
         return a.recipe.name.localeCompare(b.recipe.name);
       } else if (sortBy === 'user_made_desc') {
@@ -1508,15 +1524,39 @@
       userRatingEl.remove();
     }
 
+    // Update Community Rating if present
+    const isPersonal = Boolean(recipe.isPersonal || (recipe.id && recipe.id.startsWith('custom_')));
+    const commRating = communityStats.ratings[recipe.id];
+    const hasCommRating = Boolean(!isPersonal && commRating && commRating.count > 0);
+    let commRatingEl = card.querySelector('.card-community-rating');
+    if (hasCommRating) {
+      if (commRatingEl) {
+        commRatingEl.title = `Community rating: ${commRating.avg.toFixed(1)} / 5.0 (${commRating.count} review${commRating.count === 1 ? '' : 's'})`;
+        commRatingEl.innerHTML = `★ ${commRating.avg.toFixed(1)} <span class="rating-sub">(${commRating.count})</span>`;
+      } else {
+        const actionsTop = card.querySelector('.card-actions-top');
+        if (actionsTop) {
+          const span = document.createElement('span');
+          span.className = 'card-community-rating';
+          span.title = `Community rating: ${commRating.avg.toFixed(1)} / 5.0 (${commRating.count} review${commRating.count === 1 ? '' : 's'})`;
+          span.innerHTML = `★ ${commRating.avg.toFixed(1)} <span class="rating-sub">(${commRating.count})</span>`;
+          actionsTop.prepend(span);
+        }
+      }
+    } else if (commRatingEl) {
+      commRatingEl.remove();
+    }
+
     // Update Made & Batch Tracker Pills if present
     const madeRow = card.querySelector('.card-made-row');
     if (madeRow) {
       const userMade = recipeMadeCounts[recipe.id] || 0;
-      const commMade = communityStats.madeCounts[recipe.id] ?? (12 + (Math.abs(hashString(recipe.id)) % 30));
-      const isPersonal = Boolean(recipe.isPersonal || (recipe.id && recipe.id.startsWith('custom_')));
+      const commMade = communityStats.madeCounts[recipe.id] || 0;
+      const hasMadeContent = (userMade > 0) || (!isPersonal && commMade > 0);
+      madeRow.style.display = hasMadeContent ? 'flex' : 'none';
       madeRow.innerHTML = `
         ${userMade > 0 ? `<span class="made-pill personal" title="You have spun this ${userMade} times">🍨 You spun ${userMade}×</span>` : ''}
-        ${!isPersonal ? `<span class="made-pill community" title="Spun ${commMade} times across all users">🔥 ${commMade} community spin${commMade === 1 ? '' : 's'}</span>` : ''}
+        ${(!isPersonal && commMade > 0) ? `<span class="made-pill community" title="Spun ${commMade} times across all users">🔥 ${commMade} community spin${commMade === 1 ? '' : 's'}</span>` : ''}
       `;
     }
   }
@@ -1550,11 +1590,12 @@
 
     const isPersonal = Boolean(recipe.isPersonal || (recipe.id && recipe.id.startsWith('custom_')));
     const commRating = communityStats.ratings[recipe.id];
-    const commAvg = commRating ? commRating.avg : (4.5 + (Math.abs(hashString(recipe.id)) % 5) * 0.1);
-    const commCount = commRating ? commRating.count : (3 + (Math.abs(hashString(recipe.id)) % 8));
+    const hasCommRating = Boolean(!isPersonal && commRating && commRating.count > 0);
+    const commAvg = hasCommRating ? commRating.avg : 0;
+    const commCount = hasCommRating ? commRating.count : 0;
     const userFeedback = userRecipeData[recipe.id] || {};
     const userMade = recipeMadeCounts[recipe.id] || 0;
-    const commMade = communityStats.madeCounts[recipe.id] ?? (12 + (Math.abs(hashString(recipe.id)) % 30));
+    const commMade = communityStats.madeCounts[recipe.id] || 0;
 
     card.innerHTML = `
       <div class="recipe-card-body">
@@ -1563,8 +1604,8 @@
             ${isPersonal ? `<span class="book-tag custom" title="Personal custom recipe saved to your Google account">🔒 Personal Recipe</span>` : categories.map(c => `<span class="book-tag ${getCategoryClass(c)}">${c}</span>`).join('')}
           </div>
           <div class="card-actions-top">
-            ${!isPersonal ? `
-              <span class="card-community-rating" title="Community rating: ${commAvg.toFixed(1)} / 5.0 (${commCount} reviews)">
+            ${hasCommRating ? `
+              <span class="card-community-rating" title="Community rating: ${commAvg.toFixed(1)} / 5.0 (${commCount} review${commCount === 1 ? '' : 's'})">
                 ★ ${commAvg.toFixed(1)} <span class="rating-sub">(${commCount})</span>
               </span>
             ` : ''}
@@ -1607,9 +1648,9 @@
         </div>
 
         <!-- Recipe Made & Batch Tracker Pills -->
-        <div class="card-made-row">
+        <div class="card-made-row" style="${(userMade === 0 && (!commMade || isPersonal)) ? 'display: none;' : ''}">
           ${userMade > 0 ? `<span class="made-pill personal" title="You have spun this ${userMade} times">🍨 You spun ${userMade}×</span>` : ''}
-          ${!isPersonal ? `<span class="made-pill community" title="Spun ${commMade} times across all users">🔥 ${commMade} community spin${commMade === 1 ? '' : 's'}</span>` : ''}
+          ${(!isPersonal && commMade > 0) ? `<span class="made-pill community" title="Spun ${commMade} times across all users">🔥 ${commMade} community spin${commMade === 1 ? '' : 's'}</span>` : ''}
         </div>
 
         <div class="card-ingredients-preview">
@@ -2169,14 +2210,15 @@
 
     const userFeedback = userRecipeData[recipe.id] || { rating: 0, notes: '' };
     const userMade = recipeMadeCounts[recipe.id] || 0;
-    const commMade = communityStats.madeCounts[recipe.id] ?? (12 + (Math.abs(hashString(recipe.id)) % 30));
+    const commMade = communityStats.madeCounts[recipe.id] || 0;
     const commRating = communityStats.ratings[recipe.id];
-    const commAvg = commRating ? commRating.avg : (4.5 + (Math.abs(hashString(recipe.id)) % 5) * 0.1);
-    const commCount = commRating ? commRating.count : (3 + (Math.abs(hashString(recipe.id)) % 8));
+    const hasCommRating = Boolean(commRating && commRating.count > 0);
+    const commAvg = hasCommRating ? commRating.avg : 0;
+    const commCount = hasCommRating ? commRating.count : 0;
     const commDist = (commRating && commRating.distribution) ? commRating.distribution : {
-      5: Math.max(1, commCount - 2),
-      4: 1,
-      3: 1,
+      5: 0,
+      4: 0,
+      3: 0,
       2: 0,
       1: 0
     };
@@ -2375,7 +2417,7 @@
           </div>
           ${!isPersonal ? `
             <div class="batch-community-pill" id="modalCommunityBatchesBadge" title="Total times this recipe has been spun across all Creami users">
-              🔥 <span id="modalCommunityBatchesVal">${commMade}</span> community spins
+              🔥 <span id="modalCommunityBatchesVal">${commMade}</span> community spin${commMade === 1 ? '' : 's'}
             </div>
           ` : `<div class="batch-community-pill" style="color: #c084fc; background: rgba(168, 85, 247, 0.14); border-color: rgba(168, 85, 247, 0.35);">🔒 Private to your account</div>`}
         </div>
@@ -2397,7 +2439,7 @@
 
       <!-- Overall Community Rating & Reviews System -->
       <div class="recipe-community-rating-card">
-        ${!isPersonal ? `
+        ${!isPersonal ? (hasCommRating ? `
           <div class="community-rating-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
             <span style="font-family: var(--font-heading); font-weight: 700; color: var(--text-main); font-size: 0.95rem;">⭐ Overall Community Rating</span>
             <span class="comm-badge" id="modalOverallScoreBadge" style="font-weight: 700; color: #fbbf24; background: rgba(251, 191, 36, 0.12); border: 1px solid rgba(251, 191, 36, 0.35); padding: 3px 8px; border-radius: 999px; font-size: 0.8rem;">★ ${commAvg.toFixed(1)} / 5.0</span>
@@ -2426,6 +2468,14 @@
             </div>
           </div>
         ` : `
+          <div class="community-rating-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <span style="font-family: var(--font-heading); font-weight: 700; color: var(--text-main); font-size: 0.95rem;">⭐ Overall Community Rating</span>
+            <span class="comm-badge" id="modalOverallScoreBadge" style="font-weight: 600; color: var(--text-dim); background: var(--bg-glass); border: 1px solid var(--border-item); padding: 3px 8px; border-radius: 999px; font-size: 0.8rem;">No reviews yet</span>
+          </div>
+          <div style="padding: 12px 14px; background: rgba(255, 255, 255, 0.02); border: 1px dashed var(--border-item); border-radius: var(--radius-md); text-align: center; color: var(--text-dim); font-size: 0.88rem; margin-bottom: 16px;">
+            🍦 No community ratings yet for this recipe. Rate it below to be the first!
+          </div>
+        `) : `
           <div class="community-rating-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
             <span style="font-family: var(--font-heading); font-weight: 700; color: var(--text-main); font-size: 0.95rem;">⭐ My Tasting Score & Notes</span>
             <span class="comm-badge" style="color: #c084fc; background: rgba(168, 85, 247, 0.12); border: 1px solid rgba(168, 85, 247, 0.35); padding: 3px 8px; border-radius: 999px; font-size: 0.8rem;">🔒 Personal</span>

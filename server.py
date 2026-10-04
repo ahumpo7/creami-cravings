@@ -69,42 +69,6 @@ if 'admin' not in users_db:
         'token': 'token_admin_001'
     }
 
-# Seed baseline community stats if ratings_db is empty
-if not ratings_db or len(ratings_db) < 5:
-    seed_ratings = {
-        "shamrock_shake": { "avg": 4.9, "count": 28, "made": 42 },
-        "oreo_mcflurry": { "avg": 4.9, "count": 34, "made": 56 },
-        "cake_batter": { "avg": 4.8, "count": 22, "made": 38 },
-        "mint_chocolate_chip": { "avg": 4.8, "count": 19, "made": 31 },
-        "biscoff_cookie_butter": { "avg": 4.9, "count": 25, "made": 44 },
-        "dr_pepper_float": { "avg": 4.7, "count": 16, "made": 27 },
-        "vanilla": { "avg": 4.7, "count": 31, "made": 65 },
-        "chocolate": { "avg": 4.8, "count": 29, "made": 58 },
-        "salted_peanut_butter": { "avg": 4.9, "count": 21, "made": 35 },
-        "s_mores_blizzard": { "avg": 4.8, "count": 18, "made": 29 },
-        "cotton_candy_blizzard": { "avg": 4.7, "count": 15, "made": 24 },
-        "baked_alaska": { "avg": 4.8, "count": 14, "made": 22 },
-        "peanut_butter_cup": { "avg": 4.9, "count": 27, "made": 49 },
-        "matcha": { "avg": 4.6, "count": 12, "made": 19 }
-    }
-    for r_slug, info in seed_ratings.items():
-        if r_slug not in ratings_db:
-            ratings_db[r_slug] = {}
-            for i in range(info["count"]):
-                uid = f"seed_user_{i+1}"
-                r_val = 5 if i % 6 != 0 else 4
-                ratings_db[r_slug][uid] = {
-                    "rating": r_val,
-                    "notes": "Spun on Lite Ice Cream, perfect texture!",
-                    "userName": f"CreamiFan_{i+1}",
-                    "updatedAt": "2026-09-15"
-                }
-        if r_slug not in stats_db:
-            stats_db[r_slug] = { "totalMade": info["made"] }
-
-    save_json_file(RATINGS_DB_FILE, ratings_db)
-    save_json_file(STATS_DB_FILE, stats_db)
-
 save_json_file(USERS_DB_FILE, users_db)
 
 def verify_google_token(credential):

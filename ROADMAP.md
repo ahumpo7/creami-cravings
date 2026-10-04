@@ -16,10 +16,10 @@ A prioritized checklist of fixes, features, and refinements for the Creami Cravi
 - [x] **User Isolation:** Ensure favorites are strictly associated with the authenticated user account and synced via `/api/user/sync`.
 - [x] **Offline/Guest UI:** Show a friendly tooltip or modal explaining that favorites require an account so they can be saved across devices.
 
-### 3. Reset Counts of Everything & Community Rankings
-- [ ] **Clean Slate:** Clear out mock/seed community numbers from `db_ratings.json` and `db_recipe_stats.json`.
-- [ ] **Remove Seed Batches:** Reset total community batches from 540+ down to real organic user data (or 0).
-- [ ] **Fresh Rankings:** Allow recipe popularities and star ratings to grow organically from real user logs and ratings.
+### 3. Reset Counts of Everything & Community Rankings (Completed ✅)
+- [x] **Clean Slate:** Wiped mock and seed community numbers from `db_ratings.json` and `db_recipe_stats.json`. Removed mock auto-seed initialization in `server.py` so the database remains pure.
+- [x] **Remove Seed Batches:** Reset total community spins from the hardcoded 539+ down to real organic count (0) across `index.html`, `app.js`, and `server.py`.
+- [x] **Fresh Organic Rankings:** Recipe cards, modal reviews, and sorting algorithms now rely 100% on genuine user-submitted ratings and logged spins. Unreviewed recipes cleanly display a friendly prompt to be the first to rate without fake star averages or review bar distributions.
 
 ### 4. Fix Shopping List Populating "Weird Things" (Completed ✅)
 - [x] **Sanitize Missing Items:** Review missing ingredient extraction logic in `app.js` to prevent non-standard items, compound instructions, or un-slugged strings from entering the shopping list.
@@ -156,12 +156,11 @@ A prioritized checklist of fixes, features, and refinements for the Creami Cravi
 
 | Rank | Task | Why & Scope | Est. Effort |
 | :---: | :--- | :--- | :--- |
-| **🥇 1** | **Item 3: Reset Counts & Community Rankings** | Clean data wipe of mock/seed numbers in `db_recipe_stats.json`, `db_ratings.json`, and initial seed constants so counts start at 0. | 🟢 ~5 mins |
-| **🥈 2** | **Item 16: 🔄 1-Tap Smart Ingredient Substitutions** | Modal swap popup with tested substitutions for milks, gums, proteins, and sweeteners with texture/macro delta hints. | 🟡 ~20–30 mins |
-| **🥉 3** | **Item 8: 🧊 "Pints in Freezer" Tracker & 16-Hr Timer** | New freezer inventory manager, 16-hour countdown calculation, status badges, and 1-tap spin logging. | 🟡 ~35–45 mins |
-| **4** | **Item 17: 🔔 Freeze Timer Push Notifications** | Web/Android notification trigger when 16-hour freeze timer reaches zero. *(Hooks into Item 8 & PWA)* | 🟡 ~25–35 mins |
-| **5** | **Item 11: 📦 Grocery PWA & Offline Support** | Web App Manifest, Service Worker offline caching strategy, and 1-click export to Apple Notes/Reminders/Keep. *(Prerequisite for Android App)* | 🟠 ~30–40 mins |
-| **6** | **Item 18: 🧪 "Build-A-Pint" Balancing Wizard** | 4-step custom recipe creator with real-time Creaminess Score (1-10) and auto-calculated macros. | 🟠 ~35–45 mins |
-| **7** | **Item 15: 👥 User Management & Tiered Recipe Access** | Admin portal, user database, Google auth role assignment, and category-based recipe gating/locks. | 🟠 ~40–50 mins |
-| **8** | **Item 14: 🤖 Google Play Store Android App (Bubblewrap)** | Generate signed `.aab` bundle, deploy `assetlinks.json`, generate $1024\times500$ banner and $512\times512$ store icon, and prepare `/privacy.html`. | 🟠 ~30–45 mins |
-| **9** | **Item 1: Finish Google Sign-In** | Requires generating OAuth 2.0 Client ID in Google Cloud Console and setting authorized origins. | ⚪ External Credential |
+| **🥇 1** | **Item 16: 🔄 1-Tap Smart Ingredient Substitutions** | Modal swap popup with tested substitutions for milks, gums, proteins, and sweeteners with texture/macro delta hints. | 🟡 ~20–30 mins |
+| **🥈 2** | **Item 8: 🧊 "Pints in Freezer" Tracker & 16-Hr Timer** | New freezer inventory manager, 16-hour countdown calculation, status badges, and 1-tap spin logging. | 🟡 ~35–45 mins |
+| **🥉 3** | **Item 17: 🔔 Freeze Timer Push Notifications** | Web/Android notification trigger when 16-hour freeze timer reaches zero. *(Hooks into Item 8 & PWA)* | 🟡 ~25–35 mins |
+| **4** | **Item 11: 📦 Grocery PWA & Offline Support** | Web App Manifest, Service Worker offline caching strategy, and 1-click export to Apple Notes/Reminders/Keep. *(Prerequisite for Android App)* | 🟠 ~30–40 mins |
+| **5** | **Item 18: 🧪 "Build-A-Pint" Balancing Wizard** | 4-step custom recipe creator with real-time Creaminess Score (1-10) and auto-calculated macros. | 🟠 ~35–45 mins |
+| **6** | **Item 15: 👥 User Management & Tiered Recipe Access** | Admin portal, user database, Google auth role assignment, and category-based recipe gating/locks. | 🟠 ~40–50 mins |
+| **7** | **Item 14: 🤖 Google Play Store Android App (Bubblewrap)** | Generate signed `.aab` bundle, deploy `assetlinks.json`, generate $1024\times500$ banner and $512\times512$ store icon, and prepare `/privacy.html`. | 🟠 ~30–45 mins |
+| **8** | **Item 1: Finish Google Sign-In** | Requires generating OAuth 2.0 Client ID in Google Cloud Console and setting authorized origins. | ⚪ External Credential |

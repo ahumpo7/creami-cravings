@@ -39,16 +39,8 @@
       "cocoa_powder"
     ],
     "favorites": [],
-    "madeCounts": {
-      "shamrock_shake": 1
-    },
-    "ratings": {
-      "shamrock_shake": {
-        "rating": 5,
-        "notes": "Best ever!",
-        "updatedAt": "2026-10-01 13:55"
-      }
-    },
+    "madeCounts": {},
+    "ratings": {},
     "customRecipes": [],
     "shoppingList": [],
     "subscriptions": [
