@@ -329,8 +329,16 @@ for k, copies in sorted(grouped_recipes.items()):
             seen_cats.add(b)
             categories.append(b)
 
-    has_mixins = any(i.get("isMixin") for i in primary["ingredients"])
-    if not has_mixins and "Base Flavors" not in categories:
+    core_base_slugs = {
+        'vanilla', 'vanilla_milk', 'vanilla_protein_shake',
+        'chocolate',
+        'strawberry',
+        'cake_batter', 'cake_batter_milk', 'cake_batter_protein_shake',
+        'coffee',
+        'tart_frozen_yogurt', 'vanilla_bean_frozen_yogurt',
+        'fruit_sorbet'
+    }
+    if recipe_slug in core_base_slugs and "Base Flavors" not in categories:
         categories.append("Base Flavors")
             
     sources = []
