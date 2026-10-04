@@ -154,14 +154,14 @@ A prioritized checklist of fixes, features, and refinements for the Creami Cravi
   - *"🍨 Ding! Your [Recipe Name] pint has chilled for 16 hours. Time to spin and enjoy!"*
 - [ ] **Direct Spin Shortcut:** Tapping the notification opens Creami Cravings directly to that recipe card with recommended spin cycle and batch logger.
 
-### 18. 🧪 "Build-A-Pint" Custom Recipe Balancing Wizard & Creaminess Score
-- [ ] **Guided 4-Step Pint Creator:** Step-by-step interactive builder to formulate balanced custom recipes:
-  - Step 1: Base Liquid (Almond milk, Fairlife, coconut milk, oat milk)
-  - Step 2: Protein & Flavor Powders (Whey, casein, cocoa, peanut butter powder)
-  - Step 3: Stabilizer & Emulsifier (Xanthan gum, sugar-free pudding mix, cream cheese, cottage cheese)
-  - Step 4: Sweeteners & Mix-Ins (Allulose, stevia, monk fruit, Oreos, chocolate chips)
-- [ ] **Real-Time "Creaminess Score" (1 to 10):** Evaluates fat, total dissolved solids, and stabilizer ratios to warn if the pint will freeze into an icy block or turn powdery.
-- [ ] **Automatic Macro Computation:** Recalculates total calories, protein, carbs, and fat per pint, with 1-click save to "My Recipes".
+### 18. 🧪 "Build-A-Pint" Custom Recipe Balancing Wizard & Creaminess Score (Completed ✅)
+- [x] **Guided 4-Step Pint Creator:** Step-by-step interactive builder to formulate balanced custom recipes:
+  - Step 1: Base Liquid (Almond milk, Fairlife [nonfat/2%/whole], coconut milk, oat milk, RTD shakes)
+  - Step 2: Protein & Flavor Powders (Whey isolate, casein, whey/casein blend, cocoa, black cocoa, peanut butter powder, espresso)
+  - Step 3: Stabilizer & Emulsifier (Xanthan gum, guar gum, sugar-free pudding mix, cream cheese, cottage cheese, Greek yogurt, heavy cream)
+  - Step 4: Sweeteners & Mix-Ins (Allulose, erythritol/monk fruit, maple syrup, vanilla extract, Oreos, chocolate chips, PB cups, graham crackers, sprinkles)
+- [x] **Real-Time "Creaminess Score" (1 to 10):** Evaluates fat, total dissolved solids, and stabilizer ratios with live meter bar, grade badge, and science-backed diagnostic tips.
+- [x] **Automatic Macro Computation & Spin Recommendation:** Live recalculation of total calories, protein, carbs, and fat per pint, auto-recommended spin setting (Lite Ice Cream vs Ice Cream), auto-namer, and 1-click save to "My Recipes".
 
 ---
 
@@ -169,9 +169,9 @@ A prioritized checklist of fixes, features, and refinements for the Creami Cravi
 
 | Rank | Task | Why & Scope | Est. Effort |
 | :---: | :--- | :--- | :--- |
-| **🥇 1** | **Item 17: 🔔 Freeze Timer Push Notifications** | Web/Android notification trigger when 16-hour freeze timer reaches zero. *(Hooks into Item 8 & PWA)* | 🟡 ~25–35 mins |
-| **🥈 2** | **Item 11: 📦 Grocery PWA & Offline Support** | Web App Manifest, Service Worker offline caching strategy, and 1-click export to Apple Notes/Reminders/Keep. *(Prerequisite for Android App)* | 🟠 ~30–40 mins |
-| **🥉 3** | **Item 18: 🧪 "Build-A-Pint" Balancing Wizard** | 4-step custom recipe creator with real-time Creaminess Score (1-10) and auto-calculated macros. | 🟠 ~35–45 mins |
-| **4** | **Item 15: 👥 User Management & Tiered Recipe Access** | Admin portal, user database, Google auth role assignment, and category-based recipe gating/locks. | 🟠 ~40–50 mins |
+| **🥇 1** | **Item 11: 📦 Grocery PWA & Offline Support** | Web App Manifest, Service Worker offline caching strategy, and 1-click export to Apple Notes/Reminders/Keep. *(Prerequisite for Push Notifications & Android App)* | 🟠 ~30–40 mins |
+| **🥈 2** | **Item 17: 🔔 Freeze Timer Push Notifications** | Web/Android notification trigger when 16-hour freeze timer reaches zero. *(Hooks into Item 8 & PWA Service Worker)* | 🟡 ~25–35 mins |
+| **🥉 3** | **Item 1: Finish Google Sign-In** | Configure production Google Cloud Console OAuth 2.0 Client ID and authorized origins. *(Authentication backbone)* | ⚪ External Credential |
+| **4** | **Item 15: 👥 User Management & Tiered Recipe Access** | Admin portal, user database (`db_users.json`), Google auth role assignment, and category-based recipe gating/locks. | 🟠 ~40–50 mins |
 | **5** | **Item 14: 🤖 Google Play Store Android App (Bubblewrap)** | Generate signed `.aab` bundle, deploy `assetlinks.json`, generate $1024\times500$ banner and $512\times512$ store icon, and prepare `/privacy.html`. | 🟠 ~30–45 mins |
 | **6** | **Item 1: Finish Google Sign-In** | Requires generating OAuth 2.0 Client ID in Google Cloud Console and setting authorized origins. | ⚪ External Credential |

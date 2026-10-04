@@ -1819,6 +1819,7 @@
         <div class="recipe-card-top">
           <div class="card-book-tags">
             ${isPersonal ? `<span class="book-tag custom" title="Personal custom recipe saved to your Google account">🔒 Personal Recipe</span>` : categories.map(c => `<span class="book-tag ${getCategoryClass(c)}">${c}</span>`).join('')}
+            ${recipe.creaminessScore ? `<span class="recipe-creaminess-badge" title="Build-A-Pint Creaminess Score">🧪 ${recipe.creaminessScore}/10</span>` : ''}
           </div>
           <div class="card-actions-top">
             ${hasCommRating ? `
@@ -3307,6 +3308,7 @@
           ${isPersonal ? `<span class="book-tag custom">🔒 Personal Recipe</span>` : (recipe.categories && recipe.categories.length > 0 ? recipe.categories : [recipe.category]).map(cat => {
             return `<span class="book-tag ${getCategoryClass(cat)}">${cat}</span>`;
           }).join('')}
+          ${recipe.creaminessScore ? `<span class="book-tag" style="background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.4); color: #34d399;">🧪 Creaminess: ${recipe.creaminessScore}/10 (${recipe.creaminessGrade || 'Balanced'})</span>` : ''}
           <span class="book-tag">🌀 ${recipe.spinSetting || 'Lite Ice Cream'}</span>
           <span class="book-tag">⏱️ Prep: ${recipe.prepTime || '2 min'}</span>
           <span class="book-tag">❄️ Freeze: ${recipe.freezeTime || '16+ hrs'}</span>
@@ -4633,14 +4635,1157 @@
     window.print();
   }
 
-  // --- Custom Recipe Builder (Gated to Signed-In Google Account) ---
-  function openCustomRecipeModal() {
+  // --- Build-A-Pint Balancing Wizard & Creaminess Score (Roadmap Item 18) ---
+  const BAP_DATA = {
+    liquids: [
+      {
+        id: 'fairlife_nonfat',
+        name: 'Fairlife Nonfat Milk',
+        icon: '🥛',
+        desc: 'Ultra-filtered, 13g protein per cup. Dense natural casein structure.',
+        unit: 'g',
+        defaultQty16: 380,
+        defaultQty24: 570,
+        step: 10,
+        min: 150,
+        max: 650,
+        per100: { kcal: 40, p: 6.8, c: 3.2, f: 0 },
+        fatScore: 0.2,
+        caseinScore: 1.0,
+        stabilizerScore: 0.2
+      },
+      {
+        id: 'fairlife_2pct',
+        name: 'Fairlife 2% Reduced Fat',
+        icon: '🥛',
+        desc: 'Balanced milkfat & high protein. Shaves into luscious gelato texture.',
+        unit: 'g',
+        defaultQty16: 380,
+        defaultQty24: 570,
+        step: 10,
+        min: 150,
+        max: 650,
+        per100: { kcal: 60, p: 6.8, c: 3.2, f: 2.4 },
+        fatScore: 1.8,
+        caseinScore: 1.0,
+        stabilizerScore: 0.4
+      },
+      {
+        id: 'fairlife_whole',
+        name: 'Fairlife Whole Milk',
+        icon: '🥛',
+        desc: 'Rich whole milkfat solids. Gourmet ice cream parlor richness.',
+        unit: 'g',
+        defaultQty16: 380,
+        defaultQty24: 570,
+        step: 10,
+        min: 150,
+        max: 650,
+        per100: { kcal: 78, p: 6.8, c: 3.2, f: 4.5 },
+        fatScore: 2.8,
+        caseinScore: 1.0,
+        stabilizerScore: 0.6
+      },
+      {
+        id: 'almond_milk',
+        name: 'Unsweetened Almond Milk',
+        icon: '🌰',
+        desc: 'Ultra-low calorie (30-45 kcal). Watery; strongly requires a stabilizer.',
+        unit: 'g',
+        defaultQty16: 360,
+        defaultQty24: 540,
+        step: 10,
+        min: 150,
+        max: 650,
+        per100: { kcal: 13, p: 0.4, c: 0.3, f: 1.0 },
+        fatScore: 0.3,
+        caseinScore: 0,
+        stabilizerScore: 0
+      },
+      {
+        id: 'oat_milk',
+        name: 'Oat Milk (Barista / Creamy)',
+        icon: '🌾',
+        desc: 'Naturally sweet with beta-glucan soluble fibers that coat shaved ice.',
+        unit: 'g',
+        defaultQty16: 380,
+        defaultQty24: 570,
+        step: 10,
+        min: 150,
+        max: 650,
+        per100: { kcal: 60, p: 1.0, c: 8.0, f: 2.5 },
+        fatScore: 1.2,
+        caseinScore: 0,
+        stabilizerScore: 0.8
+      },
+      {
+        id: 'rtd_shake',
+        name: 'RTD Protein Shake (Core Power/Premier)',
+        icon: '💪',
+        desc: 'Pre-blended liquid base with 26-30g protein and natural stabilizers.',
+        unit: 'g',
+        defaultQty16: 340,
+        defaultQty24: 510,
+        step: 10,
+        min: 150,
+        max: 650,
+        per100: { kcal: 47, p: 7.6, c: 1.5, f: 0.9 },
+        fatScore: 0.8,
+        caseinScore: 1.0,
+        stabilizerScore: 0.8
+      },
+      {
+        id: 'coconut_milk',
+        name: 'Canned Coconut Milk (Light)',
+        icon: '🥥',
+        desc: 'Plant-based medium-chain fats that freeze into velvety ice cream.',
+        unit: 'g',
+        defaultQty16: 360,
+        defaultQty24: 540,
+        step: 10,
+        min: 150,
+        max: 650,
+        per100: { kcal: 65, p: 0.6, c: 1.5, f: 6.5 },
+        fatScore: 2.8,
+        caseinScore: 0,
+        stabilizerScore: 0.8
+      }
+    ],
+    powders: [
+      {
+        id: 'whey_casein',
+        name: 'Whey/Casein Blend (PEScience/Quest)',
+        icon: '⭐',
+        desc: 'The #1 Creami secret. Casein absorbs water and forms thick velvet pudding.',
+        unit: 'g',
+        defaultQty16: 31,
+        defaultQty24: 46,
+        step: 5,
+        min: 10,
+        max: 70,
+        serving: 31,
+        perServing: { kcal: 120, p: 24, c: 2, f: 1.5 },
+        caseinScore: 1.5
+      },
+      {
+        id: 'casein_pure',
+        name: '100% Micellar Casein',
+        icon: '🥛',
+        desc: 'Absorbs huge amounts of liquid for ultra-thick soft-serve.',
+        unit: 'g',
+        defaultQty16: 30,
+        defaultQty24: 45,
+        step: 5,
+        min: 10,
+        max: 70,
+        serving: 30,
+        perServing: { kcal: 115, p: 24, c: 1, f: 0.5 },
+        caseinScore: 1.5
+      },
+      {
+        id: 'whey_isolate',
+        name: '100% Whey Protein Isolate',
+        icon: '⚡',
+        desc: 'Ultra-pure protein. Low fat; pairs best with xanthan or pudding mix.',
+        unit: 'g',
+        defaultQty16: 30,
+        defaultQty24: 45,
+        step: 5,
+        min: 10,
+        max: 70,
+        serving: 30,
+        perServing: { kcal: 110, p: 25, c: 1, f: 0.5 },
+        caseinScore: 0.6
+      },
+      {
+        id: 'plant_protein',
+        name: 'Plant Protein (Pea/Brown Rice)',
+        icon: '🌱',
+        desc: 'Dense plant proteins. High water absorption prevents melting.',
+        unit: 'g',
+        defaultQty16: 32,
+        defaultQty24: 48,
+        step: 5,
+        min: 10,
+        max: 70,
+        serving: 32,
+        perServing: { kcal: 125, p: 24, c: 3, f: 2 },
+        caseinScore: 0.8
+      },
+      {
+        id: 'dutch_cocoa',
+        name: 'Dutch-Process Dark Cocoa',
+        icon: '🍫',
+        desc: 'Adds rich fudge flavor and natural cocoa fiber solids.',
+        unit: 'g',
+        defaultQty16: 15,
+        defaultQty24: 22,
+        step: 5,
+        min: 5,
+        max: 40,
+        serving: 15,
+        perServing: { kcal: 45, p: 3, c: 8, f: 1.8 },
+        caseinScore: 0.4
+      },
+      {
+        id: 'black_cocoa',
+        name: 'Black Cocoa Powder (Oreo Wafer)',
+        icon: '🖤',
+        desc: 'Authentic Nabisco Oreo flavor without added sugar or calories.',
+        unit: 'g',
+        defaultQty16: 15,
+        defaultQty24: 22,
+        step: 5,
+        min: 5,
+        max: 40,
+        serving: 15,
+        perServing: { kcal: 40, p: 3, c: 7, f: 1.5 },
+        caseinScore: 0.4
+      },
+      {
+        id: 'pb_fit',
+        name: 'PB Fit / Peanut Butter Powder',
+        icon: '🥜',
+        desc: 'De-fatted peanut flour adds authentic peanut butter taste and thickness.',
+        unit: 'g',
+        defaultQty16: 16,
+        defaultQty24: 24,
+        step: 4,
+        min: 8,
+        max: 50,
+        serving: 16,
+        perServing: { kcal: 70, p: 8, c: 5, f: 2 },
+        caseinScore: 0.5
+      },
+      {
+        id: 'espresso_powder',
+        name: 'Instant Espresso Powder',
+        icon: '☕',
+        desc: 'Intense barista espresso depth that cuts through rich dairy.',
+        unit: 'g',
+        defaultQty16: 4,
+        defaultQty24: 6,
+        step: 2,
+        min: 2,
+        max: 15,
+        serving: 4,
+        perServing: { kcal: 10, p: 0.5, c: 2, f: 0 },
+        caseinScore: 0
+      }
+    ],
+    stabilizers: [
+      {
+        id: 'xanthan_gum',
+        name: 'Xanthan Gum',
+        icon: '🧪',
+        desc: 'Binds free water molecules, completely preventing rock-hard ice sheets.',
+        unit: 'g',
+        defaultQty16: 1,
+        defaultQty24: 1.5,
+        step: 0.5,
+        min: 0.5,
+        max: 3,
+        serving: 1,
+        perServing: { kcal: 3, p: 0, c: 1, f: 0 },
+        stabilizerScore: 1.8
+      },
+      {
+        id: 'guar_gum',
+        name: 'Guar Gum',
+        icon: '🌿',
+        desc: 'Cold-hydrating natural galactomannan. Creates a smooth, creamy pull.',
+        unit: 'g',
+        defaultQty16: 1,
+        defaultQty24: 1.5,
+        step: 0.5,
+        min: 0.5,
+        max: 3,
+        serving: 1,
+        perServing: { kcal: 3, p: 0, c: 1, f: 0 },
+        stabilizerScore: 1.8
+      },
+      {
+        id: 'pudding_mix',
+        name: 'Sugar-Free Pudding Mix',
+        icon: '🍮',
+        desc: 'Modified food starches turn liquids into instant custard consistency.',
+        unit: 'g',
+        defaultQty16: 7,
+        defaultQty24: 11,
+        step: 2,
+        min: 4,
+        max: 20,
+        serving: 7,
+        perServing: { kcal: 20, p: 0, c: 6, f: 0 },
+        stabilizerScore: 1.5
+      },
+      {
+        id: 'greek_yogurt',
+        name: '0% Nonfat Plain Greek Yogurt',
+        icon: '🥣',
+        desc: 'Adds tangy creaminess and dense dairy solids without any fat.',
+        unit: 'g',
+        defaultQty16: 50,
+        defaultQty24: 75,
+        step: 10,
+        min: 20,
+        max: 120,
+        serving: 50,
+        perServing: { kcal: 30, p: 5, c: 2, f: 0 },
+        stabilizerScore: 1.0
+      },
+      {
+        id: 'cream_cheese',
+        name: 'Light Cream Cheese / Neufchâtel',
+        icon: '🧀',
+        desc: 'Natural dairy fat & lactic culture. Emulsifies into gourmet cheesecake body.',
+        unit: 'g',
+        defaultQty16: 30,
+        defaultQty24: 45,
+        step: 5,
+        min: 15,
+        max: 75,
+        serving: 30,
+        perServing: { kcal: 60, p: 2, c: 2, f: 5 },
+        stabilizerScore: 1.5
+      },
+      {
+        id: 'cottage_cheese',
+        name: 'Low-Fat Cottage Cheese (Blended)',
+        icon: '🍦',
+        desc: 'The viral Creami hack: rich, velvety volume and protein with minimal fat.',
+        unit: 'g',
+        defaultQty16: 50,
+        defaultQty24: 75,
+        step: 10,
+        min: 25,
+        max: 120,
+        serving: 50,
+        perServing: { kcal: 45, p: 6, c: 2, f: 1 },
+        stabilizerScore: 1.2
+      },
+      {
+        id: 'heavy_cream',
+        name: 'Splash of Heavy Cream',
+        icon: '🧈',
+        desc: 'Dairy butterfat coats the Creami blade to shave micro-emulsions.',
+        unit: 'ml',
+        defaultQty16: 15,
+        defaultQty24: 22,
+        step: 5,
+        min: 5,
+        max: 45,
+        serving: 15,
+        perServing: { kcal: 50, p: 0, c: 0, f: 5 },
+        stabilizerScore: 1.2
+      }
+    ],
+    sweeteners: [
+      {
+        id: 'allulose',
+        name: 'Allulose (Freezing Point Depressor)',
+        icon: '✨',
+        desc: 'Pure rare sugar: depresses freezing point like real sugar with 0 net carbs & 0 kcal!',
+        unit: 'g',
+        defaultQty16: 20,
+        defaultQty24: 30,
+        step: 5,
+        min: 5,
+        max: 45,
+        serving: 20,
+        perServing: { kcal: 0, p: 0, c: 20, f: 0 },
+        freezingScore: 1.0
+      },
+      {
+        id: 'monkfruit',
+        name: 'Monk Fruit / Erythritol Sweetener',
+        icon: '🍃',
+        desc: 'Zero-calorie, zero-glycemic sweetness without bitterness.',
+        unit: 'g',
+        defaultQty16: 15,
+        defaultQty24: 22,
+        step: 5,
+        min: 5,
+        max: 40,
+        serving: 15,
+        perServing: { kcal: 0, p: 0, c: 15, f: 0 },
+        freezingScore: 0.5
+      },
+      {
+        id: 'maple_syrup',
+        name: 'Pure Maple Syrup or Honey',
+        icon: '🍁',
+        desc: 'Natural invert sugars that soften ice crystal bonding.',
+        unit: 'g',
+        defaultQty16: 20,
+        defaultQty24: 30,
+        step: 5,
+        min: 5,
+        max: 50,
+        serving: 20,
+        perServing: { kcal: 60, p: 0, c: 17, f: 0 },
+        freezingScore: 0.8
+      },
+      {
+        id: 'vanilla_extract',
+        name: 'Pure Vanilla Extract',
+        icon: '🌼',
+        desc: 'Alcohol extract base that rounds out all flavors.',
+        unit: 'g',
+        defaultQty16: 5,
+        defaultQty24: 7,
+        step: 1,
+        min: 2,
+        max: 15,
+        serving: 5,
+        perServing: { kcal: 12, p: 0, c: 1, f: 0 },
+        freezingScore: 0.2
+      }
+    ],
+    mixins: [
+      {
+        id: 'oreos',
+        name: 'Crushed Oreo Cookies',
+        icon: '🍪',
+        desc: 'Roughly crushed sandwich cookies folded in on the "Mix-In" spin.',
+        unit: 'g',
+        defaultQty16: 15,
+        defaultQty24: 22,
+        step: 5,
+        min: 5,
+        max: 45,
+        serving: 15,
+        perServing: { kcal: 75, p: 1, c: 11, f: 3.5 },
+        isMixin: true
+      },
+      {
+        id: 'mini_chips',
+        name: 'Mini Chocolate Chips',
+        icon: '🍫',
+        desc: 'Mini chips shatter into stracciatella flakes instead of tooth-breakers.',
+        unit: 'g',
+        defaultQty16: 15,
+        defaultQty24: 22,
+        step: 5,
+        min: 5,
+        max: 45,
+        serving: 15,
+        perServing: { kcal: 70, p: 1, c: 9, f: 4.5 },
+        isMixin: true
+      },
+      {
+        id: 'pb_cups',
+        name: 'Chopped Peanut Butter Cups',
+        icon: '🥜',
+        desc: 'Rich chocolate peanut butter pockets throughout your pint.',
+        unit: 'g',
+        defaultQty16: 17,
+        defaultQty24: 25,
+        step: 5,
+        min: 5,
+        max: 50,
+        serving: 17,
+        perServing: { kcal: 90, p: 2, c: 10, f: 5 },
+        isMixin: true
+      },
+      {
+        id: 'graham_crackers',
+        name: 'Crushed Graham Crackers',
+        icon: '🥧',
+        desc: 'Sweet honey-graham crust crunch.',
+        unit: 'g',
+        defaultQty16: 15,
+        defaultQty24: 22,
+        step: 5,
+        min: 5,
+        max: 45,
+        serving: 15,
+        perServing: { kcal: 65, p: 1, c: 11, f: 1.5 },
+        isMixin: true
+      },
+      {
+        id: 'sprinkles',
+        name: 'Rainbow Sprinkles',
+        icon: '🎉',
+        desc: 'Colorful funfetti crunch for birthday cake pints.',
+        unit: 'g',
+        defaultQty16: 10,
+        defaultQty24: 15,
+        step: 2,
+        min: 4,
+        max: 30,
+        serving: 10,
+        perServing: { kcal: 40, p: 0, c: 9, f: 1 },
+        isMixin: true
+      }
+    ]
+  };
+
+  let bapState = {
+    currentStep: 1,
+    size: '16',
+    selectedLiquid: 'fairlife_nonfat',
+    liquidQty: 380,
+    selectedPowders: {},
+    selectedStabilizers: { xanthan_gum: 1 },
+    selectedSweeteners: { allulose: 20, vanilla_extract: 5 },
+    selectedMixins: {}
+  };
+
+  let bapInitialized = false;
+
+  function setBapMode(mode) {
+    const btnWizard = document.getElementById('btnModeWizard');
+    const btnManual = document.getElementById('btnModeManual');
+    const wizardCont = document.getElementById('wizardContainer');
+    const manualCont = document.getElementById('manualFormContainer');
+    const modalMainTitle = document.getElementById('bapModalMainTitle');
+    const modalSubTitle = document.getElementById('bapModalSubTitle');
+
+    if (mode === 'wizard') {
+      if (btnWizard) btnWizard.classList.add('active');
+      if (btnManual) btnManual.classList.remove('active');
+      if (wizardCont) wizardCont.style.display = 'block';
+      if (manualCont) manualCont.style.display = 'none';
+      if (modalMainTitle) modalMainTitle.textContent = '🧪 Build-A-Pint Balancing Wizard';
+      if (modalSubTitle) modalSubTitle.textContent = 'Formulate balanced, high-protein custom Creami recipes with real-time texture diagnostics, Creaminess Score (1–10), and auto-computed nutrition.';
+    } else {
+      if (btnWizard) btnWizard.classList.remove('active');
+      if (btnManual) btnManual.classList.add('active');
+      if (wizardCont) wizardCont.style.display = 'none';
+      if (manualCont) manualCont.style.display = 'block';
+      if (modalMainTitle) modalMainTitle.textContent = '📝 Manual Custom Recipe';
+      if (modalSubTitle) modalSubTitle.textContent = '🔒 Tied exclusively to your signed-in Google account. Personal recipes remain strictly private.';
+    }
+  }
+
+  function setBapSize(size) {
+    bapState.size = size;
+    const btn16 = document.getElementById('bapSize16');
+    const btn24 = document.getElementById('bapSize24');
+    if (btn16 && btn24) {
+      btn16.classList.toggle('active', size === '16');
+      btn24.classList.toggle('active', size === '24');
+    }
+
+    // Scale current liquid quantity
+    const liquid = BAP_DATA.liquids.find(l => l.id === bapState.selectedLiquid);
+    if (liquid) {
+      bapState.liquidQty = size === '24' ? liquid.defaultQty24 : liquid.defaultQty16;
+    }
+
+    renderBapGrids();
+    updateBapHUD();
+  }
+
+  function switchBapStep(stepNum) {
+    const target = Math.max(1, Math.min(4, stepNum));
+    bapState.currentStep = target;
+
+    // Update Step Pills
+    document.querySelectorAll('.bap-step-pill').forEach(pill => {
+      const pStep = parseInt(pill.dataset.step);
+      pill.classList.toggle('active', pStep === target);
+    });
+
+    // Update Step Content Panels
+    for (let i = 1; i <= 4; i++) {
+      const panel = document.getElementById(`bapStep${i}`);
+      if (panel) {
+        panel.style.display = (i === target) ? 'block' : 'none';
+        if (i === target) panel.classList.add('active');
+      }
+    }
+
+    // Update Prev / Next Buttons
+    const btnPrev = document.getElementById('bapBtnPrev');
+    const btnNext = document.getElementById('bapBtnNext');
+    if (btnPrev) btnPrev.style.display = (target > 1) ? 'inline-flex' : 'none';
+    if (btnNext) btnNext.style.display = (target < 4) ? 'inline-flex' : 'none';
+  }
+
+  function renderBapCard(item, isSelected, currentQty, onSelect, onQtyChange) {
+    const card = document.createElement('div');
+    card.className = `bap-card ${isSelected ? 'active' : ''}`;
+
+    const macroText = item.per100 
+      ? `${item.per100.kcal} kcal/100g • ${item.per100.p}g P` 
+      : `${item.perServing.kcal} kcal • ${item.perServing.p}g P`;
+
+    card.innerHTML = `
+      <div class="bap-card-check">✓</div>
+      <div>
+        <div class="bap-card-icon">${item.icon}</div>
+        <div class="bap-card-title">${item.name}</div>
+        <div class="bap-card-desc">${item.desc}</div>
+      </div>
+      <div>
+        <div class="bap-card-macros">${macroText}</div>
+        ${isSelected ? `
+          <div class="bap-card-stepper">
+            <button type="button" class="bap-stepper-btn btn-minus">−</button>
+            <span class="bap-stepper-val">${currentQty}${item.unit}</span>
+            <button type="button" class="bap-stepper-btn btn-plus">+</button>
+          </div>
+        ` : ''}
+      </div>
+    `;
+
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('.bap-stepper-btn')) return;
+      onSelect(item);
+    });
+
+    const minusBtn = card.querySelector('.btn-minus');
+    if (minusBtn) {
+      minusBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const newQty = Math.max(item.min, currentQty - item.step);
+        onQtyChange(item, newQty);
+      });
+    }
+
+    const plusBtn = card.querySelector('.btn-plus');
+    if (plusBtn) {
+      plusBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const newQty = Math.min(item.max, currentQty + item.step);
+        onQtyChange(item, newQty);
+      });
+    }
+
+    return card;
+  }
+
+  function renderBapGrids() {
+    const isDeluxe = bapState.size === '24';
+
+    // 1. Liquids Grid
+    const liquidsGrid = document.getElementById('bapGridLiquids');
+    if (liquidsGrid) {
+      liquidsGrid.innerHTML = '';
+      BAP_DATA.liquids.forEach(liquid => {
+        const isSelected = bapState.selectedLiquid === liquid.id;
+        const currentQty = isSelected ? bapState.liquidQty : (isDeluxe ? liquid.defaultQty24 : liquid.defaultQty16);
+        const card = renderBapCard(liquid, isSelected, currentQty, 
+          (l) => {
+            bapState.selectedLiquid = l.id;
+            bapState.liquidQty = isDeluxe ? l.defaultQty24 : l.defaultQty16;
+            renderBapGrids();
+            updateBapHUD();
+          },
+          (l, qty) => {
+            bapState.liquidQty = qty;
+            renderBapGrids();
+            updateBapHUD();
+          }
+        );
+        liquidsGrid.appendChild(card);
+      });
+    }
+
+    // 2. Powders Grid
+    const powdersGrid = document.getElementById('bapGridPowders');
+    if (powdersGrid) {
+      powdersGrid.innerHTML = '';
+      BAP_DATA.powders.forEach(powder => {
+        const isSelected = bapState.selectedPowders[powder.id] !== undefined;
+        const currentQty = isSelected ? bapState.selectedPowders[powder.id] : (isDeluxe ? powder.defaultQty24 : powder.defaultQty16);
+        const card = renderBapCard(powder, isSelected, currentQty,
+          (p) => {
+            if (bapState.selectedPowders[p.id]) {
+              delete bapState.selectedPowders[p.id];
+            } else {
+              bapState.selectedPowders[p.id] = isDeluxe ? p.defaultQty24 : p.defaultQty16;
+            }
+            renderBapGrids();
+            updateBapHUD();
+          },
+          (p, qty) => {
+            bapState.selectedPowders[p.id] = qty;
+            renderBapGrids();
+            updateBapHUD();
+          }
+        );
+        powdersGrid.appendChild(card);
+      });
+    }
+
+    // 3. Stabilizers Grid
+    const stabGrid = document.getElementById('bapGridStabilizers');
+    if (stabGrid) {
+      stabGrid.innerHTML = '';
+      BAP_DATA.stabilizers.forEach(stab => {
+        const isSelected = bapState.selectedStabilizers[stab.id] !== undefined;
+        const currentQty = isSelected ? bapState.selectedStabilizers[stab.id] : (isDeluxe ? stab.defaultQty24 : stab.defaultQty16);
+        const card = renderBapCard(stab, isSelected, currentQty,
+          (s) => {
+            if (bapState.selectedStabilizers[s.id]) {
+              delete bapState.selectedStabilizers[s.id];
+            } else {
+              bapState.selectedStabilizers[s.id] = isDeluxe ? s.defaultQty24 : s.defaultQty16;
+            }
+            renderBapGrids();
+            updateBapHUD();
+          },
+          (s, qty) => {
+            bapState.selectedStabilizers[s.id] = qty;
+            renderBapGrids();
+            updateBapHUD();
+          }
+        );
+        stabGrid.appendChild(card);
+      });
+    }
+
+    // 4. Sweeteners Grid
+    const sweetGrid = document.getElementById('bapGridSweeteners');
+    if (sweetGrid) {
+      sweetGrid.innerHTML = '';
+      BAP_DATA.sweeteners.forEach(sw => {
+        const isSelected = bapState.selectedSweeteners[sw.id] !== undefined;
+        const currentQty = isSelected ? bapState.selectedSweeteners[sw.id] : (isDeluxe ? sw.defaultQty24 : sw.defaultQty16);
+        const card = renderBapCard(sw, isSelected, currentQty,
+          (item) => {
+            if (bapState.selectedSweeteners[item.id]) {
+              delete bapState.selectedSweeteners[item.id];
+            } else {
+              bapState.selectedSweeteners[item.id] = isDeluxe ? item.defaultQty24 : item.defaultQty16;
+            }
+            renderBapGrids();
+            updateBapHUD();
+          },
+          (item, qty) => {
+            bapState.selectedSweeteners[item.id] = qty;
+            renderBapGrids();
+            updateBapHUD();
+          }
+        );
+        sweetGrid.appendChild(card);
+      });
+    }
+
+    // 5. Mixins Grid
+    const mixinsGrid = document.getElementById('bapGridMixins');
+    if (mixinsGrid) {
+      mixinsGrid.innerHTML = '';
+      BAP_DATA.mixins.forEach(mix => {
+        const isSelected = bapState.selectedMixins[mix.id] !== undefined;
+        const currentQty = isSelected ? bapState.selectedMixins[mix.id] : (isDeluxe ? mix.defaultQty24 : mix.defaultQty16);
+        const card = renderBapCard(mix, isSelected, currentQty,
+          (item) => {
+            if (bapState.selectedMixins[item.id]) {
+              delete bapState.selectedMixins[item.id];
+            } else {
+              bapState.selectedMixins[item.id] = isDeluxe ? item.defaultQty24 : item.defaultQty16;
+            }
+            renderBapGrids();
+            updateBapHUD();
+          },
+          (item, qty) => {
+            bapState.selectedMixins[item.id] = qty;
+            renderBapGrids();
+            updateBapHUD();
+          }
+        );
+        mixinsGrid.appendChild(card);
+      });
+    }
+  }
+
+  function calculateBapNutritionAndScore() {
+    let totalKcal = 0;
+    let totalProtein = 0;
+    let totalCarbs = 0;
+    let totalFat = 0;
+
+    let fatScore = 0;
+    let stabilizerScore = 0;
+    let caseinScore = 0;
+    let freezingScore = 0;
+
+    // Liquid
+    const liquid = BAP_DATA.liquids.find(l => l.id === bapState.selectedLiquid);
+    if (liquid) {
+      const factor = bapState.liquidQty / 100;
+      totalKcal += liquid.per100.kcal * factor;
+      totalProtein += liquid.per100.p * factor;
+      totalCarbs += liquid.per100.c * factor;
+      totalFat += liquid.per100.f * factor;
+
+      fatScore += (liquid.fatScore || 0);
+      stabilizerScore += (liquid.stabilizerScore || 0);
+      caseinScore += (liquid.caseinScore || 0);
+    }
+
+    // Powders
+    Object.entries(bapState.selectedPowders).forEach(([id, qty]) => {
+      const p = BAP_DATA.powders.find(x => x.id === id);
+      if (p && qty > 0) {
+        const factor = qty / p.serving;
+        totalKcal += p.perServing.kcal * factor;
+        totalProtein += p.perServing.p * factor;
+        totalCarbs += p.perServing.c * factor;
+        totalFat += p.perServing.f * factor;
+
+        caseinScore += (p.caseinScore || 0);
+      }
+    });
+
+    // Stabilizers
+    Object.entries(bapState.selectedStabilizers).forEach(([id, qty]) => {
+      const s = BAP_DATA.stabilizers.find(x => x.id === id);
+      if (s && qty > 0) {
+        const factor = qty / s.serving;
+        totalKcal += s.perServing.kcal * factor;
+        totalProtein += s.perServing.p * factor;
+        totalCarbs += s.perServing.c * factor;
+        totalFat += s.perServing.f * factor;
+
+        stabilizerScore += (s.stabilizerScore || 0);
+      }
+    });
+
+    // Sweeteners
+    Object.entries(bapState.selectedSweeteners).forEach(([id, qty]) => {
+      const sw = BAP_DATA.sweeteners.find(x => x.id === id);
+      if (sw && qty > 0) {
+        const factor = qty / sw.serving;
+        totalKcal += sw.perServing.kcal * factor;
+        totalProtein += sw.perServing.p * factor;
+        totalCarbs += sw.perServing.c * factor;
+        totalFat += sw.perServing.f * factor;
+
+        freezingScore += (sw.freezingScore || 0);
+      }
+    });
+
+    // Mixins
+    Object.entries(bapState.selectedMixins).forEach(([id, qty]) => {
+      const m = BAP_DATA.mixins.find(x => x.id === id);
+      if (m && qty > 0) {
+        const factor = qty / m.serving;
+        totalKcal += m.perServing.kcal * factor;
+        totalProtein += m.perServing.p * factor;
+        totalCarbs += m.perServing.c * factor;
+        totalFat += m.perServing.f * factor;
+      }
+    });
+
+    // Calculate Creaminess Score (1.0 to 10.0)
+    let dynamicFatBonus = 0.3;
+    if (totalFat >= 12) dynamicFatBonus = 3.5;
+    else if (totalFat >= 8) dynamicFatBonus = 3.0;
+    else if (totalFat >= 5) dynamicFatBonus = 2.4;
+    else if (totalFat >= 3) dynamicFatBonus = 1.7;
+    else if (totalFat >= 1) dynamicFatBonus = 1.0;
+
+    const cappedFat = Math.max(dynamicFatBonus, Math.min(3.5, fatScore));
+    const cappedStab = Math.min(3.5, stabilizerScore);
+    const cappedCasein = Math.min(2.0, caseinScore);
+    const cappedFreeze = Math.min(1.0, freezingScore);
+
+    const rawScore = 1.0 + cappedFat + cappedStab + cappedCasein + cappedFreeze;
+    const creaminessScore = Math.min(10.0, Math.max(1.0, Math.round(rawScore * 10) / 10));
+
+    // Determine Grade & Tip
+    let grade = 'Balanced Soft-Serve';
+    let tip = '';
+    let recommendedSpin = 'Lite Ice Cream';
+
+    const hasStabilizer = Object.keys(bapState.selectedStabilizers).length > 0 || (liquid && liquid.stabilizerScore >= 0.6);
+
+    if (!hasStabilizer && totalFat < 3) {
+      grade = '⚠️ Icy / Snow Warning';
+      tip = '⚠️ Ice Crystal Alert: No stabilizer (pudding mix, xanthan gum, or dairy fats) detected. Shaving will result in dry powdery snow. Add 1g xanthan gum or 7g sugar-free pudding mix!';
+      recommendedSpin = 'Lite Ice Cream';
+    } else if (creaminessScore < 5.0) {
+      grade = '❄️ Hard Freeze / Needs Respin';
+      tip = '❄️ High water content detected. This pint will freeze into a hard block. Add protein powder, allulose, or a stabilizer to avoid having to respin 3+ times.';
+      recommendedSpin = 'Lite Ice Cream';
+    } else if (creaminessScore < 7.5) {
+      grade = '🍦 Good Everyday Fitness Soft-Serve';
+      tip = '🍦 Solid macro-friendly profile! Shaves nicely on "Lite Ice Cream". If slightly powdery after the 1st spin, add 1 tbsp liquid and hit "Respin".';
+      recommendedSpin = 'Lite Ice Cream';
+    } else if (creaminessScore < 9.0) {
+      grade = '🍨 Creamy Gelato Grade';
+      tip = '🍨 Excellent emulsion balance! Protein solids and stabilizers bind water molecules into thick, velvety ribbons with zero ice crystals.';
+      recommendedSpin = totalFat >= 10 ? 'Ice Cream' : 'Lite Ice Cream';
+    } else {
+      grade = '🌟 Ultra-Decadent Custard Grade';
+      tip = '🌟 Gourmet ice cream parlor consistency! High fat and optimal solids provide maximum mouthfeel lubrication. Spin on standard "Ice Cream".';
+      recommendedSpin = 'Ice Cream';
+    }
+
+    return {
+      totalKcal: Math.round(totalKcal),
+      totalProtein: Math.round(totalProtein),
+      totalCarbs: Math.round(totalCarbs),
+      totalFat: Math.round(totalFat),
+      creaminessScore,
+      grade,
+      tip,
+      recommendedSpin
+    };
+  }
+
+  function updateBapHUD() {
+    const nutrition = calculateBapNutritionAndScore();
+
+    const scoreNum = document.getElementById('bapScoreNum');
+    const scoreGrade = document.getElementById('bapScoreGrade');
+    const meterBar = document.getElementById('bapMeterBar');
+    const spinBadge = document.getElementById('bapSpinBadge');
+    const scienceTip = document.getElementById('bapScienceTip');
+    const macroKcal = document.getElementById('bapMacroKcal');
+    const macroProtein = document.getElementById('bapMacroProtein');
+    const macroCarbs = document.getElementById('bapMacroCarbs');
+    const macroFat = document.getElementById('bapMacroFat');
+
+    if (scoreNum) scoreNum.textContent = nutrition.creaminessScore.toFixed(1);
+    if (scoreGrade) scoreGrade.textContent = nutrition.grade;
+    if (meterBar) meterBar.style.width = `${Math.min(100, Math.round(nutrition.creaminessScore * 10))}%`;
+    if (spinBadge) spinBadge.textContent = `🌀 ${nutrition.recommendedSpin}`;
+    if (scienceTip) {
+      scienceTip.textContent = nutrition.tip;
+      if (nutrition.creaminessScore < 5.0 || nutrition.grade.includes('Warning')) {
+        scienceTip.style.borderLeftColor = '#f59e0b';
+      } else {
+        scienceTip.style.borderLeftColor = '#34d399';
+      }
+    }
+
+    if (macroKcal) macroKcal.textContent = nutrition.totalKcal;
+    if (macroProtein) macroProtein.textContent = `${nutrition.totalProtein}g`;
+    if (macroCarbs) macroCarbs.textContent = `${nutrition.totalCarbs}g`;
+    if (macroFat) macroFat.textContent = `${nutrition.totalFat}g`;
+  }
+
+  function autoNameBapRecipe() {
+    const liquid = BAP_DATA.liquids.find(l => l.id === bapState.selectedLiquid);
+    const powderKeys = Object.keys(bapState.selectedPowders);
+    const stabilizerKeys = Object.keys(bapState.selectedStabilizers);
+    const mixinKeys = Object.keys(bapState.selectedMixins);
+
+    let flavor = 'Vanilla Silk';
+    if (powderKeys.includes('black_cocoa') || mixinKeys.includes('oreos')) {
+      flavor = 'Oreo Cookies & Cream';
+    } else if (powderKeys.includes('pb_fit') || mixinKeys.includes('pb_cups')) {
+      flavor = 'Chocolate Peanut Butter Cup';
+    } else if (powderKeys.includes('dutch_cocoa') || mixinKeys.includes('mini_chips')) {
+      flavor = 'Double Dark Chocolate Chunk';
+    } else if (powderKeys.includes('espresso_powder')) {
+      flavor = 'Barista Mocha Espresso';
+    } else if (stabilizerKeys.includes('cream_cheese')) {
+      flavor = 'Velvet Cheesecake Swirl';
+    } else if (mixinKeys.includes('sprinkles')) {
+      flavor = 'Birthday Cake Confetti';
+    } else if (liquid && liquid.id === 'coconut_milk') {
+      flavor = 'Toasted Coconut Gelato';
+    }
+
+    const baseName = liquid && liquid.id.includes('fairlife') ? 'Fairlife' : (liquid ? liquid.name.split(' ')[0] : 'Custom');
+    const autoTitle = `${baseName} ${flavor}`;
+    const input = document.getElementById('bapRecipeName');
+    if (input) input.value = autoTitle;
+    showToast(`✨ Generated recipe name: "${autoTitle}"`);
+  }
+
+  function saveBapRecipe() {
     if (!currentUser) {
-      showToast('🔒 Please sign in with Google to create and save personal custom recipes.');
+      showToast('🔒 Please sign in with Google to save your balanced recipe to your account.');
       openGoogleAuthModal();
       return;
     }
-    customRecipeForm.reset();
+
+    const titleInput = document.getElementById('bapRecipeName');
+    let title = titleInput ? titleInput.value.trim() : '';
+    if (!title) {
+      autoNameBapRecipe();
+      title = titleInput.value.trim() || 'Custom Balanced Creami';
+    }
+
+    const nutrition = calculateBapNutritionAndScore();
+    const isDeluxe = bapState.size === '24';
+    const liquidObj = BAP_DATA.liquids.find(l => l.id === bapState.selectedLiquid) || BAP_DATA.liquids[0];
+
+    const parsedIngredients = [];
+    parsedIngredients.push({
+      id: liquidObj.id,
+      name: liquidObj.name,
+      quantity: `${bapState.liquidQty}g`,
+      unit: 'g',
+      raw: `${bapState.liquidQty}g ${liquidObj.name}`,
+      section: 'Base',
+      isMixin: false,
+      notes: ''
+    });
+
+    Object.entries(bapState.selectedPowders).forEach(([id, qty]) => {
+      const p = BAP_DATA.powders.find(x => x.id === id);
+      if (p && qty > 0) {
+        parsedIngredients.push({
+          id: p.id,
+          name: p.name,
+          quantity: `${qty}g`,
+          unit: 'g',
+          raw: `${qty}g ${p.name}`,
+          section: 'Base',
+          isMixin: false,
+          notes: ''
+        });
+      }
+    });
+
+    Object.entries(bapState.selectedStabilizers).forEach(([id, qty]) => {
+      const s = BAP_DATA.stabilizers.find(x => x.id === id);
+      if (s && qty > 0) {
+        parsedIngredients.push({
+          id: s.id,
+          name: s.name,
+          quantity: `${qty}${s.unit}`,
+          unit: s.unit,
+          raw: `${qty}${s.unit} ${s.name}`,
+          section: 'Base',
+          isMixin: false,
+          notes: ''
+        });
+      }
+    });
+
+    Object.entries(bapState.selectedSweeteners).forEach(([id, qty]) => {
+      const sw = BAP_DATA.sweeteners.find(x => x.id === id);
+      if (sw && qty > 0) {
+        parsedIngredients.push({
+          id: sw.id,
+          name: sw.name,
+          quantity: `${qty}${sw.unit}`,
+          unit: sw.unit,
+          raw: `${qty}${sw.unit} ${sw.name}`,
+          section: 'Base',
+          isMixin: false,
+          notes: ''
+        });
+      }
+    });
+
+    Object.entries(bapState.selectedMixins).forEach(([id, qty]) => {
+      const m = BAP_DATA.mixins.find(x => x.id === id);
+      if (m && qty > 0) {
+        parsedIngredients.push({
+          id: m.id,
+          name: m.name,
+          quantity: `${qty}g`,
+          unit: 'g',
+          raw: `${qty}g ${m.name} (Mix-in)`,
+          section: 'Mix-in',
+          isMixin: true,
+          notes: ''
+        });
+      }
+    });
+
+    const powderNames = Object.keys(bapState.selectedPowders).map(id => BAP_DATA.powders.find(p => p.id === id)?.name).filter(Boolean);
+    const stabilizerNames = Object.keys(bapState.selectedStabilizers).map(id => BAP_DATA.stabilizers.find(s => s.id === id)?.name).filter(Boolean);
+    const mixinNames = Object.keys(bapState.selectedMixins).map(id => BAP_DATA.mixins.find(m => m.id === id)?.name).filter(Boolean);
+
+    const instructions = [];
+    instructions.push(`Pour ${bapState.liquidQty}g ${liquidObj.name} into your ${isDeluxe ? 'Deluxe 24 oz' : 'Standard 16 oz'} Ninja Creami pint.`);
+    if (powderNames.length > 0 || stabilizerNames.length > 0) {
+      const dryItems = [...powderNames, ...stabilizerNames].join(', ');
+      instructions.push(`Add ${dryItems}. Blend with an immersion blender or milk frother for 30–45 seconds until completely smooth.`);
+    }
+    instructions.push('Smooth top surface flat with a spatula, secure storage lid, and freeze on a level freezer shelf for 16+ hours.');
+    instructions.push(`Lock pint into outer bowl and spin on the "${nutrition.recommendedSpin}" program.`);
+    if (mixinNames.length > 0) {
+      instructions.push(`Make a 1.5-inch hollow core down to the bottom center of the pint.`);
+      instructions.push(`Add ${mixinNames.join(', ')} into the core and press the "Mix-In" program.`);
+    } else {
+      instructions.push('If texture is slightly powdery or crumbly after the first spin, add 1 tbsp liquid and press "Respin".');
+    }
+    instructions.push('Grab a spoon and enjoy your custom balanced Creami creation!');
+
+    const newRecipe = {
+      id: `custom_${currentUser.id}_${Date.now()}`,
+      name: title,
+      category: 'Custom',
+      categories: ['Custom'],
+      userId: currentUser.id,
+      isPersonal: true,
+      sourceFile: 'Personal Custom',
+      page: 1,
+      macros: {
+        calories: String(nutrition.totalKcal),
+        protein: `${nutrition.totalProtein}g`,
+        carbs: `${nutrition.totalCarbs}g`,
+        fat: `${nutrition.totalFat}g`,
+        sugar: '0g',
+        fiber: '0g'
+      },
+      spinSetting: nutrition.recommendedSpin,
+      prepTime: '2 MIN',
+      freezeTime: '16+ HOURS',
+      makes: isDeluxe ? '1 DELUXE PINT (24 oz)' : '1 PINT (16 oz)',
+      ingredients: parsedIngredients,
+      instructions: instructions,
+      creaminessScore: nutrition.creaminessScore,
+      creaminessGrade: nutrition.grade
+    };
+
+    customRecipesState.push(newRecipe);
+    saveCustomRecipes();
+    closeCustomRecipeModal();
+    updateAuthUI();
+    renderRecipes();
+    showToast(`🧪 Saved balanced recipe "${title}" with Creaminess Score ${nutrition.creaminessScore}/10!`);
+  }
+
+  function initBuildAPint() {
+    if (!bapInitialized) {
+      bapInitialized = true;
+
+      // Mode toggles
+      const btnModeWizard = document.getElementById('btnModeWizard');
+      const btnModeManual = document.getElementById('btnModeManual');
+      if (btnModeWizard) btnModeWizard.addEventListener('click', () => setBapMode('wizard'));
+      if (btnModeManual) btnModeManual.addEventListener('click', () => setBapMode('manual'));
+
+      // Size buttons
+      const size16 = document.getElementById('bapSize16');
+      const size24 = document.getElementById('bapSize24');
+      if (size16) size16.addEventListener('click', () => setBapSize('16'));
+      if (size24) size24.addEventListener('click', () => setBapSize('24'));
+
+      // Step pills
+      document.querySelectorAll('.bap-step-pill').forEach(pill => {
+        pill.addEventListener('click', () => {
+          const step = parseInt(pill.dataset.step);
+          if (step) switchBapStep(step);
+        });
+      });
+
+      // Prev / Next buttons
+      const btnPrev = document.getElementById('bapBtnPrev');
+      const btnNext = document.getElementById('bapBtnNext');
+      if (btnPrev) btnPrev.addEventListener('click', () => switchBapStep(bapState.currentStep - 1));
+      if (btnNext) btnNext.addEventListener('click', () => switchBapStep(bapState.currentStep + 1));
+
+      // Auto-name & Save buttons
+      const btnAutoName = document.getElementById('bapBtnAutoName');
+      const btnSave = document.getElementById('bapBtnSave');
+      if (btnAutoName) btnAutoName.addEventListener('click', autoNameBapRecipe);
+      if (btnSave) btnSave.addEventListener('click', saveBapRecipe);
+    }
+
+    setBapMode('wizard');
+    switchBapStep(1);
+    renderBapGrids();
+    updateBapHUD();
+  }
+
+  function openCustomRecipeModal() {
+    if (customRecipeForm) customRecipeForm.reset();
+    initBuildAPint();
     customRecipeModalOverlay.classList.add('active');
     customRecipeModalOverlay.setAttribute('aria-hidden', 'false');
     lockBackgroundScroll();
@@ -4723,6 +5868,7 @@
     saveCustomRecipes();
     closeCustomRecipeModal();
     updateAuthUI();
+    renderRecipes();
     showToast(`✨ Saved personal recipe "${name}" to your Google account!`);
   }
 

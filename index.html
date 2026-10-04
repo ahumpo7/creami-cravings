@@ -539,85 +539,241 @@
     </div>
   </div>
 
-  <!-- Custom Recipe Modal -->
+  <!-- Custom Recipe & Build-A-Pint Modal (Roadmap Item 18) -->
   <div class="modal-overlay" id="customRecipeModalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
-    <div class="modal-content custom-modal-content">
+    <div class="modal-content custom-modal-content bap-modal-container">
       <div class="modal-handle-bar" aria-hidden="true"></div>
       <button class="modal-close" id="customModalCloseBtn" aria-label="Close modal">&times;</button>
-      <div class="modal-header">
-        <h2 class="modal-title">🧑‍🍳 Create Personal Custom Recipe</h2>
-        <p class="modal-subtitle">🔒 Tied exclusively to your signed-in Google account. Personal recipes remain strictly private and are never shared with or visible to others.</p>
+      
+      <div class="modal-header bap-header">
+        <div class="bap-header-badge">🧪 EXPERIMENTAL CREAM LAB</div>
+        <h2 class="modal-title" id="bapModalMainTitle">🧪 Build-A-Pint Balancing Wizard</h2>
+        <p class="modal-subtitle" id="bapModalSubTitle">Formulate balanced, high-protein custom Creami recipes with real-time texture diagnostics, Creaminess Score (1–10), and auto-computed nutrition.</p>
       </div>
-      <form id="customRecipeForm">
-        <div class="form-row">
-          <div class="form-group flex-2">
-            <label for="crName">Recipe Title *</label>
-            <input type="text" id="crName" required placeholder="e.g. Pistachio Matcha Swirl">
+
+      <!-- Mode Selector -->
+      <div class="bap-mode-tabs" role="tablist">
+        <button type="button" class="bap-mode-btn active" id="btnModeWizard" role="tab" aria-selected="true">🧪 Build-A-Pint Wizard</button>
+        <button type="button" class="bap-mode-btn" id="btnModeManual" role="tab" aria-selected="false">📝 Manual Freeform Form</button>
+      </div>
+
+      <!-- WIZARD MODE CONTAINER -->
+      <div id="wizardContainer" class="bap-wizard-container">
+        <!-- Live Creaminess & Macro HUD -->
+        <div class="bap-hud-card">
+          <div class="bap-hud-top">
+            <div class="bap-score-box">
+              <div class="bap-score-meta">
+                <span class="bap-score-title">CREAMINESS SCORE</span>
+                <span class="bap-score-grade" id="bapScoreGrade">Creamy Gelato Grade</span>
+              </div>
+              <div class="bap-score-display">
+                <span class="bap-score-num" id="bapScoreNum">8.4</span>
+                <span class="bap-score-max">/10</span>
+              </div>
+              <div class="bap-meter-track">
+                <div class="bap-meter-bar" id="bapMeterBar" style="width: 84%;"></div>
+              </div>
+            </div>
+
+            <div class="bap-specs-box">
+              <div class="bap-spec-item">
+                <span class="bap-spec-label">RECOMMENDED SPIN</span>
+                <span class="bap-spin-badge" id="bapSpinBadge">🌀 Lite Ice Cream</span>
+              </div>
+              <div class="bap-spec-item">
+                <span class="bap-spec-label">FREEZER TIME</span>
+                <span class="bap-freeze-badge">❄️ 16+ Hours</span>
+              </div>
+            </div>
           </div>
-          <div class="form-group flex-1">
-            <label for="crCategory">Cookbook / Category</label>
-            <select id="crCategory">
-              <option value="Custom">Custom Recipe</option>
-              <option value="Fan Favorites">Fan Favorites</option>
-              <option value="Keto">Keto</option>
-              <option value="Lactose Free">Lactose Free</option>
-              <option value="No Protein">No Protein</option>
-            </select>
+
+          <!-- Real-Time Science & Emulsion Tip -->
+          <div class="bap-science-tip" id="bapScienceTip">
+            ✨ Great emulsion balance! Xanthan gum + dairy proteins will bind micro-ice crystals into velvety ribbons.
+          </div>
+
+          <!-- Macro HUD Strip -->
+          <div class="bap-macro-strip">
+            <div class="bap-macro-cell">
+              <div class="bap-macro-val" id="bapMacroKcal">245</div>
+              <div class="bap-macro-label">CALORIES</div>
+            </div>
+            <div class="bap-macro-cell">
+              <div class="bap-macro-val" id="bapMacroProtein">31g</div>
+              <div class="bap-macro-label">PROTEIN</div>
+            </div>
+            <div class="bap-macro-cell">
+              <div class="bap-macro-val" id="bapMacroCarbs">18g</div>
+              <div class="bap-macro-label">CARBS</div>
+            </div>
+            <div class="bap-macro-cell">
+              <div class="bap-macro-val" id="bapMacroFat">4g</div>
+              <div class="bap-macro-label">FAT</div>
+            </div>
           </div>
         </div>
 
-        <div class="form-row">
+        <!-- Recipe Title & Machine Model Row -->
+        <div class="bap-config-bar">
+          <div class="bap-title-field">
+            <label for="bapRecipeName">Recipe Title</label>
+            <div class="bap-input-with-action">
+              <input type="text" id="bapRecipeName" placeholder="e.g. Vanilla Chocolate Swirl" class="bap-text-input">
+              <button type="button" class="btn-secondary bap-autoname-btn" id="bapBtnAutoName" title="Auto-compose recipe name from your ingredients">✨ Auto-Name</button>
+            </div>
+          </div>
+
+          <div class="bap-size-field">
+            <label>Machine / Pint Size</label>
+            <div class="bap-size-toggle-group">
+              <button type="button" class="bap-size-btn active" data-size="16" id="bapSize16">🍨 16 oz Standard</button>
+              <button type="button" class="bap-size-btn" data-size="24" id="bapSize24">🥣 24 oz Deluxe</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step Navigation Tabs -->
+        <div class="bap-step-pills">
+          <button type="button" class="bap-step-pill active" data-step="1">
+            <span class="bap-pill-num">1</span>
+            <span class="bap-pill-text">🥛 Liquid Base</span>
+          </button>
+          <button type="button" class="bap-step-pill" data-step="2">
+            <span class="bap-pill-num">2</span>
+            <span class="bap-pill-text">🍦 Protein & Powders</span>
+          </button>
+          <button type="button" class="bap-step-pill" data-step="3">
+            <span class="bap-pill-num">3</span>
+            <span class="bap-pill-text">🍮 Stabilizers & Gels</span>
+          </button>
+          <button type="button" class="bap-step-pill" data-step="4">
+            <span class="bap-pill-num">4</span>
+            <span class="bap-pill-text">🍯 Sweeteners & Mix-Ins</span>
+          </button>
+        </div>
+
+        <!-- STEP 1: Liquid Base -->
+        <div class="bap-step-content active" id="bapStep1">
+          <div class="bap-section-header">
+            <h4>Step 1: Choose Your Primary Liquid Base</h4>
+            <p>The liquid dictates the freezing point and base ice crystal structure.</p>
+          </div>
+          <div class="bap-grid" id="bapGridLiquids"></div>
+        </div>
+
+        <!-- STEP 2: Protein & Flavor Powders -->
+        <div class="bap-step-content" id="bapStep2" style="display: none;">
+          <div class="bap-section-header">
+            <h4>Step 2: Protein & Flavor Powders (Optional)</h4>
+            <p>Casein absorbs water to prevent chalky texture; dark cocoa provides rich dessert depth.</p>
+          </div>
+          <div class="bap-grid" id="bapGridPowders"></div>
+        </div>
+
+        <!-- STEP 3: Stabilizers & Emulsifiers -->
+        <div class="bap-step-content" id="bapStep3" style="display: none;">
+          <div class="bap-section-header">
+            <h4>Step 3: Stabilizers & Dairy Emulsifiers (Crucial for Creaminess)</h4>
+            <p>Prevents rock-hard ice sheets. 1g of xanthan gum or 7g pudding mix binds water into soft-serve ribbons.</p>
+          </div>
+          <div class="bap-grid" id="bapGridStabilizers"></div>
+        </div>
+
+        <!-- STEP 4: Sweeteners & Mix-Ins -->
+        <div class="bap-step-content" id="bapStep4" style="display: none;">
+          <div class="bap-section-header">
+            <h4>Step 4: Sweeteners, Extracts & Mix-Ins</h4>
+            <p>Allulose lowers the freezing point naturally. Mix-ins are gently folded during the "Mix-In" spin.</p>
+          </div>
+          <h5 class="bap-subhead">🍯 Sweeteners & Flavors</h5>
+          <div class="bap-grid" id="bapGridSweeteners"></div>
+          
+          <h5 class="bap-subhead" style="margin-top: 18px;">🍪 Mix-Ins (Folded on "Mix-In" cycle)</h5>
+          <div class="bap-grid" id="bapGridMixins"></div>
+        </div>
+
+        <!-- Wizard Navigation & Bottom Actions -->
+        <div class="bap-wizard-footer">
+          <button type="button" class="btn-secondary" id="bapBtnPrev" style="display: none;">← Previous Step</button>
+          <button type="button" class="btn-secondary" id="bapBtnNext">Next Step →</button>
+          <button type="button" class="btn-primary bap-save-btn" id="bapBtnSave">🧪 Save & Balance Pint</button>
+        </div>
+      </div>
+
+      <!-- MANUAL FORM CONTAINER (Keeps existing custom recipe form intact) -->
+      <div id="manualFormContainer" style="display: none;">
+        <form id="customRecipeForm">
+          <div class="form-row">
+            <div class="form-group flex-2">
+              <label for="crName">Recipe Title *</label>
+              <input type="text" id="crName" required placeholder="e.g. Pistachio Matcha Swirl">
+            </div>
+            <div class="form-group flex-1">
+              <label for="crCategory">Cookbook / Category</label>
+              <select id="crCategory">
+                <option value="Custom">Custom Recipe</option>
+                <option value="Fan Favorites">Fan Favorites</option>
+                <option value="Keto">Keto</option>
+                <option value="Lactose Free">Lactose Free</option>
+                <option value="No Protein">No Protein</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="crCalories">Calories</label>
+              <input type="number" id="crCalories" placeholder="e.g. 260">
+            </div>
+            <div class="form-group">
+              <label for="crProtein">Protein (g)</label>
+              <input type="text" id="crProtein" placeholder="e.g. 35g">
+            </div>
+            <div class="form-group">
+              <label for="crCarbs">Carbs (g)</label>
+              <input type="text" id="crCarbs" placeholder="e.g. 18g">
+            </div>
+            <div class="form-group">
+              <label for="crFat">Fat (g)</label>
+              <input type="text" id="crFat" placeholder="e.g. 5g">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label for="crSpinSetting">Creami Spin Setting</label>
+              <select id="crSpinSetting">
+                <option value="Lite Ice Cream">Lite Ice Cream</option>
+                <option value="Ice Cream">Ice Cream</option>
+                <option value="Sorbet">Sorbet</option>
+                <option value="Respin">Respin</option>
+                <option value="Mix-in">Mix-In</option>
+              </select>
+            </div>
+            <div class="form-group flex-1">
+              <label for="crFreezeTime">Freeze Time</label>
+              <input type="text" id="crFreezeTime" value="16+ HOURS">
+            </div>
+          </div>
+
           <div class="form-group">
-            <label for="crCalories">Calories</label>
-            <input type="number" id="crCalories" placeholder="e.g. 260">
+            <label for="crIngredients">Ingredients (One per line) *</label>
+            <textarea id="crIngredients" rows="5" required placeholder="400g Fat Free Ultra-Filtered Milk&#10;25g Sweetener&#10;1g Xanthan Gum&#10;A pinch of salt&#10;15g Chocolate Chips (Mix-in)"></textarea>
+            <small class="form-hint">Tip: Add "(Mix-in)" at the end of any ingredient to designate it as a mix-in.</small>
           </div>
+
           <div class="form-group">
-            <label for="crProtein">Protein (g)</label>
-            <input type="text" id="crProtein" placeholder="e.g. 35g">
+            <label for="crInstructions">Instructions (One step per line)</label>
+            <textarea id="crInstructions" rows="4" placeholder="Blend all base ingredients and freeze for 16+ hours&#10;Run outer pint under hot water for 60 seconds&#10;Spin on Lite Ice Cream&#10;Respin if powdery, then add mix-ins"></textarea>
           </div>
-          <div class="form-group">
-            <label for="crCarbs">Carbs (g)</label>
-            <input type="text" id="crCarbs" placeholder="e.g. 18g">
-          </div>
-          <div class="form-group">
-            <label for="crFat">Fat (g)</label>
-            <input type="text" id="crFat" placeholder="e.g. 5g">
-          </div>
-        </div>
 
-        <div class="form-row">
-          <div class="form-group flex-1">
-            <label for="crSpinSetting">Creami Spin Setting</label>
-            <select id="crSpinSetting">
-              <option value="Lite Ice Cream">Lite Ice Cream</option>
-              <option value="Ice Cream">Ice Cream</option>
-              <option value="Sorbet">Sorbet</option>
-              <option value="Respin">Respin</option>
-              <option value="Mix-in">Mix-In</option>
-            </select>
+          <div class="modal-footer">
+            <button type="button" class="btn-secondary" id="cancelCustomRecipeBtn">Cancel</button>
+            <button type="submit" class="btn-primary">Save Custom Recipe</button>
           </div>
-          <div class="form-group flex-1">
-            <label for="crFreezeTime">Freeze Time</label>
-            <input type="text" id="crFreezeTime" value="16+ HOURS">
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="crIngredients">Ingredients (One per line) *</label>
-          <textarea id="crIngredients" rows="5" required placeholder="400g Fat Free Ultra-Filtered Milk&#10;25g Sweetener&#10;1g Xanthan Gum&#10;A pinch of salt&#10;15g Chocolate Chips (Mix-in)"></textarea>
-          <small class="form-hint">Tip: Add "(Mix-in)" at the end of any ingredient to designate it as a mix-in.</small>
-        </div>
-
-        <div class="form-group">
-          <label for="crInstructions">Instructions (One step per line)</label>
-          <textarea id="crInstructions" rows="4" placeholder="Blend all base ingredients and freeze for 16+ hours&#10;Run outer pint under hot water for 60 seconds&#10;Spin on Lite Ice Cream&#10;Respin if powdery, then add mix-ins"></textarea>
-        </div>
-
-        <div class="modal-footer">
-          <button type="button" class="btn-secondary" id="cancelCustomRecipeBtn">Cancel</button>
-          <button type="submit" class="btn-primary">Save Custom Recipe</button>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   </div>
 
