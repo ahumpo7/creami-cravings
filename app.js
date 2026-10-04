@@ -466,6 +466,19 @@
   const iosInstallModalCloseBtn = document.getElementById('iosInstallModalCloseBtn');
   const btnDismissIosInstall = document.getElementById('btnDismissIosInstall');
 
+  // Cookie Consent Elements (Google Consent Mode v2 Ready)
+  const cookieConsentBanner = document.getElementById('cookieConsentBanner');
+  const btnAcceptAllCookies = document.getElementById('btnAcceptAllCookies');
+  const btnEssentialOnlyCookies = document.getElementById('btnEssentialOnlyCookies');
+  const btnCustomizeCookies = document.getElementById('btnCustomizeCookies');
+  const footerCookieBtn = document.getElementById('footerCookieBtn');
+  const cookieModalOverlay = document.getElementById('cookieModalOverlay');
+  const cookieModalCloseBtn = document.getElementById('cookieModalCloseBtn');
+  const prefAnalyticsToggle = document.getElementById('prefAnalyticsToggle');
+  const prefMarketingToggle = document.getElementById('prefMarketingToggle');
+  const btnRejectOptionalInModal = document.getElementById('btnRejectOptionalInModal');
+  const btnSaveCustomCookies = document.getElementById('btnSaveCustomCookies');
+
   // --- Initialization ---
   function init() {
     loadStorage();
@@ -485,6 +498,7 @@
     startFreezerTicker();
     initFreezeNotifications();
     initPwaInstall();
+    initCookieConsent();
 
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
@@ -8156,6 +8170,129 @@
 
     closeBackupModal();
     showToast('Kitchen data reset to factory defaults.');
+  }
+
+  // --- Cookie Consent & Google Consent Mode v2 Engine ---
+  const COOKIE_CONSENT_KEY = 'creami_cookie_consent_v1';
+
+  function getCookieConsent() {
+    const raw = localStorage.getItem(COOKIE_CONSENT_KEY);
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function applyCookieConsent(consent) {
+    if (!consent) return;
+    localStorage.setItem(COOKIE_CONSENT_KEY, JSON.stringify(consent));
+
+    // Update Google Consent Mode v2 for GA4 & AdSense
+    if (typeof window.gtag === 'function') {
+      window.gtag('consent', 'update', {
+        'analytics_storage': consent.analytics ? 'granted' : 'denied',
+        'ad_storage': consent.marketing ? 'granted' : 'denied',
+        'ad_user_data': consent.marketing ? 'granted' : 'denied',
+        'ad_personalization': consent.marketing ? 'granted' : 'denied'
+      });
+    }
+
+    if (cookieConsentBanner) {
+      cookieConsentBanner.style.display = 'none';
+    }
+    closeCookieModal();
+  }
+
+  function openCookieModal() {
+    if (!cookieModalOverlay) return;
+    const current = getCookieConsent() || { analytics: false, marketing: false };
+    if (prefAnalyticsToggle) prefAnalyticsToggle.checked = Boolean(current.analytics);
+    if (prefMarketingToggle) prefMarketingToggle.checked = Boolean(current.marketing);
+
+    cookieModalOverlay.classList.add('active');
+    cookieModalOverlay.setAttribute('aria-hidden', 'false');
+    lockBackgroundScroll();
+  }
+
+  function closeCookieModal() {
+    if (!cookieModalOverlay) return;
+    cookieModalOverlay.classList.remove('active');
+    cookieModalOverlay.setAttribute('aria-hidden', 'true');
+    unlockBackgroundScroll();
+  }
+
+  function initCookieConsent() {
+    const existingConsent = getCookieConsent();
+    if (existingConsent) {
+      // Re-apply saved consent into Google Consent Mode
+      applyCookieConsent(existingConsent);
+    } else {
+      // Show consent banner after a short delay
+      setTimeout(() => {
+        if (cookieConsentBanner && !getCookieConsent()) {
+          cookieConsentBanner.style.display = 'block';
+        }
+      }, 700);
+    }
+
+    // Button Bindings
+    if (btnAcceptAllCookies) {
+      btnAcceptAllCookies.addEventListener('click', () => {
+        applyCookieConsent({ essential: true, analytics: true, marketing: true, timestamp: new Date().toISOString() });
+        showToast('🍪 All preferences saved.');
+      });
+    }
+
+    if (btnEssentialOnlyCookies) {
+      btnEssentialOnlyCookies.addEventListener('click', () => {
+        applyCookieConsent({ essential: true, analytics: false, marketing: false, timestamp: new Date().toISOString() });
+        showToast('🍪 Essential storage active only.');
+      });
+    }
+
+    if (btnCustomizeCookies) {
+      btnCustomizeCookies.addEventListener('click', () => {
+        openCookieModal();
+      });
+    }
+
+    if (footerCookieBtn) {
+      footerCookieBtn.addEventListener('click', () => {
+        openCookieModal();
+      });
+    }
+
+    if (cookieModalCloseBtn) {
+      cookieModalCloseBtn.addEventListener('click', () => {
+        closeCookieModal();
+      });
+    }
+
+    if (cookieModalOverlay) {
+      cookieModalOverlay.addEventListener('click', (e) => {
+        if (e.target === cookieModalOverlay) {
+          closeCookieModal();
+        }
+      });
+    }
+
+    if (btnRejectOptionalInModal) {
+      btnRejectOptionalInModal.addEventListener('click', () => {
+        applyCookieConsent({ essential: true, analytics: false, marketing: false, timestamp: new Date().toISOString() });
+        showToast('🍪 Optional cookies declined.');
+      });
+    }
+
+    if (btnSaveCustomCookies) {
+      btnSaveCustomCookies.addEventListener('click', () => {
+        const analytics = Boolean(prefAnalyticsToggle && prefAnalyticsToggle.checked);
+        const marketing = Boolean(prefMarketingToggle && prefMarketingToggle.checked);
+        applyCookieConsent({ essential: true, analytics, marketing, timestamp: new Date().toISOString() });
+        showToast('🍪 Custom preferences saved.');
+      });
+    }
   }
 
   // Run on DOM Ready

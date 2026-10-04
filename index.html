@@ -19,6 +19,32 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <!-- Google Identity Services -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+  <!-- Google Consent Mode v2 (Analytics & AdSense Ready) -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    (function() {
+      const saved = localStorage.getItem('creami_cookie_consent_v1');
+      let analyticsConsent = 'denied';
+      let adsConsent = 'denied';
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (parsed.analytics) analyticsConsent = 'granted';
+          if (parsed.marketing) adsConsent = 'granted';
+        } catch (e) {}
+      }
+      gtag('consent', 'default', {
+        'analytics_storage': analyticsConsent,
+        'ad_storage': adsConsent,
+        'ad_user_data': adsConsent,
+        'ad_personalization': adsConsent,
+        'wait_for_update': 500
+      });
+    })();
+  </script>
+
   <script>
     // Immediate Theme Initialization to avoid flash of light/dark mode
     (function() {
@@ -416,6 +442,8 @@
           <a href="/privacy.html" class="footer-link">Privacy Policy</a>
           <span class="footer-dot">•</span>
           <a href="/terms.html" class="footer-link">Terms of Service</a>
+          <span class="footer-dot">•</span>
+          <button type="button" class="footer-action-btn" id="footerCookieBtn">🍪 Cookie Preferences</button>
           <span class="footer-dot">•</span>
           <button type="button" class="footer-action-btn" id="footerBackupBtn">💾 Backup &amp; Restore</button>
           <span class="footer-dot">•</span>
@@ -1051,6 +1079,82 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn-primary" id="btnDismissIosInstall" style="width: 100%;">Got It!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cookie & Analytics Consent Banner (Google Consent Mode v2 Ready) -->
+  <aside id="cookieConsentBanner" class="cookie-consent-banner" style="display: none;" role="region" aria-label="Cookie and Privacy Choices">
+    <div class="cookie-banner-content">
+      <div class="cookie-banner-text">
+        <div class="cookie-banner-title">🍪 Cookie &amp; Privacy Choices</div>
+        <p class="cookie-banner-desc">
+          We use strictly necessary storage for your offline pantry and recipes. With your consent, we and Google also use cookies for site analytics and relevant recipe ads. Learn more in our <a href="/privacy.html" target="_blank" rel="noopener">Privacy Policy</a>.
+        </p>
+      </div>
+      <div class="cookie-banner-actions">
+        <button type="button" class="btn-cookie-accept" id="btnAcceptAllCookies">Accept All</button>
+        <button type="button" class="btn-cookie-essential" id="btnEssentialOnlyCookies">Essential Only</button>
+        <button type="button" class="btn-cookie-custom" id="btnCustomizeCookies">Customize</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Cookie Preferences Customization Modal -->
+  <div class="modal-overlay" id="cookieModalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-content cookie-modal-content">
+      <div class="modal-handle-bar" aria-hidden="true"></div>
+      <button class="modal-close" id="cookieModalCloseBtn" aria-label="Close modal">&times;</button>
+      <div class="modal-header">
+        <h2 class="modal-title">🍪 Cookie &amp; Data Preferences</h2>
+        <p class="modal-subtitle">Choose which types of cookies and local storage you allow Creami Cravings to use. You can update these choices anytime from the footer.</p>
+      </div>
+
+      <div class="cookie-pref-list">
+        <!-- Strictly Necessary -->
+        <div class="cookie-pref-item">
+          <div class="cookie-pref-info">
+            <div class="cookie-pref-header">
+              <span class="cookie-pref-title">Strictly Necessary &amp; Offline Storage</span>
+              <span class="cookie-badge-always">Always Active</span>
+            </div>
+            <p class="cookie-pref-desc">Essential for core features: in-stock pantry items, custom creations, 16-hour freeze timer, offline PWA caching, and theme preferences.</p>
+          </div>
+          <input type="checkbox" checked disabled class="cookie-toggle-input" aria-label="Strictly Necessary Storage (Always Active)">
+        </div>
+
+        <!-- Google Analytics -->
+        <div class="cookie-pref-item">
+          <div class="cookie-pref-info">
+            <div class="cookie-pref-header">
+              <span class="cookie-pref-title">Performance &amp; Google Analytics</span>
+            </div>
+            <p class="cookie-pref-desc">Helps us understand recipe popularity, search trends, and navigation patterns so we can optimize cookbook speed and add top-requested flavors.</p>
+          </div>
+          <label class="cookie-switch">
+            <input type="checkbox" id="prefAnalyticsToggle" class="cookie-toggle-input">
+            <span class="cookie-slider"></span>
+          </label>
+        </div>
+
+        <!-- Advertising / AdSense -->
+        <div class="cookie-pref-item">
+          <div class="cookie-pref-info">
+            <div class="cookie-pref-header">
+              <span class="cookie-pref-title">Personalized Advertising &amp; Google AdSense</span>
+            </div>
+            <p class="cookie-pref-desc">Allows Google and approved ad partners to display relevant ingredient, blender, and fitness product offers to support the free companion cookbook.</p>
+          </div>
+          <label class="cookie-switch">
+            <input type="checkbox" id="prefMarketingToggle" class="cookie-toggle-input">
+            <span class="cookie-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="modal-footer cookie-modal-footer">
+        <button type="button" class="btn-secondary" id="btnRejectOptionalInModal">Reject All Optional</button>
+        <button type="button" class="btn-primary" id="btnSaveCustomCookies">Save Preferences</button>
       </div>
     </div>
   </div>
