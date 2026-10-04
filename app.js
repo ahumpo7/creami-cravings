@@ -936,27 +936,66 @@
   }
 
   // --- Modal Scroll & Overscroll Containment Helpers ---
+  let savedScrollY = 0;
+  let isScrollLocked = false;
+
   function lockBackgroundScroll() {
+    if (isScrollLocked) return;
+    savedScrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
+    isScrollLocked = true;
+
     document.documentElement.classList.add('modal-open');
     document.body.classList.add('modal-open');
     document.documentElement.style.overflow = 'hidden';
+    document.documentElement.style.height = '100%';
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${savedScrollY}px`;
+    document.body.style.left = '0';
+    document.body.style.right = '0';
+    document.body.style.width = '100%';
     document.body.style.overflow = 'hidden';
   }
 
   function unlockBackgroundScroll() {
-    const activeModals = document.querySelectorAll('.modal-overlay.active');
-    if (activeModals.length === 0) {
+    requestAnimationFrame(() => {
+      const activeModals = document.querySelectorAll('.modal-overlay.active');
+      if (activeModals.length > 0) return;
+      if (!isScrollLocked) return;
+      isScrollLocked = false;
+
       document.documentElement.classList.remove('modal-open');
       document.body.classList.remove('modal-open');
       document.documentElement.style.overflow = '';
+      document.documentElement.style.height = '';
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.width = '';
       document.body.style.overflow = '';
-    }
+      window.scrollTo(0, savedScrollY);
+    });
   }
 
   function setupModalScrollLock(overlay) {
     if (!overlay) return;
 
-    // Prevent background scrolling via wheel
+    // Special unconditional lockdown for Roulette modal (it never scrolls)
+    if (overlay.id === 'rouletteModalOverlay') {
+      overlay.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }, { passive: false });
+
+      overlay.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }, { passive: false });
+
+      return;
+    }
+
+    // For other modals (which may have internal scrollable lists):
     overlay.addEventListener('wheel', (e) => {
       if (!overlay.classList.contains('active')) return;
 
@@ -967,8 +1006,8 @@
         return;
       }
 
-      // If content has no internal scrollable overflow (e.g. roulette popup)
-      const canScroll = content.scrollHeight > content.clientHeight;
+      // If content has no internal scrollable overflow
+      const canScroll = content.scrollHeight > (content.clientHeight + 4);
       if (!canScroll) {
         e.preventDefault();
         return;
@@ -976,7 +1015,7 @@
 
       // If content can scroll, prevent overscroll chaining at top or bottom limits
       const isAtTop = content.scrollTop <= 0 && e.deltaY < 0;
-      const isAtBottom = (content.scrollTop + content.clientHeight >= content.scrollHeight - 1) && e.deltaY > 0;
+      const isAtBottom = (content.scrollTop + content.clientHeight >= content.scrollHeight - 2) && e.deltaY > 0;
       if (isAtTop || isAtBottom) {
         e.preventDefault();
       }
@@ -999,7 +1038,7 @@
         return;
       }
 
-      const canScroll = content.scrollHeight > content.clientHeight;
+      const canScroll = content.scrollHeight > (content.clientHeight + 4);
       if (!canScroll) {
         e.preventDefault();
         return;
@@ -1009,7 +1048,7 @@
       const deltaY = touchStartY - currentY; // positive = scrolling down
 
       const isAtTop = content.scrollTop <= 0 && deltaY < 0;
-      const isAtBottom = (content.scrollTop + content.clientHeight >= content.scrollHeight - 1) && deltaY > 0;
+      const isAtBottom = (content.scrollTop + content.clientHeight >= content.scrollHeight - 2) && deltaY > 0;
       if (isAtTop || isAtBottom) {
         e.preventDefault();
       }
@@ -5136,7 +5175,7 @@
     }
     if (customRecipeForm) customRecipeForm.addEventListener('submit', handleCustomRecipeSubmit);
 
-    // Escape Key to Close Modals
+    // Escape Key to Close Modals & Prevent Keyboard Background Scroll
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         closeSwapInspector();
@@ -5146,6 +5185,18 @@
         closeFreezerModal();
         closeCustomRecipeModal();
         closeGoogleAuthModal();
+        return;
+      }
+
+      // Prevent arrow keys or space from scrolling background when a modal is active
+      const activeModal = document.querySelector('.modal-overlay.active');
+      if (activeModal) {
+        if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', ' '].includes(e.key)) {
+          const tag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+          if (tag !== 'input' && tag !== 'textarea') {
+            e.preventDefault();
+          }
+        }
       }
     });
 

@@ -1337,10 +1337,17 @@ body::before {
 }
 
 /* Modals & Scroll Containment */
-html.modal-open,
+html.modal-open {
+  overflow: hidden !important;
+  height: 100% !important;
+  overscroll-behavior: none !important;
+}
+
 body.modal-open {
   overflow: hidden !important;
+  height: 100% !important;
   overscroll-behavior: none !important;
+  touch-action: none !important;
 }
 
 .modal-overlay {
@@ -3176,14 +3183,20 @@ body.modal-open {
 }
 
 /* Roulette Spin Modal */
+#rouletteModalOverlay {
+  overscroll-behavior: none !important;
+  touch-action: none !important;
+}
+
 .roulette-modal-content {
   max-width: 480px;
   text-align: center;
   padding: 32px 28px;
   border: 1px solid rgba(236, 72, 153, 0.3);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 35px rgba(236, 72, 153, 0.2);
-  overscroll-behavior: contain;
-  touch-action: pan-y;
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+  touch-action: none !important;
 }
 
 .roulette-title-badge {
