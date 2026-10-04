@@ -1707,6 +1707,19 @@
     statBaseReadyRecipes.title = lockedBaseReadyCount > 0
       ? `${baseReadyCount} accessible recipe${baseReadyCount === 1 ? '' : 's'} ready to freeze (+${lockedBaseReadyCount} in locked packs)`
       : `${baseReadyCount} recipe${baseReadyCount === 1 ? '' : 's'} ready to freeze`;
+
+    // Smart Visibility: Only show Base Ready card when it provides distinct value
+    // (i.e. when there are recipes where base can be frozen today, but mix-ins are needed later)
+    const baseReadyCard = document.getElementById('statBaseReadyCard');
+    const statsBar = document.querySelector('.stats-bar');
+    const shouldShowBaseReady = baseReadyCount > readyCount;
+    if (baseReadyCard) {
+      baseReadyCard.style.display = shouldShowBaseReady ? '' : 'none';
+    }
+    if (statsBar) {
+      statsBar.classList.toggle('base-ready-hidden', !shouldShowBaseReady);
+    }
+
     const tabRecipeCount = document.getElementById('mobileTabRecipeCount');
     if (tabRecipeCount) tabRecipeCount.textContent = accessibleTotal;
 

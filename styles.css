@@ -353,10 +353,25 @@ body::before {
   line-height: 1.2;
 }
 
+.stat-text-group {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
 .stat-label {
   font-size: 0.82rem;
   color: var(--text-muted);
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.stat-sublabel {
+  font-size: 0.72rem;
+  color: var(--text-dim);
   font-weight: 500;
+  line-height: 1.2;
+  margin-top: 1px;
 }
 
 /* Split Main Layout */
@@ -4013,8 +4028,8 @@ body.modal-open .cookie-consent-banner {
   .stat-card-highlight .stat-info {
     display: flex !important;
     flex-direction: row !important;
-    align-items: baseline !important;
-    gap: 8px !important;
+    align-items: center !important;
+    gap: 10px !important;
     width: auto !important;
   }
 
@@ -4023,10 +4038,24 @@ body.modal-open .cookie-consent-banner {
     line-height: 1 !important;
   }
 
+  .stat-card-highlight .stat-text-group {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
   .stat-card-highlight .stat-label {
     font-size: 0.88rem !important;
     font-weight: 700 !important;
     margin-top: 0 !important;
+    line-height: 1.2 !important;
+  }
+
+  .stat-card-highlight .stat-sublabel {
+    font-size: 0.72rem !important;
+    color: rgba(52, 211, 153, 0.9) !important;
+    font-weight: 500 !important;
+    line-height: 1.15 !important;
+    margin-top: 1px !important;
   }
 
   .stat-card {
@@ -4064,9 +4093,15 @@ body.modal-open .cookie-consent-banner {
     overflow: visible;
   }
 
-  .stat-label {
+  .stat-text-group {
     grid-column: 1 / -1 !important;
     grid-row: 2 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    margin-top: 2px !important;
+  }
+
+  .stat-label {
     font-size: 0.8rem !important;
     font-weight: 600;
     color: var(--text-muted);
@@ -4076,7 +4111,18 @@ body.modal-open .cookie-consent-banner {
     white-space: normal !important;
     word-break: normal;
     overflow-wrap: normal;
-    margin-top: 2px;
+  }
+
+  .stat-sublabel {
+    font-size: 0.68rem !important;
+    color: var(--text-dim);
+    font-weight: 500;
+    line-height: 1.15;
+    margin-top: 1px;
+  }
+
+  .stats-bar.base-ready-hidden .stat-card:last-child {
+    grid-column: 1 / -1 !important;
   }
 
   /* Mobile Section Switcher & Bottom Nav Display */
