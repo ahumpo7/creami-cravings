@@ -2448,7 +2448,12 @@
       rouletteModalOverlay.setAttribute('aria-hidden', 'false');
       lockBackgroundScroll();
 
+      const slotMachineEl = rouletteModalOverlay.querySelector('.roulette-slot-machine');
+      const headlineEl = rouletteModalOverlay.querySelector('.roulette-headline');
+      if (headlineEl) headlineEl.textContent = 'Spinning The Flavor Wheel!';
+      if (slotMachineEl) slotMachineEl.style.display = 'block';
       if (rouletteWinnerCard) rouletteWinnerCard.style.display = 'none';
+
       if (rouletteSubtext) {
         rouletteSubtext.textContent = poolType === 'ready' 
           ? '🎰 Spinning exclusively from your 100% ready-to-make recipes...'
@@ -2486,11 +2491,20 @@
             metaText = `Missing ${winnerMatch.missing.length} ingredient${winnerMatch.missing.length > 1 ? 's' : ''}`;
           }
 
+          if (headlineEl) headlineEl.textContent = '🎉 Flavor Winner!';
+          if (rouletteSubtext) rouletteSubtext.textContent = 'Here is your matched Ninja Creami flavor:';
+          if (slotMachineEl) slotMachineEl.style.display = 'none';
+
           if (rouletteWinnerTitle) rouletteWinnerTitle.textContent = winner.name;
           if (rouletteWinnerMeta) rouletteWinnerMeta.textContent = metaText;
           if (rouletteWinnerCard) rouletteWinnerCard.style.display = 'block';
 
-          showToast(`🎰 Creami Roulette picked: "${winner.name}"!`);
+          // Reset modal scroll to ensure the buttons are immediately visible on all screens
+          const modalContent = rouletteModalOverlay.querySelector('.roulette-modal-content');
+          if (modalContent) modalContent.scrollTop = 0;
+
+          // Note: Do NOT trigger a toast notification here; the modal card already announces
+          // the winner and a bottom toast blocks the 'Open Recipe' and 'Spin Again' buttons.
         }
       }, 80);
     } else {
@@ -2509,6 +2523,11 @@
     if (rouletteModalOverlay) {
       rouletteModalOverlay.classList.remove('active');
       rouletteModalOverlay.setAttribute('aria-hidden', 'true');
+      const slotMachineEl = rouletteModalOverlay.querySelector('.roulette-slot-machine');
+      const headlineEl = rouletteModalOverlay.querySelector('.roulette-headline');
+      if (headlineEl) headlineEl.textContent = 'Spinning The Flavor Wheel!';
+      if (slotMachineEl) slotMachineEl.style.display = 'block';
+      if (rouletteWinnerCard) rouletteWinnerCard.style.display = 'none';
     }
     unlockBackgroundScroll();
   }
