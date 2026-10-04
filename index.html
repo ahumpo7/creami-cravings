@@ -367,7 +367,7 @@
           <div class="category-tabs" id="categoryTabs">
             <button class="tab-btn active" data-category="all">
               <span>🌟 All</span>
-              <span class="tab-count" id="countAll">149</span>
+              <span class="tab-count" id="countAll">12</span>
             </button>
             <button class="tab-btn" data-category="Base Flavors">
               <span>🥣 Base Flavors</span>
@@ -375,19 +375,23 @@
             </button>
             <button class="tab-btn" data-category="Fan Favorites">
               <span>⭐ Fan Favorites</span>
-              <span class="tab-count" id="countFan">76</span>
+              <span class="tab-count" id="countFan">1</span>
+              <span class="tab-lock-indicator" id="lockFan" style="display: none;" title="Pack available for purchase">🔒</span>
             </button>
             <button class="tab-btn" data-category="Keto">
               <span>🥑 Keto</span>
-              <span class="tab-count" id="countKeto">28</span>
+              <span class="tab-count" id="countKeto">6</span>
+              <span class="tab-lock-indicator" id="lockKeto" style="display: none;" title="Pack available for purchase">🔒</span>
             </button>
             <button class="tab-btn" data-category="Lactose Free">
               <span>🥛 Lactose Free</span>
-              <span class="tab-count" id="countLactose">51</span>
+              <span class="tab-count" id="countLactose">8</span>
+              <span class="tab-lock-indicator" id="lockLactose" style="display: none;" title="Pack available for purchase">🔒</span>
             </button>
             <button class="tab-btn" data-category="No Protein">
               <span>💪 No Protein</span>
-              <span class="tab-count" id="countNoProtein">88</span>
+              <span class="tab-count" id="countNoProtein">5</span>
+              <span class="tab-lock-indicator" id="lockNoProtein" style="display: none;" title="Pack available for purchase">🔒</span>
             </button>
             <button class="tab-btn" data-category="favorites">
               <span>💖 Favorites</span>
@@ -409,20 +413,64 @@
         <!-- Recipe Results Header -->
         <div class="results-header">
           <div class="results-summary-group">
-            <div class="results-summary" id="resultsSummary">Showing all 243 recipes</div>
+            <div class="results-summary" id="resultsSummary">Showing 12 recipes in your library</div>
             <div class="active-pantry-hint" id="activePantryHint"></div>
           </div>
           <div class="access-filter-wrap">
-            <label class="access-filter-label" for="filterAccessibleOnly" title="Hide locked recipes and show only recipes accessible with your subscription tier">
-              <input type="checkbox" id="filterAccessibleOnly">
-              <span>🔒 Unlocked Only</span>
-            </label>
+            <button type="button" class="btn-available-packs" id="btnAvailablePacksBadge" title="View recipe packs available for purchase">
+              <span class="btn-packs-icon">🛍️</span>
+              <span class="btn-packs-label"><strong id="lockedCountBadge">137</strong> Available for Purchase</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Category Pack Available for Purchase Showcase (shown when viewing a locked category) -->
+        <div class="category-pack-promo" id="categoryPackPromo" style="display: none;">
+          <div class="pack-promo-card">
+            <div class="pack-promo-header">
+              <div class="pack-promo-icon" id="packPromoIcon">⭐</div>
+              <div class="pack-promo-meta">
+                <span class="pack-promo-badge">🛍️ Pack Available for Purchase</span>
+                <h3 class="pack-promo-title" id="packPromoTitle">Fan Favorites Collection</h3>
+              </div>
+            </div>
+            <p class="pack-promo-desc" id="packPromoDesc">
+              Unlock 75 signature recipes including viral dessert dupes, mix-in masterpieces, and decadent bakery treats.
+            </p>
+            <div class="pack-promo-actions">
+              <button type="button" class="btn-primary btn-pack-unlock" id="btnUnlockCurrentCategory">
+                <span>🛒 Unlock This Pack</span>
+              </button>
+              <button type="button" class="btn-secondary" id="btnViewAllPacksFromCategory">
+                <span>✨ Browse All Packs</span>
+              </button>
+            </div>
           </div>
         </div>
 
         <!-- Recipe Cards Grid -->
         <div class="recipe-grid" id="recipeGrid">
-          <!-- Dynamically populated by app.js -->
+          <!-- Dynamically populated by app.js with ONLY accessible recipes -->
+        </div>
+
+        <!-- General Available for Purchase Banner (shown below accessible recipes) -->
+        <div class="purchase-available-banner" id="purchaseAvailableBanner" style="display: none;">
+          <div class="purchase-banner-glow"></div>
+          <div class="purchase-banner-body">
+            <div class="purchase-banner-icon">🛍️</div>
+            <div class="purchase-banner-text">
+              <div class="purchase-banner-title">
+                <span>Unlock <strong id="bannerLockedCount">137</strong> More Recipes</span>
+                <span class="purchase-banner-tag">Available for Purchase</span>
+              </div>
+              <p class="purchase-banner-desc">
+                Craving Oreo McFlurry, Cookie Dough, Cosmic Brownie, or high-protein bakery treats? Expand your library with Fan Favorites, Keto, Lactose-Free, and No-Protein recipe packs.
+              </p>
+            </div>
+            <button type="button" class="btn-purchase-cta" id="btnBrowsePacksBanner">
+              <span>✨ View Recipe Packs</span>
+            </button>
+          </div>
         </div>
 
         <!-- Empty State -->
@@ -964,6 +1012,157 @@
           <span>Connect Google Account</span>
         </button>
       </form>
+    </div>
+  </div>
+
+  <!-- Recipe Packs Store Modal (Roadmap Item 15 & Purchase Indicators) -->
+  <div class="modal-overlay" id="recipePacksModalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-content recipe-packs-modal-content">
+      <div class="modal-handle-bar" aria-hidden="true"></div>
+      <button class="modal-close" id="closeRecipePacksModalBtn" aria-label="Close modal">&times;</button>
+      
+      <div class="modal-header-compact">
+        <div class="modal-title-row">
+          <span class="modal-title-icon">🛍️</span>
+          <div>
+            <h2 class="modal-title">Premium Recipe Packs</h2>
+            <p class="modal-subtitle">Handcrafted Ninja Creami collections available for purchase.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="recipe-packs-grid" id="recipePacksGrid">
+        <!-- Fan Favorites Pack -->
+        <div class="recipe-pack-card" data-pack="Fan Favorites">
+          <div class="pack-card-header">
+            <span class="pack-card-icon">⭐</span>
+            <div class="pack-card-title-col">
+              <div class="pack-card-title-row">
+                <h3 class="pack-card-name">Fan Favorites Pack</h3>
+                <span class="pack-card-badge fan-fav">75 Recipes</span>
+              </div>
+              <span class="pack-card-tagline">Viral dupes, desserts & bakery creations</span>
+            </div>
+          </div>
+          <p class="pack-card-desc">
+            The ultimate crowd-pleasing collection. Includes Oreo McFlurry, Cosmic Brownie, Cookie Dough Craze, Birthday Cake Pint, Reese's Peanut Butter Cup, Kit Kat Crunch, and Snickers Swirl.
+          </p>
+          <div class="pack-card-footer">
+            <div class="pack-card-status" id="statusPackFan">
+              <span class="pack-status-available">🛍️ Available for Purchase</span>
+            </div>
+            <button type="button" class="btn-primary btn-sm btn-action-pack" data-pack="Fan Favorites">
+              <span>🛒 Unlock Pack</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Keto & Low Carb Pack -->
+        <div class="recipe-pack-card" data-pack="Keto">
+          <div class="pack-card-header">
+            <span class="pack-card-icon">🥑</span>
+            <div class="pack-card-title-col">
+              <div class="pack-card-title-row">
+                <h3 class="pack-card-name">Keto & Low-Carb Pack</h3>
+                <span class="pack-card-badge keto">22 Recipes</span>
+              </div>
+              <span class="pack-card-tagline">Sugar-free indulgence under 5g net carbs</span>
+            </div>
+          </div>
+          <p class="pack-card-desc">
+            Ultra-low net carbs without sacrificing silky soft-serve texture. Includes Keto Chocolate Fudge, Peanut Butter Swirl, Mint Chip, Butter Pecan, and Sea Salt Caramel.
+          </p>
+          <div class="pack-card-footer">
+            <div class="pack-card-status" id="statusPackKeto">
+              <span class="pack-status-available">🛍️ Available for Purchase</span>
+            </div>
+            <button type="button" class="btn-primary btn-sm btn-action-pack" data-pack="Keto">
+              <span>🛒 Unlock Pack</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Lactose Free Pack -->
+        <div class="recipe-pack-card" data-pack="Lactose Free">
+          <div class="pack-card-header">
+            <span class="pack-card-icon">🥛</span>
+            <div class="pack-card-title-col">
+              <div class="pack-card-title-row">
+                <h3 class="pack-card-name">Lactose-Free Pack</h3>
+                <span class="pack-card-badge lactose">43 Recipes</span>
+              </div>
+              <span class="pack-card-tagline">100% real dairy flavor, zero digestive distress</span>
+            </div>
+          </div>
+          <p class="pack-card-desc">
+            Formulated with ultra-filtered Fairlife and lactase enzyme bases. Includes Creamy Vanilla Latte, Strawberry Cheesecake, Mocha Chip, and Real Fruit Sorbets.
+          </p>
+          <div class="pack-card-footer">
+            <div class="pack-card-status" id="statusPackLactose">
+              <span class="pack-status-available">🛍️ Available for Purchase</span>
+            </div>
+            <button type="button" class="btn-primary btn-sm btn-action-pack" data-pack="Lactose Free">
+              <span>🛒 Unlock Pack</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- No Protein Powder Pack -->
+        <div class="recipe-pack-card" data-pack="No Protein">
+          <div class="pack-card-header">
+            <span class="pack-card-icon">💪</span>
+            <div class="pack-card-title-col">
+              <div class="pack-card-title-row">
+                <h3 class="pack-card-name">No Protein Powder Pack</h3>
+                <span class="pack-card-badge nopro">83 Recipes</span>
+              </div>
+              <span class="pack-card-tagline">Classic artisanal ice cream parlor flavor</span>
+            </div>
+          </div>
+          <p class="pack-card-desc">
+            Pure ice cream decadence made without any protein powders. Pure milk, pudding bases, and authentic churned texture for true dessert connoisseurs.
+          </p>
+          <div class="pack-card-footer">
+            <div class="pack-card-status" id="statusPackNoProtein">
+              <span class="pack-status-available">🛍️ Available for Purchase</span>
+            </div>
+            <button type="button" class="btn-primary btn-sm btn-action-pack" data-pack="No Protein">
+              <span>🛒 Unlock Pack</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- All-Access Bundle -->
+        <div class="recipe-pack-card vip-bundle" data-pack="All-Access">
+          <div class="pack-card-header">
+            <span class="pack-card-icon">👑</span>
+            <div class="pack-card-title-col">
+              <div class="pack-card-title-row">
+                <h3 class="pack-card-name">All-Access Master Pass</h3>
+                <span class="pack-card-badge vip">All 149 Recipes</span>
+              </div>
+              <span class="pack-card-tagline">Best Value • Complete library access</span>
+            </div>
+          </div>
+          <p class="pack-card-desc">
+            Instantly unlock all 4 premium packs, every secret ingredient ratio, step-by-step spin instructions, and all future seasonal flavor drops.
+          </p>
+          <div class="pack-card-footer">
+            <div class="pack-card-status" id="statusPackAllAccess">
+              <span class="pack-status-available">🛍️ Available for Purchase</span>
+            </div>
+            <button type="button" class="btn-primary btn-sm btn-action-pack vip-btn" data-pack="All-Access">
+              <span>👑 Unlock All-Access Bundle</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="packs-modal-footer">
+        <p class="packs-footer-hint">
+          💡 After purchase or request, your access is automatically linked to your account across all your devices.
+        </p>
+      </div>
     </div>
   </div>
 

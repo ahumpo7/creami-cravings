@@ -442,7 +442,16 @@
   const adminRoleFilterPills = document.getElementById('adminRoleFilterPills');
   const adminRefreshUsersBtn = document.getElementById('adminRefreshUsersBtn');
   const adminUsersList = document.getElementById('adminUsersList');
-  const filterAccessibleOnly = document.getElementById('filterAccessibleOnly');
+  const btnAvailablePacksBadge = document.getElementById('btnAvailablePacksBadge');
+  const lockedCountBadge = document.getElementById('lockedCountBadge');
+  const purchaseAvailableBanner = document.getElementById('purchaseAvailableBanner');
+  const bannerLockedCount = document.getElementById('bannerLockedCount');
+  const btnBrowsePacksBanner = document.getElementById('btnBrowsePacksBanner');
+  const categoryPackPromo = document.getElementById('categoryPackPromo');
+  const btnUnlockCurrentCategory = document.getElementById('btnUnlockCurrentCategory');
+  const btnViewAllPacksFromCategory = document.getElementById('btnViewAllPacksFromCategory');
+  const recipePacksModalOverlay = document.getElementById('recipePacksModalOverlay');
+  const closeRecipePacksModalBtn = document.getElementById('closeRecipePacksModalBtn');
   let adminUsersState = [];
   let adminFilterRole = 'all';
   let adminSearchQuery = '';
@@ -1676,15 +1685,22 @@
       return { recipe, match };
     });
 
+    const accessibleTotal = allRecipes.filter(r => isRecipeAccessible(r)).length;
+    const lockedTotal = allRecipes.length - accessibleTotal;
+
     // Update Dashboard Stats
-    statTotalRecipes.textContent = allRecipes.length;
+    statTotalRecipes.textContent = accessibleTotal;
+    statTotalRecipes.title = `${accessibleTotal} accessible recipes in your library (${lockedTotal} available for purchase)`;
     statReadyRecipes.textContent = readyCount;
     statBaseReadyRecipes.textContent = baseReadyCount;
+    const tabRecipeCount = document.getElementById('mobileTabRecipeCount');
+    if (tabRecipeCount) tabRecipeCount.textContent = accessibleTotal;
 
     // Apply active category and filter toggles
     let filtered = scoredRecipes.filter(({ recipe, match }) => {
-      // Unlocked / Accessible Only filter (Roadmap Item 15)
-      if (filterAccessibleOnly && filterAccessibleOnly.checked && !isRecipeAccessible(recipe)) return false;
+      // Only show recipes the user has access to!
+      // If they are locked, hide them.
+      if (!isRecipeAccessible(recipe)) return false;
 
       // Category filter
       if (activeCategory === 'favorites') {
@@ -1796,9 +1812,45 @@
     });
 
     // Update Results Summary & Active Hint
-    resultsSummary.textContent = `Showing ${filtered.length} of ${allRecipes.length} recipes`;
+    // Update Results Summary & Active Hint
+    if (lockedTotal > 0) {
+      resultsSummary.innerHTML = `Showing <strong>${filtered.length}</strong> accessible recipe${filtered.length === 1 ? '' : 's'}`;
+    } else {
+      resultsSummary.textContent = `Showing all ${filtered.length} recipes`;
+    }
+
+    if (btnAvailablePacksBadge) {
+      if (lockedTotal > 0) {
+        btnAvailablePacksBadge.style.display = 'inline-flex';
+        btnAvailablePacksBadge.innerHTML = `<span class="btn-packs-icon">🛍️</span><span class="btn-packs-label"><strong id="lockedCountBadge">${lockedTotal}</strong> Available for Purchase</span>`;
+      } else {
+        btnAvailablePacksBadge.innerHTML = `<span class="badge-all-unlocked">👑 All Packs Unlocked</span>`;
+      }
+    }
+
+    // Update Category Pack Promo (shown when viewing a locked category)
+    if (categoryPackPromo) {
+      const isPackCategory = ['Fan Favorites', 'Keto', 'Lactose Free', 'No Protein'].includes(activeCategory);
+      const isCatUnlocked = isCategoryUnlocked(activeCategory);
+      if (isPackCategory && !isCatUnlocked) {
+        categoryPackPromo.style.display = 'block';
+        updateCategoryPackPromo(activeCategory);
+      } else {
+        categoryPackPromo.style.display = 'none';
+      }
+    }
+
+    // Update General Available for Purchase Banner
+    if (purchaseAvailableBanner) {
+      if (lockedTotal > 0 && activeCategory === 'all') {
+        purchaseAvailableBanner.style.display = 'block';
+        if (bannerLockedCount) bannerLockedCount.textContent = lockedTotal;
+      } else {
+        purchaseAvailableBanner.style.display = 'none';
+      }
+    }
+
     const hintParts = [];
-    if (filterAccessibleOnly && filterAccessibleOnly.checked) hintParts.push('🔒 Unlocked Only');
     if (readyOnlyFilter) hintParts.push('⚡ 100% Ready to Make');
     if (baseOnlyFilter) hintParts.push('🥣 Base Ready to Freeze');
     if (activeQuickFilter === 'high_protein') hintParts.push('💪 High Protein (≥35g)');
@@ -1825,7 +1877,13 @@
 
     // Render Cards or Empty State (Flicker-Free Atomic Update)
     if (filtered.length === 0) {
-      emptyState.style.display = 'block';
+      const isPackCategory = ['Fan Favorites', 'Keto', 'Lactose Free', 'No Protein'].includes(activeCategory);
+      const isCatUnlocked = isCategoryUnlocked(activeCategory);
+      if (isPackCategory && !isCatUnlocked) {
+        emptyState.style.display = 'none';
+      } else {
+        emptyState.style.display = 'block';
+      }
       recipeGrid.style.display = 'none';
       recipeGrid.replaceChildren();
       return;
@@ -2163,9 +2221,147 @@
     }
   }
 
+  function isCategoryUnlocked(categoryName) {
+    if (!categoryName || categoryName === 'all' || categoryName === 'Base Flavors' || categoryName === 'favorites' || categoryName === 'Custom') {
+      return true;
+    }
+    if (currentUser && currentUser.role === 'admin') return true;
+    const subs = (currentUser && Array.isArray(currentUser.subscriptions)) ? currentUser.subscriptions : ['Base Flavors'];
+    if (subs.includes('All-Access')) return true;
+    const norm = normalizeCategoryName(categoryName);
+    return subs.some(s => {
+      const normS = normalizeCategoryName(s);
+      return normS.includes(norm) || norm.includes(normS);
+    });
+  }
+
+  function updateCategoryPackPromo(category) {
+    const titleEl = document.getElementById('packPromoTitle');
+    const descEl = document.getElementById('packPromoDesc');
+    const iconEl = document.getElementById('packPromoIcon');
+    const unlockBtn = document.getElementById('btnUnlockCurrentCategory');
+
+    const packInfo = {
+      'Fan Favorites': {
+        icon: '⭐',
+        title: 'Fan Favorites Collection (75 Recipes)',
+        desc: 'Unlock 75 signature recipes including viral dessert dupes, mix-in masterpieces, and bakery creations like Oreo McFlurry, Cookie Dough Craze, Cosmic Brownie, and Birthday Cake.',
+        btnText: '🛒 Unlock Fan Favorites Pack'
+      },
+      'Keto': {
+        icon: '🥑',
+        title: 'Keto & Low-Carb Collection (22 Recipes)',
+        desc: 'Ultra-low net carbs without sacrificing rich, creamy texture. Includes Keto Chocolate Fudge, Peanut Butter Swirl, Mint Chip, Butter Pecan, and Sea Salt Caramel (under 5g net carbs).',
+        btnText: '🛒 Unlock Keto Pack'
+      },
+      'Lactose Free': {
+        icon: '🥛',
+        title: 'Lactose-Free Collection (43 Recipes)',
+        desc: '100% real dairy flavor without digestive distress, formulated with ultra-filtered Fairlife and lactase enzyme bases. Includes Vanilla Latte, Strawberry Cheesecake & Mocha Chip.',
+        btnText: '🛒 Unlock Lactose Free Pack'
+      },
+      'No Protein': {
+        icon: '💪',
+        title: 'No Protein Powder Collection (83 Recipes)',
+        desc: 'Pure, authentic ice cream parlor decadence made without any protein powders. Whole milk, pudding bases, and authentic churned texture for true dessert lovers.',
+        btnText: '🛒 Unlock No Protein Pack'
+      }
+    };
+
+    const info = packInfo[category] || packInfo['Fan Favorites'];
+    if (iconEl) iconEl.textContent = info.icon;
+    if (titleEl) titleEl.textContent = info.title;
+    if (descEl) descEl.textContent = info.desc;
+    if (unlockBtn) {
+      unlockBtn.dataset.pack = category;
+      const span = unlockBtn.querySelector('span');
+      if (span) span.textContent = info.btnText;
+    }
+  }
+
+  function openRecipePacksModal() {
+    if (!recipePacksModalOverlay) return;
+    updatePacksModalStatuses();
+    recipePacksModalOverlay.classList.add('active');
+    recipePacksModalOverlay.setAttribute('aria-hidden', 'false');
+    lockBackgroundScroll();
+  }
+
+  function closeRecipePacksModal() {
+    if (!recipePacksModalOverlay) return;
+    recipePacksModalOverlay.classList.remove('active');
+    recipePacksModalOverlay.setAttribute('aria-hidden', 'true');
+    unlockBackgroundScroll();
+  }
+
+  function updatePacksModalStatuses() {
+    if (!recipePacksModalOverlay) return;
+    const packs = [
+      { id: 'Fan Favorites', statusEl: 'statusPackFan' },
+      { id: 'Keto', statusEl: 'statusPackKeto' },
+      { id: 'Lactose Free', statusEl: 'statusPackLactose' },
+      { id: 'No Protein', statusEl: 'statusPackNoProtein' },
+      { id: 'All-Access', statusEl: 'statusPackAllAccess' }
+    ];
+
+    packs.forEach(p => {
+      const el = document.getElementById(p.statusEl);
+      const isUnlocked = isCategoryUnlocked(p.id);
+      const card = recipePacksModalOverlay.querySelector(`.recipe-pack-card[data-pack="${p.id}"]`);
+      const btn = card ? card.querySelector('.btn-action-pack') : null;
+
+      if (el) {
+        if (isUnlocked) {
+          el.innerHTML = '<span class="pack-status-active">✅ In Your Library</span>';
+        } else {
+          el.innerHTML = '<span class="pack-status-available">🛍️ Available for Purchase</span>';
+        }
+      }
+      if (btn) {
+        if (isUnlocked) {
+          btn.disabled = true;
+          btn.innerHTML = '<span>✅ Active</span>';
+          btn.style.opacity = '0.6';
+          btn.style.cursor = 'default';
+        } else {
+          btn.disabled = false;
+          btn.style.opacity = '1';
+          btn.style.cursor = 'pointer';
+          btn.innerHTML = p.id === 'All-Access' ? '<span>👑 Unlock All-Access Bundle</span>' : `<span>🛒 Unlock ${p.id} Pack</span>`;
+        }
+      }
+    });
+  }
+
+  async function handlePackPurchase(packName) {
+    if (!currentUser) {
+      closeRecipePacksModal();
+      openGoogleAuthModal();
+      showToast('🔑 Please sign in with Google to purchase recipe packs!');
+      return;
+    }
+    showToast(`✉️ Purchase request for "${packName}" submitted! Admin notified for ${currentUser.email}.`);
+    try {
+      await fetch('/api/purchase-inquiry', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: currentUser.email,
+          userId: currentUser.id,
+          pack: packName,
+          timestamp: new Date().toISOString()
+        })
+      });
+    } catch (e) {
+      console.warn('Purchase inquiry send error:', e);
+    }
+  }
+
   function updateCategoryCounts() {
+    const accessible = allRecipes.filter(r => isRecipeAccessible(r));
+
     const counts = {
-      all: allRecipes.length,
+      all: accessible.length,
       'Base Flavors': 0,
       'Fan Favorites': 0,
       'Keto': 0,
@@ -2174,7 +2370,7 @@
       favorites: favoritesState.size
     };
 
-    allRecipes.forEach(r => {
+    accessible.forEach(r => {
       const cats = r.categories || (r.category ? [r.category] : []);
       cats.forEach(cat => {
         if (counts[cat] !== undefined) {
@@ -2204,6 +2400,17 @@
     if (tabCustom) {
       tabCustom.style.display = (currentUser && customRecipesState.length > 0) ? 'inline-flex' : 'none';
     }
+
+    // Update lock indicators on category tabs
+    const lockFan = document.getElementById('lockFan');
+    const lockKeto = document.getElementById('lockKeto');
+    const lockLactose = document.getElementById('lockLactose');
+    const lockNoPro = document.getElementById('lockNoProtein');
+
+    if (lockFan) lockFan.style.display = isCategoryUnlocked('Fan Favorites') ? 'none' : 'inline';
+    if (lockKeto) lockKeto.style.display = isCategoryUnlocked('Keto') ? 'none' : 'inline';
+    if (lockLactose) lockLactose.style.display = isCategoryUnlocked('Lactose Free') ? 'none' : 'inline';
+    if (lockNoPro) lockNoPro.style.display = isCategoryUnlocked('No Protein') ? 'none' : 'inline';
   }
 
   function updateStats() {
@@ -7565,9 +7772,33 @@
       });
     }
 
-    if (filterAccessibleOnly) {
-      filterAccessibleOnly.addEventListener('change', () => {
-        renderRecipes();
+    if (btnAvailablePacksBadge) {
+      btnAvailablePacksBadge.addEventListener('click', openRecipePacksModal);
+    }
+    if (btnBrowsePacksBanner) {
+      btnBrowsePacksBanner.addEventListener('click', openRecipePacksModal);
+    }
+    if (btnViewAllPacksFromCategory) {
+      btnViewAllPacksFromCategory.addEventListener('click', openRecipePacksModal);
+    }
+    if (btnUnlockCurrentCategory) {
+      btnUnlockCurrentCategory.addEventListener('click', () => {
+        const pack = btnUnlockCurrentCategory.dataset.pack || activeCategory;
+        handlePackPurchase(pack);
+      });
+    }
+    if (closeRecipePacksModalBtn) {
+      closeRecipePacksModalBtn.addEventListener('click', closeRecipePacksModal);
+    }
+    if (recipePacksModalOverlay) {
+      recipePacksModalOverlay.addEventListener('click', (e) => {
+        if (e.target === recipePacksModalOverlay) closeRecipePacksModal();
+      });
+      recipePacksModalOverlay.querySelectorAll('.btn-action-pack').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const pack = btn.dataset.pack;
+          if (pack) handlePackPurchase(pack);
+        });
       });
     }
 

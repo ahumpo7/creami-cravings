@@ -732,6 +732,28 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
             save_json_file(USERS_DB_FILE, users_db)
             self._send_json({'status': 'ok', 'success': True})
 
+        # 8. Purchase Inquiry (Store available pack requests)
+        elif self.path == '/api/purchase-inquiry':
+            email = data.get('email', '').strip()
+            pack = data.get('pack', '').strip()
+            if not email or not pack:
+                self._send_json({'error': 'Email and pack required'}, 400)
+                return
+
+            if 'purchase_inquiries' not in stats_db:
+                stats_db['purchase_inquiries'] = []
+
+            inquiry = {
+                'id': str(uuid.uuid4()),
+                'email': email,
+                'userId': data.get('userId'),
+                'pack': pack,
+                'timestamp': datetime.utcnow().isoformat()
+            }
+            stats_db['purchase_inquiries'].append(inquiry)
+            save_json_file(STATS_DB_FILE, stats_db)
+            self._send_json({'status': 'ok', 'success': True, 'message': 'Inquiry received', 'inquiry': inquiry})
+
         else:
             self._send_json({'error': 'Endpoint not found'}, 404)
 
