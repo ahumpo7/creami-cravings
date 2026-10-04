@@ -81,9 +81,15 @@ A prioritized checklist of fixes, features, and refinements for the Creami Cravi
   - Quick-action "🧈 Low Fat (≤5g)" filter chip
   - Active target indicator dot and instant reset
 
-### 11. 📦 Grocery PWA & Offline Support
-- [ ] **Full PWA Offline Support:** Install a Web App Manifest and Service Worker so all 149+ recipes and images load 100% offline in grocery stores with zero signal.
-- [ ] **Shopping List Export:** 1-click export of missing ingredients to Apple Notes, Apple Reminders, Google Keep, or clipboard text.
+### 11. 📦 Grocery PWA & Offline Support (Completed ✅)
+- [x] **Full PWA Offline Support:** Installed production Web App Manifest (`manifest.json`) and Service Worker (`service-worker.js`) caching all 149+ recipes, stylesheets, script logic, and vector icons so the app functions 100% offline in signal-dead grocery stores.
+- [x] **High-Res App Icons & Metadata:** Generated 192×192, 512×512, maskable icons, apple-touch-icon, and SVG favicon with dark cosmic styling.
+- [x] **Offline Status Detection & App Shortcuts:** Live offline indicator banner (`⚡ Offline Mode Active`) and PWA quick-action launch shortcuts (Browse Recipes, My Pantry, Freezer Pints, Build-A-Pint).
+- [x] **1-Click Shopping List Export:** Export grocery lists directly to:
+  - 📲 **Apple Notes & Reminders** (via native Web Share API with markdown checklist support)
+  - 📝 **Google Keep** (1-tap checklist copy and Keep link)
+  - 📋 **Copy Checklist** (formatted `- [ ]` checkboxes ready for any to-do app)
+  - 🖨️ **Print List**
 
 ### 12. 🎰 Fun & Discovery ("Creami Roulette") (Completed ✅)
 - [x] **"Surprise Me / Spin the Wheel":** Animated Creami Roulette slot machine modal that picks a winning recipe—intelligently prioritizing 100% ready-to-make recipes from your pantry, with instant "Spin Again" and recipe opening.
@@ -169,9 +175,7 @@ A prioritized checklist of fixes, features, and refinements for the Creami Cravi
 
 | Rank | Task | Why & Scope | Est. Effort |
 | :---: | :--- | :--- | :--- |
-| **🥇 1** | **Item 11: 📦 Grocery PWA & Offline Support** | Web App Manifest, Service Worker offline caching strategy, and 1-click export to Apple Notes/Reminders/Keep. *(Prerequisite for Push Notifications & Android App)* | 🟠 ~30–40 mins |
-| **🥈 2** | **Item 17: 🔔 Freeze Timer Push Notifications** | Web/Android notification trigger when 16-hour freeze timer reaches zero. *(Hooks into Item 8 & PWA Service Worker)* | 🟡 ~25–35 mins |
-| **🥉 3** | **Item 1: Finish Google Sign-In** | Configure production Google Cloud Console OAuth 2.0 Client ID and authorized origins. *(Authentication backbone)* | ⚪ External Credential |
-| **4** | **Item 15: 👥 User Management & Tiered Recipe Access** | Admin portal, user database (`db_users.json`), Google auth role assignment, and category-based recipe gating/locks. | 🟠 ~40–50 mins |
-| **5** | **Item 14: 🤖 Google Play Store Android App (Bubblewrap)** | Generate signed `.aab` bundle, deploy `assetlinks.json`, generate $1024\times500$ banner and $512\times512$ store icon, and prepare `/privacy.html`. | 🟠 ~30–45 mins |
-| **6** | **Item 1: Finish Google Sign-In** | Requires generating OAuth 2.0 Client ID in Google Cloud Console and setting authorized origins. | ⚪ External Credential |
+| **🥇 1** | **Item 17: 🔔 Freeze Timer Push Notifications** | Web/Android local push notifications when 16-hour freeze timer reaches zero. *(Directly hooks into Service Worker)* | 🟡 ~20–30 mins |
+| **🥈 2** | **Item 1: Finish Google Sign-In** | Configure production Google Cloud Console OAuth 2.0 Client ID and authorized origins. *(Authentication backbone)* | ⚪ External Credential |
+| **🥉 3** | **Item 15: 👥 User Management & Tiered Recipe Access** | Admin portal, user database (`db_users.json`), Google auth role assignment, and category-based recipe gating/locks. | 🟠 ~40–50 mins |
+| **4** | **Item 14: 🤖 Google Play Store Android App (Bubblewrap)** | Generate signed `.aab` bundle, deploy `assetlinks.json`, generate $1024\times500$ banner and $512\times512$ store icon, and prepare `/privacy.html`. | 🟠 ~30–45 mins |

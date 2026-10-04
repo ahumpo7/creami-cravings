@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="description" content="Creami Cravings Pantry & Recipe Finder - Select ingredients in your kitchen to instantly discover which delicious, high-protein Ninja Creami recipes you can make right now!">
   <title>Creami Cravings - High Protein Ninja Creami Recipe & Pantry Finder</title>
+  <meta name="theme-color" content="#ec4899">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Creami Cravings">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -26,6 +34,11 @@
   </script>
 </head>
 <body>
+  <!-- Offline Grocery Banner (Roadmap Item 11) -->
+  <div id="offlineIndicatorBanner" class="offline-banner" style="display: none;" role="status">
+    <span>⚡ Offline Mode Active — 100% of recipes & pantry items are available offline.</span>
+  </div>
+
   <div class="container">
     <!-- Header -->
     <header class="main-header">
@@ -418,8 +431,10 @@
       <div id="shoppingModalBody" class="shopping-modal-body"></div>
       <div class="modal-footer shopping-modal-footer">
         <button class="btn-secondary" id="clearShoppingListBtn" style="color: var(--text-dim); margin-right: auto;">🗑️ Clear List</button>
-        <button class="btn-secondary" id="copyShoppingListBtn">📋 Copy to Clipboard</button>
-        <button class="btn-primary" id="printShoppingListBtn">🖨️ Print List</button>
+        <button class="btn-secondary" id="shareShoppingListBtn" title="Export to Apple Notes, Reminders, or native share sheet">📲 Share / Notes</button>
+        <button class="btn-secondary" id="keepShoppingListBtn" title="Send grocery checklist to Google Keep">📝 Google Keep</button>
+        <button class="btn-secondary" id="copyShoppingListBtn">📋 Copy Checklist</button>
+        <button class="btn-primary" id="printShoppingListBtn">🖨️ Print</button>
       </div>
     </div>
   </div>

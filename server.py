@@ -237,6 +237,35 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 })
             self._send_json({'users': users_list})
 
+        elif self.path == '/service-worker.js':
+            sw_path = os.path.join(DIRECTORY, 'service-worker.js')
+            if os.path.exists(sw_path):
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/javascript')
+                self.send_header('Service-Worker-Allowed', '/')
+                self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate')
+                self.end_headers()
+                with open(sw_path, 'rb') as f:
+                    self.wfile.write(f.read())
+                return
+            else:
+                self.send_error(404, "File not found")
+                return
+
+        elif self.path == '/manifest.json':
+            mf_path = os.path.join(DIRECTORY, 'manifest.json')
+            if os.path.exists(mf_path):
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/manifest+json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                with open(mf_path, 'rb') as f:
+                    self.wfile.write(f.read())
+                return
+            else:
+                self.send_error(404, "File not found")
+                return
+
         else:
             super().do_GET()
 

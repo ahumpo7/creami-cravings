@@ -4604,12 +4604,9 @@
     }
   }
 
-  function copyShoppingList() {
+  function getFormattedShoppingListText(format = 'standard') {
     const categoryGroups = shoppingModalBody.querySelectorAll('.shopping-category-group');
-    if (categoryGroups.length === 0) {
-      showToast('Shopping list is empty');
-      return;
-    }
+    if (categoryGroups.length === 0) return null;
 
     let listText = '🛒 Creami Cravings Grocery List:\n';
     categoryGroups.forEach(grp => {
@@ -4619,15 +4616,70 @@
       if (items.length > 0) {
         listText += `\n${icon} ${title}:\n`;
         items.forEach(it => {
-          listText += `  • ${it}\n`;
+          if (format === 'checklist') {
+            listText += `- [ ] ${it}\n`;
+          } else {
+            listText += `  • ${it}\n`;
+          }
         });
       }
     });
+    return listText.trim();
+  }
 
-    navigator.clipboard.writeText(listText.trim()).then(() => {
-      showToast('📋 Copied organized grocery list to clipboard!');
+  function copyShoppingList() {
+    const listText = getFormattedShoppingListText('checklist');
+    if (!listText) {
+      showToast('Shopping list is empty');
+      return;
+    }
+
+    navigator.clipboard.writeText(listText).then(() => {
+      showToast('📋 Copied checklist (- [ ] items) to clipboard!');
     }).catch(() => {
       showToast('Failed to copy list to clipboard');
+    });
+  }
+
+  function shareShoppingList() {
+    const listText = getFormattedShoppingListText('checklist');
+    if (!listText) {
+      showToast('Shopping list is empty');
+      return;
+    }
+
+    if (navigator.share) {
+      navigator.share({
+        title: '🛒 Creami Cravings Grocery List',
+        text: listText
+      }).then(() => {
+        showToast('📲 Shared to Notes / Reminders!');
+      }).catch((err) => {
+        if (err.name !== 'AbortError') {
+          copyShoppingList();
+        }
+      });
+    } else {
+      navigator.clipboard.writeText(listText).then(() => {
+        showToast('📋 Copied checklist! Paste directly into Apple Notes or Reminders.');
+      }).catch(() => {
+        showToast('Failed to copy list to clipboard');
+      });
+    }
+  }
+
+  function exportToGoogleKeep() {
+    const listText = getFormattedShoppingListText('checklist');
+    if (!listText) {
+      showToast('Shopping list is empty');
+      return;
+    }
+
+    navigator.clipboard.writeText(listText).then(() => {
+      showToast('📝 Checklist copied! Opening Google Keep in a new tab...');
+      window.open('https://keep.google.com/', '_blank');
+    }).catch(() => {
+      window.open('https://keep.google.com/', '_blank');
     });
   }
 
@@ -6211,6 +6263,10 @@
 
     if (openShoppingListBtn) openShoppingListBtn.addEventListener('click', openShoppingListModal);
     if (copyShoppingListBtn) copyShoppingListBtn.addEventListener('click', copyShoppingList);
+    const shareShoppingListBtn = document.getElementById('shareShoppingListBtn');
+    const keepShoppingListBtn = document.getElementById('keepShoppingListBtn');
+    if (shareShoppingListBtn) shareShoppingListBtn.addEventListener('click', shareShoppingList);
+    if (keepShoppingListBtn) keepShoppingListBtn.addEventListener('click', exportToGoogleKeep);
     if (printShoppingListBtn) printShoppingListBtn.addEventListener('click', printShoppingList);
     if (clearShoppingListBtn) clearShoppingListBtn.addEventListener('click', clearShoppingList);
 
@@ -6381,6 +6437,66 @@
         setMobileView(activeMobileView);
       }
     });
+
+    // Handle PWA App Shortcuts & URL Parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const actionParam = urlParams.get('action');
+    if (actionParam === 'pantry') {
+      setTimeout(() => {
+        if (window.innerWidth <= 768) setMobileView('pantry');
+      }, 250);
+    } else if (actionParam === 'freezer') {
+      setTimeout(() => openFreezerModal(), 300);
+    } else if (actionParam === 'build') {
+      setTimeout(() => openCustomRecipeModal(), 300);
+    } else if (actionParam === 'shopping') {
+      setTimeout(() => openShoppingListModal(), 300);
+    }
+
+    // Initialize PWA Offline Engine & Service Worker
+    initPWA();
+  }
+
+  // --- Service Worker & PWA Offline Engine (Roadmap Item 11) ---
+  function initPWA() {
+    const offlineBanner = document.getElementById('offlineIndicatorBanner');
+
+    function updateOnlineStatus() {
+      if (navigator.onLine) {
+        if (offlineBanner) offlineBanner.style.display = 'none';
+      } else {
+        if (offlineBanner) offlineBanner.style.display = 'block';
+        showToast('⚡ Offline Mode: Operating with 100% cached recipes & pantry.');
+      }
+    }
+
+    window.addEventListener('online', () => {
+      updateOnlineStatus();
+      showToast('🟢 Back Online! Syncing with cloud...');
+      if (currentUser && typeof syncUserDataWithServer === 'function') {
+        syncUserDataWithServer();
+      }
+    });
+
+    window.addEventListener('offline', () => {
+      updateOnlineStatus();
+    });
+
+    if (!navigator.onLine && offlineBanner) {
+      offlineBanner.style.display = 'block';
+    }
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then((registration) => {
+            console.log('[PWA] Service Worker registered with scope:', registration.scope);
+          })
+          .catch((error) => {
+            console.warn('[PWA] Service Worker registration failed:', error);
+          });
+      });
+    }
   }
 
   // Run on DOM Ready
