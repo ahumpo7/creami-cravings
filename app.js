@@ -547,10 +547,10 @@
           currentUser.role = isAdmin ? 'admin' : (currentUser.role || 'user');
           if (!currentUser.subscriptions || !Array.isArray(currentUser.subscriptions)) {
             currentUser.subscriptions = isAdmin 
-              ? ['All-Access', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free'] 
-              : ['Fan Favorites'];
+              ? ['All-Access', 'Base Flavors', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free'] 
+              : ['Base Flavors'];
           } else if (isAdmin && !currentUser.subscriptions.includes('All-Access')) {
-            currentUser.subscriptions = ['All-Access', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free'];
+            currentUser.subscriptions = ['All-Access', 'Base Flavors', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free'];
           }
         }
       } catch (e) {
@@ -915,8 +915,8 @@
       picture: data.user.picture,
       role: isAdmin ? 'admin' : (data.user.role || 'user'),
       subscriptions: isAdmin 
-        ? ['All-Access', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free']
-        : (data.user.subscriptions || ['Fan Favorites']),
+        ? ['All-Access', 'Base Flavors', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free']
+        : (data.user.subscriptions || ['Base Flavors']),
       token: data.token
     };
     saveUserAuth();
@@ -1047,21 +1047,22 @@
   }
 
   function getRecipeRequiredTier(recipe) {
-    if (!recipe) return 'Fan Favorites';
+    if (!recipe) return 'Base Flavors';
     if (recipe.category === 'Custom' || recipe.isPersonal || (recipe.id && recipe.id.startsWith('custom_'))) {
       return 'Custom';
     }
     const cats = (recipe.categories && recipe.categories.length > 0)
       ? recipe.categories
-      : [recipe.category || 'Fan Favorites'];
+      : [recipe.category || 'Base Flavors'];
 
-    // Universal free starter tier: Fan Favorites is accessible to all
-    if (cats.some(c => normalizeCategoryName(c).includes('fanfav'))) {
-      return 'Fan Favorites';
+    // Universal free starter tier: Base Flavors is accessible to all
+    if (cats.some(c => normalizeCategoryName(c).includes('base'))) {
+      return 'Base Flavors';
     }
 
     for (const c of cats) {
       const norm = normalizeCategoryName(c);
+      if (norm.includes('fanfav')) return 'Fan Favorites';
       if (norm.includes('keto')) return 'Keto';
       if (norm.includes('lactose')) return 'Lactose Free';
       if (norm.includes('noprot')) return 'No Protein';
@@ -1077,10 +1078,10 @@
 
     const cats = (recipe.categories && recipe.categories.length > 0)
       ? recipe.categories
-      : [recipe.category || 'Fan Favorites'];
+      : [recipe.category || 'Base Flavors'];
 
-    // Universal free starter tier: Fan Favorites is always accessible to everyone
-    if (cats.some(c => normalizeCategoryName(c).includes('fanfav'))) {
+    // Universal free starter tier: Base Flavors is always accessible to everyone
+    if (cats.some(c => normalizeCategoryName(c).includes('base'))) {
       return true;
     }
 
@@ -1091,7 +1092,7 @@
 
     const subs = (currentUser && Array.isArray(currentUser.subscriptions))
       ? currentUser.subscriptions
-      : ['Fan Favorites'];
+      : ['Base Flavors'];
 
     if (subs.includes('All-Access')) {
       return true;
@@ -2121,6 +2122,7 @@
   function getCategoryClass(category) {
     if (!category) return '';
     const c = category.toLowerCase();
+    if (c.includes('base')) return 'base-flavors';
     if (c.includes('fan')) return 'fan-favorites';
     if (c.includes('keto')) return 'keto';
     if (c.includes('lactose')) return 'lactose-free';
@@ -2164,6 +2166,7 @@
   function updateCategoryCounts() {
     const counts = {
       all: allRecipes.length,
+      'Base Flavors': 0,
       'Fan Favorites': 0,
       'Keto': 0,
       'Lactose Free': 0,
@@ -2181,6 +2184,7 @@
     });
 
     const elAll = document.getElementById('countAll');
+    const elBase = document.getElementById('countBase');
     const elFan = document.getElementById('countFan');
     const elKeto = document.getElementById('countKeto');
     const elLactose = document.getElementById('countLactose');
@@ -2190,6 +2194,7 @@
     const tabCustom = document.getElementById('tabCustomRecipes');
 
     if (elAll) elAll.textContent = counts.all;
+    if (elBase) elBase.textContent = counts['Base Flavors'];
     if (elFan) elFan.textContent = counts['Fan Favorites'];
     if (elKeto) elKeto.textContent = counts['Keto'];
     if (elLactose) elLactose.textContent = counts['Lactose Free'];
@@ -2420,9 +2425,11 @@
       rouletteBtn.classList.add('spinning');
     }
 
-    // Determine candidate pool: prioritize ready-to-make recipes from pantry
-    const readyRecipes = allRecipes.filter(r => computeRecipeMatch(r).isReady);
-    const baseReadyRecipes = allRecipes.filter(r => computeRecipeMatch(r).isBaseReady);
+    // Determine candidate pool: prioritize accessible recipes the user can view & make
+    const accessibleRecipes = allRecipes.filter(r => isRecipeAccessible(r));
+    const poolSource = accessibleRecipes.length > 0 ? accessibleRecipes : allRecipes;
+    const readyRecipes = poolSource.filter(r => computeRecipeMatch(r).isReady);
+    const baseReadyRecipes = poolSource.filter(r => computeRecipeMatch(r).isBaseReady);
     
     let candidates = [];
     let poolType = 'any';
@@ -2434,7 +2441,7 @@
       candidates = baseReadyRecipes;
       poolType = 'base';
     } else {
-      candidates = allRecipes;
+      candidates = poolSource;
       poolType = 'any';
     }
 
@@ -4076,8 +4083,8 @@
           </p>
           <div class="locked-user-status">
             ${currentUser 
-              ? `Signed in as <strong>${currentUser.email}</strong> • Active packs: <em>${(currentUser.subscriptions || ['Fan Favorites']).join(', ')}</em>`
-              : `Currently browsing as <strong>Guest</strong> (Standard Fan Favorites tier)`}
+              ? `Signed in as <strong>${currentUser.email}</strong> • Active packs: <em>${(currentUser.subscriptions || ['Base Flavors']).join(', ')}</em>`
+              : `Currently browsing as <strong>Guest</strong> (Standard Base Flavors tier)`}
           </div>
           <div class="locked-teaser-actions">
             ${!currentUser ? `
@@ -6711,7 +6718,7 @@
   }
 
   // --- Admin Portal & User Management (Roadmap Item 15) ---
-  const ALL_CATEGORY_SUBSCRIPTIONS = ['All-Access', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free'];
+  const ALL_CATEGORY_SUBSCRIPTIONS = ['All-Access', 'Base Flavors', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free'];
 
   function openAdminPortal() {
     if (!currentUser || currentUser.role !== 'admin') {
@@ -6809,7 +6816,7 @@
       const userEmail = (u.email || '').toLowerCase();
       const isRootAdmin = ADMIN_ROOTS.includes(userEmail);
       const isCurrentAdmin = (currentUser && currentUser.email && currentUser.email.toLowerCase() === userEmail);
-      const subs = Array.isArray(u.subscriptions) ? u.subscriptions : ['Fan Favorites'];
+      const subs = Array.isArray(u.subscriptions) ? u.subscriptions : ['Base Flavors'];
       const hasAllAccess = subs.includes('All-Access');
       const avatarUrl = u.picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name || u.username || 'User')}&background=059669&color=fff&bold=true`;
       
@@ -6893,7 +6900,7 @@
           return;
         }
 
-        await updateUserPermissions(user.id, user.email, user.subscriptions || ['Fan Favorites'], newRole);
+        await updateUserPermissions(user.id, user.email, user.subscriptions || ['Base Flavors'], newRole);
       });
     });
 
@@ -6921,12 +6928,12 @@
         const user = adminUsersState.find(u => u.id === userId);
         if (!user) return;
 
-        let curSubs = Array.isArray(user.subscriptions) ? [...user.subscriptions] : ['Fan Favorites'];
+        let curSubs = Array.isArray(user.subscriptions) ? [...user.subscriptions] : ['Base Flavors'];
 
         if (subName === 'All-Access') {
           if (curSubs.includes('All-Access')) {
-            // Turn off All-Access, reset to Fan Favorites
-            curSubs = ['Fan Favorites'];
+            // Turn off All-Access, reset to Base Flavors
+            curSubs = ['Base Flavors'];
           } else {
             // Grant All-Access
             curSubs = [...ALL_CATEGORY_SUBSCRIPTIONS];
@@ -6934,9 +6941,9 @@
         } else {
           // Individual category pack toggle
           if (curSubs.includes(subName)) {
-            // Prevent removing Fan Favorites if it's the only one
-            if (subName === 'Fan Favorites' && curSubs.length === 1) {
-              showToast('Fan Favorites is the universal starter pack and cannot be removed.');
+            // Prevent removing Base Flavors if it's the only one
+            if (subName === 'Base Flavors' && curSubs.length === 1) {
+              showToast('Base Flavors is the universal starter pack and cannot be removed.');
               return;
             }
             curSubs = curSubs.filter(s => s !== subName && s !== 'All-Access');

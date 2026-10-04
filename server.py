@@ -23,8 +23,8 @@ DEFAULT_STAPLES = [
     'cocoa_powder'
 ]
 
-ALL_SUBSCRIPTIONS = ["All-Access", "Fan Favorites", "No Protein", "Keto", "Lactose Free"]
-DEFAULT_SUBSCRIPTIONS = ["Fan Favorites"]
+ALL_SUBSCRIPTIONS = ["All-Access", "Base Flavors", "Fan Favorites", "No Protein", "Keto", "Lactose Free"]
+DEFAULT_SUBSCRIPTIONS = ["Base Flavors"]
 
 # Admin accounts designated by verified email
 ADMIN_EMAILS = [
@@ -229,7 +229,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 'customRecipes': user.get('customRecipes', []),
                 'shoppingList': user.get('shoppingList', []),
                 'freezerPints': user.get('freezerPints', []),
-                'subscriptions': user.get('subscriptions', ["Fan Favorites"])
+                'subscriptions': user.get('subscriptions', list(DEFAULT_SUBSCRIPTIONS))
             })
 
         elif self.path == '/api/admin/users':

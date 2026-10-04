@@ -1400,7 +1400,8 @@ const RECIPES_MASTER = [
     "category": "No Protein",
     "categories": [
       "No Protein",
-      "Lactose Free"
+      "Lactose Free",
+      "Base Flavors"
     ],
     "sources": [
       {
@@ -1510,7 +1511,8 @@ const RECIPES_MASTER = [
     "category": "No Protein",
     "categories": [
       "No Protein",
-      "Lactose Free"
+      "Lactose Free",
+      "Base Flavors"
     ],
     "sources": [
       {
@@ -2389,7 +2391,8 @@ const RECIPES_MASTER = [
     "category": "Keto",
     "categories": [
       "Keto",
-      "Lactose Free"
+      "Lactose Free",
+      "Base Flavors"
     ],
     "sources": [
       {
@@ -2725,7 +2728,8 @@ const RECIPES_MASTER = [
     "category": "Keto",
     "categories": [
       "Keto",
-      "No Protein"
+      "No Protein",
+      "Base Flavors"
     ],
     "sources": [
       {
@@ -2966,7 +2970,8 @@ const RECIPES_MASTER = [
     "name": "Cake Batter (Milk)",
     "category": "Lactose Free",
     "categories": [
-      "Lactose Free"
+      "Lactose Free",
+      "Base Flavors"
     ],
     "sources": [
       {
@@ -3190,7 +3195,8 @@ const RECIPES_MASTER = [
     "name": "Cake Batter (Protein Shake)",
     "category": "Lactose Free",
     "categories": [
-      "Lactose Free"
+      "Lactose Free",
+      "Base Flavors"
     ],
     "sources": [
       {
@@ -3544,7 +3550,8 @@ const RECIPES_MASTER = [
     "category": "No Protein",
     "categories": [
       "No Protein",
-      "Lactose Free"
+      "Lactose Free",
+      "Base Flavors"
     ],
     "sources": [
       {
@@ -3656,7 +3663,8 @@ const RECIPES_MASTER = [
     "category": "No Protein",
     "categories": [
       "No Protein",
-      "Lactose Free"
+      "Lactose Free",
+      "Base Flavors"
     ],
     "sources": [
       {
@@ -4007,7 +4015,8 @@ const RECIPES_MASTER = [
     "category": "Keto",
     "categories": [
       "Keto",
-      "Lactose Free"
+      "Lactose Free",
+      "Base Flavors"
     ],
     "sources": [
       {
@@ -5880,7 +5889,8 @@ const RECIPES_MASTER = [
     "category": "Keto",
     "categories": [
       "Keto",
-      "Lactose Free"
+      "Lactose Free",
+      "Base Flavors"
     ],
     "sources": [
       {
@@ -7243,7 +7253,8 @@ const RECIPES_MASTER = [
     "category": "No Protein",
     "categories": [
       "No Protein",
-      "Lactose Free"
+      "Lactose Free",
+      "Base Flavors"
     ],
     "sources": [
       {
@@ -7452,7 +7463,8 @@ const RECIPES_MASTER = [
     "category": "Keto",
     "categories": [
       "Keto",
-      "Lactose Free"
+      "Lactose Free",
+      "Base Flavors"
     ],
     "sources": [
       {
@@ -7687,7 +7699,8 @@ const RECIPES_MASTER = [
     "category": "No Protein",
     "categories": [
       "No Protein",
-      "Lactose Free"
+      "Lactose Free",
+      "Base Flavors"
     ],
     "sources": [
       {
@@ -8082,7 +8095,8 @@ const RECIPES_MASTER = [
     "name": "Frosted Lemonade",
     "category": "Keto",
     "categories": [
-      "Keto"
+      "Keto",
+      "Base Flavors"
     ],
     "sources": [
       {
@@ -8302,7 +8316,8 @@ const RECIPES_MASTER = [
     "category": "No Protein",
     "categories": [
       "No Protein",
-      "Lactose Free"
+      "Lactose Free",
+      "Base Flavors"
     ],
     "sources": [
       {
@@ -8891,7 +8906,8 @@ const RECIPES_MASTER = [
     "category": "No Protein",
     "categories": [
       "No Protein",
-      "Lactose Free"
+      "Lactose Free",
+      "Base Flavors"
     ],
     "sources": [
       {
@@ -9203,7 +9219,8 @@ const RECIPES_MASTER = [
     "category": "No Protein",
     "categories": [
       "No Protein",
-      "Lactose Free"
+      "Lactose Free",
+      "Base Flavors"
     ],
     "sources": [
       {
@@ -9924,7 +9941,8 @@ const RECIPES_MASTER = [
     "name": "Mango & Cream",
     "category": "Lactose Free",
     "categories": [
-      "Lactose Free"
+      "Lactose Free",
+      "Base Flavors"
     ],
     "sources": [
       {
@@ -10008,7 +10026,8 @@ const RECIPES_MASTER = [
     "category": "No Protein",
     "categories": [
       "No Protein",
-      "Lactose Free"
+      "Lactose Free",
+      "Base Flavors"
     ],
     "sources": [
       {
@@ -10250,7 +10269,8 @@ const RECIPES_MASTER = [
     "categories": [
       "Keto",
       "No Protein",
-      "Lactose Free"
+      "Lactose Free",
+      "Base Flavors"
     ],
     "sources": [
       {
@@ -10487,7 +10507,8 @@ const RECIPES_MASTER = [
     "category": "Keto",
     "categories": [
       "Keto",
-      "Lactose Free"
+      "Lactose Free",
+      "Base Flavors"
     ],
     "sources": [
       {
@@ -11185,7 +11206,8 @@ const RECIPES_MASTER = [
     "category": "Keto",
     "categories": [
       "Keto",
-      "Lactose Free"
+      "Lactose Free",
+      "Base Flavors"
     ],
     "sources": [
       {
@@ -11691,7 +11713,8 @@ const RECIPES_MASTER = [
     "name": "Nutella",
     "category": "Fan Favorites",
     "categories": [
-      "Fan Favorites"
+      "Fan Favorites",
+      "Base Flavors"
     ],
     "sources": [
       {
@@ -12189,7 +12212,8 @@ const RECIPES_MASTER = [
     "category": "No Protein",
     "categories": [
       "No Protein",
-      "Lactose Free"
+      "Lactose Free",
+      "Base Flavors"
     ],
     "sources": [
       {
@@ -12545,7 +12569,8 @@ const RECIPES_MASTER = [
     "name": "Peaches And Cream Frozen Yogurt",
     "category": "No Protein",
     "categories": [
-      "No Protein"
+      "No Protein",
+      "Base Flavors"
     ],
     "sources": [
       {
@@ -13271,7 +13296,8 @@ const RECIPES_MASTER = [
     "category": "No Protein",
     "categories": [
       "No Protein",
-      "Lactose Free"
+      "Lactose Free",
+      "Base Flavors"
     ],
     "sources": [
       {
@@ -13641,7 +13667,8 @@ const RECIPES_MASTER = [
     "category": "Keto",
     "categories": [
       "Keto",
-      "Lactose Free"
+      "Lactose Free",
+      "Base Flavors"
     ],
     "sources": [
       {
@@ -13897,7 +13924,8 @@ const RECIPES_MASTER = [
     "category": "No Protein",
     "categories": [
       "No Protein",
-      "Lactose Free"
+      "Lactose Free",
+      "Base Flavors"
     ],
     "sources": [
       {
@@ -14530,7 +14558,8 @@ const RECIPES_MASTER = [
     "category": "No Protein",
     "categories": [
       "No Protein",
-      "Lactose Free"
+      "Lactose Free",
+      "Base Flavors"
     ],
     "sources": [
       {
@@ -14650,7 +14679,8 @@ const RECIPES_MASTER = [
     "category": "No Protein",
     "categories": [
       "No Protein",
-      "Lactose Free"
+      "Lactose Free",
+      "Base Flavors"
     ],
     "sources": [
       {
@@ -15755,7 +15785,8 @@ const RECIPES_MASTER = [
     "category": "Keto",
     "categories": [
       "Keto",
-      "Lactose Free"
+      "Lactose Free",
+      "Base Flavors"
     ],
     "sources": [
       {
@@ -16462,7 +16493,8 @@ const RECIPES_MASTER = [
     "categories": [
       "Fan Favorites",
       "Keto",
-      "Lactose Free"
+      "Lactose Free",
+      "Base Flavors"
     ],
     "sources": [
       {
@@ -16871,7 +16903,8 @@ const RECIPES_MASTER = [
     "category": "Keto",
     "categories": [
       "Keto",
-      "Lactose Free"
+      "Lactose Free",
+      "Base Flavors"
     ],
     "sources": [
       {
@@ -16960,7 +16993,8 @@ const RECIPES_MASTER = [
     "name": "Strawberry Banana",
     "category": "Lactose Free",
     "categories": [
-      "Lactose Free"
+      "Lactose Free",
+      "Base Flavors"
     ],
     "sources": [
       {
@@ -17157,7 +17191,8 @@ const RECIPES_MASTER = [
     "category": "Fan Favorites",
     "categories": [
       "Fan Favorites",
-      "No Protein"
+      "No Protein",
+      "Base Flavors"
     ],
     "sources": [
       {
@@ -17764,7 +17799,8 @@ const RECIPES_MASTER = [
     "name": "Vanilla",
     "category": "No Protein",
     "categories": [
-      "No Protein"
+      "No Protein",
+      "Base Flavors"
     ],
     "sources": [
       {
@@ -17857,7 +17893,8 @@ const RECIPES_MASTER = [
     "name": "Vanilla Bean Frozen Yogurt",
     "category": "No Protein",
     "categories": [
-      "No Protein"
+      "No Protein",
+      "Base Flavors"
     ],
     "sources": [
       {
@@ -17934,7 +17971,8 @@ const RECIPES_MASTER = [
     "category": "Keto",
     "categories": [
       "Keto",
-      "Lactose Free"
+      "Lactose Free",
+      "Base Flavors"
     ],
     "sources": [
       {
@@ -18166,7 +18204,8 @@ const RECIPES_MASTER = [
     "category": "Keto",
     "categories": [
       "Keto",
-      "Lactose Free"
+      "Lactose Free",
+      "Base Flavors"
     ],
     "sources": [
       {
@@ -18370,7 +18409,8 @@ const RECIPES_MASTER = [
     "category": "No Protein",
     "categories": [
       "No Protein",
-      "Lactose Free"
+      "Lactose Free",
+      "Base Flavors"
     ],
     "sources": [
       {

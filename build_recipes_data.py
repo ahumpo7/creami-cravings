@@ -328,6 +328,10 @@ for k, copies in sorted(grouped_recipes.items()):
         if b not in seen_cats:
             seen_cats.add(b)
             categories.append(b)
+
+    has_mixins = any(i.get("isMixin") for i in primary["ingredients"])
+    if not has_mixins and "Base Flavors" not in categories:
+        categories.append("Base Flavors")
             
     sources = []
     for c in copies:
