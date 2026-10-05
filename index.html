@@ -862,6 +862,46 @@
             <p>The liquid dictates the freezing point and base ice crystal structure.</p>
           </div>
           <div class="bap-grid" id="bapGridLiquids"></div>
+          <div class="bap-custom-ing-section" data-step="1" data-hint="liquid">
+            <button type="button" class="bap-btn-add-custom" data-step="1">
+              ➕ Can't find your liquid? Create Custom Liquid
+            </button>
+            <div class="bap-custom-form-card" id="bapCustomCard1" style="display: none;">
+              <div class="bap-custom-form-head">
+                <span class="bap-custom-form-title">✨ Create Custom Liquid Base</span>
+                <button type="button" class="bap-custom-close-btn" data-step="1" title="Close">✕</button>
+              </div>
+              <div class="bap-custom-form-fields">
+                <div class="form-row">
+                  <div class="form-group flex-2">
+                    <label>Liquid Name</label>
+                    <input type="text" class="bap-custom-input-name" placeholder="e.g. Soy Milk, Oat Barista Blend, Chocolate Fairlife..." data-step="1">
+                  </div>
+                  <div class="form-group flex-1">
+                    <label>Quantity</label>
+                    <div class="bap-custom-qty-wrapper">
+                      <input type="number" class="bap-custom-input-qty" value="380" min="10" max="1000" data-step="1">
+                      <span class="bap-custom-unit-tag">g</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="bap-category-notice-box" data-step="1">
+                  <div class="bap-category-notice-pill">
+                    <span class="bap-category-notice-icon">🥛</span>
+                    <span class="bap-category-notice-label">Auto-Detected Pantry Group:</span>
+                    <span class="bap-category-notice-val">Milk & Liquid Bases</span>
+                  </div>
+                  <p class="bap-category-notice-msg">
+                    ℹ️ Once you save this pint, this ingredient will automatically be added to your <strong class="bap-notice-target-cat">"Milk & Liquid Bases"</strong> pantry group and marked in stock!
+                  </p>
+                </div>
+                <div class="bap-custom-form-actions">
+                  <button type="button" class="btn-primary btn-sm bap-btn-submit-custom" data-step="1">✓ Add to This Pint</button>
+                  <button type="button" class="btn-secondary btn-sm bap-btn-cancel-custom" data-step="1">Cancel</button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- STEP 2: Protein & Flavor Powders -->
@@ -871,6 +911,46 @@
             <p>Casein absorbs water to prevent chalky texture; dark cocoa provides rich dessert depth.</p>
           </div>
           <div class="bap-grid" id="bapGridPowders"></div>
+          <div class="bap-custom-ing-section" data-step="2" data-hint="powder">
+            <button type="button" class="bap-btn-add-custom" data-step="2">
+              ➕ Can't find your powder? Create Custom Powder
+            </button>
+            <div class="bap-custom-form-card" id="bapCustomCard2" style="display: none;">
+              <div class="bap-custom-form-head">
+                <span class="bap-custom-form-title">✨ Create Custom Protein / Powder</span>
+                <button type="button" class="bap-custom-close-btn" data-step="2" title="Close">✕</button>
+              </div>
+              <div class="bap-custom-form-fields">
+                <div class="form-row">
+                  <div class="form-group flex-2">
+                    <label>Powder Name</label>
+                    <input type="text" class="bap-custom-input-name" placeholder="e.g. Ghost Cinnabon Protein, Matcha Powder, Black Cocoa..." data-step="2">
+                  </div>
+                  <div class="form-group flex-1">
+                    <label>Quantity</label>
+                    <div class="bap-custom-qty-wrapper">
+                      <input type="number" class="bap-custom-input-qty" value="25" min="1" max="500" data-step="2">
+                      <span class="bap-custom-unit-tag">g</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="bap-category-notice-box" data-step="2">
+                  <div class="bap-category-notice-pill">
+                    <span class="bap-category-notice-icon">🍦</span>
+                    <span class="bap-category-notice-label">Auto-Detected Pantry Group:</span>
+                    <span class="bap-category-notice-val">Protein Powders & Shakes</span>
+                  </div>
+                  <p class="bap-category-notice-msg">
+                    ℹ️ Once you save this pint, this ingredient will automatically be added to your <strong class="bap-notice-target-cat">"Protein Powders & Shakes"</strong> pantry group and marked in stock!
+                  </p>
+                </div>
+                <div class="bap-custom-form-actions">
+                  <button type="button" class="btn-primary btn-sm bap-btn-submit-custom" data-step="2">✓ Add to This Pint</button>
+                  <button type="button" class="btn-secondary btn-sm bap-btn-cancel-custom" data-step="2">Cancel</button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- STEP 3: Stabilizers & Emulsifiers -->
@@ -880,6 +960,46 @@
             <p>Prevents rock-hard ice sheets. 1g of xanthan gum or 7g pudding mix binds water into soft-serve ribbons.</p>
           </div>
           <div class="bap-grid" id="bapGridStabilizers"></div>
+          <div class="bap-custom-ing-section" data-step="3" data-hint="stabilizer">
+            <button type="button" class="bap-btn-add-custom" data-step="3">
+              ➕ Can't find your stabilizer? Create Custom Stabilizer
+            </button>
+            <div class="bap-custom-form-card" id="bapCustomCard3" style="display: none;">
+              <div class="bap-custom-form-head">
+                <span class="bap-custom-form-title">✨ Create Custom Stabilizer / Gel</span>
+                <button type="button" class="bap-custom-close-btn" data-step="3" title="Close">✕</button>
+              </div>
+              <div class="bap-custom-form-fields">
+                <div class="form-row">
+                  <div class="form-group flex-2">
+                    <label>Stabilizer Name</label>
+                    <input type="text" class="bap-custom-input-name" placeholder="e.g. Tara Gum, Unflavored Gelatin, Ricotta Cheese..." data-step="3">
+                  </div>
+                  <div class="form-group flex-1">
+                    <label>Quantity</label>
+                    <div class="bap-custom-qty-wrapper">
+                      <input type="number" class="bap-custom-input-qty" value="1" min="1" max="100" data-step="3">
+                      <span class="bap-custom-unit-tag">g</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="bap-category-notice-box" data-step="3">
+                  <div class="bap-category-notice-pill">
+                    <span class="bap-category-notice-icon">🍮</span>
+                    <span class="bap-category-notice-label">Auto-Detected Pantry Group:</span>
+                    <span class="bap-category-notice-val">Sweeteners & Binders</span>
+                  </div>
+                  <p class="bap-category-notice-msg">
+                    ℹ️ Once you save this pint, this ingredient will automatically be added to your <strong class="bap-notice-target-cat">"Sweeteners & Binders"</strong> pantry group and marked in stock!
+                  </p>
+                </div>
+                <div class="bap-custom-form-actions">
+                  <button type="button" class="btn-primary btn-sm bap-btn-submit-custom" data-step="3">✓ Add to This Pint</button>
+                  <button type="button" class="btn-secondary btn-sm bap-btn-cancel-custom" data-step="3">Cancel</button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- STEP 4: Sweeteners & Mix-Ins -->
@@ -893,6 +1013,47 @@
           
           <h5 class="bap-subhead" style="margin-top: 18px;">🍪 Mix-Ins (Folded on "Mix-In" cycle)</h5>
           <div class="bap-grid" id="bapGridMixins"></div>
+
+          <div class="bap-custom-ing-section" data-step="4" data-hint="mixin">
+            <button type="button" class="bap-btn-add-custom" data-step="4">
+              ➕ Can't find your sweetener or mix-in? Create Custom Ingredient
+            </button>
+            <div class="bap-custom-form-card" id="bapCustomCard4" style="display: none;">
+              <div class="bap-custom-form-head">
+                <span class="bap-custom-form-title">✨ Create Custom Flavor, Sweetener, or Mix-In</span>
+                <button type="button" class="bap-custom-close-btn" data-step="4" title="Close">✕</button>
+              </div>
+              <div class="bap-custom-form-fields">
+                <div class="form-row">
+                  <div class="form-group flex-2">
+                    <label>Ingredient Name</label>
+                    <input type="text" class="bap-custom-input-name" placeholder="e.g. Boba Pearls, Dragon Fruit Puree, Skinny Caramel Syrup..." data-step="4">
+                  </div>
+                  <div class="form-group flex-1">
+                    <label>Quantity</label>
+                    <div class="bap-custom-qty-wrapper">
+                      <input type="number" class="bap-custom-input-qty" value="20" min="1" max="500" data-step="4">
+                      <span class="bap-custom-unit-tag">g</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="bap-category-notice-box" data-step="4">
+                  <div class="bap-category-notice-pill">
+                    <span class="bap-category-notice-icon">🍪</span>
+                    <span class="bap-category-notice-label">Auto-Detected Pantry Group:</span>
+                    <span class="bap-category-notice-val">Mix-Ins, Cookies & Candies</span>
+                  </div>
+                  <p class="bap-category-notice-msg">
+                    ℹ️ Once you save this pint, this ingredient will automatically be added to your <strong class="bap-notice-target-cat">"Mix-Ins, Cookies & Candies"</strong> pantry group and marked in stock!
+                  </p>
+                </div>
+                <div class="bap-custom-form-actions">
+                  <button type="button" class="btn-primary btn-sm bap-btn-submit-custom" data-step="4">✓ Add to This Pint</button>
+                  <button type="button" class="btn-secondary btn-sm bap-btn-cancel-custom" data-step="4">Cancel</button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Wizard Navigation & Bottom Actions -->

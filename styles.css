@@ -6404,6 +6404,182 @@ body.modal-open .cookie-consent-banner {
   color: var(--text-main);
 }
 
+/* Custom Ingredient Creator in Wizard */
+.bap-custom-ing-section {
+  margin-top: 14px;
+  margin-bottom: 20px;
+}
+
+.bap-btn-add-custom {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px dashed var(--border-item);
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  padding: 8px 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.bap-btn-add-custom:hover {
+  background: rgba(236, 72, 153, 0.08);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.bap-custom-form-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-item);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin-top: 10px;
+  animation: bapFadeIn 0.25s ease-out;
+}
+
+@keyframes bapFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.bap-custom-form-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--border-glass);
+  padding-bottom: 8px;
+}
+
+.bap-custom-form-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bap-custom-close-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.bap-custom-close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-main);
+}
+
+.bap-custom-qty-wrapper {
+  display: flex;
+  align-items: center;
+  background: var(--bg-input, rgba(0, 0, 0, 0.3));
+  border: 1px solid var(--border-item);
+  border-radius: var(--radius-sm);
+  padding-right: 10px;
+}
+
+.bap-custom-qty-wrapper input {
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  padding: 8px 10px;
+  font-size: 0.9rem;
+  width: 100%;
+  outline: none;
+}
+
+.bap-custom-unit-tag {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* Category Notice Box */
+.bap-category-notice-box {
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  margin: 12px 0 14px;
+}
+
+.bap-category-notice-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  margin-bottom: 4px;
+}
+
+.bap-category-notice-label {
+  color: var(--text-muted);
+}
+
+.bap-category-notice-val {
+  font-weight: 800;
+  color: #60a5fa;
+}
+
+.bap-category-notice-msg {
+  font-size: 0.78rem;
+  color: var(--text-secondary, #cbd5e1);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.bap-custom-form-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.bap-card-remove-custom {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  border: none;
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border-radius: 999px;
+  width: 22px;
+  height: 22px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  transition: all 0.15s;
+  z-index: 2;
+}
+
+.bap-card-remove-custom:hover {
+  background: #ef4444;
+  color: #ffffff;
+  transform: scale(1.1);
+}
+
+.bap-custom-tag {
+  background: rgba(236, 72, 153, 0.2);
+  color: #f472b6;
+  font-size: 0.65rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 800;
+  margin-left: 6px;
+  text-transform: uppercase;
+}
+
 /* Wizard Footer Actions */
 .bap-wizard-footer {
   display: flex;

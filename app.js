@@ -219,27 +219,45 @@
     return false;
   }
 
-  function getIngredientCategoryKey(nameOrId) {
-    if (!nameOrId) return 'mixins_snacks';
-    const clean = sanitizeShoppingItemName(nameOrId).toLowerCase();
+  function getIngredientCategoryKey(nameOrId, stepHint) {
+    if (!nameOrId && !stepHint) return 'mixins_snacks';
+    const clean = sanitizeShoppingItemName(nameOrId || '').toLowerCase();
     const id = clean.replace(/[^a-z0-9]+/g, '_').trim();
-    if (typeof INGREDIENTS_MASTER !== 'undefined') {
+    if (typeof INGREDIENTS_MASTER !== 'undefined' && Array.isArray(INGREDIENTS_MASTER)) {
       const match = INGREDIENTS_MASTER.find(i => i.id === id || i.name.toLowerCase() === clean);
       if (match && match.category) return match.category;
     }
 
-    if (/cocoa powder|flour|oats|malted milk/i.test(clean)) return 'baking_powders';
-    if (/coffee|espresso|tea|matcha|dr pepper|root beer|sprite|lemonade/i.test(clean)) return 'beverages_drinks';
-    if (/protein shake|protein powder|pb fit|peanut butter powder/i.test(clean)) return 'protein_powders';
-    if (/creamer|milk|shake|yogurt|buttermilk|cheese|butter|egg/i.test(clean)) return 'dairy_liquids';
+    // Step-Hint Specific Overrides for Highly Specific Contexts
+    if (stepHint === 'stabilizer' && /gum|gelatin|agar|tara|cellulose|glucomannan|locust bean|pectin|pudding|cornstarch/i.test(clean)) {
+      if (/pudding/i.test(clean)) return 'pudding_mixes';
+      return 'sweeteners_binders';
+    }
+
+    // Comprehensive Category Keyword Detection
+    if (/protein shake|protein powder|pb fit|peanut butter powder|whey|casein|collagen|isolate|plant protein|egg white powder/i.test(clean)) return 'protein_powders';
+    if (/pudding mix|instant pudding|jell-?o|pudding/i.test(clean)) return 'pudding_mixes';
+    if (/\bcocoa\b|\bcacao\b|\bflour\b|\boats\b|\boat flour\b|\bcornstarch\b|\bmalted milk\b|\bbaking powder\b|\bbaking soda\b/i.test(clean)) return 'baking_powders';
+    if (/syrup|sauce|ganache|caramel drizzle|chocolate sauce|honey|maple syrup|agave/i.test(clean)) return 'syrups_sauces';
+    if (/xanthan|guar gum|tara gum|cellulose gum|gelatin|agar|glucomannan|locust bean gum|allulose|erythritol|stevia|monk fruit|swerve|splenda|sweetener|cane sugar|brown sugar/i.test(clean)) return 'sweeteners_binders';
+    if (/extract|emulsion|paste|flavoring|flavor drops|vanilla extract|cake batter flavor|lemon emulsion|coloring/i.test(clean)) return 'extracts_flavors';
+    if (/cinnamon|spice|nutmeg|salt|clove|ginger|cardamom|pumpkin pie spice|allspice/i.test(clean)) return 'spices_seasonings';
+    if (/peanut butter|pb|nutella|almond butter|cashew butter|cookie butter|sunbutter|spread|jam|jelly|preserves|marshmallow fluff|marshmallow creme|frosting/i.test(clean)) return 'nut_butters_spreads';
+    if (/coffee|espresso|cold brew|tea|matcha|chai|soda|diet coke|dr pepper|root beer|sprite|lemonade|energy drink/i.test(clean)) return 'beverages_drinks';
+    if (/creamer|milk|heavy cream|half and half|half & half|cream cheese|yogurt|greek yogurt|cottage cheese|buttermilk|fairlife|almond milk|oat milk|soy milk|cashew milk|coconut milk|butter|egg|egg yolk/i.test(clean)) return 'dairy_liquids';
+    if (/berry|strawberr|blueberr|raspberr|blackberr|fruit|apple|banana|mango|peach|cherry|lemon|lime|orange|pineapple|pumpkin|watermelon|grape|puree/i.test(clean)) return 'produce_fruit';
+    if (/oreo|cookie|chips?|candy|sprinkle|graham|cereal|marshmallow|pretzel|brownie|cake|dough|boba/i.test(clean)) return 'mixins_snacks';
     if (/protein/i.test(clean)) return 'protein_powders';
-    if (/pudding/i.test(clean)) return 'pudding_mixes';
-    if (/syrup|sauce|ganache/i.test(clean)) return 'syrups_sauces';
-    if (/sweetener|sugar|gum|stevia|allulose/i.test(clean)) return 'sweeteners_binders';
-    if (/extract|flavor|emulsion|paste|coloring/i.test(clean)) return 'extracts_flavors';
-    if (/cinnamon|spice|nutmeg|salt|clove/i.test(clean)) return 'spices_seasonings';
-    if (/peanut butter|pb|nutella|spread|jam|marshmallow fluff|marshmallow creme|frosting/i.test(clean)) return 'nut_butters_spreads';
-    if (/berry|fruit|apple|banana|mango|peach|lemon|lime|orange|pumpkin/i.test(clean)) return 'produce_fruit';
+    if (/gum|sweetener|sugar/i.test(clean)) return 'sweeteners_binders';
+    if (/drink|juice|water/i.test(clean)) return 'beverages_drinks';
+
+    // Contextual Step-Hint Fallbacks
+    if (stepHint === 'liquid') return 'dairy_liquids';
+    if (stepHint === 'powder') return 'protein_powders';
+    if (stepHint === 'stabilizer') return 'sweeteners_binders';
+    if (stepHint === 'sweetener') return 'sweeteners_binders';
+    if (stepHint === 'mixin') return 'mixins_snacks';
+
     return 'mixins_snacks';
   }
 
@@ -1752,7 +1770,7 @@
               customExtra.push({
                 id: slugId,
                 name: ing.name,
-                category: getIngredientCategoryKey(cleanName),
+                category: ing.category || getIngredientCategoryKey(cleanName),
                 isCustom: true
               });
             }
@@ -6477,7 +6495,12 @@
     selectedPowders: {},
     selectedStabilizers: { xanthan_gum: 1 },
     selectedSweeteners: { allulose: 20, vanilla_extract: 5 },
-    selectedMixins: {}
+    selectedMixins: {},
+    customLiquids: [],
+    customPowders: [],
+    customStabilizers: [],
+    customSweeteners: [],
+    customMixins: []
   };
 
   let bapInitialized = false;
@@ -6517,7 +6540,8 @@
     }
 
     // Scale current liquid quantity
-    const liquid = BAP_DATA.liquids.find(l => l.id === bapState.selectedLiquid);
+    const allLiquids = [...BAP_DATA.liquids, ...(bapState.customLiquids || [])];
+    const liquid = allLiquids.find(l => l.id === bapState.selectedLiquid);
     if (liquid) {
       bapState.liquidQty = size === '24' ? liquid.defaultQty24 : liquid.defaultQty16;
     }
@@ -6552,19 +6576,23 @@
     if (btnNext) btnNext.style.display = (target < 4) ? 'inline-flex' : 'none';
   }
 
-  function renderBapCard(item, isSelected, currentQty, onSelect, onQtyChange) {
+  function renderBapCard(item, isSelected, currentQty, onSelect, onQtyChange, onRemove) {
     const card = document.createElement('div');
-    card.className = `bap-card ${isSelected ? 'active' : ''}`;
+    card.className = `bap-card ${isSelected ? 'active' : ''} ${item.isCustom ? 'is-custom' : ''}`;
 
     const macroText = item.per100 
       ? `${item.per100.kcal} kcal/100g • ${item.per100.p}g P` 
-      : `${item.perServing.kcal} kcal • ${item.perServing.p}g P`;
+      : `${item.perServing ? item.perServing.kcal : 0} kcal • ${item.perServing ? item.perServing.p : 0}g P`;
+
+    const customTag = item.isCustom ? `<span class="bap-custom-tag">Custom</span>` : '';
+    const removeBtn = item.isCustom ? `<button type="button" class="bap-card-remove-custom" title="Remove custom ingredient">✕</button>` : '';
 
     card.innerHTML = `
+      ${removeBtn}
       <div class="bap-card-check">✓</div>
       <div>
-        <div class="bap-card-icon">${item.icon}</div>
-        <div class="bap-card-title">${item.name}</div>
+        <div class="bap-card-icon">${item.icon || '✨'}</div>
+        <div class="bap-card-title">${item.name} ${customTag}</div>
         <div class="bap-card-desc">${item.desc}</div>
       </div>
       <div>
@@ -6580,15 +6608,27 @@
     `;
 
     card.addEventListener('click', (e) => {
-      if (e.target.closest('.bap-stepper-btn')) return;
+      if (e.target.closest('.bap-stepper-btn') || e.target.closest('.bap-card-remove-custom')) return;
       onSelect(item);
     });
+
+    if (item.isCustom && onRemove) {
+      const rm = card.querySelector('.bap-card-remove-custom');
+      if (rm) {
+        rm.addEventListener('click', (e) => {
+          e.stopPropagation();
+          onRemove(item);
+        });
+      }
+    }
 
     const minusBtn = card.querySelector('.btn-minus');
     if (minusBtn) {
       minusBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        const newQty = Math.max(item.min, currentQty - item.step);
+        const stepVal = item.step || 5;
+        const minVal = item.min || 1;
+        const newQty = Math.max(minVal, currentQty - stepVal);
         onQtyChange(item, newQty);
       });
     }
@@ -6597,7 +6637,9 @@
     if (plusBtn) {
       plusBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        const newQty = Math.min(item.max, currentQty + item.step);
+        const stepVal = item.step || 5;
+        const maxVal = item.max || 1000;
+        const newQty = Math.min(maxVal, currentQty + stepVal);
         onQtyChange(item, newQty);
       });
     }
@@ -6607,12 +6649,18 @@
 
   function renderBapGrids() {
     const isDeluxe = bapState.size === '24';
+    if (!bapState.customLiquids) bapState.customLiquids = [];
+    if (!bapState.customPowders) bapState.customPowders = [];
+    if (!bapState.customStabilizers) bapState.customStabilizers = [];
+    if (!bapState.customSweeteners) bapState.customSweeteners = [];
+    if (!bapState.customMixins) bapState.customMixins = [];
 
     // 1. Liquids Grid
     const liquidsGrid = document.getElementById('bapGridLiquids');
     if (liquidsGrid) {
       liquidsGrid.innerHTML = '';
-      BAP_DATA.liquids.forEach(liquid => {
+      const allLiquids = [...BAP_DATA.liquids, ...bapState.customLiquids];
+      allLiquids.forEach(liquid => {
         const isSelected = bapState.selectedLiquid === liquid.id;
         const currentQty = isSelected ? bapState.liquidQty : (isDeluxe ? liquid.defaultQty24 : liquid.defaultQty16);
         const card = renderBapCard(liquid, isSelected, currentQty, 
@@ -6626,7 +6674,8 @@
             bapState.liquidQty = qty;
             renderBapGrids();
             updateBapHUD();
-          }
+          },
+          (l) => removeBapCustomItem(l.id)
         );
         liquidsGrid.appendChild(card);
       });
@@ -6636,7 +6685,8 @@
     const powdersGrid = document.getElementById('bapGridPowders');
     if (powdersGrid) {
       powdersGrid.innerHTML = '';
-      BAP_DATA.powders.forEach(powder => {
+      const allPowders = [...BAP_DATA.powders, ...bapState.customPowders];
+      allPowders.forEach(powder => {
         const isSelected = bapState.selectedPowders[powder.id] !== undefined;
         const currentQty = isSelected ? bapState.selectedPowders[powder.id] : (isDeluxe ? powder.defaultQty24 : powder.defaultQty16);
         const card = renderBapCard(powder, isSelected, currentQty,
@@ -6653,7 +6703,8 @@
             bapState.selectedPowders[p.id] = qty;
             renderBapGrids();
             updateBapHUD();
-          }
+          },
+          (p) => removeBapCustomItem(p.id)
         );
         powdersGrid.appendChild(card);
       });
@@ -6663,7 +6714,8 @@
     const stabGrid = document.getElementById('bapGridStabilizers');
     if (stabGrid) {
       stabGrid.innerHTML = '';
-      BAP_DATA.stabilizers.forEach(stab => {
+      const allStabs = [...BAP_DATA.stabilizers, ...bapState.customStabilizers];
+      allStabs.forEach(stab => {
         const isSelected = bapState.selectedStabilizers[stab.id] !== undefined;
         const currentQty = isSelected ? bapState.selectedStabilizers[stab.id] : (isDeluxe ? stab.defaultQty24 : stab.defaultQty16);
         const card = renderBapCard(stab, isSelected, currentQty,
@@ -6680,7 +6732,8 @@
             bapState.selectedStabilizers[s.id] = qty;
             renderBapGrids();
             updateBapHUD();
-          }
+          },
+          (s) => removeBapCustomItem(s.id)
         );
         stabGrid.appendChild(card);
       });
@@ -6690,7 +6743,8 @@
     const sweetGrid = document.getElementById('bapGridSweeteners');
     if (sweetGrid) {
       sweetGrid.innerHTML = '';
-      BAP_DATA.sweeteners.forEach(sw => {
+      const allSweeteners = [...BAP_DATA.sweeteners, ...bapState.customSweeteners];
+      allSweeteners.forEach(sw => {
         const isSelected = bapState.selectedSweeteners[sw.id] !== undefined;
         const currentQty = isSelected ? bapState.selectedSweeteners[sw.id] : (isDeluxe ? sw.defaultQty24 : sw.defaultQty16);
         const card = renderBapCard(sw, isSelected, currentQty,
@@ -6707,7 +6761,8 @@
             bapState.selectedSweeteners[item.id] = qty;
             renderBapGrids();
             updateBapHUD();
-          }
+          },
+          (sw) => removeBapCustomItem(sw.id)
         );
         sweetGrid.appendChild(card);
       });
@@ -6717,7 +6772,8 @@
     const mixinsGrid = document.getElementById('bapGridMixins');
     if (mixinsGrid) {
       mixinsGrid.innerHTML = '';
-      BAP_DATA.mixins.forEach(mix => {
+      const allMixins = [...BAP_DATA.mixins, ...bapState.customMixins];
+      allMixins.forEach(mix => {
         const isSelected = bapState.selectedMixins[mix.id] !== undefined;
         const currentQty = isSelected ? bapState.selectedMixins[mix.id] : (isDeluxe ? mix.defaultQty24 : mix.defaultQty16);
         const card = renderBapCard(mix, isSelected, currentQty,
@@ -6734,7 +6790,8 @@
             bapState.selectedMixins[item.id] = qty;
             renderBapGrids();
             updateBapHUD();
-          }
+          },
+          (m) => removeBapCustomItem(m.id)
         );
         mixinsGrid.appendChild(card);
       });
@@ -6752,14 +6809,21 @@
     let caseinScore = 0;
     let freezingScore = 0;
 
+    const allLiquids = [...BAP_DATA.liquids, ...(bapState.customLiquids || [])];
+    const allPowders = [...BAP_DATA.powders, ...(bapState.customPowders || [])];
+    const allStabs = [...BAP_DATA.stabilizers, ...(bapState.customStabilizers || [])];
+    const allSweeteners = [...BAP_DATA.sweeteners, ...(bapState.customSweeteners || [])];
+    const allMixins = [...BAP_DATA.mixins, ...(bapState.customMixins || [])];
+
     // Liquid
-    const liquid = BAP_DATA.liquids.find(l => l.id === bapState.selectedLiquid);
+    const liquid = allLiquids.find(l => l.id === bapState.selectedLiquid);
     if (liquid) {
       const factor = bapState.liquidQty / 100;
-      totalKcal += liquid.per100.kcal * factor;
-      totalProtein += liquid.per100.p * factor;
-      totalCarbs += liquid.per100.c * factor;
-      totalFat += liquid.per100.f * factor;
+      const p100 = liquid.per100 || { kcal: 45, p: 3, c: 4, f: 1.5 };
+      totalKcal += p100.kcal * factor;
+      totalProtein += p100.p * factor;
+      totalCarbs += p100.c * factor;
+      totalFat += p100.f * factor;
 
       fatScore += (liquid.fatScore || 0);
       stabilizerScore += (liquid.stabilizerScore || 0);
@@ -6768,13 +6832,14 @@
 
     // Powders
     Object.entries(bapState.selectedPowders).forEach(([id, qty]) => {
-      const p = BAP_DATA.powders.find(x => x.id === id);
+      const p = allPowders.find(x => x.id === id);
       if (p && qty > 0) {
-        const factor = qty / p.serving;
-        totalKcal += p.perServing.kcal * factor;
-        totalProtein += p.perServing.p * factor;
-        totalCarbs += p.perServing.c * factor;
-        totalFat += p.perServing.f * factor;
+        const factor = qty / (p.serving || 30);
+        const pServ = p.perServing || { kcal: 40, p: 8, c: 1, f: 0.5 };
+        totalKcal += pServ.kcal * factor;
+        totalProtein += pServ.p * factor;
+        totalCarbs += pServ.c * factor;
+        totalFat += pServ.f * factor;
 
         caseinScore += (p.caseinScore || 0);
       }
@@ -6782,41 +6847,44 @@
 
     // Stabilizers
     Object.entries(bapState.selectedStabilizers).forEach(([id, qty]) => {
-      const s = BAP_DATA.stabilizers.find(x => x.id === id);
+      const s = allStabs.find(x => x.id === id);
       if (s && qty > 0) {
-        const factor = qty / s.serving;
-        totalKcal += s.perServing.kcal * factor;
-        totalProtein += s.perServing.p * factor;
-        totalCarbs += s.perServing.c * factor;
-        totalFat += s.perServing.f * factor;
+        const factor = qty / (s.serving || 1);
+        const pServ = s.perServing || { kcal: 5, p: 0, c: 1, f: 0 };
+        totalKcal += pServ.kcal * factor;
+        totalProtein += pServ.p * factor;
+        totalCarbs += pServ.c * factor;
+        totalFat += pServ.f * factor;
 
-        stabilizerScore += (s.stabilizerScore || 0);
+        stabilizerScore += (s.stabilizerScore || 0.6);
       }
     });
 
     // Sweeteners
     Object.entries(bapState.selectedSweeteners).forEach(([id, qty]) => {
-      const sw = BAP_DATA.sweeteners.find(x => x.id === id);
+      const sw = allSweeteners.find(x => x.id === id);
       if (sw && qty > 0) {
-        const factor = qty / sw.serving;
-        totalKcal += sw.perServing.kcal * factor;
-        totalProtein += sw.perServing.p * factor;
-        totalCarbs += sw.perServing.c * factor;
-        totalFat += sw.perServing.f * factor;
+        const factor = qty / (sw.serving || 10);
+        const pServ = sw.perServing || { kcal: 5, p: 0, c: 1, f: 0 };
+        totalKcal += pServ.kcal * factor;
+        totalProtein += pServ.p * factor;
+        totalCarbs += pServ.c * factor;
+        totalFat += pServ.f * factor;
 
-        freezingScore += (sw.freezingScore || 0);
+        freezingScore += (sw.freezingScore || 0.2);
       }
     });
 
     // Mixins
     Object.entries(bapState.selectedMixins).forEach(([id, qty]) => {
-      const m = BAP_DATA.mixins.find(x => x.id === id);
+      const m = allMixins.find(x => x.id === id);
       if (m && qty > 0) {
-        const factor = qty / m.serving;
-        totalKcal += m.perServing.kcal * factor;
-        totalProtein += m.perServing.p * factor;
-        totalCarbs += m.perServing.c * factor;
-        totalFat += m.perServing.f * factor;
+        const factor = qty / (m.serving || 20);
+        const pServ = m.perServing || { kcal: 50, p: 1, c: 8, f: 2 };
+        totalKcal += pServ.kcal * factor;
+        totalProtein += pServ.p * factor;
+        totalCarbs += pServ.c * factor;
+        totalFat += pServ.f * factor;
       }
     });
 
@@ -6910,7 +6978,8 @@
   }
 
   function autoNameBapRecipe() {
-    const liquid = BAP_DATA.liquids.find(l => l.id === bapState.selectedLiquid);
+    const allLiquids = [...BAP_DATA.liquids, ...(bapState.customLiquids || [])];
+    const liquid = allLiquids.find(l => l.id === bapState.selectedLiquid);
     const powderKeys = Object.keys(bapState.selectedPowders);
     const stabilizerKeys = Object.keys(bapState.selectedStabilizers);
     const mixinKeys = Object.keys(bapState.selectedMixins);
@@ -6955,9 +7024,19 @@
 
     const nutrition = calculateBapNutritionAndScore();
     const isDeluxe = bapState.size === '24';
-    const liquidObj = BAP_DATA.liquids.find(l => l.id === bapState.selectedLiquid) || BAP_DATA.liquids[0];
+    const allLiquids = [...BAP_DATA.liquids, ...(bapState.customLiquids || [])];
+    const liquidObj = allLiquids.find(l => l.id === bapState.selectedLiquid) || allLiquids[0];
+
+    const allPowders = [...BAP_DATA.powders, ...(bapState.customPowders || [])];
+    const allStabs = [...BAP_DATA.stabilizers, ...(bapState.customStabilizers || [])];
+    const allSweeteners = [...BAP_DATA.sweeteners, ...(bapState.customSweeteners || [])];
+    const allMixins = [...BAP_DATA.mixins, ...(bapState.customMixins || [])];
 
     const parsedIngredients = [];
+    const addedCustomItems = [];
+
+    // 1. Liquid
+    const liquidCat = liquidObj.category || getIngredientCategoryKey(liquidObj.name, 'liquid');
     parsedIngredients.push({
       id: liquidObj.id,
       name: liquidObj.name,
@@ -6966,12 +7045,22 @@
       raw: `${bapState.liquidQty}g ${liquidObj.name}`,
       section: 'Base',
       isMixin: false,
+      isCustom: !!liquidObj.isCustom,
+      category: liquidCat,
       notes: ''
     });
+    if (liquidObj.isCustom) {
+      const catTitle = (typeof INGREDIENT_CATEGORIES !== 'undefined' && INGREDIENT_CATEGORIES[liquidCat]) 
+        ? INGREDIENT_CATEGORIES[liquidCat] 
+        : 'Pantry';
+      addedCustomItems.push({ name: liquidObj.name, catTitle });
+    }
 
+    // 2. Powders
     Object.entries(bapState.selectedPowders).forEach(([id, qty]) => {
-      const p = BAP_DATA.powders.find(x => x.id === id);
+      const p = allPowders.find(x => x.id === id);
       if (p && qty > 0) {
+        const cat = p.category || getIngredientCategoryKey(p.name, 'powder');
         parsedIngredients.push({
           id: p.id,
           name: p.name,
@@ -6980,46 +7069,76 @@
           raw: `${qty}g ${p.name}`,
           section: 'Base',
           isMixin: false,
+          isCustom: !!p.isCustom,
+          category: cat,
           notes: ''
         });
+        if (p.isCustom) {
+          const catTitle = (typeof INGREDIENT_CATEGORIES !== 'undefined' && INGREDIENT_CATEGORIES[cat]) 
+            ? INGREDIENT_CATEGORIES[cat] 
+            : 'Pantry';
+          addedCustomItems.push({ name: p.name, catTitle });
+        }
       }
     });
 
+    // 3. Stabilizers
     Object.entries(bapState.selectedStabilizers).forEach(([id, qty]) => {
-      const s = BAP_DATA.stabilizers.find(x => x.id === id);
+      const s = allStabs.find(x => x.id === id);
       if (s && qty > 0) {
+        const cat = s.category || getIngredientCategoryKey(s.name, 'stabilizer');
         parsedIngredients.push({
           id: s.id,
           name: s.name,
-          quantity: `${qty}${s.unit}`,
-          unit: s.unit,
-          raw: `${qty}${s.unit} ${s.name}`,
+          quantity: `${qty}${s.unit || 'g'}`,
+          unit: s.unit || 'g',
+          raw: `${qty}${s.unit || 'g'} ${s.name}`,
           section: 'Base',
           isMixin: false,
+          isCustom: !!s.isCustom,
+          category: cat,
           notes: ''
         });
+        if (s.isCustom) {
+          const catTitle = (typeof INGREDIENT_CATEGORIES !== 'undefined' && INGREDIENT_CATEGORIES[cat]) 
+            ? INGREDIENT_CATEGORIES[cat] 
+            : 'Pantry';
+          addedCustomItems.push({ name: s.name, catTitle });
+        }
       }
     });
 
+    // 4. Sweeteners
     Object.entries(bapState.selectedSweeteners).forEach(([id, qty]) => {
-      const sw = BAP_DATA.sweeteners.find(x => x.id === id);
+      const sw = allSweeteners.find(x => x.id === id);
       if (sw && qty > 0) {
+        const cat = sw.category || getIngredientCategoryKey(sw.name, 'sweetener');
         parsedIngredients.push({
           id: sw.id,
           name: sw.name,
-          quantity: `${qty}${sw.unit}`,
-          unit: sw.unit,
-          raw: `${qty}${sw.unit} ${sw.name}`,
+          quantity: `${qty}${sw.unit || 'g'}`,
+          unit: sw.unit || 'g',
+          raw: `${qty}${sw.unit || 'g'} ${sw.name}`,
           section: 'Base',
           isMixin: false,
+          isCustom: !!sw.isCustom,
+          category: cat,
           notes: ''
         });
+        if (sw.isCustom) {
+          const catTitle = (typeof INGREDIENT_CATEGORIES !== 'undefined' && INGREDIENT_CATEGORIES[cat]) 
+            ? INGREDIENT_CATEGORIES[cat] 
+            : 'Pantry';
+          addedCustomItems.push({ name: sw.name, catTitle });
+        }
       }
     });
 
+    // 5. Mixins
     Object.entries(bapState.selectedMixins).forEach(([id, qty]) => {
-      const m = BAP_DATA.mixins.find(x => x.id === id);
+      const m = allMixins.find(x => x.id === id);
       if (m && qty > 0) {
+        const cat = m.category || getIngredientCategoryKey(m.name, 'mixin');
         parsedIngredients.push({
           id: m.id,
           name: m.name,
@@ -7028,14 +7147,22 @@
           raw: `${qty}g ${m.name} (Mix-in)`,
           section: 'Mix-in',
           isMixin: true,
+          isCustom: !!m.isCustom,
+          category: cat,
           notes: ''
         });
+        if (m.isCustom) {
+          const catTitle = (typeof INGREDIENT_CATEGORIES !== 'undefined' && INGREDIENT_CATEGORIES[cat]) 
+            ? INGREDIENT_CATEGORIES[cat] 
+            : 'Pantry';
+          addedCustomItems.push({ name: m.name, catTitle });
+        }
       }
     });
 
-    const powderNames = Object.keys(bapState.selectedPowders).map(id => BAP_DATA.powders.find(p => p.id === id)?.name).filter(Boolean);
-    const stabilizerNames = Object.keys(bapState.selectedStabilizers).map(id => BAP_DATA.stabilizers.find(s => s.id === id)?.name).filter(Boolean);
-    const mixinNames = Object.keys(bapState.selectedMixins).map(id => BAP_DATA.mixins.find(m => m.id === id)?.name).filter(Boolean);
+    const powderNames = Object.keys(bapState.selectedPowders).map(id => allPowders.find(p => p.id === id)?.name).filter(Boolean);
+    const stabilizerNames = Object.keys(bapState.selectedStabilizers).map(id => allStabs.find(s => s.id === id)?.name).filter(Boolean);
+    const mixinNames = Object.keys(bapState.selectedMixins).map(id => allMixins.find(m => m.id === id)?.name).filter(Boolean);
 
     const instructions = [];
     instructions.push(`Pour ${bapState.liquidQty}g ${liquidObj.name} into your ${isDeluxe ? 'Deluxe 24 oz' : 'Standard 16 oz'} Ninja Creami pint.`);
@@ -7086,9 +7213,11 @@
     let addedCount = 0;
     (parsedIngredients || []).forEach(ing => {
       const ingId = ing.id || sanitizeShoppingItemName(ing.name).toLowerCase().replace(/[^a-z0-9]+/g, '_').trim();
-      if (ingId && !pantryState.has(ingId)) {
-        pantryState.add(ingId);
-        addedCount++;
+      if (ingId) {
+        if (!pantryState.has(ingId)) {
+          pantryState.add(ingId);
+          addedCount++;
+        }
       }
     });
     if (addedCount > 0) {
@@ -7102,7 +7231,239 @@
     renderPantryList();
     renderRecipes();
     updateStats();
-    showToast(`🧪 Saved balanced recipe "${title}" and added ingredients to your pantry!`);
+
+    if (addedCustomItems.length > 0) {
+      const summaryList = addedCustomItems.map(c => `"${c.name}" (${c.catTitle})`).join(', ');
+      showToast(`🧪 Saved recipe "${title}"! Added to your pantry: ${summaryList}`);
+    } else {
+      showToast(`🧪 Saved balanced recipe "${title}" and added ingredients to your pantry!`);
+    }
+  }
+
+  // --- Build-A-Pint Custom Ingredient Handlers ---
+  function updateBapCustomCategoryNotice(step, rawName) {
+    const section = document.querySelector(`.bap-custom-ing-section[data-step="${step}"]`);
+    if (!section) return;
+    const hint = section.dataset.hint || '';
+    const catKey = getIngredientCategoryKey(rawName, hint);
+    const catTitle = (typeof INGREDIENT_CATEGORIES !== 'undefined' && INGREDIENT_CATEGORIES[catKey]) 
+      ? INGREDIENT_CATEGORIES[catKey] 
+      : 'Pantry';
+    const catIcon = (typeof CATEGORY_ICONS !== 'undefined' && CATEGORY_ICONS[catKey]) 
+      ? CATEGORY_ICONS[catKey] 
+      : '📦';
+
+    const iconEl = section.querySelector('.bap-category-notice-icon');
+    const valEl = section.querySelector('.bap-category-notice-val');
+    const targetEl = section.querySelector('.bap-notice-target-cat');
+
+    if (iconEl) iconEl.textContent = catIcon;
+    if (valEl) valEl.textContent = catTitle;
+    if (targetEl) targetEl.textContent = `"${catTitle}"`;
+  }
+
+  function toggleBapCustomCard(step, show) {
+    const card = document.getElementById(`bapCustomCard${step}`);
+    const btn = document.querySelector(`.bap-btn-add-custom[data-step="${step}"]`);
+    if (card) {
+      card.style.display = show ? 'block' : 'none';
+    }
+    if (btn) {
+      btn.style.display = show ? 'none' : 'inline-flex';
+    }
+    if (show) {
+      const input = document.querySelector(`.bap-custom-input-name[data-step="${step}"]`);
+      if (input) {
+        input.focus();
+        updateBapCustomCategoryNotice(step, input.value.trim());
+      }
+    }
+  }
+
+  function handleBapCustomIngredientSubmit(step) {
+    const nameInput = document.querySelector(`.bap-custom-input-name[data-step="${step}"]`);
+    const qtyInput = document.querySelector(`.bap-custom-input-qty[data-step="${step}"]`);
+    const name = nameInput ? nameInput.value.trim() : '';
+
+    if (!name) {
+      showToast('⚠️ Please enter an ingredient name.');
+      if (nameInput) nameInput.focus();
+      return;
+    }
+
+    const section = document.querySelector(`.bap-custom-ing-section[data-step="${step}"]`);
+    const hint = section ? (section.dataset.hint || '') : '';
+    const catKey = getIngredientCategoryKey(name, hint);
+    const catTitle = (typeof INGREDIENT_CATEGORIES !== 'undefined' && INGREDIENT_CATEGORIES[catKey]) 
+      ? INGREDIENT_CATEGORIES[catKey] 
+      : 'Pantry';
+    const catIcon = (typeof CATEGORY_ICONS !== 'undefined' && CATEGORY_ICONS[catKey]) 
+      ? CATEGORY_ICONS[catKey] 
+      : '✨';
+
+    const customId = `bap_custom_${hint}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
+    const parsedQty = qtyInput ? parseFloat(qtyInput.value) : 0;
+
+    if (!bapState.customLiquids) bapState.customLiquids = [];
+    if (!bapState.customPowders) bapState.customPowders = [];
+    if (!bapState.customStabilizers) bapState.customStabilizers = [];
+    if (!bapState.customSweeteners) bapState.customSweeteners = [];
+    if (!bapState.customMixins) bapState.customMixins = [];
+
+    if (step === 1) {
+      const qty = parsedQty > 0 ? parsedQty : 380;
+      const customItem = {
+        id: customId,
+        name: name,
+        icon: catIcon,
+        desc: `Custom Liquid • Auto-categorized to "${catTitle}"`,
+        unit: 'g',
+        defaultQty16: qty,
+        defaultQty24: Math.round(qty * 1.5),
+        step: 10,
+        min: 10,
+        max: 1000,
+        per100: { kcal: 45, p: 3, c: 4, f: 1.5 },
+        fatScore: 1.0,
+        caseinScore: 0.5,
+        stabilizerScore: 0.3,
+        isCustom: true,
+        category: catKey,
+        stepType: 'liquid'
+      };
+      bapState.customLiquids.push(customItem);
+      bapState.selectedLiquid = customId;
+      bapState.liquidQty = qty;
+    } else if (step === 2) {
+      const qty = parsedQty > 0 ? parsedQty : 25;
+      const customItem = {
+        id: customId,
+        name: name,
+        icon: catIcon,
+        desc: `Custom Powder • Auto-categorized to "${catTitle}"`,
+        unit: 'g',
+        defaultQty16: qty,
+        defaultQty24: Math.round(qty * 1.2),
+        step: 5,
+        min: 5,
+        max: 150,
+        serving: 30,
+        perServing: { kcal: 40, p: 8, c: 1, f: 0.5 },
+        caseinScore: 0.5,
+        isCustom: true,
+        category: catKey,
+        stepType: 'powder'
+      };
+      bapState.customPowders.push(customItem);
+      bapState.selectedPowders[customId] = qty;
+    } else if (step === 3) {
+      const qty = parsedQty > 0 ? parsedQty : 1;
+      const customItem = {
+        id: customId,
+        name: name,
+        icon: catIcon,
+        desc: `Custom Stabilizer • Auto-categorized to "${catTitle}"`,
+        unit: 'g',
+        defaultQty16: qty,
+        defaultQty24: qty,
+        step: 1,
+        min: 1,
+        max: 50,
+        serving: 1,
+        perServing: { kcal: 5, p: 0, c: 1, f: 0 },
+        stabilizerScore: 0.8,
+        isCustom: true,
+        category: catKey,
+        stepType: 'stabilizer'
+      };
+      bapState.customStabilizers.push(customItem);
+      bapState.selectedStabilizers[customId] = qty;
+    } else if (step === 4) {
+      const qty = parsedQty > 0 ? parsedQty : 20;
+      const isSweetenerType = ['sweeteners_binders', 'extracts_flavors', 'syrups_sauces'].includes(catKey);
+      if (isSweetenerType) {
+        const customItem = {
+          id: customId,
+          name: name,
+          icon: catIcon,
+          desc: `Custom Sweetener/Flavor • Auto-categorized to "${catTitle}"`,
+          unit: 'g',
+          defaultQty16: qty,
+          defaultQty24: Math.round(qty * 1.2),
+          step: 1,
+          min: 1,
+          max: 100,
+          serving: 10,
+          perServing: { kcal: 5, p: 0, c: 1, f: 0 },
+          freezingScore: 0.3,
+          isCustom: true,
+          category: catKey,
+          stepType: 'sweetener'
+        };
+        bapState.customSweeteners.push(customItem);
+        bapState.selectedSweeteners[customId] = qty;
+      } else {
+        const customItem = {
+          id: customId,
+          name: name,
+          icon: catIcon,
+          desc: `Custom Mix-In • Auto-categorized to "${catTitle}"`,
+          unit: 'g',
+          defaultQty16: qty,
+          defaultQty24: Math.round(qty * 1.2),
+          step: 5,
+          min: 5,
+          max: 200,
+          serving: 20,
+          perServing: { kcal: 50, p: 1, c: 8, f: 2 },
+          isMixin: true,
+          isCustom: true,
+          category: catKey,
+          stepType: 'mixin'
+        };
+        bapState.customMixins.push(customItem);
+        bapState.selectedMixins[customId] = qty;
+      }
+    }
+
+    if (nameInput) nameInput.value = '';
+    toggleBapCustomCard(step, false);
+    renderBapGrids();
+    updateBapHUD();
+    showToast(`✨ Created "${name}"! Will be added to your "${catTitle}" pantry group upon saving.`);
+  }
+
+  function removeBapCustomItem(customId) {
+    if (!customId) return;
+    if (bapState.customLiquids) {
+      bapState.customLiquids = bapState.customLiquids.filter(i => i.id !== customId);
+      if (bapState.selectedLiquid === customId) {
+        bapState.selectedLiquid = 'fairlife_nonfat';
+        const isDeluxe = bapState.size === '24';
+        const defL = BAP_DATA.liquids.find(l => l.id === 'fairlife_nonfat');
+        bapState.liquidQty = isDeluxe ? (defL ? defL.defaultQty24 : 570) : (defL ? defL.defaultQty16 : 380);
+      }
+    }
+    if (bapState.customPowders) {
+      bapState.customPowders = bapState.customPowders.filter(i => i.id !== customId);
+      delete bapState.selectedPowders[customId];
+    }
+    if (bapState.customStabilizers) {
+      bapState.customStabilizers = bapState.customStabilizers.filter(i => i.id !== customId);
+      delete bapState.selectedStabilizers[customId];
+    }
+    if (bapState.customSweeteners) {
+      bapState.customSweeteners = bapState.customSweeteners.filter(i => i.id !== customId);
+      delete bapState.selectedSweeteners[customId];
+    }
+    if (bapState.customMixins) {
+      bapState.customMixins = bapState.customMixins.filter(i => i.id !== customId);
+      delete bapState.selectedMixins[customId];
+    }
+
+    renderBapGrids();
+    updateBapHUD();
+    showToast('Removed custom ingredient from pint.');
   }
 
   function initBuildAPint() {
@@ -7140,12 +7501,45 @@
       const btnSave = document.getElementById('bapBtnSave');
       if (btnAutoName) btnAutoName.addEventListener('click', autoNameBapRecipe);
       if (btnSave) btnSave.addEventListener('click', saveBapRecipe);
+
+      // Wizard Custom Ingredient Triggers & Forms (Steps 1–4)
+      for (let s = 1; s <= 4; s++) {
+        const stepNum = s;
+        const addBtn = document.querySelector(`.bap-btn-add-custom[data-step="${stepNum}"]`);
+        const closeBtn = document.querySelector(`.bap-custom-close-btn[data-step="${stepNum}"]`);
+        const cancelBtn = document.querySelector(`.bap-btn-cancel-custom[data-step="${stepNum}"]`);
+        const submitBtn = document.querySelector(`.bap-btn-submit-custom[data-step="${stepNum}"]`);
+        const nameInput = document.querySelector(`.bap-custom-input-name[data-step="${stepNum}"]`);
+
+        if (addBtn) addBtn.addEventListener('click', () => toggleBapCustomCard(stepNum, true));
+        if (closeBtn) closeBtn.addEventListener('click', () => toggleBapCustomCard(stepNum, false));
+        if (cancelBtn) cancelBtn.addEventListener('click', () => toggleBapCustomCard(stepNum, false));
+        if (submitBtn) submitBtn.addEventListener('click', () => handleBapCustomIngredientSubmit(stepNum));
+
+        if (nameInput) {
+          nameInput.addEventListener('input', () => {
+            updateBapCustomCategoryNotice(stepNum, nameInput.value.trim());
+          });
+          nameInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              handleBapCustomIngredientSubmit(stepNum);
+            }
+          });
+        }
+      }
     }
 
     setBapMode('wizard');
     switchBapStep(1);
     renderBapGrids();
     updateBapHUD();
+
+    // Reset custom form cards to closed and update default category notices
+    for (let s = 1; s <= 4; s++) {
+      toggleBapCustomCard(s, false);
+      updateBapCustomCategoryNotice(s, '');
+    }
   }
 
   function openCustomRecipeModal() {
