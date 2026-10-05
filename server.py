@@ -537,6 +537,29 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
             save_json_file(USERS_DB_FILE, users_db)
             self._send_json({'status': 'ok', 'success': True})
 
+        # 2b. Delete Personal Custom Recipe
+        elif self.path == '/api/recipe/custom/delete':
+            user = self._get_user_from_token(data)
+            if not user:
+                self._send_json({'error': 'Unauthorized'}, 401)
+                return
+
+            recipe_id = data.get('recipeId')
+            if not recipe_id:
+                self._send_json({'error': 'Recipe ID required'}, 400)
+                return
+
+            initial_count = len(user.get('customRecipes', []))
+            user['customRecipes'] = [r for r in user.get('customRecipes', []) if r.get('id') != recipe_id]
+            user['last_active'] = datetime.utcnow().isoformat()
+            save_json_file(USERS_DB_FILE, users_db)
+            self._send_json({
+                'status': 'ok',
+                'success': True,
+                'deleted': recipe_id,
+                'remaining': len(user['customRecipes'])
+            })
+
         # 3. Log Recipe Batch Made (Personal & Community counter)
         elif self.path == '/api/recipe/made':
             user = self._get_user_from_token(data)

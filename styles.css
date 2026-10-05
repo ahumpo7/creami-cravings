@@ -6580,6 +6580,37 @@ body.modal-open .cookie-consent-banner {
   text-transform: uppercase;
 }
 
+/* Personal Recipe Card Delete Button */
+.card-delete-recipe-btn {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #f87171;
+  border-radius: 999px;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+  margin-right: 4px;
+}
+
+.card-delete-recipe-btn:hover {
+  background: rgba(239, 68, 68, 0.25);
+  transform: scale(1.1);
+  color: #ffffff;
+}
+
+.card-delete-recipe-btn.confirming {
+  background: #ef4444;
+  color: #ffffff;
+  border-color: #dc2626;
+  transform: scale(1.15);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.6);
+}
+
 /* Wizard Footer Actions */
 .bap-wizard-footer {
   display: flex;

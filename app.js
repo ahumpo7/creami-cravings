@@ -105,11 +105,15 @@
     'Frozen Berries Of Choice': 'Frozen Berries (Your Choice)',
     'Fruit Of Your Choice': 'Fresh Fruit (Your Choice)',
     'Nuts Of Choice': 'Mixed Nuts (Your Choice)',
-    'Mini Lucky-Charms-Style Marshmallows': 'Mini Cereal Marshmallows'
+    'Mini Lucky-Charms-Style Marshmallows': 'Mini Cereal Marshmallows',
+    'cinnamon toast crunch': 'Cinnamon Toast Crunch',
+    'Cinnamon toast crunch': 'Cinnamon Toast Crunch'
   };
 
   // Interchangeable ingredients in pantry matcher
   const INGREDIENT_EQUIVALENTS = {
+    cinnamon_toast_crunch: ['cinnamon_cereal', 'cinnamon_toast_crunch'],
+    cinnamon_cereal: ['cinnamon_toast_crunch', 'cinnamon_cereal'],
     vanilla_extract_or_vanilla_bean_paste: ['vanilla_extract', 'vanilla_bean_paste'],
     vanilla_bean_paste: ['vanilla_extract', 'vanilla_extract_or_vanilla_bean_paste'],
     vanilla_extract: ['vanilla_bean_paste', 'vanilla_extract_or_vanilla_bean_paste'],
@@ -241,7 +245,12 @@
     if (/syrup|sauce|ganache|caramel drizzle|chocolate sauce|honey|maple syrup|agave/i.test(clean)) return 'syrups_sauces';
     if (/xanthan|guar gum|tara gum|cellulose gum|gelatin|agar|glucomannan|locust bean gum|allulose|erythritol|stevia|monk fruit|swerve|splenda|sweetener|cane sugar|brown sugar/i.test(clean)) return 'sweeteners_binders';
     if (/extract|emulsion|paste|flavoring|flavor drops|vanilla extract|cake batter flavor|lemon emulsion|coloring/i.test(clean)) return 'extracts_flavors';
-    if (/cinnamon|spice|nutmeg|salt|clove|ginger|cardamom|pumpkin pie spice|allspice/i.test(clean)) return 'spices_seasonings';
+    // Mix-Ins, Cereals, Cookies & Candies (Must be checked before spices so cinnamon cereal doesn't match spice)
+    if (/cinnamon toast crunch|cereal|cheerios|chex|pebbles|puffs|loops|graham|oreo|cookie|chips?|candy|sprinkle|marshmallow|pretzel|brownie|cake|dough|boba|pop-?tart|wafer|crisp|snack|cinnamon roll|cinnamon bun/i.test(clean)) return 'mixins_snacks';
+    if (/cinnamon|spice|nutmeg|salt|clove|ginger|cardamom|pumpkin pie spice|allspice/i.test(clean)) {
+      if (/cereal|crunch|cookie|graham|roll|bun|pastry|bar|toast/i.test(clean)) return 'mixins_snacks';
+      return 'spices_seasonings';
+    }
     if (/peanut butter|pb|nutella|almond butter|cashew butter|cookie butter|sunbutter|spread|jam|jelly|preserves|marshmallow fluff|marshmallow creme|frosting/i.test(clean)) return 'nut_butters_spreads';
     if (/coffee|espresso|cold brew|tea|matcha|chai|soda|diet coke|dr pepper|root beer|sprite|lemonade|energy drink/i.test(clean)) return 'beverages_drinks';
     if (/creamer|milk|heavy cream|half and half|half & half|cream cheese|yogurt|greek yogurt|cottage cheese|buttermilk|fairlife|almond milk|oat milk|soy milk|cashew milk|coconut milk|butter|egg|egg yolk/i.test(clean)) return 'dairy_liquids';
@@ -294,6 +303,7 @@
   let pantryState = new Set();
   let favoritesState = new Set();
   let customRecipesState = [];
+  let lastLocalMutationTime = 0;
   let allRecipes = [];
   let ingredientRecipeCount = {};
   let manualShoppingList = new Set();
@@ -989,6 +999,7 @@
   // --- Real-Time Multi-Device Account Sync Fetcher ---
   async function fetchLatestUserData() {
     if (!currentUser || (!currentUser.token && !currentUser.email)) return;
+    if (Date.now() - lastLocalMutationTime < 3500) return;
     try {
       const headers = { 'Content-Type': 'application/json' };
       if (currentUser.token) headers['Authorization'] = `Bearer ${currentUser.token}`;
@@ -2403,6 +2414,9 @@
             ${recipe.creaminessScore ? `<span class="recipe-creaminess-badge" title="Build-A-Pint Creaminess Score">🧪 ${recipe.creaminessScore}/10</span>` : ''}
           </div>
           <div class="card-actions-top">
+            ${isPersonal ? `
+              <button class="card-delete-recipe-btn" title="Delete personal recipe">🗑️</button>
+            ` : ''}
             ${hasCommRating ? `
               <span class="card-community-rating" title="Community rating: ${commAvg.toFixed(1)} / 5.0 (${commCount} review${commCount === 1 ? '' : 's'})">
                 ★ ${commAvg.toFixed(1)} <span class="rating-sub">(${commCount})</span>
@@ -2478,6 +2492,34 @@
       e.stopPropagation();
       toggleFavorite(recipe.id);
     });
+
+    // Delete personal recipe button click (with 2-tap confirmation)
+    if (isPersonal) {
+      const cardDelBtn = card.querySelector('.card-delete-recipe-btn');
+      if (cardDelBtn) {
+        let cardConfirm = false;
+        let cTimer = null;
+        cardDelBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (!cardConfirm) {
+            cardConfirm = true;
+            cardDelBtn.classList.add('confirming');
+            cardDelBtn.textContent = '✕';
+            cardDelBtn.title = 'Tap again to permanently delete';
+            showToast(`⚠️ Tap ✕ again to delete "${recipe.name}"`);
+            cTimer = setTimeout(() => {
+              cardConfirm = false;
+              cardDelBtn.classList.remove('confirming');
+              cardDelBtn.textContent = '🗑️';
+              cardDelBtn.title = 'Delete personal recipe';
+            }, 3500);
+          } else {
+            clearTimeout(cTimer);
+            deleteCustomRecipe(recipe.id);
+          }
+        });
+      }
+    }
 
     // View button click & card click
     const viewBtn = card.querySelector('.btn-view-recipe');
@@ -5214,11 +5256,29 @@
       });
     }
 
-    // Delete Personal Recipe Button
+    // Delete Personal Recipe Button (with in-modal 2-step confirmation)
     const modalDeleteBtn = recipeModalBody.querySelector('#modalDeleteRecipeBtn');
     if (modalDeleteBtn) {
-      modalDeleteBtn.addEventListener('click', () => {
-        if (confirm(`Are you sure you want to permanently delete "${recipe.name}" from your personal recipes?`)) {
+      let modalConfirm = false;
+      let mTimer = null;
+      modalDeleteBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!modalConfirm) {
+          modalConfirm = true;
+          modalDeleteBtn.innerHTML = '⚠️ Click again to confirm delete';
+          modalDeleteBtn.style.background = '#ef4444';
+          modalDeleteBtn.style.color = '#ffffff';
+          modalDeleteBtn.style.borderColor = '#dc2626';
+          mTimer = setTimeout(() => {
+            modalConfirm = false;
+            modalDeleteBtn.innerHTML = '🗑️ Delete Recipe';
+            modalDeleteBtn.style.background = 'rgba(239, 68, 68, 0.12)';
+            modalDeleteBtn.style.color = '#f87171';
+            modalDeleteBtn.style.borderColor = 'rgba(239, 68, 68, 0.35)';
+          }, 4000);
+        } else {
+          clearTimeout(mTimer);
           deleteCustomRecipe(recipe.id);
         }
       });
@@ -6483,6 +6543,21 @@
         serving: 10,
         perServing: { kcal: 40, p: 0, c: 9, f: 1 },
         isMixin: true
+      },
+      {
+        id: 'cinnamon_toast_crunch',
+        name: 'Cinnamon Toast Crunch',
+        icon: '🥣',
+        desc: 'Crispy cinnamon-sugar cereal crunch folded during the mix-in spin.',
+        unit: 'g',
+        defaultQty16: 20,
+        defaultQty24: 30,
+        step: 5,
+        min: 5,
+        max: 50,
+        serving: 20,
+        perServing: { kcal: 82, p: 1, c: 16, f: 2 },
+        isMixin: true
       }
     ]
   };
@@ -7648,16 +7723,54 @@
     showToast(`✨ Saved personal recipe "${name}" and added ${parsedIngs.length} required ingredients to your pantry!`);
   }
 
-  function deleteCustomRecipe(recipeId) {
-    if (!currentUser) return;
+  async function deleteCustomRecipe(recipeId) {
+    if (!recipeId) return;
+
+    // Set mutation lock so fetchLatestUserData doesn't overwrite with stale data
+    lastLocalMutationTime = Date.now();
+
+    // Remove from in-memory state
     customRecipesState = customRecipesState.filter(r => r.id !== recipeId);
-    saveCustomRecipes();
+
+    // Save to user localStorage
+    if (currentUser && currentUser.id) {
+      const userCustomKey = `${CUSTOM_RECIPES_STORAGE_KEY}_${currentUser.id}`;
+      localStorage.setItem(userCustomKey, JSON.stringify(customRecipesState));
+    }
+
+    // Refresh UI & pantry
+    mergeRecipes();
+    calculateIngredientUsage();
     closeRecipeModal();
     updateAuthUI();
     renderPantryList();
     renderRecipes();
     updateStats();
     showToast('🗑️ Personal custom recipe deleted.');
+
+    // Immediate server deletion call
+    if (currentUser && (currentUser.token || currentUser.email)) {
+      try {
+        await fetch('/api/recipe/custom/delete', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': currentUser.token ? `Bearer ${currentUser.token}` : '',
+            'X-User-Email': currentUser.email || ''
+          },
+          body: JSON.stringify({
+            token: currentUser.token || '',
+            email: currentUser.email || '',
+            recipeId: recipeId
+          })
+        });
+      } catch (err) {
+        console.warn('Dedicated recipe delete API call error:', err);
+      }
+
+      // Flush full cloud sync immediately
+      triggerCloudSync(true);
+    }
   }
 
   // --- Theme Toggle ---

@@ -903,6 +903,11 @@ const INGREDIENTS_MASTER = [
       "category": "mixins_snacks"
   }  ,
 {
+      "id": "cinnamon_toast_crunch",
+      "name": "Cinnamon Toast Crunch",
+      "category": "mixins_snacks"
+  }  ,
+{
       "id": "coconut_water",
       "name": "Coconut Water",
       "category": "beverages_drinks"
