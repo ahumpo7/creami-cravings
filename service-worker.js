@@ -1,5 +1,5 @@
 // Creami Cravings Service Worker (Roadmap Items 11 & 17 & 19)
-const CACHE_NAME = 'creami-cravings-v1.6';
+const CACHE_NAME = 'creami-cravings-v1.7';
 
 const PRECACHE_ASSETS = [
   '/',

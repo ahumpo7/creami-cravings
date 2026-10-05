@@ -1369,24 +1369,13 @@
   }
 
   // --- Modal Scroll & Overscroll Containment Helpers ---
-  let savedScrollY = 0;
   let isScrollLocked = false;
 
   function lockBackgroundScroll() {
     if (isScrollLocked) return;
-    savedScrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
     isScrollLocked = true;
-
     document.documentElement.classList.add('modal-open');
     document.body.classList.add('modal-open');
-    document.documentElement.style.overflow = 'hidden';
-    document.documentElement.style.height = '100%';
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${savedScrollY}px`;
-    document.body.style.left = '0';
-    document.body.style.right = '0';
-    document.body.style.width = '100%';
-    document.body.style.overflow = 'hidden';
   }
 
   function unlockBackgroundScroll() {
@@ -1395,18 +1384,8 @@
       if (activeModals.length > 0) return;
       if (!isScrollLocked) return;
       isScrollLocked = false;
-
       document.documentElement.classList.remove('modal-open');
       document.body.classList.remove('modal-open');
-      document.documentElement.style.overflow = '';
-      document.documentElement.style.height = '';
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.left = '';
-      document.body.style.right = '';
-      document.body.style.width = '';
-      document.body.style.overflow = '';
-      window.scrollTo(0, savedScrollY);
     });
   }
 
@@ -1705,7 +1684,7 @@
   function renderPantryList() {
     if (!ingredientListContainer || typeof INGREDIENTS_MASTER === 'undefined') return;
 
-    ingredientListContainer.innerHTML = '';
+    ingredientListContainer.replaceChildren();
     const q = ingredientSearchQuery.toLowerCase().trim();
 
     // Group items by category
@@ -1720,6 +1699,7 @@
     });
 
     let renderedAny = false;
+    const fragment = document.createDocumentFragment();
 
     Object.entries(INGREDIENT_CATEGORIES).forEach(([catKey, catLabel]) => {
       const items = grouped[catKey] || [];
@@ -1730,8 +1710,19 @@
       groupEl.className = 'category-group open';
 
       const inStockInCat = items.filter(it => pantryState.has(it.id)).length;
-
       const catIcon = CATEGORY_ICONS[catKey] || '📦';
+
+      const itemsHtml = items.map(item => {
+        const isChecked = pantryState.has(item.id);
+        const count = ingredientRecipeCount[item.id] || 0;
+        return `
+          <div class="ingredient-checkbox-item ${isChecked ? 'checked' : ''}" data-id="${item.id}">
+            <div class="custom-checkbox"></div>
+            <span class="ingredient-name-text">${item.name}</span>
+            ${count > 0 ? `<span class="ingredient-recipe-count" title="Used in ${count} recipes">${count}</span>` : ''}
+          </div>
+        `;
+      }).join('');
 
       groupEl.innerHTML = `
         <div class="category-header">
@@ -1744,42 +1735,15 @@
             <span class="category-chevron">▼</span>
           </div>
         </div>
-        <div class="category-items-list"></div>
+        <div class="category-items-list">${itemsHtml}</div>
       `;
 
-      const headerEl = groupEl.querySelector('.category-header');
-      headerEl.addEventListener('click', () => {
-        groupEl.classList.toggle('open');
-      });
-
-      const listEl = groupEl.querySelector('.category-items-list');
-
-      items.forEach(item => {
-        const isChecked = pantryState.has(item.id);
-        const count = ingredientRecipeCount[item.id] || 0;
-
-        const row = document.createElement('div');
-        row.className = `ingredient-checkbox-item ${isChecked ? 'checked' : ''}`;
-        row.dataset.id = item.id;
-
-        row.innerHTML = `
-          <div class="custom-checkbox"></div>
-          <span class="ingredient-name-text">${item.name}</span>
-          ${count > 0 ? `<span class="ingredient-recipe-count" title="Used in ${count} recipes">${count}</span>` : ''}
-        `;
-
-        row.addEventListener('click', (e) => {
-          e.stopPropagation();
-          togglePantryItem(item.id);
-        });
-
-        listEl.appendChild(row);
-      });
-
-      ingredientListContainer.appendChild(groupEl);
+      fragment.appendChild(groupEl);
     });
 
-    if (!renderedAny) {
+    if (renderedAny) {
+      ingredientListContainer.appendChild(fragment);
+    } else {
       ingredientListContainer.innerHTML = `
         <div style="padding: 24px 10px; text-align: center; color: var(--text-dim); font-size: 0.88rem;">
           No ingredients match "${ingredientSearchQuery}"
@@ -7505,6 +7469,22 @@
 
   // --- Event Bindings ---
   function bindEvents() {
+    // Delegated click listener for Pantry items and category headers
+    if (ingredientListContainer) {
+      ingredientListContainer.addEventListener('click', (e) => {
+        const row = e.target.closest('.ingredient-checkbox-item');
+        if (row && row.dataset.id) {
+          togglePantryItem(row.dataset.id);
+          return;
+        }
+        const header = e.target.closest('.category-header');
+        if (header) {
+          const group = header.closest('.category-group');
+          if (group) group.classList.toggle('open');
+        }
+      });
+    }
+
     // Ingredient Search
     if (ingredientSearch) {
       ingredientSearch.addEventListener('input', (e) => {

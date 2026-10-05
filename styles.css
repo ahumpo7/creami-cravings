@@ -141,6 +141,7 @@ body::before {
   background-image: var(--bg-gradient);
   pointer-events: none;
   z-index: -1;
+  transform: translateZ(0);
 }
 
 /* Custom Smooth Scrollbar */
@@ -1006,8 +1007,6 @@ body::before {
   max-width: 100%;
   min-width: 0;
   box-sizing: border-box;
-  content-visibility: auto;
-  contain-intrinsic-size: auto none auto 380px;
 }
 
 .recipe-card > div:first-child,
@@ -1404,17 +1403,10 @@ body::before {
 }
 
 /* Modals & Scroll Containment */
-html.modal-open {
-  overflow: hidden !important;
-  height: 100% !important;
-  overscroll-behavior: none !important;
-}
-
+html.modal-open,
 body.modal-open {
   overflow: hidden !important;
-  height: 100% !important;
-  overscroll-behavior: none !important;
-  touch-action: none !important;
+  overscroll-behavior: contain !important;
 }
 
 .modal-overlay {
@@ -1423,8 +1415,7 @@ body.modal-open {
   width: 100%;
   height: 100%;
   height: 100dvh;
-  background: var(--bg-modal-overlay);
-  backdrop-filter: blur(8px);
+  background: rgba(6, 8, 14, 0.88);
   z-index: 10000;
   display: flex;
   align-items: center;
@@ -1432,7 +1423,7 @@ body.modal-open {
   padding: 20px;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.25s ease;
+  transition: opacity 0.2s ease;
   overscroll-behavior: none;
 }
 
