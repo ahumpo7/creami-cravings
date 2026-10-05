@@ -123,7 +123,22 @@
     reeses_pb_cups: ['mini_reeses_pb_cups', 'peanut_butter_cups'],
     peanut_butter_cups: ['reeses_pb_cups', 'mini_reeses_pb_cups'],
     toasted_mini_marshmallows: ['mini_marshmallows'],
-    mini_marshmallows: ['toasted_mini_marshmallows']
+    mini_marshmallows: ['toasted_mini_marshmallows'],
+    lime: ['lime_juice'],
+    lime_juice: ['lime'],
+    plain_greek_yogurt: ['nonfat_greek_yogurt'],
+    nonfat_greek_yogurt: ['plain_greek_yogurt'],
+    graham_crackers: ['graham_cracker'],
+    graham_cracker: ['graham_crackers'],
+    mini_chocolate_chips: ['chocolate_chips', 'dark_chocolate_chips', 'sugar_free_chocolate_chips'],
+    chocolate_chips: ['mini_chocolate_chips'],
+    blueberries: ['frozen_blueberries'],
+    frozen_blueberries: ['blueberries'],
+    light_coconut_milk: ['unsweetened_coconut_milk'],
+    unsweetened_coconut_milk: ['light_coconut_milk'],
+    light_cream_cheese: ['whipped_cream_cheese'],
+    whipped_cream_cheese: ['light_cream_cheese'],
+    chocolate_protein_powder: ['chocolate_protein_shake', 'vanilla_protein_powder']
   };
 
   const CATEGORY_ICONS = {
@@ -602,6 +617,11 @@
     if (savedPantry !== null) {
       try {
         pantryState = new Set(JSON.parse(savedPantry));
+        // If the user had previously selected all ingredients, keep newly introduced pantry items checked
+        if (typeof INGREDIENTS_MASTER !== 'undefined' && pantryState.size >= 150) {
+          INGREDIENTS_MASTER.forEach(i => pantryState.add(i.id));
+          localStorage.setItem(key, JSON.stringify(Array.from(pantryState)));
+        }
       } catch (e) {
         pantryState = new Set(DEFAULT_STAPLES);
       }

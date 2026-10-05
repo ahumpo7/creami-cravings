@@ -951,6 +951,46 @@ const INGREDIENTS_MASTER = [
       "id": "wafer_cookies",
       "name": "Crispy Wafer Cookies",
       "category": "mixins_snacks"
+  },
+  {
+      "id": "almond_milk",
+      "name": "Unsweetened Almond Milk",
+      "category": "dairy_liquids"
+  },
+  {
+      "id": "blueberries",
+      "name": "Fresh Blueberries",
+      "category": "produce_fruit"
+  },
+  {
+      "id": "chocolate_protein_powder",
+      "name": "Chocolate Protein Powder",
+      "category": "protein_powders"
+  },
+  {
+      "id": "granola",
+      "name": "Granola",
+      "category": "mixins_snacks"
+  },
+  {
+      "id": "light_cream_cheese",
+      "name": "Light Cream Cheese",
+      "category": "dairy_liquids"
+  },
+  {
+      "id": "mini_chocolate_chips",
+      "name": "Mini Semi-Sweet Chocolate Chips",
+      "category": "mixins_snacks"
+  },
+  {
+      "id": "oat_milk",
+      "name": "Barista Oat Milk",
+      "category": "dairy_liquids"
+  },
+  {
+      "id": "shredded_coconut",
+      "name": "Shredded Coconut",
+      "category": "mixins_snacks"
   }
 ];
 
@@ -18985,7 +19025,7 @@ const RECIPES_MASTER = [
               "notes": ""
           },
           {
-              "id": "lime",
+              "id": "lime_juice",
               "name": "Fresh Lime Juice",
               "quantity": "15",
               "unit": "ml",
@@ -19079,7 +19119,7 @@ const RECIPES_MASTER = [
               "notes": ""
           },
           {
-              "id": "plain_greek_yogurt",
+              "id": "nonfat_greek_yogurt",
               "name": "Nonfat Plain Greek Yogurt",
               "quantity": "100",
               "unit": "g",
@@ -19129,7 +19169,7 @@ const RECIPES_MASTER = [
               "notes": ""
           },
           {
-              "id": "graham_crackers",
+              "id": "graham_cracker",
               "name": "Graham Crackers",
               "quantity": "15",
               "unit": "g",
@@ -19473,7 +19513,7 @@ const RECIPES_MASTER = [
       "proTip": "Toast shredded unsweetened coconut in a dry skillet on medium heat for 2\u20133 minutes until fragrant and golden before adding as mix-in.",
       "ingredients": [
           {
-              "id": "light_coconut_milk",
+              "id": "unsweetened_coconut_milk",
               "name": "Light Canned Coconut Milk",
               "quantity": "200",
               "unit": "g",
