@@ -1119,6 +1119,9 @@
       token: data.token || (currentUser ? currentUser.token : '')
     };
     saveUserAuth();
+    trackAnalyticsEvent('login', {
+      method: 'google'
+    });
 
     // 1. Restore & switch to authenticated user's pantry (STRICT ISOLATION - do not merge with guest session!)
     if (data.user && Array.isArray(data.user.pantry)) {
@@ -1483,6 +1486,10 @@
     if (delta > 0) {
       playAudioSuccess();
       triggerHaptic(25);
+      trackAnalyticsEvent('spin_recipe', {
+        recipe_id: recipeId,
+        new_batch_count: newCount
+      });
     }
 
     // Optimistic community update
@@ -1552,6 +1559,10 @@
       userRecipeData[recipeId].notes = notes;
     }
     saveUserRecipeData();
+    trackAnalyticsEvent('rate_recipe', {
+      recipe_id: recipeId,
+      rating: rating
+    });
 
     try {
       const res = await fetch('/api/user/rate', {
@@ -2394,9 +2405,11 @@
     if (!isNowFav) {
       favoritesState.delete(recipeId);
       showToast('Removed from favorites');
+      trackAnalyticsEvent('remove_from_wishlist', { item_id: recipeId });
     } else {
       favoritesState.add(recipeId);
       showToast('💖 Added to favorites!');
+      trackAnalyticsEvent('add_to_wishlist', { item_id: recipeId });
     }
     saveFavorites();
 
@@ -3525,6 +3538,10 @@
 
     freezerPintsState.unshift(newPint);
     saveFreezerPints();
+    trackAnalyticsEvent('create_freezer_pint', {
+      recipe_name: newPint.recipeName,
+      size_label: newPint.sizeLabel
+    });
     renderFreezerModal();
     toggleFreezerAddForm(false);
 
@@ -4334,6 +4351,15 @@
     recipeModalOverlay.classList.add('active');
     recipeModalOverlay.setAttribute('aria-hidden', 'false');
     lockBackgroundScroll();
+
+    if (recipe) {
+      trackAnalyticsEvent('view_item', {
+        item_id: recipe.id,
+        item_name: recipe.title || recipe.name,
+        item_category: recipe.category,
+        is_roulette: Boolean(isRoulettePick)
+      });
+    }
   }
 
   function renderRecipeModalContent(recipe) {
@@ -8701,6 +8727,17 @@
 
     closeBackupModal();
     showToast('Kitchen data reset to factory defaults.');
+  }
+
+  // --- Google Analytics 4 Event Dispatcher ---
+  function trackAnalyticsEvent(eventName, params = {}) {
+    try {
+      if (typeof window.gtag === 'function') {
+        window.gtag('event', eventName, params);
+      }
+    } catch (err) {
+      console.warn('Analytics event dispatch warning:', err);
+    }
   }
 
   // --- Cookie Consent & Google Consent Mode v2 Engine ---

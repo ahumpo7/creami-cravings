@@ -26,13 +26,13 @@
     function gtag(){dataLayer.push(arguments);}
     (function() {
       const saved = localStorage.getItem('creami_cookie_consent_v1');
-      let analyticsConsent = 'denied';
+      let analyticsConsent = 'granted';
       let adsConsent = 'denied';
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
-          if (parsed.analytics) analyticsConsent = 'granted';
-          if (parsed.marketing) adsConsent = 'granted';
+          analyticsConsent = parsed.analytics ? 'granted' : 'denied';
+          adsConsent = parsed.marketing ? 'granted' : 'denied';
         } catch (e) {}
       }
       gtag('consent', 'default', {
@@ -43,6 +43,15 @@
         'wait_for_update': 500
       });
     })();
+  </script>
+
+  <!-- Google Analytics 4 (GA4) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-VQRZ2XGM03"></script>
+  <script>
+    gtag('js', new Date());
+    gtag('config', 'G-VQRZ2XGM03', {
+      anonymize_ip: true
+    });
   </script>
 
   <script>
