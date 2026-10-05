@@ -501,6 +501,7 @@
     updateSoundUI();
     renderRecipes();
     fetchCommunityStats();
+    fetchServerConfig();
     initGoogleAuth();
     populateFreezerRecipeDatalist();
     updateFreezerBadges();
@@ -942,11 +943,29 @@
   }
 
   // --- Google Identity Services & Auth Handlers ---
+  let GOOGLE_CLIENT_ID = '547238002283-f4t0s8qto34ef86sah16q71csg8797vo.apps.googleusercontent.com';
+
+  async function fetchServerConfig() {
+    try {
+      const res = await fetch('/api/config');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.googleClientId && data.googleClientId.trim()) {
+          GOOGLE_CLIENT_ID = data.googleClientId.trim();
+          initGoogleAuth();
+        }
+      }
+    } catch (e) {
+      // Offline or static host: continue with client-side configuration
+    }
+  }
+
   function initGoogleAuth() {
     if (window.google && window.google.accounts && window.google.accounts.id) {
       try {
+        const isLight = document.documentElement.getAttribute('data-theme') === 'light';
         window.google.accounts.id.initialize({
-          client_id: '992837461234-creamicravings.apps.googleusercontent.com',
+          client_id: GOOGLE_CLIENT_ID,
           callback: handleGoogleCredentialResponse,
           auto_select: false,
           cancel_on_tap_outside: true
@@ -955,19 +974,30 @@
         const gsiContainer = document.getElementById('gsiButtonContainer');
         if (gsiContainer) {
           gsiContainer.innerHTML = '';
+          const btnWidth = Math.min(300, Math.max(220, window.innerWidth - 64));
           window.google.accounts.id.renderButton(gsiContainer, {
-            theme: 'outline',
+            theme: isLight ? 'outline' : 'filled_black',
             size: 'large',
             shape: 'pill',
             text: 'signin_with',
-            width: 280
+            width: btnWidth
           });
+        }
+
+        // Trigger Google One-Tap prompt if not signed in and using a configured production client ID
+        if (!currentUser && GOOGLE_CLIENT_ID && !GOOGLE_CLIENT_ID.startsWith('992837461234')) {
+          window.google.accounts.id.prompt();
         }
       } catch (err) {
         console.warn('Google Identity Services init notice:', err);
       }
     }
   }
+
+  // Hook global library callback for asynchronous script load
+  window.onGoogleLibraryLoad = function() {
+    initGoogleAuth();
+  };
 
   async function handleGoogleCredentialResponse(response) {
     if (!response || !response.credential) return;
@@ -7067,6 +7097,7 @@
     document.documentElement.setAttribute('data-theme', next);
     localStorage.setItem(THEME_STORAGE_KEY, next);
     updateThemeUI();
+    initGoogleAuth();
   }
 
   function updateThemeUI() {

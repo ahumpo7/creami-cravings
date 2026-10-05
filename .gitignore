@@ -19,3 +19,8 @@ recipe index/*.pdf
 
 # Local scratch files
 scratch*
+
+# Local environment variables & secrets
+.env
+.env.*
+!.env.example

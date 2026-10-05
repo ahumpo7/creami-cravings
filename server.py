@@ -8,8 +8,26 @@ import urllib.request
 import base64
 from datetime import datetime
 
-PORT = int(os.environ.get('PORT', 8000))
 DIRECTORY = os.path.dirname(os.path.abspath(__file__))
+
+# Auto-load .env file if present in DIRECTORY
+env_file = os.path.join(DIRECTORY, '.env')
+if os.path.exists(env_file):
+    try:
+        with open(env_file, 'r', encoding='utf-8') as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith('#') and '=' in line:
+                    k, v = line.split('=', 1)
+                    k = k.strip()
+                    v = v.strip().strip('"\'')
+                    if k and k not in os.environ:
+                        os.environ[k] = v
+    except Exception as e:
+        print(f"Notice: Could not parse .env file: {e}")
+
+PORT = int(os.environ.get('PORT', 8000))
+GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '').strip()
 USERS_DB_FILE = os.path.join(DIRECTORY, 'db_users.json')
 RATINGS_DB_FILE = os.path.join(DIRECTORY, 'db_ratings.json')
 STATS_DB_FILE = os.path.join(DIRECTORY, 'db_recipe_stats.json')
@@ -33,6 +51,7 @@ ADMIN_EMAILS = [
         'admin@creamicravings.com,ahumpo7@gmail.com,ahumpo@gmail.com,andrew@gmail.com'
     ).split(',') if e.strip()
 ]
+
 
 def load_json_file(filepath, default):
     if os.path.exists(filepath):
@@ -206,7 +225,13 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
         return None
 
     def do_GET(self):
-        if self.path == '/api/community/stats' or self.path == '/api/community/ratings':
+        if self.path == '/api/config':
+            self._send_json({
+                'status': 'ok',
+                'googleClientId': GOOGLE_CLIENT_ID
+            })
+
+        elif self.path == '/api/community/stats' or self.path == '/api/community/ratings':
             self._send_json(compute_community_stats())
 
         elif self.path == '/api/user/data':

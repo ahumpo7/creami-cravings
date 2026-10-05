@@ -6,10 +6,10 @@ A prioritized checklist of fixes, features, and refinements for the Creami Cravi
 
 ## 📌 Original Refinements (The 7-Item List)
 
-### 1. Finish Google Sign-In
-- [ ] **Google OAuth Client ID:** Replace placeholder client ID (`992837461234-...`) in `app.js` with a production Google Cloud Console OAuth 2.0 Client ID.
-- [ ] **Authorized JavaScript Origins:** Configure `http://localhost:8000`, `http://127.0.0.1:8000`, and your live Render domain (`https://creami-cravings.onrender.com`) in the Google Cloud Console.
-- [ ] **Seamless Sign-In Experience:** Ensure Google One-Tap and the header sign-in button work smoothly across desktop and mobile browsers, falling back gracefully to email sign-in.
+### 1. Finish Google Sign-In (Completed ✅)
+- [x] **Google OAuth Client ID:** Replaced placeholder client ID with production Google Cloud Console OAuth 2.0 Client ID (`547238002283-f4t0s8qto34ef86sah16q71csg8797vo.apps.googleusercontent.com`) in `.env` and `app.js`.
+- [x] **Authorized JavaScript Origins:** Configured `http://localhost:8000`, `http://127.0.0.1:8000`, and live Render domain (`https://creami-cravings.onrender.com`) in the Google Cloud Console.
+- [x] **Seamless Sign-In Experience:** Enabled dynamic client ID loading via `/api/config`, Google One-Tap (`prompt()`), theme-aware button rendering, and automatic asynchronous library loading fallback.
 
 ### 2. Move Favorites Behind Login (Completed ✅)
 - [x] **Require Authentication:** When an unauthenticated / guest user clicks the favorite heart button on a recipe card, prompt them to sign in instead of saving locally.
@@ -210,7 +210,7 @@ A prioritized checklist of fixes, features, and refinements for the Creami Cravi
 | :---: | :--- | :--- | :--- | :---: |
 | **Step 5** | **Item 19: 🛡️ Store Compliance & 1-Tap PWA Install** | Compliance `/privacy.html` (mandatory for Play Store), `/terms.html`, trademark disclaimers, and 1-tap `📲 Install App` prompt. | 🟢 ~15–20 mins | ✅ **Done** |
 | **Step 6** | **Item 20: 🔊 Audio, Haptics & Local Data Backup** | Web Audio slot sounds/timer chimes, mobile haptics, and JSON export/import for disaster recovery. | 🟢 ~20–25 mins | ✅ **Done** |
-| **Step 7** | **Item 1: 🔑 Finish Google Sign-In** | Configure production Google Cloud Console OAuth 2.0 Client ID and authorized origins. *(Authentication backbone)* | ⚪ External Credential | ⏳ **Next** |
+| **Step 7** | **Item 1: 🔑 Finish Google Sign-In** | Production Google Cloud Console OAuth 2.0 Client ID configured in `.env` and `app.js` with One-Tap and theme matching. | ⚪ Completed | ✅ **Done** |
 | **Step 8** | **Item 14: 🤖 Google Play Store Android App (Bubblewrap)** | Generate signed `.aab` bundle, deploy `assetlinks.json`, generate $1024\times500$ banner and $512\times512$ store icon. | 🟠 ~30–45 mins | ⏳ **Final** |
 
 
