@@ -1327,7 +1327,7 @@
   function setupModalScrollLock(overlay) {
     if (!overlay) return;
 
-    // Prevent background scrolling via wheel
+    // Prevent background scrolling via wheel outside modal
     overlay.addEventListener('wheel', (e) => {
       if (!overlay.classList.contains('active')) return;
 
@@ -1335,57 +1335,21 @@
       // If wheel event occurs directly on the backdrop or outside modal content
       if (!content || !content.contains(e.target) || e.target === overlay) {
         e.preventDefault();
-        return;
-      }
-
-      // If content has no internal scrollable overflow
-      const canScroll = content.scrollHeight > (content.clientHeight + 4);
-      if (!canScroll) {
-        e.preventDefault();
-        return;
-      }
-
-      // If content can scroll, prevent overscroll chaining at top or bottom limits
-      const isAtTop = content.scrollTop <= 0 && e.deltaY < 0;
-      const isAtBottom = (content.scrollTop + content.clientHeight >= content.scrollHeight - 2) && e.deltaY > 0;
-      if (isAtTop || isAtBottom) {
-        e.preventDefault();
       }
     }, { passive: false });
 
-    // Prevent touch-drag background scrolling on mobile
-    let touchStartY = 0;
-    overlay.addEventListener('touchstart', (e) => {
-      if (e.touches && e.touches.length > 0) {
-        touchStartY = e.touches[0].clientY;
-      }
-    }, { passive: true });
-
+    // Prevent touch-drag background scrolling on mobile when dragging backdrop
     overlay.addEventListener('touchmove', (e) => {
       if (!overlay.classList.contains('active')) return;
 
       const content = overlay.querySelector('.modal-content');
+      // Only prevent default if touch is directly on the backdrop outside the modal
       if (!content || !content.contains(e.target) || e.target === overlay) {
-        e.preventDefault();
-        return;
-      }
-
-      const canScroll = content.scrollHeight > (content.clientHeight + 4);
-      if (!canScroll) {
-        e.preventDefault();
-        return;
-      }
-
-      const currentY = e.touches && e.touches.length > 0 ? e.touches[0].clientY : 0;
-      const deltaY = touchStartY - currentY; // positive = scrolling down
-
-      const isAtTop = content.scrollTop <= 0 && deltaY < 0;
-      const isAtBottom = (content.scrollTop + content.clientHeight >= content.scrollHeight - 2) && deltaY > 0;
-      if (isAtTop || isAtBottom) {
         e.preventDefault();
       }
     }, { passive: false });
   }
+
 
   function openGoogleAuthModal() {
     const modal = document.getElementById('googleAuthModalOverlay');

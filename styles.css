@@ -6700,9 +6700,6 @@ body.modal-open .cookie-consent-banner {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  max-height: 520px;
-  overflow-y: auto;
-  padding-right: 4px;
 }
 
 .admin-user-card {
@@ -6900,6 +6897,175 @@ body.modal-open .cookie-consent-banner {
 .btn-admin-del-user:hover {
   background: rgba(239, 68, 68, 0.25);
   border-color: #ef4444;
+}
+
+/* ==========================================================================
+   Admin Portal Responsive & Mobile Touch Scrolling Optimization
+   ========================================================================== */
+@media (max-width: 640px) {
+  .admin-modal-content {
+    max-height: 90dvh !important;
+    max-height: calc(100dvh - 20px) !important;
+    padding: 16px 14px max(36px, calc(24px + env(safe-area-inset-bottom, 0px))) !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior-y: contain;
+  }
+
+  .admin-title-row {
+    gap: 10px;
+  }
+
+  .admin-icon-badge {
+    width: 38px;
+    height: 38px;
+    font-size: 1.4rem;
+  }
+
+  .admin-stats-row {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
+    margin-bottom: 14px !important;
+  }
+
+  .admin-stat-card {
+    padding: 10px 4px !important;
+  }
+
+  .admin-stat-num {
+    font-size: 1.25rem !important;
+  }
+
+  .admin-stat-label {
+    font-size: 0.62rem !important;
+    letter-spacing: 0.02em;
+  }
+
+  .admin-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .admin-search-wrap {
+    min-width: 100%;
+    width: 100%;
+  }
+
+  .admin-search-input {
+    font-size: 16px !important; /* Prevents iOS Safari auto-zoom */
+    padding: 10px 12px;
+  }
+
+  .admin-filter-pills {
+    display: flex;
+    width: 100%;
+    gap: 6px;
+  }
+
+  .admin-filter-pills .btn-time-preset {
+    flex: 1;
+    text-align: center;
+    padding: 7px 4px;
+    font-size: 0.74rem;
+  }
+
+  #adminRefreshUsersBtn {
+    width: 100%;
+    padding: 8px;
+    font-size: 0.82rem;
+  }
+
+  .admin-users-list {
+    max-height: none !important;
+    overflow: visible !important;
+    padding-right: 0 !important;
+    padding-bottom: 24px;
+    gap: 12px;
+  }
+
+  .admin-user-card {
+    padding: 14px 12px;
+    gap: 12px;
+  }
+
+  .admin-user-top {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .admin-user-info-cluster {
+    width: 100%;
+    gap: 10px;
+  }
+
+  .admin-user-avatar,
+  .admin-user-avatar-initials {
+    width: 38px;
+    height: 38px;
+    font-size: 0.95rem;
+    flex-shrink: 0;
+  }
+
+  .admin-user-name {
+    font-size: 0.95rem;
+    word-break: break-word;
+  }
+
+  .admin-user-email {
+    font-size: 0.76rem;
+    word-break: break-all;
+  }
+
+  .admin-user-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .admin-user-actions .btn-role-toggle {
+    flex: 1;
+    text-align: center;
+    padding: 8px 10px;
+    font-size: 0.76rem;
+    min-height: 38px;
+  }
+
+  .admin-user-actions .btn-admin-del-user {
+    padding: 8px 12px;
+    min-height: 38px;
+  }
+
+  .admin-user-stats-strip {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px 10px;
+    font-size: 0.72rem;
+    padding: 8px 10px;
+  }
+
+  .admin-subs-section {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .admin-subs-chips-wrap {
+    width: 100%;
+    gap: 6px;
+  }
+
+  .btn-sub-chip {
+    font-size: 0.72rem;
+    padding: 6px 10px;
+    min-height: 34px;
+    display: inline-flex;
+    align-items: center;
+  }
 }
 
 /* --- Header Sound Toggle & PWA Install Button (Roadmap Items 19 & 20) --- */
