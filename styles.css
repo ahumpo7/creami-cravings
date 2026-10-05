@@ -4019,6 +4019,24 @@ body.modal-open .cookie-consent-banner {
     display: inline;
   }
 
+  .btn-install-text-desktop {
+    display: none !important;
+  }
+
+  .btn-install-text-mobile {
+    display: inline !important;
+  }
+
+  .btn-install-pwa {
+    padding: 6px 11px;
+    font-size: 0.78rem;
+  }
+
+  .install-platform-tabs {
+    flex-direction: column;
+    gap: 6px;
+  }
+
   .btn-header-icon,
   .btn-sound-toggle,
   .theme-toggle-btn {
@@ -7100,6 +7118,14 @@ body.modal-open .cookie-consent-banner {
   box-shadow: 0 4px 18px rgba(236, 72, 153, 0.65);
 }
 
+.btn-install-text-desktop {
+  display: inline;
+}
+
+.btn-install-text-mobile {
+  display: none;
+}
+
 /* --- App Footer (Roadmap Item 19) --- */
 .app-footer {
   margin-top: 48px;
@@ -7275,6 +7301,49 @@ body.modal-open .cookie-consent-banner {
   font-size: 0.92rem;
   color: var(--text-main);
   line-height: 1.45;
+}
+
+/* --- Universal Install Guide Modal Tabs --- */
+.install-platform-tabs {
+  display: flex;
+  gap: 8px;
+  background: var(--bg-item);
+  padding: 5px;
+  border-radius: var(--radius-sm);
+  margin: 16px 0 20px;
+  border: 1px solid var(--border-glass);
+}
+
+.install-tab-btn {
+  flex: 1;
+  padding: 9px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.install-tab-btn:hover {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.install-tab-btn.active {
+  background: var(--primary);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(236, 72, 153, 0.35);
+}
+
+.install-steps-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 10px 0 20px;
 }
 
 /* --- Cookie & Analytics Consent Banner (Google Consent Mode v2 Ready) --- */

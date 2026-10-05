@@ -101,8 +101,9 @@
           </button>
 
           <!-- 1-Tap PWA Install Button (Roadmap Item 19) -->
-          <button id="btnInstallPwa" class="btn-install-pwa" style="display: none;" title="Install Creami Cravings on this Device">
-            📲 Install App
+          <button id="btnInstallPwa" class="btn-install-pwa" title="Install Creami Cravings on this Device">
+            <span class="btn-install-text-desktop">📲 Install App</span>
+            <span class="btn-install-text-mobile">📲 Install</span>
           </button>
 
           <!-- Admin Portal Header Button (Roadmap Item 15) -->
@@ -1276,29 +1277,71 @@
     </div>
   </div>
 
-  <!-- iOS Safari Install Guide Modal (Roadmap Item 19) -->
+  <!-- Universal PWA Install Guide Modal (Roadmap Item 19) -->
   <div class="modal-overlay" id="iosInstallModalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
-    <div class="modal-content">
+    <div class="modal-content modal-content-install">
       <div class="modal-handle-bar" aria-hidden="true"></div>
       <button class="modal-close" id="iosInstallModalCloseBtn" aria-label="Close modal">&times;</button>
       <div class="modal-header">
-        <h2 class="modal-title">📲 Install Creami Cravings on iOS</h2>
-        <p class="modal-subtitle">Add the app directly to your iPhone or iPad home screen for an ultra-fast, fullscreen offline experience without the App Store.</p>
+        <h2 class="modal-title" id="installModalTitle">📲 Install Creami Cravings</h2>
+        <p class="modal-subtitle">Add the app directly to your home screen or desktop for an ultra-fast, fullscreen offline experience without an app store.</p>
       </div>
-      <div class="ios-install-steps">
+
+      <!-- Platform Selector Tabs -->
+      <div class="install-platform-tabs" role="tablist">
+        <button type="button" class="install-tab-btn active" data-platform="ios" id="tabInstallIos">🍎 iPhone / iPad</button>
+        <button type="button" class="install-tab-btn" data-platform="android" id="tabInstallAndroid">🤖 Android</button>
+        <button type="button" class="install-tab-btn" data-platform="desktop" id="tabInstallDesktop">💻 Desktop (PC / Mac)</button>
+      </div>
+
+      <!-- iOS Steps -->
+      <div class="install-steps-pane" id="paneInstallIos">
         <div class="ios-step-card">
           <div class="ios-step-num">1</div>
-          <div class="ios-step-text">Tap the <strong>Share</strong> button at the bottom of Safari (the square icon with the arrow pointing up 📤).</div>
+          <div class="ios-step-text">Tap the <strong>Share</strong> button at the bottom of Safari (the square icon with the upward arrow 📤).</div>
         </div>
         <div class="ios-step-card">
           <div class="ios-step-num">2</div>
-          <div class="ios-step-text">Scroll down the share sheet and select <strong>"Add to Home Screen"</strong> (➕).</div>
+          <div class="ios-step-text">Scroll down the share sheet and tap <strong>"Add to Home Screen"</strong> (➕).</div>
         </div>
         <div class="ios-step-card">
           <div class="ios-step-num">3</div>
-          <div class="ios-step-text">Tap <strong>"Add"</strong> in the top-right corner. The Creami Cravings icon will now launch fullscreen like a native app!</div>
+          <div class="ios-step-text">Tap <strong>"Add"</strong> in the top-right corner. Creami Cravings will now launch fullscreen directly from your home screen!</div>
         </div>
       </div>
+
+      <!-- Android Steps -->
+      <div class="install-steps-pane" id="paneInstallAndroid" style="display: none;">
+        <div class="ios-step-card">
+          <div class="ios-step-num">1</div>
+          <div class="ios-step-text">Tap the <strong>three dots menu (⋮)</strong> in the top-right corner of Chrome or Samsung Internet.</div>
+        </div>
+        <div class="ios-step-card">
+          <div class="ios-step-num">2</div>
+          <div class="ios-step-text">Tap <strong>"Install app"</strong> or <strong>"Add to Home screen"</strong> from the menu list.</div>
+        </div>
+        <div class="ios-step-card">
+          <div class="ios-step-num">3</div>
+          <div class="ios-step-text">Confirm by tapping <strong>"Install"</strong>. The app icon will appear on your home screen and in your app drawer!</div>
+        </div>
+      </div>
+
+      <!-- Desktop Steps -->
+      <div class="install-steps-pane" id="paneInstallDesktop" style="display: none;">
+        <div class="ios-step-card">
+          <div class="ios-step-num">1</div>
+          <div class="ios-step-text">In <strong>Chrome, Edge, or Brave</strong>, look at the right side of the address bar (URL bar) for the <strong>Install icon</strong> (💻 or ⤓).</div>
+        </div>
+        <div class="ios-step-card">
+          <div class="ios-step-num">2</div>
+          <div class="ios-step-text">Click the <strong>Install</strong> icon, or click the browser menu (<strong>⋮</strong> / <strong>...</strong>) &rarr; <strong>"Cast, save, and share" / "Apps"</strong> &rarr; <strong>"Install Creami Cravings"</strong>.</div>
+        </div>
+        <div class="ios-step-card">
+          <div class="ios-step-num">3</div>
+          <div class="ios-step-text">Click <strong>"Install"</strong> to launch Creami Cravings in its own fast, dedicated desktop app window!</div>
+        </div>
+      </div>
+
       <div class="modal-footer">
         <button type="button" class="btn-primary" id="btnDismissIosInstall" style="width: 100%;">Got It!</button>
       </div>

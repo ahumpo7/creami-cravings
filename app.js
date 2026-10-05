@@ -8362,14 +8362,15 @@
   // --- 1-Tap PWA Install Engine (Roadmap Item 19) ---
   let deferredPrompt = null;
   const isIosDevice = /iphone|ipad|ipod/i.test(navigator.userAgent || '');
+  const isAndroidDevice = /android/i.test(navigator.userAgent || '');
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 
   function initPwaInstall() {
     const btnInstall = document.getElementById('btnInstallPwa');
     const footerInstall = document.getElementById('footerInstallBtn');
-    const iosModal = document.getElementById('iosInstallModalOverlay');
-    const iosClose = document.getElementById('iosInstallModalCloseBtn');
-    const iosDismiss = document.getElementById('btnDismissIosInstall');
+    const installModal = document.getElementById('iosInstallModalOverlay');
+    const installClose = document.getElementById('iosInstallModalCloseBtn');
+    const installDismiss = document.getElementById('btnDismissIosInstall');
 
     if (isStandalone) {
       if (btnInstall) btnInstall.style.display = 'none';
@@ -8377,9 +8378,9 @@
       return;
     }
 
-    if (isIosDevice) {
-      if (btnInstall) btnInstall.style.display = 'inline-flex';
-    }
+    // Always display install options for standard browser sessions
+    if (btnInstall) btnInstall.style.display = 'inline-flex';
+    if (footerInstall) footerInstall.style.display = 'inline-flex';
 
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
@@ -8394,24 +8395,55 @@
       showToast('🎉 Creami Cravings installed! Enjoy offline cooking.');
     });
 
+    // Tab switching inside the Install Guide Modal
+    const tabButtons = installModal ? installModal.querySelectorAll('.install-tab-btn') : [];
+    const panes = {
+      ios: document.getElementById('paneInstallIos'),
+      android: document.getElementById('paneInstallAndroid'),
+      desktop: document.getElementById('paneInstallDesktop')
+    };
+
+    function switchInstallTab(platform) {
+      tabButtons.forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-platform') === platform);
+      });
+      Object.keys(panes).forEach(p => {
+        if (panes[p]) {
+          panes[p].style.display = (p === platform) ? 'flex' : 'none';
+        }
+      });
+    }
+
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const plat = btn.getAttribute('data-platform');
+        switchInstallTab(plat);
+      });
+    });
+
+    function openInstallModal(defaultPlatform) {
+      if (!installModal) return;
+      const targetPlatform = defaultPlatform || (isIosDevice ? 'ios' : (isAndroidDevice ? 'android' : 'desktop'));
+      switchInstallTab(targetPlatform);
+      installModal.classList.add('active');
+      installModal.setAttribute('aria-hidden', 'false');
+      lockBackgroundScroll();
+    }
+
     function handleInstallTrigger() {
       if (deferredPrompt) {
         deferredPrompt.prompt();
         deferredPrompt.userChoice.then((choiceResult) => {
           if (choiceResult && choiceResult.outcome === 'accepted') {
             showToast('Installing Creami Cravings...');
+            if (btnInstall) btnInstall.style.display = 'none';
           }
           deferredPrompt = null;
-          if (btnInstall) btnInstall.style.display = 'none';
+        }).catch(() => {
+          openInstallModal();
         });
-      } else if (isIosDevice) {
-        if (iosModal) {
-          iosModal.classList.add('active');
-          iosModal.setAttribute('aria-hidden', 'false');
-          lockBackgroundScroll();
-        }
       } else {
-        showToast('💡 Creami Cravings is installable! Click the install/download icon in your browser URL bar.');
+        openInstallModal();
       }
     }
 
@@ -8421,29 +8453,29 @@
     if (footerInstall) {
       footerInstall.addEventListener('click', handleInstallTrigger);
     }
-    if (iosClose) {
-      iosClose.addEventListener('click', () => {
-        if (iosModal) {
-          iosModal.classList.remove('active');
-          iosModal.setAttribute('aria-hidden', 'true');
+    if (installClose) {
+      installClose.addEventListener('click', () => {
+        if (installModal) {
+          installModal.classList.remove('active');
+          installModal.setAttribute('aria-hidden', 'true');
           unlockBackgroundScroll();
         }
       });
     }
-    if (iosDismiss) {
-      iosDismiss.addEventListener('click', () => {
-        if (iosModal) {
-          iosModal.classList.remove('active');
-          iosModal.setAttribute('aria-hidden', 'true');
+    if (installDismiss) {
+      installDismiss.addEventListener('click', () => {
+        if (installModal) {
+          installModal.classList.remove('active');
+          installModal.setAttribute('aria-hidden', 'true');
           unlockBackgroundScroll();
         }
       });
     }
-    if (iosModal) {
-      iosModal.addEventListener('click', (e) => {
-        if (e.target === iosModal) {
-          iosModal.classList.remove('active');
-          iosModal.setAttribute('aria-hidden', 'true');
+    if (installModal) {
+      installModal.addEventListener('click', (e) => {
+        if (e.target === installModal) {
+          installModal.classList.remove('active');
+          installModal.setAttribute('aria-hidden', 'true');
           unlockBackgroundScroll();
         }
       });
