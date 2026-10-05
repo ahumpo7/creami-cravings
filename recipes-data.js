@@ -876,6 +876,82 @@ const INGREDIENTS_MASTER = [
     "name": "Zero Sugar Lemonade",
     "category": "beverages_drinks"
   }
+  ,
+{
+      "id": "acai_puree",
+      "name": "A\u00e7ai Puree",
+      "category": "produce_fruit"
+  }  ,
+{
+      "id": "apple_cider",
+      "name": "Apple Cider",
+      "category": "beverages_drinks"
+  }  ,
+{
+      "id": "chamoy",
+      "name": "Chamoy Sauce",
+      "category": "syrups_sauces"
+  }  ,
+{
+      "id": "chocolate_pudding_mix",
+      "name": "Sugar-Free Chocolate Pudding Mix",
+      "category": "pudding_mixes"
+  }  ,
+{
+      "id": "cinnamon_cereal",
+      "name": "Cinnamon Crunch Cereal",
+      "category": "mixins_snacks"
+  }  ,
+{
+      "id": "coconut_water",
+      "name": "Coconut Water",
+      "category": "beverages_drinks"
+  }  ,
+{
+      "id": "donut_holes",
+      "name": "Cider Donut Pieces",
+      "category": "mixins_snacks"
+  }  ,
+{
+      "id": "earl_grey_tea",
+      "name": "Earl Grey Tea Bags",
+      "category": "beverages_drinks"
+  }  ,
+{
+      "id": "golden_oreos",
+      "name": "Golden Oreos",
+      "category": "mixins_snacks"
+  }  ,
+{
+      "id": "hazelnuts",
+      "name": "Roasted Hazelnuts",
+      "category": "mixins_snacks"
+  }  ,
+{
+      "id": "lavender",
+      "name": "Culinary Lavender",
+      "category": "extracts_flavors"
+  }  ,
+{
+      "id": "shortbread_cookies",
+      "name": "Shortbread Cookies",
+      "category": "mixins_snacks"
+  }  ,
+{
+      "id": "strawberry_gelatin",
+      "name": "Sugar-Free Strawberry Gelatin Powder",
+      "category": "pudding_mixes"
+  }  ,
+{
+      "id": "tajin",
+      "name": "Taj\u00edn Cl\u00e1sico Seasoning",
+      "category": "spices_seasonings"
+  }  ,
+{
+      "id": "wafer_cookies",
+      "name": "Crispy Wafer Cookies",
+      "category": "mixins_snacks"
+  }
 ];
 
 const RECIPES_MASTER = [
@@ -18448,5 +18524,1337 @@ const RECIPES_MASTER = [
       "no_protein_watermelon_sorbet_186",
       "lactose_free_watermelon_sorbet_113"
     ]
+  }
+  ,
+{
+      "id": "classic_drive_thru_chocolate_malt",
+      "name": "Classic Drive-Thru Chocolate Malt",
+      "category": "Community Legends",
+      "categories": [
+          "Community Legends",
+          "Base Flavors"
+      ],
+      "sources": [
+          {
+              "book": "Community Legends",
+              "page": 1,
+              "sourceFile": "Community Legends"
+          }
+      ],
+      "sourceFile": "Community Legends",
+      "page": 1,
+      "macros": {
+          "calories": "240",
+          "protein": "30g",
+          "carbs": "20g",
+          "fat": "3g",
+          "sugar": "8g",
+          "fiber": "2g"
+      },
+      "spinSetting": "Lite Ice Cream",
+      "prepTime": "2 MIN",
+      "freezeTime": "16+ HOURS",
+      "makes": "1 PINT",
+      "proTip": "If the initial spin looks powdery like snow (common with high-protein chocolate bases), add 1 tablespoon of milk and run a RE-SPIN cycle for that iconic velvety thick Frosty soft-serve texture.",
+      "ingredients": [
+          {
+              "id": "chocolate_protein_shake",
+              "name": "Chocolate Protein Shake (Fairlife / Premier)",
+              "quantity": "340",
+              "unit": "ml",
+              "raw": "340ML CHOCOLATE READY-TO-DRINK PROTEIN SHAKE",
+              "section": "Base",
+              "isMixin": false,
+              "notes": "1 bottle"
+          },
+          {
+              "id": "chocolate_pudding_mix",
+              "name": "Sugar-Free Chocolate Pudding Mix",
+              "quantity": "7",
+              "unit": "g",
+              "raw": "7G (2 TSP) SUGAR-FREE CHOCOLATE PUDDING MIX",
+              "section": "Base",
+              "isMixin": false,
+              "notes": "Adds rich malted thickness"
+          },
+          {
+              "id": "cocoa_powder",
+              "name": "Dark Cocoa Powder",
+              "quantity": "5",
+              "unit": "g",
+              "raw": "5G (1 TBSP) DARK DUTCH COCOA POWDER",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "vanilla_bean_paste",
+              "name": "Vanilla Bean Paste",
+              "quantity": "0.5",
+              "unit": "tsp",
+              "raw": "1/2 TSP VANILLA BEAN PASTE",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "salt",
+              "name": "Salt",
+              "quantity": "1",
+              "unit": "pinch",
+              "raw": "PINCH OF SALT",
+              "section": "Base",
+              "isMixin": false,
+              "notes": "Enhances chocolate richness"
+          }
+      ],
+      "instructions": [
+          "POUR CHOCOLATE PROTEIN SHAKE INTO YOUR PINT",
+          "WHISK IN CHOCOLATE PUDDING MIX, DARK COCOA POWDER, VANILLA, AND A PINCH OF SALT WITH A FROTHER",
+          "FREEZE FOR AT LEAST 16 HOURS",
+          "RUN OUTSIDE OF PINT UNDER WARM WATER FOR 60 SECONDS",
+          "SPIN ON 'LITE ICE CREAM' SETTING",
+          "ADD 1 TBSP MILK AND RUN 'RE-SPIN' UNTIL VELVETY SMOOTH"
+      ],
+      "aliases": [
+          "wendys_frosty",
+          "chocolate_malt_frosty",
+          "drive_thru_frosty"
+      ]
+  }  ,
+{
+      "id": "strawberry_shortcake_crunch_bar",
+      "name": "Strawberry Shortcake Crunch Bar",
+      "category": "Community Legends",
+      "categories": [
+          "Community Legends",
+          "Base Flavors"
+      ],
+      "sources": [
+          {
+              "book": "Community Legends",
+              "page": 2,
+              "sourceFile": "Community Legends"
+          }
+      ],
+      "sourceFile": "Community Legends",
+      "page": 2,
+      "macros": {
+          "calories": "280",
+          "protein": "24g",
+          "carbs": "32g",
+          "fat": "5g",
+          "sugar": "12g",
+          "fiber": "2g"
+      },
+      "spinSetting": "Ice Cream",
+      "prepTime": "3 MIN",
+      "freezeTime": "16+ HOURS",
+      "makes": "1 PINT",
+      "proTip": "To make the famous ice cream truck strawberry crunch: crush 2 Golden Oreos in a ziplock bag with 1/2 tsp of strawberry gelatin powder and a tiny drop of melted butter. Add half into the center mix-in well and sprinkle the rest on top!",
+      "ingredients": [
+          {
+              "id": "fat_free_ultra_filtered_milk",
+              "name": "Fat Free Ultra-Filtered Milk",
+              "quantity": "350",
+              "unit": "g",
+              "raw": "350G FAT FREE ULTRA-FILTERED MILK",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "vanilla_protein_powder",
+              "name": "Vanilla Protein Powder",
+              "quantity": "25",
+              "unit": "g",
+              "raw": "25G VANILLA WHEY / CASEIN PROTEIN",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "cheesecake_jello_pudding_mix",
+              "name": "Cheesecake Jello Pudding Mix",
+              "quantity": "7",
+              "unit": "g",
+              "raw": "7G CHEESECAKE JELLO PUDDING MIX",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "strawberries",
+              "name": "Fresh or Frozen Strawberries",
+              "quantity": "50",
+              "unit": "g",
+              "raw": "50G FRESH OR FROZEN DICED STRAWBERRIES",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "golden_oreos",
+              "name": "Golden Oreos",
+              "quantity": "30",
+              "unit": "g",
+              "raw": "30G (2 COOKIES) GOLDEN OREOS CRUSHED",
+              "section": "Mix-In",
+              "isMixin": true,
+              "notes": "Signature crunch coating"
+          },
+          {
+              "id": "strawberry_gelatin",
+              "name": "Sugar-Free Strawberry Gelatin Powder",
+              "quantity": "3",
+              "unit": "g",
+              "raw": "3G SF STRAWBERRY GELATIN POWDER",
+              "section": "Mix-In",
+              "isMixin": true,
+              "notes": "Tossed with crushed cookies"
+          }
+      ],
+      "instructions": [
+          "BLEND MILK, PROTEIN POWDER, AND CHEESECAKE PUDDING MIX UNTIL SMOOTH",
+          "STIR IN DICED STRAWBERRIES AND FREEZE FOR 16+ HOURS",
+          "RUN UNDER WARM WATER FOR 60 SECONDS",
+          "SPIN ON 'ICE CREAM' SETTING",
+          "HOLLOW OUT A CENTER WELL AND ADD CRUSHED GOLDEN OREOS TOSSED WITH STRAWBERRY GELATIN",
+          "SPIN ON 'MIX-IN' SETTING AND ENJOY!"
+      ],
+      "aliases": [
+          "good_humor_strawberry_shortcake",
+          "strawberry_crumb_bar"
+      ]
+  }  ,
+{
+      "id": "caramel_shortbread_cookie_crunch",
+      "name": "Caramel Shortbread Cookie Crunch",
+      "category": "Community Legends",
+      "categories": [
+          "Community Legends"
+      ],
+      "sources": [
+          {
+              "book": "Community Legends",
+              "page": 3,
+              "sourceFile": "Community Legends"
+          }
+      ],
+      "sourceFile": "Community Legends",
+      "page": 3,
+      "macros": {
+          "calories": "295",
+          "protein": "25g",
+          "carbs": "28g",
+          "fat": "7g",
+          "sugar": "6g",
+          "fiber": "3g"
+      },
+      "spinSetting": "Lite Ice Cream",
+      "prepTime": "3 MIN",
+      "freezeTime": "16+ HOURS",
+      "makes": "1 PINT",
+      "proTip": "Freeze the chopped shortbread cookies for 10 minutes before adding them to the mix-in cycle so they stay snappy and crisp rather than dissolving into the base.",
+      "ingredients": [
+          {
+              "id": "fat_free_ultra_filtered_milk",
+              "name": "Fat Free Ultra-Filtered Milk",
+              "quantity": "360",
+              "unit": "g",
+              "raw": "360G FAT FREE ULTRA-FILTERED MILK",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "vanilla_protein_powder",
+              "name": "Vanilla Protein Powder",
+              "quantity": "25",
+              "unit": "g",
+              "raw": "25G VANILLA PROTEIN POWDER",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "caramel_syrup",
+              "name": "Sugar-Free Caramel Syrup",
+              "quantity": "20",
+              "unit": "g",
+              "raw": "20G SUGAR-FREE CARAMEL SYRUP",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "xanthan_gum",
+              "name": "Xanthan Gum",
+              "quantity": "1",
+              "unit": "g",
+              "raw": "1G XANTHAN GUM",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "shortbread_cookies",
+              "name": "Shortbread Cookies",
+              "quantity": "20",
+              "unit": "g",
+              "raw": "20G SHORTBREAD COOKIES (CHOPPED)",
+              "section": "Mix-In",
+              "isMixin": true,
+              "notes": ""
+          },
+          {
+              "id": "mini_chocolate_chips",
+              "name": "Mini Semi-Sweet Chocolate Chips",
+              "quantity": "10",
+              "unit": "g",
+              "raw": "10G MINI CHOCOLATE CHIPS",
+              "section": "Mix-In",
+              "isMixin": true,
+              "notes": ""
+          }
+      ],
+      "instructions": [
+          "FROTH MILK, PROTEIN POWDER, CARAMEL SYRUP, AND XANTHAN GUM UNTIL THICK",
+          "FREEZE FOR AT LEAST 16 HOURS",
+          "RUN WARM WATER AROUND THE SIDES FOR 60 SECONDS",
+          "SPIN ON 'LITE ICE CREAM' SETTING",
+          "CREATE A CENTER HOLE AND ADD CHOPPED SHORTBREAD COOKIES AND MINI CHOCOLATE CHIPS",
+          "SPIN ON 'MIX-IN' SETTING"
+      ],
+      "aliases": [
+          "twix_blizzard",
+          "caramel_twix_cookie"
+      ]
+  }  ,
+{
+      "id": "brown_sugar_oat_shaken_espresso",
+      "name": "Brown Sugar Oat Shaken Espresso",
+      "category": "Community Legends",
+      "categories": [
+          "Community Legends"
+      ],
+      "sources": [
+          {
+              "book": "Community Legends",
+              "page": 4,
+              "sourceFile": "Community Legends"
+          }
+      ],
+      "sourceFile": "Community Legends",
+      "page": 4,
+      "macros": {
+          "calories": "160",
+          "protein": "12g",
+          "carbs": "18g",
+          "fat": "4g",
+          "sugar": "3g",
+          "fiber": "2g"
+      },
+      "spinSetting": "Lite Ice Cream",
+      "prepTime": "2 MIN",
+      "freezeTime": "16+ HOURS",
+      "makes": "1 PINT",
+      "proTip": "Brew 2 shots of dark roast espresso (or mix 2 tsp instant espresso with 60ml hot water). Let it cool to room temperature before blending with the oat milk so it doesn't separate.",
+      "ingredients": [
+          {
+              "id": "espresso",
+              "name": "Brewed Espresso",
+              "quantity": "60",
+              "unit": "ml",
+              "raw": "60ML BREWED ESPRESSO (OR COLD BREW CONCENTRATE)",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "oat_milk",
+              "name": "Barista Oat Milk",
+              "quantity": "320",
+              "unit": "g",
+              "raw": "320G BARISTA OAT MILK",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "brown_sugar_sweetener",
+              "name": "Brown Sugar Sweetener",
+              "quantity": "15",
+              "unit": "g",
+              "raw": "15G BROWN SUGAR SWEETENER (ALLULOSE/SWERVE)",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "cinnamon",
+              "name": "Ground Cinnamon",
+              "quantity": "1",
+              "unit": "g",
+              "raw": "1G GROUND CINNAMON",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "vanilla_bean_paste",
+              "name": "Vanilla Bean Paste",
+              "quantity": "0.5",
+              "unit": "tsp",
+              "raw": "1/2 TSP VANILLA BEAN PASTE",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "xanthan_gum",
+              "name": "Xanthan Gum",
+              "quantity": "1",
+              "unit": "g",
+              "raw": "1G XANTHAN GUM",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          }
+      ],
+      "instructions": [
+          "BREW ESPRESSO AND ALLOW TO COOL",
+          "WHISK TOGETHER WITH OAT MILK, BROWN SUGAR SWEETENER, CINNAMON, VANILLA, AND XANTHAN GUM",
+          "FREEZE FOR 16+ HOURS",
+          "WARM BATH SIDES FOR 60 SECONDS",
+          "SPIN ON 'LITE ICE CREAM' SETTING (OPTIONAL RE-SPIN WITH 1 TBSP OAT MILK FOR EXTRA SILKY TEXTURE)"
+      ],
+      "aliases": [
+          "starbucks_shaken_espresso",
+          "brown_sugar_espresso_gelato"
+      ]
+  }  ,
+{
+      "id": "mangonada_mango_tajin_sorbet",
+      "name": "Mangonada (Mango Taj\u00edn Sorbet)",
+      "category": "Community Legends",
+      "categories": [
+          "Community Legends"
+      ],
+      "sources": [
+          {
+              "book": "Community Legends",
+              "page": 5,
+              "sourceFile": "Community Legends"
+          }
+      ],
+      "sourceFile": "Community Legends",
+      "page": 5,
+      "macros": {
+          "calories": "150",
+          "protein": "2g",
+          "carbs": "36g",
+          "fat": "0.5g",
+          "sugar": "28g",
+          "fiber": "4g"
+      },
+      "spinSetting": "Sorbet",
+      "prepTime": "2 MIN",
+      "freezeTime": "16+ HOURS",
+      "makes": "1 PINT",
+      "proTip": "Drizzle Chamoy along the inside walls of your serving bowl or hollowed center well, then dust generously with Taj\u00edn for the authentic Mexican paleteria experience.",
+      "ingredients": [
+          {
+              "id": "mango",
+              "name": "Mango Chunks",
+              "quantity": "300",
+              "unit": "g",
+              "raw": "300G FROZEN SWEET MANGO CHUNKS (THAWED SLIGHTLY)",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "coconut_water",
+              "name": "Coconut Water",
+              "quantity": "100",
+              "unit": "g",
+              "raw": "100G COCONUT WATER (OR WATER WITH LIME)",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "lime",
+              "name": "Fresh Lime Juice",
+              "quantity": "15",
+              "unit": "ml",
+              "raw": "1 TBSP FRESH LIME JUICE",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "sweetener",
+              "name": "Sweetener",
+              "quantity": "10",
+              "unit": "g",
+              "raw": "10G SWEETENER OR AGAVE (OPTIONAL TO TASTE)",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "chamoy",
+              "name": "Chamoy Sauce",
+              "quantity": "15",
+              "unit": "g",
+              "raw": "15G CHAMOY SAUCE",
+              "section": "Mix-In",
+              "isMixin": true,
+              "notes": "Swirled into finished sorbet"
+          },
+          {
+              "id": "tajin",
+              "name": "Taj\u00edn Cl\u00e1sico Seasoning",
+              "quantity": "1",
+              "unit": "tsp",
+              "raw": "1 TSP TAJ\u00cdN CL\u00c1SICO SEASONING",
+              "section": "Mix-In",
+              "isMixin": true,
+              "notes": "Garnished on top"
+          }
+      ],
+      "instructions": [
+          "BLEND MANGO CHUNKS WITH COCONUT WATER, LIME JUICE, AND SWEETENER UNTIL PUREED",
+          "POUR INTO PINT AND FREEZE FOR 16+ HOURS",
+          "RUN UNDER WARM WATER FOR 60 SECONDS",
+          "SPIN ON 'SORBET' SETTING (RE-SPIN WITH 1 TBSP COCONUT WATER IF ICY)",
+          "SWIRL WITH CHAMOY AND DUST WITH TAJ\u00cdN BEFORE DIGGING IN"
+      ],
+      "aliases": [
+          "mangonada",
+          "mango_tajin_sorbet",
+          "mexican_mango_sorbet"
+      ]
+  }  ,
+{
+      "id": "lemon_blueberry_cheesecake",
+      "name": "Lemon Blueberry Cheesecake",
+      "category": "Community Legends",
+      "categories": [
+          "Community Legends"
+      ],
+      "sources": [
+          {
+              "book": "Community Legends",
+              "page": 6,
+              "sourceFile": "Community Legends"
+          }
+      ],
+      "sourceFile": "Community Legends",
+      "page": 6,
+      "macros": {
+          "calories": "230",
+          "protein": "28g",
+          "carbs": "24g",
+          "fat": "3g",
+          "sugar": "8g",
+          "fiber": "3g"
+      },
+      "spinSetting": "Lite Ice Cream",
+      "prepTime": "3 MIN",
+      "freezeTime": "16+ HOURS",
+      "makes": "1 PINT",
+      "proTip": "Microwave the blueberries with 1 tsp of sweetener for 30 seconds to release natural pectin and juices before swirling in.",
+      "ingredients": [
+          {
+              "id": "fat_free_ultra_filtered_milk",
+              "name": "Fat Free Ultra-Filtered Milk",
+              "quantity": "250",
+              "unit": "g",
+              "raw": "250G FAT FREE ULTRA-FILTERED MILK",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "plain_greek_yogurt",
+              "name": "Nonfat Plain Greek Yogurt",
+              "quantity": "100",
+              "unit": "g",
+              "raw": "100G NONFAT PLAIN GREEK YOGURT",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "cheesecake_jello_pudding_mix",
+              "name": "Cheesecake Jello Pudding Mix",
+              "quantity": "8",
+              "unit": "g",
+              "raw": "8G CHEESECAKE JELLO PUDDING MIX",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "vanilla_protein_powder",
+              "name": "Vanilla Protein Powder",
+              "quantity": "20",
+              "unit": "g",
+              "raw": "20G VANILLA WHEY/CASEIN PROTEIN",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "lemon_juice",
+              "name": "Lemon Juice & Zest",
+              "quantity": "15",
+              "unit": "ml",
+              "raw": "1 TBSP FRESH LEMON JUICE AND ZEST",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "blueberries",
+              "name": "Fresh Blueberries",
+              "quantity": "50",
+              "unit": "g",
+              "raw": "50G FRESH BLUEBERRIES",
+              "section": "Mix-In",
+              "isMixin": true,
+              "notes": ""
+          },
+          {
+              "id": "graham_crackers",
+              "name": "Graham Crackers",
+              "quantity": "15",
+              "unit": "g",
+              "raw": "15G GRAHAM CRACKERS (CRUSHED)",
+              "section": "Mix-In",
+              "isMixin": true,
+              "notes": ""
+          }
+      ],
+      "instructions": [
+          "BLEND MILK, GREEK YOGURT, CHEESECAKE PUDDING, PROTEIN POWDER, AND LEMON JUICE",
+          "FREEZE FOR 16+ HOURS",
+          "WARM BATH FOR 60 SECONDS",
+          "SPIN ON 'LITE ICE CREAM' SETTING",
+          "ADD BLUEBERRIES AND CRUSHED GRAHAM CRACKERS TO THE CENTER WELL",
+          "SPIN ON 'MIX-IN' SETTING"
+      ],
+      "aliases": [
+          "lemon_berry_cheesecake",
+          "greek_yogurt_lemon_cheesecake"
+      ]
+  }  ,
+{
+      "id": "acai_power_bowl_pint",
+      "name": "Acai Power Bowl Pint",
+      "category": "Community Legends",
+      "categories": [
+          "Community Legends"
+      ],
+      "sources": [
+          {
+              "book": "Community Legends",
+              "page": 7,
+              "sourceFile": "Community Legends"
+          }
+      ],
+      "sourceFile": "Community Legends",
+      "page": 7,
+      "macros": {
+          "calories": "190",
+          "protein": "6g",
+          "carbs": "38g",
+          "fat": "3g",
+          "sugar": "20g",
+          "fiber": "6g"
+      },
+      "spinSetting": "Sorbet",
+      "prepTime": "2 MIN",
+      "freezeTime": "16+ HOURS",
+      "makes": "1 PINT",
+      "proTip": "Top with fresh banana coins, sliced strawberries, and a drizzle of almond butter right after spinning for the ultimate breakfast pint.",
+      "ingredients": [
+          {
+              "id": "acai_puree",
+              "name": "Pure Unsweetened A\u00e7ai Puree",
+              "quantity": "100",
+              "unit": "g",
+              "raw": "1 PACKET (100G) UNSWEETENED A\u00c7AI PUREE",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "banana",
+              "name": "Banana",
+              "quantity": "100",
+              "unit": "g",
+              "raw": "1 MEDIUM (100G) RIPE BANANA",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "almond_milk",
+              "name": "Unsweetened Almond Milk",
+              "quantity": "200",
+              "unit": "g",
+              "raw": "200G UNSWEETENED ALMOND MILK",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "sweetener",
+              "name": "Sweetener",
+              "quantity": "10",
+              "unit": "g",
+              "raw": "10G SWEETENER OR RAW HONEY",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "granola",
+              "name": "Granola",
+              "quantity": "20",
+              "unit": "g",
+              "raw": "20G HEMP OR OAT GRANOLA",
+              "section": "Mix-In",
+              "isMixin": true,
+              "notes": "Added after spin"
+          }
+      ],
+      "instructions": [
+          "BLEND A\u00c7AI, BANANA, ALMOND MILK, AND SWEETENER UNTIL ULTRA-SMOOTH",
+          "FREEZE FOR 16+ HOURS",
+          "RUN WARM WATER AROUND PINT FOR 60 SECONDS",
+          "SPIN ON 'SORBET' SETTING",
+          "TOP OR MIX-IN WITH CRUNCHY GRANOLA"
+      ],
+      "aliases": [
+          "acai_bowl",
+          "acai_sorbet_pint"
+      ]
+  }  ,
+{
+      "id": "hazelnut_cocoa_truffle_crunch",
+      "name": "Hazelnut Cocoa Truffle Crunch",
+      "category": "Community Legends",
+      "categories": [
+          "Community Legends"
+      ],
+      "sources": [
+          {
+              "book": "Community Legends",
+              "page": 8,
+              "sourceFile": "Community Legends"
+          }
+      ],
+      "sourceFile": "Community Legends",
+      "page": 8,
+      "macros": {
+          "calories": "330",
+          "protein": "26g",
+          "carbs": "29g",
+          "fat": "11g",
+          "sugar": "14g",
+          "fiber": "3g"
+      },
+      "spinSetting": "Gelato",
+      "prepTime": "3 MIN",
+      "freezeTime": "16+ HOURS",
+      "makes": "1 PINT",
+      "proTip": "Warming the Nutella in the microwave for 15 seconds makes it blend effortlessly into the base without sticking to the sides of your blender.",
+      "ingredients": [
+          {
+              "id": "fat_free_ultra_filtered_milk",
+              "name": "Fat Free Ultra-Filtered Milk",
+              "quantity": "320",
+              "unit": "g",
+              "raw": "320G FAT FREE ULTRA-FILTERED MILK",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "chocolate_protein_powder",
+              "name": "Chocolate Protein Powder",
+              "quantity": "25",
+              "unit": "g",
+              "raw": "25G CHOCOLATE PROTEIN POWDER",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "nutella",
+              "name": "Nutella / Cocoa Hazelnut Spread",
+              "quantity": "20",
+              "unit": "g",
+              "raw": "20G NUTELLA OR HAZELNUT COCOA SPREAD",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "hazelnuts",
+              "name": "Roasted Hazelnuts",
+              "quantity": "15",
+              "unit": "g",
+              "raw": "15G ROASTED HAZELNUTS (CRUSHED)",
+              "section": "Mix-In",
+              "isMixin": true,
+              "notes": ""
+          },
+          {
+              "id": "wafer_cookies",
+              "name": "Crispy Wafer Cookies",
+              "quantity": "10",
+              "unit": "g",
+              "raw": "10G CRISPY CHOCOLATE OR VANILLA WAFERS",
+              "section": "Mix-In",
+              "isMixin": true,
+              "notes": ""
+          }
+      ],
+      "instructions": [
+          "WARM NUTELLA SLIGHTLY AND BLEND WITH MILK AND CHOCOLATE PROTEIN POWDER",
+          "FREEZE FOR 16+ HOURS",
+          "WARM WATER BATH FOR 60 SECONDS",
+          "SPIN ON 'GELATO' SETTING",
+          "HOLLOW OUT CENTER WELL, ADD CRUSHED HAZELNUTS AND CRISPY WAFERS",
+          "SPIN ON 'MIX-IN' SETTING"
+      ],
+      "aliases": [
+          "ferrero_rocher_gelato",
+          "nutella_hazelnut_crunch"
+      ]
+  }  ,
+{
+      "id": "warm_bakery_cinnamon_roll_swirl",
+      "name": "Warm Bakery Cinnamon Roll Swirl",
+      "category": "Community Legends",
+      "categories": [
+          "Community Legends"
+      ],
+      "sources": [
+          {
+              "book": "Community Legends",
+              "page": 9,
+              "sourceFile": "Community Legends"
+          }
+      ],
+      "sourceFile": "Community Legends",
+      "page": 9,
+      "macros": {
+          "calories": "260",
+          "protein": "28g",
+          "carbs": "26g",
+          "fat": "4g",
+          "sugar": "8g",
+          "fiber": "2g"
+      },
+      "spinSetting": "Lite Ice Cream",
+      "prepTime": "3 MIN",
+      "freezeTime": "16+ HOURS",
+      "makes": "1 PINT",
+      "proTip": "Whisk 1 tbsp of light cream cheese with 1 tsp almond milk and 1 tsp sweetener to make a genuine cinnabon-style cream cheese glaze drizzle!",
+      "ingredients": [
+          {
+              "id": "fat_free_ultra_filtered_milk",
+              "name": "Fat Free Ultra-Filtered Milk",
+              "quantity": "350",
+              "unit": "g",
+              "raw": "350G FAT FREE ULTRA-FILTERED MILK",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "vanilla_protein_powder",
+              "name": "Vanilla Protein Powder",
+              "quantity": "25",
+              "unit": "g",
+              "raw": "25G VANILLA PROTEIN POWDER",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "cinnamon",
+              "name": "Ground Cinnamon",
+              "quantity": "2",
+              "unit": "g",
+              "raw": "2G GROUND CINNAMON",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "brown_sugar_sweetener",
+              "name": "Brown Sugar Sweetener",
+              "quantity": "15",
+              "unit": "g",
+              "raw": "15G BROWN SUGAR SWEETENER",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "light_cream_cheese",
+              "name": "Light Cream Cheese",
+              "quantity": "20",
+              "unit": "g",
+              "raw": "20G LIGHT CREAM CHEESE",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "cinnamon_cereal",
+              "name": "Cinnamon Crunch Cereal",
+              "quantity": "15",
+              "unit": "g",
+              "raw": "15G CINNAMON CRUNCH CEREAL",
+              "section": "Mix-In",
+              "isMixin": true,
+              "notes": ""
+          }
+      ],
+      "instructions": [
+          "BLEND MILK, PROTEIN, CINNAMON, BROWN SUGAR SWEETENER, AND CREAM CHEESE",
+          "FREEZE FOR 16+ HOURS",
+          "WARM BATH FOR 60 SECONDS",
+          "SPIN ON 'LITE ICE CREAM' SETTING",
+          "ADD CINNAMON CRUNCH BITS TO THE WELL AND RUN 'MIX-IN'"
+      ],
+      "aliases": [
+          "cinnabon_swirl",
+          "cinnamon_roll_ice_cream"
+      ]
+  }  ,
+{
+      "id": "toasted_coconut_cream_pie",
+      "name": "Toasted Coconut Cream Pie",
+      "category": "Community Legends",
+      "categories": [
+          "Community Legends"
+      ],
+      "sources": [
+          {
+              "book": "Community Legends",
+              "page": 10,
+              "sourceFile": "Community Legends"
+          }
+      ],
+      "sourceFile": "Community Legends",
+      "page": 10,
+      "macros": {
+          "calories": "270",
+          "protein": "22g",
+          "carbs": "27g",
+          "fat": "7g",
+          "sugar": "7g",
+          "fiber": "3g"
+      },
+      "spinSetting": "Ice Cream",
+      "prepTime": "3 MIN",
+      "freezeTime": "16+ HOURS",
+      "makes": "1 PINT",
+      "proTip": "Toast shredded unsweetened coconut in a dry skillet on medium heat for 2\u20133 minutes until fragrant and golden before adding as mix-in.",
+      "ingredients": [
+          {
+              "id": "light_coconut_milk",
+              "name": "Light Canned Coconut Milk",
+              "quantity": "200",
+              "unit": "g",
+              "raw": "200G LIGHT CANNED COCONUT MILK",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "fat_free_ultra_filtered_milk",
+              "name": "Fat Free Ultra-Filtered Milk",
+              "quantity": "150",
+              "unit": "g",
+              "raw": "150G FAT FREE ULTRA-FILTERED MILK",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "vanilla_protein_powder",
+              "name": "Vanilla Protein Powder",
+              "quantity": "20",
+              "unit": "g",
+              "raw": "20G VANILLA WHEY PROTEIN",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "cheesecake_jello_pudding_mix",
+              "name": "Vanilla or Cheesecake Pudding Mix",
+              "quantity": "8",
+              "unit": "g",
+              "raw": "8G SUGAR-FREE PUDDING MIX",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "shredded_coconut",
+              "name": "Shredded Coconut",
+              "quantity": "12",
+              "unit": "g",
+              "raw": "12G TOASTED COCONUT FLAKES",
+              "section": "Mix-In",
+              "isMixin": true,
+              "notes": ""
+          },
+          {
+              "id": "nilla_wafers",
+              "name": "Vanilla Wafers",
+              "quantity": "15",
+              "unit": "g",
+              "raw": "15G CRUSHED VANILLA WAFERS",
+              "section": "Mix-In",
+              "isMixin": true,
+              "notes": ""
+          }
+      ],
+      "instructions": [
+          "BLEND COCONUT MILK, ULTRA-FILTERED MILK, PROTEIN, AND PUDDING MIX",
+          "FREEZE FOR 16+ HOURS",
+          "WARM BATH FOR 60 SECONDS",
+          "SPIN ON 'ICE CREAM' SETTING",
+          "ADD TOASTED COCONUT FLAKES AND CRUSHED NILLA WAFERS TO THE WELL",
+          "SPIN ON 'MIX-IN' SETTING"
+      ],
+      "aliases": [
+          "coconut_cream_pie",
+          "toasted_coconut_ice_cream"
+      ]
+  }  ,
+{
+      "id": "black_forest_chocolate_cherry",
+      "name": "Black Forest Chocolate Cherry",
+      "category": "Community Legends",
+      "categories": [
+          "Community Legends"
+      ],
+      "sources": [
+          {
+              "book": "Community Legends",
+              "page": 11,
+              "sourceFile": "Community Legends"
+          }
+      ],
+      "sourceFile": "Community Legends",
+      "page": 11,
+      "macros": {
+          "calories": "250",
+          "protein": "27g",
+          "carbs": "26g",
+          "fat": "4.5g",
+          "sugar": "14g",
+          "fiber": "3g"
+      },
+      "spinSetting": "Gelato",
+      "prepTime": "3 MIN",
+      "freezeTime": "16+ HOURS",
+      "makes": "1 PINT",
+      "proTip": "Use dark sweet Bing cherries packed in their own natural juices. Coarsely chop them so you get juicy cherry bursts in every bite.",
+      "ingredients": [
+          {
+              "id": "fat_free_ultra_filtered_milk",
+              "name": "Fat Free Ultra-Filtered Milk",
+              "quantity": "350",
+              "unit": "g",
+              "raw": "350G FAT FREE ULTRA-FILTERED MILK",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "chocolate_protein_powder",
+              "name": "Chocolate Protein Powder",
+              "quantity": "25",
+              "unit": "g",
+              "raw": "25G CHOCOLATE WHEY/CASEIN PROTEIN",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "cocoa_powder",
+              "name": "Dutch Cocoa Powder",
+              "quantity": "8",
+              "unit": "g",
+              "raw": "8G DUTCH PROCESS COCOA POWDER",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "sweetener",
+              "name": "Sweetener",
+              "quantity": "10",
+              "unit": "g",
+              "raw": "10G SWEETENER OF CHOICE",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "cherries",
+              "name": "Dark Sweet Cherries",
+              "quantity": "50",
+              "unit": "g",
+              "raw": "50G PITTED DARK SWEET CHERRIES (CHOPPED)",
+              "section": "Mix-In",
+              "isMixin": true,
+              "notes": ""
+          },
+          {
+              "id": "dark_chocolate_chips",
+              "name": "Dark Chocolate",
+              "quantity": "10",
+              "unit": "g",
+              "raw": "10G SHAVED DARK CHOCOLATE (70%)",
+              "section": "Mix-In",
+              "isMixin": true,
+              "notes": ""
+          }
+      ],
+      "instructions": [
+          "BLEND MILK, PROTEIN, COCOA POWDER, AND SWEETENER",
+          "FREEZE FOR 16+ HOURS",
+          "WARM BATH FOR 60 SECONDS",
+          "SPIN ON 'GELATO' SETTING",
+          "ADD CHOPPED DARK CHERRIES AND SHAVED DARK CHOCOLATE TO THE WELL",
+          "SPIN ON 'MIX-IN' SETTING"
+      ],
+      "aliases": [
+          "black_forest_gelato",
+          "chocolate_cherry_ice_cream"
+      ]
+  }  ,
+{
+      "id": "spiced_apple_cider_donut",
+      "name": "Spiced Apple Cider Donut",
+      "category": "Community Legends",
+      "categories": [
+          "Community Legends"
+      ],
+      "sources": [
+          {
+              "book": "Community Legends",
+              "page": 12,
+              "sourceFile": "Community Legends"
+          }
+      ],
+      "sourceFile": "Community Legends",
+      "page": 12,
+      "macros": {
+          "calories": "240",
+          "protein": "20g",
+          "carbs": "34g",
+          "fat": "3g",
+          "sugar": "16g",
+          "fiber": "2g"
+      },
+      "spinSetting": "Lite Ice Cream",
+      "prepTime": "3 MIN",
+      "freezeTime": "16+ HOURS",
+      "makes": "1 PINT",
+      "proTip": "Simmer 1 cup of spiced apple cider on the stove for 10 minutes until it reduces to 1/2 cup. This intensifies the apple donut flavor exponentially.",
+      "ingredients": [
+          {
+              "id": "apple_cider",
+              "name": "Spiced Apple Cider",
+              "quantity": "150",
+              "unit": "g",
+              "raw": "150G SPICED APPLE CIDER (REDUCED)",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "fat_free_ultra_filtered_milk",
+              "name": "Fat Free Ultra-Filtered Milk",
+              "quantity": "200",
+              "unit": "g",
+              "raw": "200G FAT FREE ULTRA-FILTERED MILK",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "vanilla_protein_powder",
+              "name": "Vanilla Protein Powder",
+              "quantity": "20",
+              "unit": "g",
+              "raw": "20G VANILLA PROTEIN POWDER",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "cinnamon",
+              "name": "Ground Cinnamon",
+              "quantity": "1",
+              "unit": "g",
+              "raw": "1G GROUND CINNAMON",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "nutmeg",
+              "name": "Ground Nutmeg",
+              "quantity": "1",
+              "unit": "pinch",
+              "raw": "PINCH OF GROUND NUTMEG",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "donut_holes",
+              "name": "Apple Cider Donut Pieces",
+              "quantity": "25",
+              "unit": "g",
+              "raw": "1 DONUT HOLE (25G) CIDER DONUT CRUMBLED",
+              "section": "Mix-In",
+              "isMixin": true,
+              "notes": ""
+          }
+      ],
+      "instructions": [
+          "SIMMER AND COOL APPLE CIDER",
+          "WHISK WITH MILK, VANILLA PROTEIN, CINNAMON, AND NUTMEG",
+          "FREEZE FOR 16+ HOURS",
+          "WARM BATH FOR 60 SECONDS",
+          "SPIN ON 'LITE ICE CREAM' SETTING",
+          "ADD CRUMBLED CIDER DONUT HOLE TO THE WELL AND RUN 'MIX-IN'"
+      ],
+      "aliases": [
+          "apple_cider_donut_creami",
+          "fall_cider_donut"
+      ]
+  }  ,
+{
+      "id": "london_fog_earl_grey_lavender",
+      "name": "London Fog (Earl Grey Lavender)",
+      "category": "Community Legends",
+      "categories": [
+          "Community Legends"
+      ],
+      "sources": [
+          {
+              "book": "Community Legends",
+              "page": 13,
+              "sourceFile": "Community Legends"
+          }
+      ],
+      "sourceFile": "Community Legends",
+      "page": 13,
+      "macros": {
+          "calories": "180",
+          "protein": "14g",
+          "carbs": "20g",
+          "fat": "5g",
+          "sugar": "8g",
+          "fiber": "1g"
+      },
+      "spinSetting": "Gelato",
+      "prepTime": "5 MIN",
+      "freezeTime": "16+ HOURS",
+      "makes": "1 PINT",
+      "proTip": "Steep 3 Earl Grey tea bags in 150ml of steaming hot milk for 8 minutes to extract that bold bergamot tea oil before sweetening.",
+      "ingredients": [
+          {
+              "id": "earl_grey_tea",
+              "name": "Earl Grey Tea Bags",
+              "quantity": "3",
+              "unit": "bags",
+              "raw": "3 EARL GREY TEA BAGS (STEEPED CONCENTRATED)",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "fat_free_ultra_filtered_milk",
+              "name": "Fat Free Ultra-Filtered Milk",
+              "quantity": "250",
+              "unit": "g",
+              "raw": "250G FAT FREE ULTRA-FILTERED MILK (OR OAT MILK)",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "vanilla_bean_paste",
+              "name": "Vanilla Bean Paste",
+              "quantity": "1",
+              "unit": "tsp",
+              "raw": "1 TSP VANILLA BEAN PASTE",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "lavender",
+              "name": "Culinary Lavender",
+              "quantity": "1",
+              "unit": "pinch",
+              "raw": "1 PINCH CULINARY LAVENDER (OR 1 DROP EXTRACT)",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "sweetener",
+              "name": "Sweetener",
+              "quantity": "15",
+              "unit": "g",
+              "raw": "15G SWEETENER OR RAW HONEY",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          },
+          {
+              "id": "xanthan_gum",
+              "name": "Xanthan Gum",
+              "quantity": "1",
+              "unit": "g",
+              "raw": "1G XANTHAN GUM",
+              "section": "Base",
+              "isMixin": false,
+              "notes": ""
+          }
+      ],
+      "instructions": [
+          "STEEP TEA BAGS IN 150ML HOT MILK FOR 8 MINUTES, THEN DISCARD BAGS",
+          "COOL TO ROOM TEMP AND WHISK WITH REMAINING MILK, VANILLA, LAVENDER, SWEETENER, AND XANTHAN GUM",
+          "FREEZE FOR 16+ HOURS",
+          "WARM BATH FOR 60 SECONDS",
+          "SPIN ON 'GELATO' SETTING"
+      ],
+      "aliases": [
+          "london_fog_gelato",
+          "earl_grey_lavender"
+      ]
   }
 ];

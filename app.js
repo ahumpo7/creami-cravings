@@ -701,10 +701,10 @@
           currentUser.role = isAdmin ? 'admin' : (currentUser.role || 'user');
           if (!currentUser.subscriptions || !Array.isArray(currentUser.subscriptions)) {
             currentUser.subscriptions = isAdmin 
-              ? ['All-Access', 'Base Flavors', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free'] 
-              : ['Base Flavors'];
+              ? ['All-Access', 'Base Flavors', 'Community Legends', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free'] 
+              : ['Base Flavors', 'Community Legends'];
           } else if (isAdmin && !currentUser.subscriptions.includes('All-Access')) {
-            currentUser.subscriptions = ['All-Access', 'Base Flavors', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free'];
+            currentUser.subscriptions = ['All-Access', 'Base Flavors', 'Community Legends', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free'];
           }
         }
       } catch (e) {
@@ -1114,8 +1114,8 @@
       picture: data.user.picture,
       role: isAdmin ? 'admin' : (data.user.role || 'user'),
       subscriptions: isAdmin 
-        ? ['All-Access', 'Base Flavors', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free']
-        : (data.user.subscriptions || ['Base Flavors']),
+        ? ['All-Access', 'Base Flavors', 'Community Legends', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free']
+        : (data.user.subscriptions || ['Base Flavors', 'Community Legends']),
       token: data.token || (currentUser ? currentUser.token : '')
     };
     saveUserAuth();
@@ -1352,7 +1352,7 @@
 
     const subs = (currentUser && Array.isArray(currentUser.subscriptions))
       ? currentUser.subscriptions
-      : ['Base Flavors'];
+      : ['Base Flavors', 'Community Legends'];
 
     if (subs.includes('All-Access')) {
       return true;
@@ -2417,11 +2417,11 @@
   }
 
   function isCategoryUnlocked(categoryName) {
-    if (!categoryName || categoryName === 'all' || categoryName === 'Base Flavors' || categoryName === 'favorites' || categoryName === 'Custom') {
+    if (!categoryName || categoryName === 'all' || categoryName === 'Base Flavors' || categoryName === 'Community Legends' || categoryName === 'favorites' || categoryName === 'Custom') {
       return true;
     }
     if (currentUser && currentUser.role === 'admin') return true;
-    const subs = (currentUser && Array.isArray(currentUser.subscriptions)) ? currentUser.subscriptions : ['Base Flavors'];
+    const subs = (currentUser && Array.isArray(currentUser.subscriptions)) ? currentUser.subscriptions : ['Base Flavors', 'Community Legends'];
     if (subs.includes('All-Access')) return true;
     const norm = normalizeCategoryName(categoryName);
     return subs.some(s => {
@@ -2576,6 +2576,7 @@
 
     const elAll = document.getElementById('countAll');
     const elBase = document.getElementById('countBase');
+    const elLegends = document.getElementById('countLegends');
     const elFan = document.getElementById('countFan');
     const elKeto = document.getElementById('countKeto');
     const elLactose = document.getElementById('countLactose');
@@ -2585,11 +2586,12 @@
     const tabCustom = document.getElementById('tabCustomRecipes');
 
     if (elAll) elAll.textContent = counts.all;
-    if (elBase) elBase.textContent = counts['Base Flavors'];
-    if (elFan) elFan.textContent = counts['Fan Favorites'];
-    if (elKeto) elKeto.textContent = counts['Keto'];
-    if (elLactose) elLactose.textContent = counts['Lactose Free'];
-    if (elNoPro) elNoPro.textContent = counts['No Protein'];
+    if (elBase) elBase.textContent = counts['Base Flavors'] || 0;
+    if (elLegends) elLegends.textContent = counts['Community Legends'] || 0;
+    if (elFan) elFan.textContent = counts['Fan Favorites'] || 0;
+    if (elKeto) elKeto.textContent = counts['Keto'] || 0;
+    if (elLactose) elLactose.textContent = counts['Lactose Free'] || 0;
+    if (elNoPro) elNoPro.textContent = counts['No Protein'] || 0;
     if (elFav) elFav.textContent = counts.favorites;
     if (elCustom) elCustom.textContent = customRecipesState.length;
     if (tabCustom) {
@@ -7140,7 +7142,7 @@
   }
 
   // --- Admin Portal & User Management (Roadmap Item 15) ---
-  const ALL_CATEGORY_SUBSCRIPTIONS = ['All-Access', 'Base Flavors', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free'];
+  const ALL_CATEGORY_SUBSCRIPTIONS = ['All-Access', 'Base Flavors', 'Community Legends', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free'];
 
   function openAdminPortal() {
     if (!currentUser || currentUser.role !== 'admin') {
@@ -7238,7 +7240,7 @@
       const userEmail = (u.email || '').toLowerCase();
       const isRootAdmin = ADMIN_ROOTS.includes(userEmail);
       const isCurrentAdmin = (currentUser && currentUser.email && currentUser.email.toLowerCase() === userEmail);
-      const subs = Array.isArray(u.subscriptions) ? u.subscriptions : ['Base Flavors'];
+      const subs = Array.isArray(u.subscriptions) ? u.subscriptions : ['Base Flavors', 'Community Legends'];
       const hasAllAccess = subs.includes('All-Access');
       const avatarUrl = u.picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name || u.username || 'User')}&background=059669&color=fff&bold=true`;
       
@@ -7350,12 +7352,12 @@
         const user = adminUsersState.find(u => u.id === userId);
         if (!user) return;
 
-        let curSubs = Array.isArray(user.subscriptions) ? [...user.subscriptions] : ['Base Flavors'];
+        let curSubs = Array.isArray(user.subscriptions) ? [...user.subscriptions] : ['Base Flavors', 'Community Legends'];
 
         if (subName === 'All-Access') {
           if (curSubs.includes('All-Access')) {
-            // Turn off All-Access, reset to Base Flavors
-            curSubs = ['Base Flavors'];
+            // Turn off All-Access, reset to Free Tiers
+            curSubs = ['Base Flavors', 'Community Legends'];
           } else {
             // Grant All-Access
             curSubs = [...ALL_CATEGORY_SUBSCRIPTIONS];

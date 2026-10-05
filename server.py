@@ -42,8 +42,8 @@ DEFAULT_STAPLES = [
     'cocoa_powder'
 ]
 
-ALL_SUBSCRIPTIONS = ["All-Access", "Base Flavors", "Fan Favorites", "No Protein", "Keto", "Lactose Free"]
-DEFAULT_SUBSCRIPTIONS = ["Base Flavors"]
+ALL_SUBSCRIPTIONS = ["All-Access", "Base Flavors", "Community Legends", "Fan Favorites", "No Protein", "Keto", "Lactose Free"]
+DEFAULT_SUBSCRIPTIONS = ["Base Flavors", "Community Legends"]
 
 # Admin accounts designated by verified email
 ADMIN_EMAILS = [
