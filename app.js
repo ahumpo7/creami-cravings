@@ -1698,9 +1698,80 @@
     }
   }
 
+  // --- Dynamic User-Accessible Ingredients Engine ---
+  function getUserPantryIngredients() {
+    if (typeof INGREDIENTS_MASTER === 'undefined' || !Array.isArray(INGREDIENTS_MASTER)) return [];
+
+    // 1. Identify all accessible recipes for this user session
+    const accessibleRecipes = (typeof allRecipes !== 'undefined' && Array.isArray(allRecipes))
+      ? allRecipes.filter(r => isRecipeAccessible(r))
+      : [];
+
+    // 2. Collect all ingredient IDs and sanitized names required by accessible recipes
+    const requiredIngIds = new Set();
+    const requiredCleanNames = new Set();
+
+    accessibleRecipes.forEach(recipe => {
+      (recipe.ingredients || []).forEach(ing => {
+        if (ing.id) requiredIngIds.add(ing.id);
+        if (ing.name) requiredCleanNames.add(sanitizeShoppingItemName(ing.name).toLowerCase());
+      });
+    });
+
+    // 3. Expand with equivalents (so interchangeable items can be stocked)
+    const expandedRequiredIds = new Set(requiredIngIds);
+    if (typeof INGREDIENT_EQUIVALENTS !== 'undefined') {
+      Object.entries(INGREDIENT_EQUIVALENTS).forEach(([key, list]) => {
+        if (requiredIngIds.has(key)) {
+          list.forEach(eq => expandedRequiredIds.add(eq));
+        } else if (list.some(eq => requiredIngIds.has(eq))) {
+          expandedRequiredIds.add(key);
+        }
+      });
+    }
+
+    // 4. Filter INGREDIENTS_MASTER: only include items needed by accessible recipes
+    const visibleMaster = INGREDIENTS_MASTER.filter(item => {
+      if (expandedRequiredIds.has(item.id)) return true;
+      if (requiredCleanNames.has(item.name.toLowerCase())) return true;
+      return false;
+    });
+
+    // 5. Add custom ingredients from this user's personal custom recipes
+    const customExtra = [];
+    const masterIdSet = new Set(visibleMaster.map(i => i.id));
+    const masterNameSet = new Set(visibleMaster.map(i => i.name.toLowerCase()));
+
+    if (Array.isArray(customRecipesState)) {
+      customRecipesState.forEach(recipe => {
+        (recipe.ingredients || []).forEach(ing => {
+          const cleanName = sanitizeShoppingItemName(ing.name);
+          const slugId = ing.id || cleanName.toLowerCase().replace(/[^a-z0-9]+/g, '_').trim();
+          if (!masterIdSet.has(slugId) && !masterNameSet.has(cleanName.toLowerCase())) {
+            if (!customExtra.some(c => c.id === slugId)) {
+              customExtra.push({
+                id: slugId,
+                name: ing.name,
+                category: getIngredientCategoryKey(cleanName),
+                isCustom: true
+              });
+            }
+          }
+        });
+      });
+    }
+
+    const combined = [...visibleMaster, ...customExtra];
+    combined.sort((a, b) => a.name.localeCompare(b.name));
+    return combined;
+  }
+
   function calculateIngredientUsage() {
     ingredientRecipeCount = {};
-    allRecipes.forEach(recipe => {
+    const accessible = (typeof allRecipes !== 'undefined' && Array.isArray(allRecipes))
+      ? allRecipes.filter(r => isRecipeAccessible(r))
+      : [];
+    accessible.forEach(recipe => {
       const seen = new Set();
       (recipe.ingredients || []).forEach(ing => {
         if (ing.id && !seen.has(ing.id)) {
@@ -1718,11 +1789,12 @@
     ingredientListContainer.replaceChildren();
     const q = ingredientSearchQuery.toLowerCase().trim();
 
-    // Group items by category
+    // Group items by category from the user's accessible pantry ingredients
     const grouped = {};
     Object.keys(INGREDIENT_CATEGORIES).forEach(cat => grouped[cat] = []);
 
-    INGREDIENTS_MASTER.forEach(item => {
+    const visibleIngredients = getUserPantryIngredients();
+    visibleIngredients.forEach(item => {
       if (q && !item.name.toLowerCase().includes(q)) return;
       const cat = item.category || 'mixins_snacks';
       if (!grouped[cat]) grouped[cat] = [];
@@ -2644,16 +2716,21 @@
   }
 
   function updateStats() {
-    if (statPantryCount) statPantryCount.textContent = pantryState.size;
-    if (pantryInStockCount) pantryInStockCount.textContent = `${pantryState.size} items in stock`;
+    const visibleItems = getUserPantryIngredients();
+    const inStockVisible = visibleItems.filter(it => pantryState.has(it.id)).length;
+    if (statPantryCount) statPantryCount.textContent = inStockVisible;
+    if (pantryInStockCount) pantryInStockCount.textContent = `${inStockVisible}/${visibleItems.length} items`;
     const tabRecipeCount = document.getElementById('mobileTabRecipeCount');
     const tabPantryCount = document.getElementById('mobileTabPantryCount');
     const navPantryBadge = document.getElementById('navPantryBadge');
-    if (tabRecipeCount) tabRecipeCount.textContent = allRecipes.length;
-    if (tabPantryCount) tabPantryCount.textContent = pantryState.size;
+    const accessibleTotal = (typeof allRecipes !== 'undefined' && Array.isArray(allRecipes))
+      ? allRecipes.filter(r => isRecipeAccessible(r)).length
+      : 0;
+    if (tabRecipeCount) tabRecipeCount.textContent = accessibleTotal;
+    if (tabPantryCount) tabPantryCount.textContent = inStockVisible;
     if (navPantryBadge) {
-      navPantryBadge.textContent = pantryState.size;
-      navPantryBadge.style.display = pantryState.size > 0 ? 'inline-block' : 'none';
+      navPantryBadge.textContent = inStockVisible;
+      navPantryBadge.style.display = inStockVisible > 0 ? 'inline-block' : 'none';
     }
   }
 
@@ -7004,11 +7081,28 @@
     };
 
     customRecipesState.push(newRecipe);
+
+    // Auto-add required ingredients for this balanced recipe into the user's pantry
+    let addedCount = 0;
+    (parsedIngredients || []).forEach(ing => {
+      const ingId = ing.id || sanitizeShoppingItemName(ing.name).toLowerCase().replace(/[^a-z0-9]+/g, '_').trim();
+      if (ingId && !pantryState.has(ingId)) {
+        pantryState.add(ingId);
+        addedCount++;
+      }
+    });
+    if (addedCount > 0) {
+      savePantry();
+      updatePantryCheckboxVisuals();
+    }
+
     saveCustomRecipes();
     closeCustomRecipeModal();
     updateAuthUI();
+    renderPantryList();
     renderRecipes();
-    showToast(`🧪 Saved balanced recipe "${title}" with Creaminess Score ${nutrition.creaminessScore}/10!`);
+    updateStats();
+    showToast(`🧪 Saved balanced recipe "${title}" and added ingredients to your pantry!`);
   }
 
   function initBuildAPint() {
@@ -7136,11 +7230,28 @@
     };
 
     customRecipesState.push(newRecipe);
+
+    // Auto-add required ingredients for this personal recipe into the user's pantry
+    let addedCount = 0;
+    (parsedIngs || []).forEach(ing => {
+      const ingId = ing.id || sanitizeShoppingItemName(ing.name).toLowerCase().replace(/[^a-z0-9]+/g, '_').trim();
+      if (ingId && !pantryState.has(ingId)) {
+        pantryState.add(ingId);
+        addedCount++;
+      }
+    });
+    if (addedCount > 0) {
+      savePantry();
+      updatePantryCheckboxVisuals();
+    }
+
     saveCustomRecipes();
     closeCustomRecipeModal();
     updateAuthUI();
+    renderPantryList();
     renderRecipes();
-    showToast(`✨ Saved personal recipe "${name}" to your Google account!`);
+    updateStats();
+    showToast(`✨ Saved personal recipe "${name}" and added ${parsedIngs.length} required ingredients to your pantry!`);
   }
 
   function deleteCustomRecipe(recipeId) {
@@ -7149,6 +7260,9 @@
     saveCustomRecipes();
     closeRecipeModal();
     updateAuthUI();
+    renderPantryList();
+    renderRecipes();
+    updateStats();
     showToast('🗑️ Personal custom recipe deleted.');
   }
 
@@ -7556,11 +7670,13 @@
     // Check All & Clear All Pantry
     if (checkAllBtn) {
       checkAllBtn.addEventListener('click', () => {
-        INGREDIENTS_MASTER.forEach(i => pantryState.add(i.id));
+        const visibleItems = getUserPantryIngredients();
+        visibleItems.forEach(i => pantryState.add(i.id));
         savePantry();
         updatePantryCheckboxVisuals();
+        updateStats();
         renderRecipes();
-        showToast('✓ All pantry items checked');
+        showToast(`✓ All ${visibleItems.length} pantry items checked`);
       });
     }
 
@@ -7569,6 +7685,7 @@
         pantryState.clear();
         savePantry();
         updatePantryCheckboxVisuals();
+        updateStats();
         renderRecipes();
         showToast('Cleared pantry');
       });
