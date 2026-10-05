@@ -510,6 +510,11 @@
     initPwaInstall();
     initCookieConsent();
 
+    // If user is already logged in, immediately fetch latest synchronized cloud data
+    if (currentUser && (currentUser.token || currentUser.email)) {
+      fetchLatestUserData();
+    }
+
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
         checkAndNotifyReadyPints();
@@ -517,12 +522,29 @@
         if (freezerModalOverlay && freezerModalOverlay.classList.contains('active')) {
           renderFreezerModal();
         }
+        if (currentUser && (currentUser.token || currentUser.email)) {
+          fetchLatestUserData();
+        }
+      } else if (document.visibilityState === 'hidden') {
+        // Tab being hidden or backgrounded: flush pending cloud sync immediately
+        triggerCloudSync(true);
       }
+    });
+
+    window.addEventListener('beforeunload', () => {
+      triggerCloudSync(true);
+    });
+
+    window.addEventListener('pagehide', () => {
+      triggerCloudSync(true);
     });
 
     window.addEventListener('focus', () => {
       checkAndNotifyReadyPints();
       updateFreezerBadges();
+      if (currentUser && (currentUser.token || currentUser.email)) {
+        fetchLatestUserData();
+      }
     });
 
     if (window.innerWidth <= 768) {
@@ -887,30 +909,69 @@
 
   // --- Background Cloud Sync to Google Account ---
   let syncTimeout = null;
-  function triggerCloudSync() {
-    if (!currentUser || !currentUser.token) return;
+  function triggerCloudSync(immediate = false) {
+    if (!currentUser || (!currentUser.token && !currentUser.email)) return;
     clearTimeout(syncTimeout);
-    syncTimeout = setTimeout(async () => {
+
+    const performSync = async () => {
       try {
+        const payload = {
+          token: currentUser.token || '',
+          email: currentUser.email || '',
+          pantry: Array.from(pantryState),
+          favorites: Array.from(favoritesState),
+          madeCounts: recipeMadeCounts,
+          ratings: userRecipeData,
+          customRecipes: customRecipesState,
+          shoppingList: Array.from(manualShoppingList),
+          freezerPints: freezerPintsState
+        };
         await fetch('/api/user/sync', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            token: currentUser.token,
-            pantry: Array.from(pantryState),
-            favorites: Array.from(favoritesState),
-            madeCounts: recipeMadeCounts,
-            ratings: userRecipeData,
-            customRecipes: customRecipesState,
-            shoppingList: Array.from(manualShoppingList),
-            freezerPints: freezerPintsState
-          })
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': currentUser.token ? `Bearer ${currentUser.token}` : '',
+            'X-User-Email': currentUser.email || ''
+          },
+          body: JSON.stringify(payload),
+          keepalive: true
         });
       } catch (err) {
         console.warn('Background sync notice:', err);
       }
-    }, 1200);
+    };
+
+    if (immediate) {
+      performSync();
+    } else {
+      syncTimeout = setTimeout(performSync, 800);
+    }
   }
+
+  // --- Real-Time Multi-Device Account Sync Fetcher ---
+  async function fetchLatestUserData() {
+    if (!currentUser || (!currentUser.token && !currentUser.email)) return;
+    try {
+      const headers = { 'Content-Type': 'application/json' };
+      if (currentUser.token) headers['Authorization'] = `Bearer ${currentUser.token}`;
+      if (currentUser.email) headers['X-User-Email'] = currentUser.email;
+
+      const res = await fetch('/api/user/data', { headers });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.id) {
+          applyUserSession({
+            user: data,
+            token: currentUser.token,
+            isSilent: true
+          });
+        }
+      }
+    } catch (e) {
+      // Offline mode: keep cached local state
+    }
+  }
+
 
   // --- Community Stats & Overall Rating Fetch ---
   async function fetchCommunityStats() {
@@ -1055,7 +1116,7 @@
       subscriptions: isAdmin 
         ? ['All-Access', 'Base Flavors', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free']
         : (data.user.subscriptions || ['Base Flavors']),
-      token: data.token
+      token: data.token || (currentUser ? currentUser.token : '')
     };
     saveUserAuth();
 
@@ -1075,21 +1136,39 @@
         pantryState = new Set(DEFAULT_STAPLES);
       }
     }
-    savePantry();
+    const pantryKey = getPantryStorageKey();
+    localStorage.setItem(pantryKey, JSON.stringify(Array.from(pantryState)));
+    if (currentUser) {
+      localStorage.removeItem(PANTRY_STORAGE_KEY);
+    }
+    updateStats();
     updatePantryCheckboxVisuals();
     renderPantryList();
 
     // 2. Restore user's favorites
     favoritesState = new Set(Array.isArray(data.user.favorites) ? data.user.favorites : []);
-    saveFavorites();
+    if (currentUser && currentUser.id) {
+      const userFavKey = `${FAVORITES_STORAGE_KEY}_${currentUser.id}`;
+      localStorage.setItem(userFavKey, JSON.stringify(Array.from(favoritesState)));
+    }
+    localStorage.removeItem(FAVORITES_STORAGE_KEY);
+    updateCategoryCounts();
 
     // 3. Restore made counts
     recipeMadeCounts = (data.user.madeCounts && typeof data.user.madeCounts === 'object') ? { ...data.user.madeCounts } : {};
-    saveRecipeMadeCounts();
+    if (currentUser && currentUser.id) {
+      const userMadeKey = `${RECIPE_MADE_STORAGE_KEY}_${currentUser.id}`;
+      localStorage.setItem(userMadeKey, JSON.stringify(recipeMadeCounts));
+    }
+    localStorage.removeItem(RECIPE_MADE_STORAGE_KEY);
 
     // 4. Restore ratings
     userRecipeData = (data.user.ratings && typeof data.user.ratings === 'object') ? { ...data.user.ratings } : {};
-    saveUserRecipeData();
+    if (currentUser && currentUser.id) {
+      const userRatingKey = `${USER_RECIPE_DATA_KEY}_${currentUser.id}`;
+      localStorage.setItem(userRatingKey, JSON.stringify(userRecipeData));
+    }
+    localStorage.removeItem(USER_RECIPE_DATA_KEY);
 
     // 5. Restore custom recipes
     if (data.user.customRecipes && Array.isArray(data.user.customRecipes)) {
@@ -1110,30 +1189,37 @@
           .filter(item => !isShoppingExcluded(item))
           .map(item => sanitizeShoppingItemName(item))
       );
-      saveManualShoppingList();
+      const shopKey = getShoppingStorageKey();
+      localStorage.setItem(shopKey, JSON.stringify(Array.from(manualShoppingList)));
+      if (currentUser) {
+        localStorage.removeItem(MANUAL_SHOPPING_STORAGE_KEY);
+      }
+      updateShoppingListBadge();
     } else {
       manualShoppingList = new Set();
-      saveManualShoppingList();
     }
 
     // 7. Restore freezer pints
     if (data.user.freezerPints && Array.isArray(data.user.freezerPints)) {
       freezerPintsState = data.user.freezerPints;
-      saveFreezerPints();
+      const userFreezerKey = `${FREEZER_STORAGE_KEY}_${currentUser.id}`;
+      localStorage.setItem(userFreezerKey, JSON.stringify(freezerPintsState));
+      updateFreezerBadges();
     } else {
       freezerPintsState = [];
-      saveFreezerPints();
     }
 
-    closeGoogleAuthModal();
     updateAuthUI();
     updateFreezerBadges();
     renderRecipes();
-    showToast(`✨ Welcome back, ${currentUser.name || 'Ice Cream Craver'}! All data synced.`);
-    
-    // Push updated combined state to cloud
-    triggerCloudSync();
+
+    if (!data.isSilent) {
+      closeGoogleAuthModal();
+      showToast(`✨ Welcome back, ${currentUser.name || 'Ice Cream Craver'}! All data synced.`);
+      triggerCloudSync(true);
+    }
   }
+
 
   function logoutUser() {
     if (currentUser && currentUser.id) {

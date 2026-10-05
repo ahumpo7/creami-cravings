@@ -5,6 +5,7 @@ import os
 import hashlib
 import uuid
 import urllib.request
+import urllib.parse
 import base64
 from datetime import datetime
 
@@ -222,6 +223,29 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
             for u in users_db.values():
                 if u.get('email', '').lower() == user_email:
                     return u
+
+        # Fallback to URL query params
+        raw_path = getattr(self, 'path', '')
+        if '?' in raw_path:
+            try:
+                query_str = raw_path.split('?', 1)[1]
+                for part in query_str.split('&'):
+                    if '=' in part:
+                        k, v = part.split('=', 1)
+                        k = urllib.parse.unquote(k).strip()
+                        v = urllib.parse.unquote(v).strip()
+                        if k == 'token' and v:
+                            for u in users_db.values():
+                                if u.get('token') == v:
+                                    return u
+                        elif (k == 'email' or k == 'adminEmail') and v:
+                            v_lower = v.lower()
+                            for u in users_db.values():
+                                if u.get('email', '').lower() == v_lower:
+                                    return u
+            except Exception:
+                pass
+
         return None
 
     def do_GET(self):
@@ -234,7 +258,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
         elif self.path == '/api/community/stats' or self.path == '/api/community/ratings':
             self._send_json(compute_community_stats())
 
-        elif self.path == '/api/user/data':
+        elif self.path == '/api/user/data' or self.path.startswith('/api/user/data?'):
             user = self._get_user_from_token()
             if not user:
                 self._send_json({'error': 'Unauthorized'}, 401)
@@ -488,12 +512,17 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                         ratings_db[r_id] = {}
                     r_val = r_info.get('rating') if isinstance(r_info, dict) else r_info
                     r_notes = r_info.get('notes', '') if isinstance(r_info, dict) else ''
-                    ratings_db[r_id][user['id']] = {
-                        'rating': int(r_val),
-                        'notes': r_notes,
-                        'userName': user.get('name') or user.get('username'),
-                        'updatedAt': datetime.now().strftime('%Y-%m-%d %H:%M')
-                    }
+                    try:
+                        r_int = int(r_val) if r_val is not None and str(r_val).strip().isdigit() else 0
+                    except (ValueError, TypeError):
+                        r_int = 0
+                    if r_int > 0 or r_notes:
+                        ratings_db[r_id][user['id']] = {
+                            'rating': r_int,
+                            'notes': r_notes,
+                            'userName': user.get('name') or user.get('username'),
+                            'updatedAt': datetime.utcnow().strftime('%Y-%m-%d %H:%M')
+                        }
                 save_json_file(RATINGS_DB_FILE, ratings_db)
 
             if 'customRecipes' in data and isinstance(data['customRecipes'], list):
@@ -504,6 +533,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
             if 'freezerPints' in data and isinstance(data['freezerPints'], list):
                 user['freezerPints'] = data['freezerPints']
 
+            user['last_active'] = datetime.utcnow().isoformat()
             save_json_file(USERS_DB_FILE, users_db)
             self._send_json({'status': 'ok', 'success': True})
 
