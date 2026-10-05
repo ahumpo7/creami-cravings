@@ -205,19 +205,54 @@
     return s;
   }
 
+  const MATCH_STOP_WORDS = new Set([
+    'powder', 'powders', 'liquid', 'liquids', 'milk', 'shake', 'shakes', 
+    'extract', 'extracts', 'mix', 'mixes', 'blend', 'blends', 'flavor', 
+    'flavoring', 'puree', 'syrup', 'syrups', 'sauce', 'sauces', 'cup', 'cups',
+    'style', 'cookies', 'cookie', 'chips', 'chip', 'bar', 'bars', 'pieces', 'piece'
+  ]);
+
+  function normalizeIngName(str) {
+    if (!str || typeof str !== 'string') return '';
+    return str
+      .toLowerCase()
+      .replace(/[\(\)\[\]\{\}\/\\,:\-_'"\.!#*&]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function collapseName(str) {
+    return (normalizeIngName(str) || '').replace(/\s+/g, '');
+  }
+
   function isItemInPantry(ing) {
     if (!ing) return false;
     const id = typeof ing === 'string' ? ing : (ing.id || '');
-    if (!id) return false;
-    if (pantryState.has(id)) return true;
-    const equivs = INGREDIENT_EQUIVALENTS[id];
-    if (equivs && equivs.some(eqId => pantryState.has(eqId))) return true;
+    if (id && pantryState.has(id)) return true;
+    if (id) {
+      const equivs = INGREDIENT_EQUIVALENTS[id];
+      if (equivs && equivs.some(eqId => pantryState.has(eqId))) return true;
+    }
 
-    const rawName = typeof ing === 'object' ? (ing.name || '') : ing;
-    if (rawName && typeof INGREDIENTS_MASTER !== 'undefined') {
-      const clean = sanitizeShoppingItemName(rawName).toLowerCase();
-      const masterMatch = INGREDIENTS_MASTER.find(m => m.name.toLowerCase() === clean);
-      if (masterMatch && pantryState.has(masterMatch.id)) return true;
+    const rawName = typeof ing === 'object' ? (ing.name || '') : (typeof ing === 'string' ? ing : '');
+    if (rawName) {
+      const clean = sanitizeShoppingItemName(rawName);
+      const slug = clean.toLowerCase().replace(/[^a-z0-9]+/g, '_').trim();
+      if (slug && pantryState.has(slug)) return true;
+
+      const norm = normalizeIngName(clean);
+      const col = collapseName(clean);
+      if (typeof INGREDIENTS_MASTER !== 'undefined' && Array.isArray(INGREDIENTS_MASTER)) {
+        const masterMatch = INGREDIENTS_MASTER.find(m => 
+          m.id === slug ||
+          m.name.toLowerCase() === clean.toLowerCase() ||
+          (norm && normalizeIngName(m.name) === norm) ||
+          (col && collapseName(m.name) === col)
+        );
+        if (masterMatch && (pantryState.has(masterMatch.id) || (INGREDIENT_EQUIVALENTS[masterMatch.id] && INGREDIENT_EQUIVALENTS[masterMatch.id].some(eqId => pantryState.has(eqId))))) {
+          return true;
+        }
+      }
     }
 
     return false;
@@ -1770,21 +1805,38 @@
     const customExtra = [];
     const masterIdSet = new Set(visibleMaster.map(i => i.id));
     const masterNameSet = new Set(visibleMaster.map(i => i.name.toLowerCase()));
+    const masterNormSet = new Set(visibleMaster.map(i => normalizeIngName(i.name)));
+    const masterColSet = new Set(visibleMaster.map(i => collapseName(i.name)));
 
     if (Array.isArray(customRecipesState)) {
       customRecipesState.forEach(recipe => {
         (recipe.ingredients || []).forEach(ing => {
           const cleanName = sanitizeShoppingItemName(ing.name);
           const slugId = ing.id || cleanName.toLowerCase().replace(/[^a-z0-9]+/g, '_').trim();
-          if (!masterIdSet.has(slugId) && !masterNameSet.has(cleanName.toLowerCase())) {
-            if (!customExtra.some(c => c.id === slugId)) {
-              customExtra.push({
-                id: slugId,
-                name: ing.name,
-                category: ing.category || getIngredientCategoryKey(cleanName),
-                isCustom: true
-              });
-            }
+          const norm = normalizeIngName(cleanName);
+          const col = collapseName(cleanName);
+
+          // Skip if already represented in master
+          if (masterIdSet.has(slugId) || masterNameSet.has(cleanName.toLowerCase()) ||
+              (norm && masterNormSet.has(norm)) || (col && masterColSet.has(col))) {
+            return;
+          }
+
+          // Skip if already in customExtra
+          const alreadyAdded = customExtra.some(c => 
+            c.id === slugId || 
+            c.name.toLowerCase() === cleanName.toLowerCase() ||
+            (norm && normalizeIngName(c.name) === norm) ||
+            (col && collapseName(c.name) === col)
+          );
+
+          if (!alreadyAdded) {
+            customExtra.push({
+              id: slugId,
+              name: ing.name,
+              category: ing.category || getIngredientCategoryKey(cleanName),
+              isCustom: true
+            });
           }
         });
       });
@@ -1793,6 +1845,189 @@
     const combined = [...visibleMaster, ...customExtra];
     combined.sort((a, b) => a.name.localeCompare(b.name));
     return combined;
+  }
+
+  // --- Intelligent Ingredient Matcher & Deduplicator ---
+  function findExistingPantryIngredient(rawName, stepHint) {
+    if (!rawName || typeof rawName !== 'string') return null;
+    const clean = sanitizeShoppingItemName(rawName).trim();
+    if (!clean) return null;
+    const normInput = normalizeIngName(clean);
+    const colInput = collapseName(clean);
+    const inputSlug = clean.toLowerCase().replace(/[^a-z0-9]+/g, '_').trim();
+    if (!normInput && !inputSlug) return null;
+
+    const candidates = [];
+    const seenKeys = new Set();
+
+    function addCandidate(cand, origin) {
+      if (!cand || !cand.id) return;
+      const key = `${cand.id}_${cand.bapStep || ''}`;
+      if (seenKeys.has(key)) return;
+      seenKeys.add(key);
+      candidates.push({
+        id: cand.id,
+        name: cand.name || cand.id,
+        category: cand.category || getIngredientCategoryKey(cand.name || cand.id, cand.bapStep || stepHint),
+        origin: origin,
+        bapStep: cand.bapStep || null,
+        bapItem: cand.bapItem || null,
+        isCustom: !!cand.isCustom,
+        rawObj: cand
+      });
+    }
+
+    // 1. Current user active pantry items
+    try {
+      const pantryItems = getUserPantryIngredients();
+      if (Array.isArray(pantryItems)) {
+        pantryItems.forEach(it => addCandidate(it, 'pantry'));
+      }
+    } catch (e) {}
+
+    // 2. BAP presets
+    if (typeof BAP_DATA !== 'undefined' && BAP_DATA) {
+      (BAP_DATA.liquids || []).forEach(l => addCandidate({ ...l, bapStep: 'liquid', bapItem: l, category: 'dairy_liquids' }, 'bap'));
+      (BAP_DATA.powders || []).forEach(p => addCandidate({ ...p, bapStep: 'powder', bapItem: p, category: p.category || 'protein_powders' }, 'bap'));
+      (BAP_DATA.stabilizers || []).forEach(s => addCandidate({ ...s, bapStep: 'stabilizer', bapItem: s, category: s.category || 'sweeteners_binders' }, 'bap'));
+      (BAP_DATA.sweeteners || []).forEach(sw => addCandidate({ ...sw, bapStep: 'sweetener', bapItem: sw, category: sw.category || 'sweeteners_binders' }, 'bap'));
+      (BAP_DATA.mixins || []).forEach(m => addCandidate({ ...m, bapStep: 'mixin', bapItem: m, category: m.category || 'mixins_snacks' }, 'bap'));
+    }
+
+    // 3. Master ingredients
+    if (typeof INGREDIENTS_MASTER !== 'undefined' && Array.isArray(INGREDIENTS_MASTER)) {
+      INGREDIENTS_MASTER.forEach(m => addCandidate(m, 'master'));
+    }
+
+    // 4. Custom recipes state
+    if (Array.isArray(customRecipesState)) {
+      customRecipesState.forEach(recipe => {
+        (recipe.ingredients || []).forEach(ing => {
+          addCandidate({
+            id: ing.id,
+            name: ing.name,
+            category: ing.category,
+            isCustom: true
+          }, 'custom_recipe');
+        });
+      });
+    }
+
+    function scoreCandidate(cand) {
+      const normCand = normalizeIngName(cand.name);
+      const colCand = collapseName(cand.name);
+      const candSlug = (cand.id || '').toLowerCase();
+      let score = 0;
+
+      // Direct ID match
+      if (candSlug === inputSlug) {
+        score += 1000;
+      } else if (typeof INGREDIENT_EQUIVALENTS !== 'undefined') {
+        const eqList = INGREDIENT_EQUIVALENTS[inputSlug] || [];
+        if (eqList.includes(candSlug)) {
+          score += 900;
+        }
+        const candEqList = INGREDIENT_EQUIVALENTS[candSlug] || [];
+        if (candEqList.includes(inputSlug)) {
+          score += 900;
+        }
+      }
+
+      // Exact normalized name match
+      if (normCand === normInput) {
+        score += 800;
+      }
+
+      // Exact collapsed name match (e.g. "dragon fruit" vs "dragonfruit")
+      if (colCand && colInput && colCand === colInput) {
+        score += 750;
+      }
+
+      // Singular / Plural match
+      if (normCand === normInput + 's' || normInput === normCand + 's' ||
+          normCand === normInput + 'es' || normInput === normCand + 'es' ||
+          colCand === colInput + 's' || colInput === colCand + 's') {
+        score += 650;
+      }
+
+      // Meaningful token containment (excluding generic stop words)
+      const inputTokens = normInput.split(' ').filter(w => w.length >= 3 && !MATCH_STOP_WORDS.has(w));
+      const candTokens = normCand.split(' ').filter(w => w.length >= 3 && !MATCH_STOP_WORDS.has(w));
+
+      if (inputTokens.length > 0 && candTokens.length > 0) {
+        const allInputInCand = inputTokens.every(t => candTokens.some(ct => ct === t || ct.startsWith(t) || t.startsWith(ct)));
+        const allCandInInput = candTokens.every(t => inputTokens.some(it => it === t || it.startsWith(t) || t.startsWith(it)));
+
+        if (allInputInCand && allCandInInput) {
+          score += 600;
+        } else if (allInputInCand) {
+          score += 450 + Math.round((inputTokens.length / candTokens.length) * 100);
+        } else if (allCandInInput) {
+          score += 400 + Math.round((candTokens.length / inputTokens.length) * 100);
+        } else {
+          const matchedTokens = inputTokens.filter(t => candTokens.some(ct => ct === t));
+          if (matchedTokens.length >= 2 || (matchedTokens.length === 1 && inputTokens.length === 1 && candTokens.length === 1)) {
+            score += 300 + matchedTokens.length * 50;
+          }
+        }
+      }
+
+      // Only apply contextual and pantry bonuses if there is an actual base match
+      if (score > 0) {
+        if (stepHint) {
+          if (cand.bapStep === stepHint) {
+            score += 250;
+          }
+          if (stepHint === 'liquid' && cand.category === 'dairy_liquids') score += 150;
+          if (stepHint === 'powder' && cand.category === 'protein_powders') score += 150;
+          if (stepHint === 'stabilizer' && cand.category === 'sweeteners_binders') score += 150;
+          if (stepHint === 'sweetener' && (cand.category === 'sweeteners_binders' || cand.category === 'syrups_sauces')) score += 150;
+          if (stepHint === 'mixin' && cand.category === 'mixins_snacks') score += 150;
+        }
+
+        if (pantryState && (pantryState.has(cand.id) || (typeof isItemInPantry === 'function' && isItemInPantry(cand)))) {
+          score += 50;
+        }
+
+        if (cand.origin === 'pantry') {
+          score += 30;
+        }
+      }
+
+      return score;
+    }
+
+    let best = null;
+    let highestScore = 0;
+
+    for (const c of candidates) {
+      const s = scoreCandidate(c);
+      if (s > highestScore) {
+        highestScore = s;
+        best = c;
+      }
+    }
+
+    if (best && highestScore >= 400) {
+      const catTitle = (typeof INGREDIENT_CATEGORIES !== 'undefined' && INGREDIENT_CATEGORIES[best.category]) 
+        ? INGREDIENT_CATEGORIES[best.category] 
+        : 'Pantry';
+      return {
+        matched: true,
+        id: best.id,
+        name: best.name,
+        category: best.category,
+        catTitle: catTitle,
+        origin: best.origin,
+        bapStep: best.bapStep,
+        bapItem: best.bapItem,
+        isCustom: best.isCustom,
+        score: highestScore,
+        inPantry: pantryState ? (pantryState.has(best.id) || (typeof isItemInPantry === 'function' && isItemInPantry(best.rawObj || best))) : false
+      };
+    }
+
+    return null;
   }
 
   function calculateIngredientUsage() {
@@ -7110,6 +7345,20 @@
     const parsedIngredients = [];
     const addedCustomItems = [];
 
+    function recordCustomIfNew(item, catKey) {
+      if (!item || !item.isCustom) return;
+      const matched = findExistingPantryIngredient(item.name);
+      if (matched && (matched.origin === 'master' || matched.origin === 'bap' || (matched.origin === 'pantry' && !matched.isCustom))) {
+        return;
+      }
+      const catTitle = (typeof INGREDIENT_CATEGORIES !== 'undefined' && INGREDIENT_CATEGORIES[catKey]) 
+        ? INGREDIENT_CATEGORIES[catKey] 
+        : 'Pantry';
+      if (!addedCustomItems.some(c => c.name.toLowerCase() === item.name.toLowerCase())) {
+        addedCustomItems.push({ name: item.name, catTitle });
+      }
+    }
+
     // 1. Liquid
     const liquidCat = liquidObj.category || getIngredientCategoryKey(liquidObj.name, 'liquid');
     parsedIngredients.push({
@@ -7124,12 +7373,7 @@
       category: liquidCat,
       notes: ''
     });
-    if (liquidObj.isCustom) {
-      const catTitle = (typeof INGREDIENT_CATEGORIES !== 'undefined' && INGREDIENT_CATEGORIES[liquidCat]) 
-        ? INGREDIENT_CATEGORIES[liquidCat] 
-        : 'Pantry';
-      addedCustomItems.push({ name: liquidObj.name, catTitle });
-    }
+    recordCustomIfNew(liquidObj, liquidCat);
 
     // 2. Powders
     Object.entries(bapState.selectedPowders).forEach(([id, qty]) => {
@@ -7148,12 +7392,7 @@
           category: cat,
           notes: ''
         });
-        if (p.isCustom) {
-          const catTitle = (typeof INGREDIENT_CATEGORIES !== 'undefined' && INGREDIENT_CATEGORIES[cat]) 
-            ? INGREDIENT_CATEGORIES[cat] 
-            : 'Pantry';
-          addedCustomItems.push({ name: p.name, catTitle });
-        }
+        recordCustomIfNew(p, cat);
       }
     });
 
@@ -7174,12 +7413,7 @@
           category: cat,
           notes: ''
         });
-        if (s.isCustom) {
-          const catTitle = (typeof INGREDIENT_CATEGORIES !== 'undefined' && INGREDIENT_CATEGORIES[cat]) 
-            ? INGREDIENT_CATEGORIES[cat] 
-            : 'Pantry';
-          addedCustomItems.push({ name: s.name, catTitle });
-        }
+        recordCustomIfNew(s, cat);
       }
     });
 
@@ -7200,12 +7434,7 @@
           category: cat,
           notes: ''
         });
-        if (sw.isCustom) {
-          const catTitle = (typeof INGREDIENT_CATEGORIES !== 'undefined' && INGREDIENT_CATEGORIES[cat]) 
-            ? INGREDIENT_CATEGORIES[cat] 
-            : 'Pantry';
-          addedCustomItems.push({ name: sw.name, catTitle });
-        }
+        recordCustomIfNew(sw, cat);
       }
     });
 
@@ -7226,12 +7455,7 @@
           category: cat,
           notes: ''
         });
-        if (m.isCustom) {
-          const catTitle = (typeof INGREDIENT_CATEGORIES !== 'undefined' && INGREDIENT_CATEGORIES[cat]) 
-            ? INGREDIENT_CATEGORIES[cat] 
-            : 'Pantry';
-          addedCustomItems.push({ name: m.name, catTitle });
-        }
+        recordCustomIfNew(m, cat);
       }
     });
 
@@ -7320,21 +7544,59 @@
     const section = document.querySelector(`.bap-custom-ing-section[data-step="${step}"]`);
     if (!section) return;
     const hint = section.dataset.hint || '';
-    const catKey = getIngredientCategoryKey(rawName, hint);
+    const clean = (rawName || '').trim();
+
+    const iconEl = section.querySelector('.bap-category-notice-icon');
+    const valEl = section.querySelector('.bap-category-notice-val');
+    const labelEl = section.querySelector('.bap-category-notice-label');
+    const msgEl = section.querySelector('.bap-category-notice-msg');
+    const targetEl = section.querySelector('.bap-notice-target-cat');
+
+    if (!clean) {
+      const defaultCat = (hint === 'liquid') ? 'dairy_liquids' :
+                         (hint === 'powder') ? 'protein_powders' :
+                         (hint === 'stabilizer') ? 'sweeteners_binders' : 'mixins_snacks';
+      const catTitle = (typeof INGREDIENT_CATEGORIES !== 'undefined' && INGREDIENT_CATEGORIES[defaultCat]) 
+        ? INGREDIENT_CATEGORIES[defaultCat] 
+        : 'Pantry';
+      const catIcon = (typeof CATEGORY_ICONS !== 'undefined' && CATEGORY_ICONS[defaultCat]) 
+        ? CATEGORY_ICONS[defaultCat] 
+        : '📦';
+
+      if (iconEl) iconEl.textContent = catIcon;
+      if (valEl) valEl.textContent = catTitle;
+      if (labelEl) labelEl.textContent = 'Auto-Detected Pantry Group:';
+      if (msgEl) {
+        msgEl.innerHTML = `ℹ️ Once you save this pint, this ingredient will automatically be added to your <strong class="bap-notice-target-cat">"${catTitle}"</strong> pantry group and marked in stock!`;
+      }
+      return;
+    }
+
+    const matched = findExistingPantryIngredient(clean, hint);
+    const catKey = matched ? matched.category : getIngredientCategoryKey(clean, hint);
     const catTitle = (typeof INGREDIENT_CATEGORIES !== 'undefined' && INGREDIENT_CATEGORIES[catKey]) 
       ? INGREDIENT_CATEGORIES[catKey] 
       : 'Pantry';
     const catIcon = (typeof CATEGORY_ICONS !== 'undefined' && CATEGORY_ICONS[catKey]) 
       ? CATEGORY_ICONS[catKey] 
-      : '📦';
-
-    const iconEl = section.querySelector('.bap-category-notice-icon');
-    const valEl = section.querySelector('.bap-category-notice-val');
-    const targetEl = section.querySelector('.bap-notice-target-cat');
+      : '✨';
 
     if (iconEl) iconEl.textContent = catIcon;
-    if (valEl) valEl.textContent = catTitle;
-    if (targetEl) targetEl.textContent = `"${catTitle}"`;
+
+    if (matched) {
+      if (labelEl) labelEl.textContent = '✅ Matches Existing Item:';
+      if (valEl) valEl.textContent = `${matched.name} (${catTitle})`;
+      if (msgEl) {
+        const sourceDesc = matched.bapItem ? 'preset recipe ingredients' : (matched.inPantry ? 'your stocked pantry' : 'ingredient library');
+        msgEl.innerHTML = `✅ Found in ${sourceDesc}: <strong>"${matched.name}"</strong> in <strong>"${catTitle}"</strong>. Adding will link directly to this existing item instead of creating a duplicate!`;
+      }
+    } else {
+      if (labelEl) labelEl.textContent = 'Auto-Detected Pantry Group:';
+      if (valEl) valEl.textContent = catTitle;
+      if (msgEl) {
+        msgEl.innerHTML = `ℹ️ Once you save this pint, this ingredient will automatically be added to your <strong class="bap-notice-target-cat">"${catTitle}"</strong> pantry group and marked in stock!`;
+      }
+    }
   }
 
   function toggleBapCustomCard(step, show) {
@@ -7368,6 +7630,201 @@
 
     const section = document.querySelector(`.bap-custom-ing-section[data-step="${step}"]`);
     const hint = section ? (section.dataset.hint || '') : '';
+    const isDeluxe = bapState.size === '24';
+    const parsedQty = qtyInput ? parseFloat(qtyInput.value) : 0;
+
+    if (!bapState.customLiquids) bapState.customLiquids = [];
+    if (!bapState.customPowders) bapState.customPowders = [];
+    if (!bapState.customStabilizers) bapState.customStabilizers = [];
+    if (!bapState.customSweeteners) bapState.customSweeteners = [];
+    if (!bapState.customMixins) bapState.customMixins = [];
+
+    // Check if ingredient already exists in pantry, master, BAP presets, or custom recipes
+    const matched = findExistingPantryIngredient(name, hint);
+
+    if (matched) {
+      const catTitle = matched.catTitle || 'Pantry';
+
+      // 1. If it's a built-in BAP preset: select it directly!
+      if (matched.bapItem) {
+        const item = matched.bapItem;
+        if (step === 1 && (matched.bapStep === 'liquid' || BAP_DATA.liquids.some(l => l.id === item.id))) {
+          bapState.selectedLiquid = item.id;
+          bapState.liquidQty = parsedQty > 0 ? parsedQty : (isDeluxe ? item.defaultQty24 : item.defaultQty16);
+        } else if (step === 2 && (matched.bapStep === 'powder' || BAP_DATA.powders.some(p => p.id === item.id))) {
+          bapState.selectedPowders[item.id] = parsedQty > 0 ? parsedQty : (isDeluxe ? item.defaultQty24 : item.defaultQty16);
+        } else if (step === 3 && (matched.bapStep === 'stabilizer' || BAP_DATA.stabilizers.some(s => s.id === item.id))) {
+          bapState.selectedStabilizers[item.id] = parsedQty > 0 ? parsedQty : (isDeluxe ? item.defaultQty24 : item.defaultQty16);
+        } else if (step === 4) {
+          if (matched.bapStep === 'sweetener' || BAP_DATA.sweeteners.some(sw => sw.id === item.id)) {
+            bapState.selectedSweeteners[item.id] = parsedQty > 0 ? parsedQty : (isDeluxe ? item.defaultQty24 : item.defaultQty16);
+          } else {
+            bapState.selectedMixins[item.id] = parsedQty > 0 ? parsedQty : (isDeluxe ? item.defaultQty24 : item.defaultQty16);
+          }
+        } else {
+          // Cross-step BAP match
+          if (['sweeteners_binders', 'extracts_flavors', 'syrups_sauces'].includes(matched.category)) {
+            bapState.selectedSweeteners[item.id] = parsedQty > 0 ? parsedQty : (isDeluxe ? item.defaultQty24 : item.defaultQty16);
+          } else {
+            bapState.selectedMixins[item.id] = parsedQty > 0 ? parsedQty : (isDeluxe ? item.defaultQty24 : item.defaultQty16);
+          }
+        }
+
+        if (nameInput) nameInput.value = '';
+        toggleBapCustomCard(step, false);
+        renderBapGrids();
+        updateBapHUD();
+        showToast(`✅ Selected existing "${item.name}" from recipe ingredients!`);
+        return;
+      }
+
+      // 2. Existing pantry item or previous custom ingredient (not in BAP presets):
+      // Reuse existing ID, existing Name, and existing Category!
+      const catKey = matched.category;
+      const catIcon = (typeof CATEGORY_ICONS !== 'undefined' && CATEGORY_ICONS[catKey]) 
+        ? CATEGORY_ICONS[catKey] 
+        : '✨';
+
+      if (step === 1) {
+        const qty = parsedQty > 0 ? parsedQty : (isDeluxe ? 570 : 380);
+        let existingCard = bapState.customLiquids.find(c => c.id === matched.id);
+        if (!existingCard) {
+          existingCard = {
+            id: matched.id,
+            name: matched.name,
+            icon: catIcon,
+            desc: `Existing Pantry Liquid • ${catTitle}`,
+            unit: 'g',
+            defaultQty16: 380,
+            defaultQty24: 570,
+            step: 10,
+            min: 10,
+            max: 1000,
+            per100: { kcal: 45, p: 3, c: 4, f: 1.5 },
+            fatScore: 1.0,
+            caseinScore: 0.5,
+            stabilizerScore: 0.3,
+            isCustom: matched.isCustom,
+            category: catKey,
+            stepType: 'liquid'
+          };
+          bapState.customLiquids.push(existingCard);
+        }
+        bapState.selectedLiquid = matched.id;
+        bapState.liquidQty = qty;
+      } else if (step === 2) {
+        const qty = parsedQty > 0 ? parsedQty : (isDeluxe ? 30 : 25);
+        let existingCard = bapState.customPowders.find(c => c.id === matched.id);
+        if (!existingCard) {
+          existingCard = {
+            id: matched.id,
+            name: matched.name,
+            icon: catIcon,
+            desc: `Existing Pantry Powder • ${catTitle}`,
+            unit: 'g',
+            defaultQty16: 25,
+            defaultQty24: 30,
+            step: 5,
+            min: 5,
+            max: 150,
+            serving: 30,
+            perServing: { kcal: 40, p: 8, c: 1, f: 0.5 },
+            caseinScore: 0.5,
+            isCustom: matched.isCustom,
+            category: catKey,
+            stepType: 'powder'
+          };
+          bapState.customPowders.push(existingCard);
+        }
+        bapState.selectedPowders[matched.id] = qty;
+      } else if (step === 3) {
+        const qty = parsedQty > 0 ? parsedQty : 1;
+        let existingCard = bapState.customStabilizers.find(c => c.id === matched.id);
+        if (!existingCard) {
+          existingCard = {
+            id: matched.id,
+            name: matched.name,
+            icon: catIcon,
+            desc: `Existing Pantry Stabilizer • ${catTitle}`,
+            unit: 'g',
+            defaultQty16: 1,
+            defaultQty24: 1,
+            step: 1,
+            min: 1,
+            max: 50,
+            serving: 1,
+            perServing: { kcal: 5, p: 0, c: 1, f: 0 },
+            stabilizerScore: 0.8,
+            isCustom: matched.isCustom,
+            category: catKey,
+            stepType: 'stabilizer'
+          };
+          bapState.customStabilizers.push(existingCard);
+        }
+        bapState.selectedStabilizers[matched.id] = qty;
+      } else if (step === 4) {
+        const qty = parsedQty > 0 ? parsedQty : 20;
+        const isSweetenerType = ['sweeteners_binders', 'extracts_flavors', 'syrups_sauces'].includes(catKey);
+        if (isSweetenerType) {
+          let existingCard = bapState.customSweeteners.find(c => c.id === matched.id);
+          if (!existingCard) {
+            existingCard = {
+              id: matched.id,
+              name: matched.name,
+              icon: catIcon,
+              desc: `Existing Pantry Sweetener/Flavor • ${catTitle}`,
+              unit: 'g',
+              defaultQty16: 20,
+              defaultQty24: 25,
+              step: 1,
+              min: 1,
+              max: 100,
+              serving: 10,
+              perServing: { kcal: 5, p: 0, c: 1, f: 0 },
+              freezingScore: 0.3,
+              isCustom: matched.isCustom,
+              category: catKey,
+              stepType: 'sweetener'
+            };
+            bapState.customSweeteners.push(existingCard);
+          }
+          bapState.selectedSweeteners[matched.id] = qty;
+        } else {
+          let existingCard = bapState.customMixins.find(c => c.id === matched.id);
+          if (!existingCard) {
+            existingCard = {
+              id: matched.id,
+              name: matched.name,
+              icon: catIcon,
+              desc: `Existing Pantry Item • ${catTitle}`,
+              unit: 'g',
+              defaultQty16: 20,
+              defaultQty24: 25,
+              step: 5,
+              min: 5,
+              max: 200,
+              serving: 20,
+              perServing: { kcal: 50, p: 1, c: 8, f: 2 },
+              isMixin: true,
+              isCustom: matched.isCustom,
+              category: catKey,
+              stepType: 'mixin'
+            };
+            bapState.customMixins.push(existingCard);
+          }
+          bapState.selectedMixins[matched.id] = qty;
+        }
+      }
+
+      if (nameInput) nameInput.value = '';
+      toggleBapCustomCard(step, false);
+      renderBapGrids();
+      updateBapHUD();
+      showToast(`✅ Linked existing "${matched.name}" from your pantry!`);
+      return;
+    }
+
+    // 3. Genuinely brand-new custom ingredient:
     const catKey = getIngredientCategoryKey(name, hint);
     const catTitle = (typeof INGREDIENT_CATEGORIES !== 'undefined' && INGREDIENT_CATEGORIES[catKey]) 
       ? INGREDIENT_CATEGORIES[catKey] 
@@ -7377,13 +7834,6 @@
       : '✨';
 
     const customId = `bap_custom_${hint}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
-    const parsedQty = qtyInput ? parseFloat(qtyInput.value) : 0;
-
-    if (!bapState.customLiquids) bapState.customLiquids = [];
-    if (!bapState.customPowders) bapState.customPowders = [];
-    if (!bapState.customStabilizers) bapState.customStabilizers = [];
-    if (!bapState.customSweeteners) bapState.customSweeteners = [];
-    if (!bapState.customMixins) bapState.customMixins = [];
 
     if (step === 1) {
       const qty = parsedQty > 0 ? parsedQty : 380;
@@ -7654,19 +8104,22 @@
     const parsedIngs = ingredientsRaw.map(line => {
       const isMixin = line.toLowerCase().includes('(mix-in)');
       const cleanLine = sanitizeShoppingItemName(line);
-      let masterMatch = null;
-      if (typeof INGREDIENTS_MASTER !== 'undefined' && Array.isArray(INGREDIENTS_MASTER)) {
-        masterMatch = INGREDIENTS_MASTER.find(i => i.name.toLowerCase() === cleanLine.toLowerCase());
-      }
-      const slugId = masterMatch ? masterMatch.id : cleanLine.toLowerCase().replace(/[^a-z0-9]+/g, '_').trim();
+      const matched = findExistingPantryIngredient(cleanLine, isMixin ? 'mixin' : null);
+
+      const finalId = matched ? matched.id : cleanLine.toLowerCase().replace(/[^a-z0-9]+/g, '_').trim();
+      const finalName = matched ? matched.name : cleanLine;
+      const finalCategory = matched ? matched.category : getIngredientCategoryKey(cleanLine, isMixin ? 'mixin' : null);
+
       return {
-        id: slugId,
-        name: masterMatch ? masterMatch.name : cleanLine,
+        id: finalId,
+        name: finalName,
+        category: finalCategory,
         quantity: '',
         unit: '',
         raw: line.trim(),
         section: isMixin ? 'Mix-in' : 'Base',
         isMixin: isMixin,
+        isCustom: matched ? matched.isCustom : true,
         notes: ''
       };
     }).filter(i => i.name.length > 0);
