@@ -106,6 +106,10 @@
     'Fruit Of Your Choice': 'Fresh Fruit (Your Choice)',
     'Nuts Of Choice': 'Mixed Nuts (Your Choice)',
     'Mini Lucky-Charms-Style Marshmallows': 'Mini Cereal Marshmallows',
+    'Cinnamon Crunch Cereal': 'Cinnamon Toast Crunch',
+    'cinnamon crunch cereal': 'Cinnamon Toast Crunch',
+    'Cinnamon Cereal': 'Cinnamon Toast Crunch',
+    'cinnamon cereal': 'Cinnamon Toast Crunch',
     'cinnamon toast crunch': 'Cinnamon Toast Crunch',
     'Cinnamon toast crunch': 'Cinnamon Toast Crunch'
   };
@@ -685,6 +689,11 @@
           INGREDIENTS_MASTER.forEach(i => pantryState.add(i.id));
           localStorage.setItem(key, JSON.stringify(Array.from(pantryState)));
         }
+        if (pantryState.has('cinnamon_cereal')) {
+          pantryState.delete('cinnamon_cereal');
+          pantryState.add('cinnamon_toast_crunch');
+          localStorage.setItem(key, JSON.stringify(Array.from(pantryState)));
+        }
       } catch (e) {
         pantryState = new Set(DEFAULT_STAPLES);
       }
@@ -1223,6 +1232,11 @@
         pantryState = new Set(DEFAULT_STAPLES);
       }
     }
+    if (pantryState.has('cinnamon_cereal')) {
+      pantryState.delete('cinnamon_cereal');
+      pantryState.add('cinnamon_toast_crunch');
+      triggerCloudSync();
+    }
     const pantryKey = getPantryStorageKey();
     localStorage.setItem(pantryKey, JSON.stringify(Array.from(pantryState)));
     if (currentUser) {
@@ -1760,6 +1774,13 @@
     if (userChanged) {
       saveUserRecipeData();
     }
+
+    // Migrate legacy pantry ingredient keys (e.g. cinnamon_cereal -> cinnamon_toast_crunch)
+    if (pantryState && pantryState.has('cinnamon_cereal')) {
+      pantryState.delete('cinnamon_cereal');
+      pantryState.add('cinnamon_toast_crunch');
+      savePantry();
+    }
   }
 
   // --- Dynamic User-Accessible Ingredients Engine ---
@@ -1782,14 +1803,17 @@
       });
     });
 
-    // 3. Expand with equivalents (so interchangeable items can be stocked)
+    // 3. Expand with equivalents ONLY if the user already has that equivalent in their pantry,
+    // so we don't display redundant duplicate items that no accessible recipe actually needs
     const expandedRequiredIds = new Set(requiredIngIds);
     if (typeof INGREDIENT_EQUIVALENTS !== 'undefined') {
       Object.entries(INGREDIENT_EQUIVALENTS).forEach(([key, list]) => {
         if (requiredIngIds.has(key)) {
-          list.forEach(eq => expandedRequiredIds.add(eq));
-        } else if (list.some(eq => requiredIngIds.has(eq))) {
-          expandedRequiredIds.add(key);
+          list.forEach(eq => {
+            if (pantryState && pantryState.has(eq)) {
+              expandedRequiredIds.add(eq);
+            }
+          });
         }
       });
     }

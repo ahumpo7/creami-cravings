@@ -898,11 +898,6 @@ const INGREDIENTS_MASTER = [
       "category": "pudding_mixes"
   }  ,
 {
-      "id": "cinnamon_cereal",
-      "name": "Cinnamon Crunch Cereal",
-      "category": "mixins_snacks"
-  }  ,
-{
       "id": "cinnamon_toast_crunch",
       "name": "Cinnamon Toast Crunch",
       "category": "mixins_snacks"
@@ -19465,11 +19460,11 @@ const RECIPES_MASTER = [
               "notes": ""
           },
           {
-              "id": "cinnamon_cereal",
-              "name": "Cinnamon Crunch Cereal",
+              "id": "cinnamon_toast_crunch",
+              "name": "Cinnamon Toast Crunch",
               "quantity": "15",
               "unit": "g",
-              "raw": "15G CINNAMON CRUNCH CEREAL",
+              "raw": "15G CINNAMON TOAST CRUNCH",
               "section": "Mix-In",
               "isMixin": true,
               "notes": ""
