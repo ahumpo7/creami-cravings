@@ -87,5 +87,39 @@
     "created_at": "2026-10-04T19:09:44.349639",
     "last_active": "2026-10-05T02:08:35.799627",
     "token": "token_g_c4553eb1-e954-4258-bd86-dbedbb4b7547"
+  },
+  "eli@fitnessproductfinder.com": {
+    "id": "user_creator_eli",
+    "username": "eli",
+    "name": "Eli (Fitness Product Finder)",
+    "email": "eli@fitnessproductfinder.com",
+    "password": "f3c13397f8e1ec4a028a44af2cbd5075820b184faa1fa5f9659cb60ee5970ad1",
+    "role": "creator",
+    "pantry": [
+      "fat_free_ultra_filtered_milk",
+      "sweetener",
+      "xanthan_gum",
+      "salt",
+      "vanilla_bean_paste",
+      "cocoa_powder"
+    ],
+    "favorites": [],
+    "madeCounts": {},
+    "ratings": {},
+    "customRecipes": [],
+    "shoppingList": [],
+    "freezerPints": [],
+    "subscriptions": [
+      "All-Access",
+      "Base Flavors",
+      "Community Legends",
+      "Fan Favorites",
+      "No Protein",
+      "Keto",
+      "Lactose Free"
+    ],
+    "created_at": "2026-10-07T17:45:10.671690",
+    "last_active": "2026-10-07T17:45:10.671690",
+    "token": "token_creator_eli_001"
   }
 }

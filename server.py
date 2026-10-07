@@ -91,6 +91,34 @@ if 'admin' not in users_db:
         'token': 'token_admin_001'
     }
 
+# Ensure official Content Creator account for Eli (FPF) exists
+eli_email = 'eli@fitnessproductfinder.com'
+eli_user = next((u for u in users_db.values() if u.get('email', '').lower() == eli_email or u.get('username', '').lower() == 'eli'), None)
+if not eli_user:
+    eli_hash = hash_password('creami2026!')
+    users_db[eli_email] = {
+        'id': 'user_creator_eli',
+        'username': 'eli',
+        'name': 'Eli (Fitness Product Finder)',
+        'email': eli_email,
+        'password': eli_hash,
+        'role': 'creator',
+        'pantry': list(DEFAULT_STAPLES),
+        'favorites': [],
+        'madeCounts': {},
+        'ratings': {},
+        'customRecipes': [],
+        'shoppingList': [],
+        'freezerPints': [],
+        'subscriptions': list(ALL_SUBSCRIPTIONS),
+        'created_at': datetime.utcnow().isoformat(),
+        'last_active': datetime.utcnow().isoformat(),
+        'token': 'token_creator_eli_001'
+    }
+elif eli_user.get('role') != 'creator' or 'All-Access' not in eli_user.get('subscriptions', []):
+    eli_user['role'] = 'creator'
+    eli_user['subscriptions'] = list(ALL_SUBSCRIPTIONS)
+
 save_json_file(USERS_DB_FILE, users_db)
 
 def verify_google_token(credential):
@@ -687,17 +715,26 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
             username = data.get('username', '').strip().lower()
             password = data.get('password', '').strip()
 
-            if username not in users_db:
+            target_user = None
+            if username in users_db:
+                target_user = users_db[username]
+            else:
+                for k, u in users_db.items():
+                    if u.get('email', '').lower() == username or u.get('username', '').lower() == username:
+                        target_user = u
+                        break
+
+            if not target_user:
                 self._send_json({'error': 'Invalid username or password'}, 401)
                 return
 
-            user = users_db[username]
-            if user.get('password') != hash_password(password):
+            if target_user.get('password') != hash_password(password):
                 self._send_json({'error': 'Invalid username or password'}, 401)
                 return
 
             token = 'token_' + str(uuid.uuid4())
-            user['token'] = token
+            target_user['token'] = token
+            target_user['last_active'] = datetime.utcnow().isoformat()
             save_json_file(USERS_DB_FILE, users_db)
 
             self._send_json({
@@ -705,17 +742,19 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 'success': True,
                 'token': token,
                 'user': {
-                    'id': user.get('id'),
-                    'username': user.get('username'),
-                    'name': user.get('name') or user.get('username'),
-                    'email': user.get('email', ''),
-                    'role': user.get('role', 'user'),
-                    'pantry': user.get('pantry') if user.get('pantry') is not None else list(DEFAULT_STAPLES),
-                    'favorites': user.get('favorites', []),
-                    'madeCounts': user.get('madeCounts', {}),
-                    'ratings': user.get('ratings', {}),
-                    'customRecipes': user.get('customRecipes', []),
-                    'shoppingList': user.get('shoppingList', [])
+                    'id': target_user.get('id'),
+                    'username': target_user.get('username'),
+                    'name': target_user.get('name') or target_user.get('username'),
+                    'email': target_user.get('email', ''),
+                    'role': target_user.get('role', 'user'),
+                    'subscriptions': target_user.get('subscriptions', list(DEFAULT_SUBSCRIPTIONS)),
+                    'pantry': target_user.get('pantry') if target_user.get('pantry') is not None else list(DEFAULT_STAPLES),
+                    'favorites': target_user.get('favorites', []),
+                    'madeCounts': target_user.get('madeCounts', {}),
+                    'ratings': target_user.get('ratings', {}),
+                    'customRecipes': target_user.get('customRecipes', []),
+                    'shoppingList': target_user.get('shoppingList', []),
+                    'freezerPints': target_user.get('freezerPints', [])
                 }
             })
 
@@ -810,6 +849,99 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
             del users_db[key_to_delete]
             save_json_file(USERS_DB_FILE, users_db)
             self._send_json({'status': 'ok', 'success': True})
+
+        # Admin: Create New User Account
+        elif self.path == '/api/admin/user/create':
+            admin_user = self._get_user_from_token(data)
+            if not admin_user or admin_user.get('role') != 'admin':
+                self._send_json({'error': 'Unauthorized admin access'}, 403)
+                return
+
+            email = data.get('email', '').strip().lower()
+            name = data.get('name', '').strip()
+            username = data.get('username', '').strip().lower()
+            role = data.get('role', 'user').strip().lower()
+            password = data.get('password', '').strip()
+            subscriptions = data.get('subscriptions', [])
+
+            if not email and not username:
+                self._send_json({'error': 'Email or username is required'}, 400)
+                return
+
+            if not username:
+                username = email.split('@')[0] if email else f"user_{uuid.uuid4().hex[:6]}"
+
+            if not name:
+                name = username.capitalize()
+
+            if role not in ['admin', 'creator', 'vip', 'user']:
+                role = 'user'
+
+            # Check if user already exists
+            existing = None
+            for u in users_db.values():
+                if (email and u.get('email', '').lower() == email) or (username and u.get('username', '').lower() == username):
+                    existing = u
+                    break
+
+            if existing:
+                self._send_json({'error': f"User with this email or username already exists ({existing.get('email') or existing.get('username')})"}, 400)
+                return
+
+            now_iso = datetime.utcnow().isoformat()
+            user_id = f"user_{uuid.uuid4().hex[:8]}"
+
+            # Determine initial subscriptions
+            if not isinstance(subscriptions, list) or len(subscriptions) == 0:
+                if role in ['admin', 'creator', 'vip']:
+                    initial_subs = list(ALL_SUBSCRIPTIONS)
+                else:
+                    initial_subs = list(DEFAULT_SUBSCRIPTIONS)
+            else:
+                initial_subs = list(set(subscriptions))
+
+            # Password hashing
+            default_pass = password if password else 'creami123'
+            pass_hash = hash_password(default_pass)
+
+            new_user = {
+                'id': user_id,
+                'username': username,
+                'name': name,
+                'email': email,
+                'password': pass_hash,
+                'role': role,
+                'pantry': list(DEFAULT_STAPLES),
+                'favorites': [],
+                'madeCounts': {},
+                'ratings': {},
+                'customRecipes': [],
+                'shoppingList': [],
+                'freezerPints': [],
+                'subscriptions': initial_subs,
+                'created_at': now_iso,
+                'last_active': now_iso,
+                'token': f"token_{uuid.uuid4().hex}"
+            }
+
+            key = email if email else username
+            users_db[key] = new_user
+            save_json_file(USERS_DB_FILE, users_db)
+
+            self._send_json({
+                'status': 'ok',
+                'success': True,
+                'user': {
+                    'id': new_user['id'],
+                    'username': new_user['username'],
+                    'name': new_user['name'],
+                    'email': new_user['email'],
+                    'role': new_user['role'],
+                    'subscriptions': new_user['subscriptions'],
+                    'created_at': new_user['created_at'],
+                    'tempPassword': default_pass if not password else None
+                }
+            })
 
         # Admin: Resolve Access Claim / Inquiry
         elif self.path == '/api/admin/inquiry/resolve':

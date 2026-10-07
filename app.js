@@ -1191,6 +1191,32 @@
     }
   }
 
+  async function handlePasswordLogin(usernameOrEmail, password) {
+    if (!usernameOrEmail || !password) return;
+    try {
+      showToast('Signing in...');
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: usernameOrEmail.trim(),
+          password: password.trim()
+        })
+      });
+      const data = await res.json();
+      if (res.ok && (data.status === 'ok' || data.success)) {
+        applyUserSession(data);
+        closeGoogleAuthModal();
+        showToast(`👋 Welcome back, ${data.user.name || data.user.username}!`);
+      } else {
+        showToast('Login failed: ' + (data.error || data.message || 'Invalid username or password'));
+      }
+    } catch (err) {
+      console.error('Password login error:', err);
+      showToast('Connection error during sign-in.');
+    }
+  }
+
   function applyUserSession(data) {
     const ADMIN_EMAILS = ['admin@creamicravings.com', 'ahumpo7@gmail.com', 'ahumpo@gmail.com', 'andrew@gmail.com'];
     const email = (data.user.email || '').toLowerCase();
@@ -1662,6 +1688,32 @@
         const name = nameInput ? nameInput.value : '';
         if (email) {
           handleManualGoogleAuth(email, name);
+        }
+      });
+    }
+
+    const togglePasswordBtn = document.getElementById('btnTogglePasswordAuth');
+    const passwordForm = document.getElementById('passwordAuthForm');
+    if (togglePasswordBtn && passwordForm) {
+      togglePasswordBtn.addEventListener('click', () => {
+        const isHidden = passwordForm.style.display === 'none' || !passwordForm.style.display;
+        passwordForm.style.display = isHidden ? 'block' : 'none';
+        if (isHidden) {
+          const userField = document.getElementById('authLoginUsername');
+          if (userField) setTimeout(() => userField.focus(), 50);
+        }
+      });
+    }
+
+    if (passwordForm) {
+      passwordForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const userInput = document.getElementById('authLoginUsername');
+        const passInput = document.getElementById('authLoginPassword');
+        const userVal = userInput ? userInput.value : '';
+        const passVal = passInput ? passInput.value : '';
+        if (userVal && passVal) {
+          handlePasswordLogin(userVal, passVal);
         }
       });
     }
@@ -9069,6 +9121,95 @@
     }
   }
 
+  function openAdminCreateUserModal() {
+    const overlay = document.getElementById('adminCreateUserModalOverlay');
+    const form = document.getElementById('adminCreateUserForm');
+    if (!overlay) return;
+    if (form) form.reset();
+    const customSubsGrid = document.getElementById('adminNewUserCustomSubs');
+    if (customSubsGrid) customSubsGrid.style.display = 'none';
+    overlay.classList.add('active');
+    overlay.setAttribute('aria-hidden', 'false');
+    const emailInput = document.getElementById('adminNewUserEmail');
+    if (emailInput) setTimeout(() => emailInput.focus(), 50);
+  }
+
+  function closeAdminCreateUserModal() {
+    const overlay = document.getElementById('adminCreateUserModalOverlay');
+    if (!overlay) return;
+    overlay.classList.remove('active');
+    overlay.setAttribute('aria-hidden', 'true');
+  }
+
+  async function handleAdminCreateUser(e) {
+    e.preventDefault();
+    const emailInput = document.getElementById('adminNewUserEmail');
+    const nameInput = document.getElementById('adminNewUserName');
+    const usernameInput = document.getElementById('adminNewUserUsername');
+    const passwordInput = document.getElementById('adminNewUserPassword');
+    const roleSelect = document.getElementById('adminNewUserRole');
+
+    const email = emailInput ? emailInput.value.trim() : '';
+    const name = nameInput ? nameInput.value.trim() : '';
+    const username = usernameInput ? usernameInput.value.trim() : '';
+    const password = passwordInput ? passwordInput.value.trim() : '';
+    const role = roleSelect ? roleSelect.value : 'user';
+
+    if (!email && !username) {
+      showToast('⚠️ Email or username is required.');
+      return;
+    }
+
+    const presetRadio = document.querySelector('input[name="adminNewUserTierPreset"]:checked');
+    const preset = presetRadio ? presetRadio.value : 'free';
+
+    let subscriptions = ['Community Legends'];
+    if (preset === 'allaccess') {
+      subscriptions = [...ALL_CATEGORY_SUBSCRIPTIONS];
+    } else if (preset === 'custom') {
+      const checkedBoxes = document.querySelectorAll('#adminNewUserCustomSubs .chk-custom-sub:checked');
+      checkedBoxes.forEach(chk => {
+        if (!subscriptions.includes(chk.value)) subscriptions.push(chk.value);
+      });
+    }
+
+    try {
+      showToast('Creating user account...');
+      const res = await fetch('/api/admin/user/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': currentUser.token ? `Bearer ${currentUser.token}` : '',
+          'X-User-Email': currentUser.email || ''
+        },
+        body: JSON.stringify({
+          token: currentUser.token,
+          adminEmail: currentUser.email,
+          email,
+          name,
+          username,
+          password,
+          role,
+          subscriptions
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        closeAdminCreateUserModal();
+        const tempPass = data.user.tempPassword || password || 'creami123';
+        showToast(`✅ Created user "${data.user.name}" (${data.user.role})!`);
+        alert(`🎉 User Account Created Successfully!\n\nEmail: ${data.user.email}\nUsername: ${data.user.username}\nRole: ${data.user.role}\nPassword: ${tempPass}\n\nYou can share these credentials with the user or content creator.`);
+        await fetchAdminUsers();
+      } else {
+        showToast('Error: ' + (data.error || 'Failed to create user'));
+      }
+    } catch (err) {
+      console.error('Create user error:', err);
+      showToast('Connection error while creating user.');
+    }
+  }
+
   // --- Event Bindings ---
   function bindEvents() {
     // Delegated click listener for Pantry items and category headers
@@ -9613,6 +9754,35 @@
         fetchAdminUsers();
       });
     }
+
+    const btnOpenCreateUser = document.getElementById('btnAdminOpenCreateUserModal');
+    if (btnOpenCreateUser) {
+      btnOpenCreateUser.addEventListener('click', openAdminCreateUserModal);
+    }
+    const btnCloseCreateUser = document.getElementById('btnCloseAdminCreateUser');
+    if (btnCloseCreateUser) {
+      btnCloseCreateUser.addEventListener('click', closeAdminCreateUserModal);
+    }
+    const btnCancelCreateUser = document.getElementById('btnAdminCancelCreateUser');
+    if (btnCancelCreateUser) {
+      btnCancelCreateUser.addEventListener('click', closeAdminCreateUserModal);
+    }
+    const createUserOverlay = document.getElementById('adminCreateUserModalOverlay');
+    if (createUserOverlay) {
+      createUserOverlay.addEventListener('click', (e) => {
+        if (e.target === createUserOverlay) closeAdminCreateUserModal();
+      });
+    }
+    const createUserForm = document.getElementById('adminCreateUserForm');
+    if (createUserForm) {
+      createUserForm.addEventListener('submit', handleAdminCreateUser);
+    }
+    document.querySelectorAll('input[name="adminNewUserTierPreset"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        const customGrid = document.getElementById('adminNewUserCustomSubs');
+        if (customGrid) customGrid.style.display = e.target.value === 'custom' ? 'grid' : 'none';
+      });
+    });
 
     // Admin Navigation Tabs Switcher
     const tabBtnAdminUsers = document.getElementById('tabBtnAdminUsers');

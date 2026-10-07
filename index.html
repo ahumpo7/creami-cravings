@@ -1206,6 +1206,27 @@
           <span>Connect Google Account</span>
         </button>
       </form>
+
+      <!-- Password Login Toggle & Form -->
+      <div style="margin-top: 14px; text-align: center;">
+        <button type="button" id="btnTogglePasswordAuth" style="background: none; border: none; color: #34d399; font-size: 0.82rem; font-weight: 600; cursor: pointer; text-decoration: underline;">
+          🔑 Sign in with Email / Username &amp; Password
+        </button>
+      </div>
+
+      <form id="passwordAuthForm" class="quick-auth-form" style="display: none; margin-top: 12px;">
+        <div class="form-group">
+          <label for="authLoginUsername">Username or Email</label>
+          <input type="text" id="authLoginUsername" required placeholder="e.g. eli or name@example.com" autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label for="authLoginPassword">Password</label>
+          <input type="password" id="authLoginPassword" required placeholder="Enter password" autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn-primary btn-block" id="btnPasswordLogin">
+          <span>Sign In</span>
+        </button>
+      </form>
     </div>
   </div>
 
@@ -1517,7 +1538,10 @@
             <button type="button" class="btn-time-preset" data-role="user">👤 Standard</button>
             <button type="button" class="btn-time-preset" data-role="allaccess">✨ All-Access</button>
           </div>
-          <button type="button" class="btn-secondary" id="adminRefreshUsersBtn" title="Refresh user list">🔄 Refresh</button>
+          <div class="admin-toolbar-actions">
+            <button type="button" class="btn-primary" id="btnAdminOpenCreateUserModal" style="white-space: nowrap;">➕ Create User</button>
+            <button type="button" class="btn-secondary" id="adminRefreshUsersBtn" title="Refresh user list">🔄 Refresh</button>
+          </div>
         </div>
 
         <div class="admin-users-list" id="adminUsersList">
@@ -1541,6 +1565,87 @@
           <!-- Rendered dynamically by app.js -->
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Modal: Admin Create User -->
+  <div class="modal-overlay" id="adminCreateUserModalOverlay" aria-hidden="true" role="dialog" aria-modal="true" style="z-index: 10100;">
+    <div class="modal-dialog admin-create-user-dialog" role="document">
+      <div class="modal-header">
+        <div class="modal-header-text">
+          <h2 class="modal-title">➕ Create New User Account</h2>
+          <p class="modal-subtitle">Provision a new account, configure their system role, and set initial pack subscriptions.</p>
+        </div>
+        <button class="modal-close" id="btnCloseAdminCreateUser" aria-label="Close modal">&times;</button>
+      </div>
+      <form id="adminCreateUserForm" class="admin-create-user-form">
+        <div class="admin-form-row">
+          <div class="admin-form-group">
+            <label for="adminNewUserEmail" class="admin-form-label">Email Address <span class="required" style="color: #ef4444;">*</span></label>
+            <input type="email" id="adminNewUserEmail" class="admin-form-input" placeholder="user@example.com" required autocomplete="off">
+          </div>
+          <div class="admin-form-group">
+            <label for="adminNewUserName" class="admin-form-label">Full Name / Display Name</label>
+            <input type="text" id="adminNewUserName" class="admin-form-input" placeholder="e.g. Alex Smith" autocomplete="off">
+          </div>
+        </div>
+
+        <div class="admin-form-row">
+          <div class="admin-form-group">
+            <label for="adminNewUserUsername" class="admin-form-label">Username (Optional)</label>
+            <input type="text" id="adminNewUserUsername" class="admin-form-input" placeholder="Auto-generated from email if blank" autocomplete="off">
+          </div>
+          <div class="admin-form-group">
+            <label for="adminNewUserPassword" class="admin-form-label">Initial Password</label>
+            <input type="text" id="adminNewUserPassword" class="admin-form-input" placeholder="Default: creami123" autocomplete="off">
+            <span class="admin-form-hint" style="font-size: 0.74rem; color: var(--text-dim); margin-top: 4px; display: block;">Users can log in with this password or with Google sign-in.</span>
+          </div>
+        </div>
+
+        <div class="admin-form-group" style="margin-top: 12px;">
+          <label for="adminNewUserRole" class="admin-form-label">System Role</label>
+          <select id="adminNewUserRole" class="admin-form-select">
+            <option value="user">👤 Standard User</option>
+            <option value="creator">🧑‍🍳 Content Creator (Partner attribution)</option>
+            <option value="vip">⭐ VIP / Tester (Auto-unlocks all recipes)</option>
+            <option value="admin">👑 Administrator (Full access)</option>
+          </select>
+        </div>
+
+        <div class="admin-form-group" style="margin-top: 14px;">
+          <label class="admin-form-label">Recipe Pack Subscriptions</label>
+          <div class="admin-sub-presets-row" style="display: flex; gap: 14px; margin-top: 6px; flex-wrap: wrap;">
+            <label class="admin-radio-label" style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; cursor: pointer;">
+              <input type="radio" name="adminNewUserTierPreset" value="free" checked>
+              <span>🆓 Free Starter Tier (Community Legends)</span>
+            </label>
+            <label class="admin-radio-label" style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; cursor: pointer;">
+              <input type="radio" name="adminNewUserTierPreset" value="allaccess">
+              <span>👑 All-Access (All books unlocked)</span>
+            </label>
+            <label class="admin-radio-label" style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; cursor: pointer;">
+              <input type="radio" name="adminNewUserTierPreset" value="custom">
+              <span>⚙️ Custom Selection</span>
+            </label>
+          </div>
+
+          <div class="admin-custom-subs-grid" id="adminNewUserCustomSubs" style="display: none; margin-top: 12px; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px;">
+            <label class="admin-checkbox-label" style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--text-dim);"><input type="checkbox" value="Community Legends" checked disabled> Community Legends (Free)</label>
+            <label class="admin-checkbox-label" style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem;"><input type="checkbox" value="Base Flavors" class="chk-custom-sub"> Base Flavors</label>
+            <label class="admin-checkbox-label" style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem;"><input type="checkbox" value="Fan Favorites" class="chk-custom-sub"> Fan Favorites</label>
+            <label class="admin-checkbox-label" style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem;"><input type="checkbox" value="Keto" class="chk-custom-sub"> Keto &amp; Low Carb</label>
+            <label class="admin-checkbox-label" style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem;"><input type="checkbox" value="Lactose Free" class="chk-custom-sub"> Lactose Free</label>
+            <label class="admin-checkbox-label" style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem;"><input type="checkbox" value="No Protein" class="chk-custom-sub"> No Protein</label>
+          </div>
+        </div>
+
+        <div class="modal-actions" style="margin-top: 24px; display: flex; justify-content: flex-end; gap: 12px;">
+          <button type="button" class="btn-secondary" id="btnAdminCancelCreateUser">Cancel</button>
+          <button type="submit" class="btn-primary" id="btnAdminSubmitCreateUser">
+            <span>➕ Create User Account</span>
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 

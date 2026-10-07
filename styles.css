@@ -9041,5 +9041,81 @@ body.modal-open .cookie-consent-banner {
   color: #f87171;
 }
 
+/* Admin Toolbar Actions */
+.admin-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
+.btn-admin-create-user {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #fff;
+  font-weight: 700;
+  border: none;
+}
 
+/* Admin Create User Modal */
+.admin-create-user-dialog {
+  max-width: 580px;
+  width: 95%;
+  background: var(--bg-card);
+  border: 1px solid var(--border-item);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-xl);
+}
+
+.admin-create-user-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.admin-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+@media (max-width: 600px) {
+  .admin-form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.admin-form-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.admin-form-input,
+.admin-form-select {
+  padding: 10px 12px;
+  font-size: 0.88rem;
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-item);
+  color: var(--text-main);
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-form-input:focus,
+.admin-form-select:focus {
+  border-color: #34d399;
+  box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.2);
+}
+
+.admin-form-select option {
+  background: #1e293b;
+  color: #fff;
+}
