@@ -790,7 +790,7 @@
           if (!currentUser.subscriptions || !Array.isArray(currentUser.subscriptions)) {
             currentUser.subscriptions = isAdmin 
               ? ['All-Access', 'Base Flavors', 'Community Legends', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free'] 
-              : ['Base Flavors', 'Community Legends'];
+              : ['Community Legends'];
           } else if (isAdmin && !currentUser.subscriptions.includes('All-Access')) {
             currentUser.subscriptions = ['All-Access', 'Base Flavors', 'Community Legends', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free'];
           }
@@ -1204,7 +1204,7 @@
       role: isAdmin ? 'admin' : (data.user.role || 'user'),
       subscriptions: isAdmin 
         ? ['All-Access', 'Base Flavors', 'Community Legends', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free']
-        : (data.user.subscriptions || ['Base Flavors', 'Community Legends']),
+        : (data.user.subscriptions || ['Community Legends']),
       token: data.token || (currentUser ? currentUser.token : '')
     };
     saveUserAuth();
@@ -1405,17 +1405,24 @@
     return String(cat).toLowerCase().replace(/[^a-z0-9]/g, '');
   }
 
+  // Strict check for universal starter base trio: Chocolate, Vanilla, Strawberry
+  function isExactBaseTrio(recipe) {
+    if (!recipe || !recipe.name) return false;
+    const cleanName = recipe.name.trim().toLowerCase();
+    return cleanName === 'chocolate' || cleanName === 'vanilla' || cleanName === 'strawberry';
+  }
+
   function isCategoryUnlocked(categoryName) {
-    if (!categoryName || categoryName === 'all' || categoryName === 'Base Flavors' || categoryName === 'Community Legends' || categoryName === 'favorites' || categoryName === 'Custom') {
+    if (!categoryName || categoryName === 'all' || categoryName === 'Community Legends' || categoryName === 'favorites' || categoryName === 'Custom') {
       return true;
     }
     if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'vip')) return true;
-    const subs = (currentUser && Array.isArray(currentUser.subscriptions)) ? currentUser.subscriptions : ['Base Flavors', 'Community Legends'];
+    const subs = (currentUser && Array.isArray(currentUser.subscriptions)) ? currentUser.subscriptions : ['Community Legends'];
     if (subs.includes('All-Access')) return true;
     const norm = normalizeCategoryName(categoryName);
     return subs.some(s => {
       const normS = normalizeCategoryName(s);
-      return normS.includes(norm) || norm.includes(normS);
+      return normS === norm || (normS.length > 3 && norm.includes(normS));
     });
   }
 
@@ -1424,26 +1431,36 @@
     if (recipe.category === 'Custom' || recipe.isPersonal || (recipe.id && recipe.id.startsWith('custom_'))) {
       return ['Custom'];
     }
+    // Universal free starter trio strictly shows Base Flavors tag unless user owns more packs
+    if (isExactBaseTrio(recipe)) {
+      const cats = (recipe.categories && recipe.categories.length > 0) ? recipe.categories : ['Base Flavors'];
+      const accessible = cats.filter(c => {
+        if (c === 'Base Flavors' || c === 'Community Legends') return true;
+        return isCategoryUnlocked(c);
+      });
+      return accessible.length > 0 ? accessible : ['Base Flavors'];
+    }
     const cats = (recipe.categories && recipe.categories.length > 0)
       ? recipe.categories
       : [recipe.category || 'Base Flavors'];
 
-    return cats.filter(c => isCategoryUnlocked(c));
+    return cats.filter(c => {
+      if (c === 'Community Legends') return true;
+      if (c === 'Base Flavors') {
+        return isRecipeAccessible(recipe);
+      }
+      return isCategoryUnlocked(c);
+    });
   }
 
   function getRecipeRequiredTier(recipe) {
-    if (!recipe) return 'Base Flavors';
+    if (!recipe) return 'All-Access';
     if (recipe.category === 'Custom' || recipe.isPersonal || (recipe.id && recipe.id.startsWith('custom_'))) {
       return 'Custom';
     }
     const cats = (recipe.categories && recipe.categories.length > 0)
       ? recipe.categories
-      : [recipe.category || 'Base Flavors'];
-
-    // Universal free starter tier: Base Flavors is accessible to all
-    if (cats.some(c => normalizeCategoryName(c).includes('base'))) {
-      return 'Base Flavors';
-    }
+      : [recipe.category || 'All-Access'];
 
     for (const c of cats) {
       const norm = normalizeCategoryName(c);
@@ -1452,7 +1469,10 @@
       if (norm.includes('lactose')) return 'Lactose Free';
       if (norm.includes('noprot')) return 'No Protein';
     }
-    return cats[0] || 'Fan Favorites';
+    if (cats.some(c => normalizeCategoryName(c).includes('base'))) {
+      return 'All-Access';
+    }
+    return cats[0] || 'All-Access';
   }
 
   function isRecipeAccessible(recipe) {
@@ -1460,7 +1480,43 @@
     if (recipe.category === 'Custom' || recipe.isPersonal || (recipe.id && recipe.id.startsWith('custom_'))) {
       return true;
     }
-    return getAccessibleRecipeCategories(recipe).length > 0;
+    // Free universal starter base trio (Chocolate, Vanilla, Strawberry)
+    if (isExactBaseTrio(recipe)) {
+      return true;
+    }
+    // Free community recipes
+    if (
+      recipe.category === 'Community Legends' ||
+      recipe.sourceFile === 'Community Legends' ||
+      (recipe.categories && recipe.categories.includes('Community Legends'))
+    ) {
+      return true;
+    }
+
+    // All remaining recipes are Eli (FPF) recipes! Gated behind the Eli paywall.
+    if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'vip')) {
+      return true;
+    }
+    const subs = (currentUser && Array.isArray(currentUser.subscriptions)) ? currentUser.subscriptions : ['Community Legends'];
+    if (subs.includes('All-Access')) {
+      return true;
+    }
+
+    const cats = (recipe.categories && recipe.categories.length > 0)
+      ? recipe.categories
+      : [recipe.category || 'All-Access'];
+
+    return cats.some(c => {
+      if (c === 'Community Legends') return true;
+      if (c === 'Base Flavors') {
+        return subs.includes('All-Access') || subs.includes('Base Flavors');
+      }
+      const normC = normalizeCategoryName(c);
+      return subs.some(s => {
+        const normS = normalizeCategoryName(s);
+        return normS === normC || (normS.length > 3 && normC.includes(normS));
+      });
+    });
   }
 
   function getRecipeCreator(recipe) {
@@ -1471,7 +1527,8 @@
       recipe.category === 'Custom' ||
       recipe.isPersonal ||
       (recipe.id && recipe.id.startsWith('custom_')) ||
-      recipe.sourceFile === 'Community Legends'
+      recipe.sourceFile === 'Community Legends' ||
+      isExactBaseTrio(recipe)
     ) {
       return null;
     }
@@ -1487,7 +1544,8 @@
       recipe.category === 'Custom' ||
       recipe.isPersonal ||
       (recipe.id && recipe.id.startsWith('custom_')) ||
-      recipe.sourceFile === 'Community Legends'
+      recipe.sourceFile === 'Community Legends' ||
+      isExactBaseTrio(recipe)
     ) {
       return null;
     }
@@ -1501,7 +1559,7 @@
       const match = BOOKS_MASTER.find(b => b.categoryKey === cat || b.bookKey === cat);
       if (match) return match;
     }
-    return BOOKS_MASTER.find(b => b.id === 'fpf_fan_favorites') || null;
+    return BOOKS_MASTER.find(b => b.id === 'fpf_complete_bundle') || null;
   }
 
   // --- Modal Scroll & Overscroll Containment Helpers ---
@@ -2547,12 +2605,16 @@
       const isPersonal = Boolean(recipe.isPersonal || (recipe.id && recipe.id.startsWith('custom_')));
       const accessibleCategories = getAccessibleRecipeCategories(recipe);
       const requiredTier = getRecipeRequiredTier(recipe);
+      const creator = getRecipeCreator(recipe);
 
       let tagsHtml = '';
       if (isPersonal) {
         tagsHtml = '<span class="book-tag custom" title="Personal custom recipe saved to your Google account">🔒 Personal Recipe</span>';
       } else {
         tagsHtml = accessibleCategories.map(c => `<span class="book-tag ${getCategoryClass(c)}">${c}</span>`).join('');
+      }
+      if (creator) {
+        tagsHtml += `<span class="creator-badge-tag" title="Recipe by ${creator.name} (${creator.brandName})">📖 ${creator.name} (FPF)</span>`;
       }
       if (!isAccessible) {
         tagsHtml += `<span class="locked-badge" title="Exclusive ${requiredTier} pack">🔒 ${requiredTier} Pack</span>`;
@@ -8601,7 +8663,7 @@
     const roleFilter = adminFilterRole || 'all';
 
     const filtered = adminUsersState.filter(u => {
-      const subs = Array.isArray(u.subscriptions) ? u.subscriptions : ['Base Flavors', 'Community Legends'];
+      const subs = Array.isArray(u.subscriptions) ? u.subscriptions : ['Community Legends'];
       if (roleFilter === 'admin' && u.role !== 'admin') return false;
       if (roleFilter === 'creator' && u.role !== 'creator') return false;
       if (roleFilter === 'vip' && u.role !== 'vip') return false;
@@ -8632,7 +8694,7 @@
       const userEmail = (u.email || '').toLowerCase();
       const isRootAdmin = ADMIN_ROOTS.includes(userEmail);
       const isCurrentAdmin = (currentUser && currentUser.email && currentUser.email.toLowerCase() === userEmail);
-      const subs = Array.isArray(u.subscriptions) ? u.subscriptions : ['Base Flavors', 'Community Legends'];
+      const subs = Array.isArray(u.subscriptions) ? u.subscriptions : ['Community Legends'];
       const hasAllAccess = subs.includes('All-Access');
       const avatarUrl = u.picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name || u.username || 'User')}&background=059669&color=fff&bold=true`;
       
@@ -8727,7 +8789,7 @@
         const newRole = sel.value;
         const user = adminUsersState.find(u => u.id === userId);
         if (!user) return;
-        await updateUserPermissions(user.id, user.email, user.subscriptions || ['Base Flavors'], newRole);
+        await updateUserPermissions(user.id, user.email, user.subscriptions || ['Community Legends'], newRole);
       });
     });
 
@@ -8748,7 +8810,7 @@
         const userId = btn.dataset.userId;
         const user = adminUsersState.find(u => u.id === userId);
         if (!user) return;
-        const newSubs = ['Base Flavors', 'Community Legends'];
+        const newSubs = ['Community Legends'];
         await updateUserPermissions(user.id, user.email, newSubs, user.role || 'user');
       });
     });
@@ -8777,18 +8839,18 @@
         const user = adminUsersState.find(u => u.id === userId);
         if (!user) return;
 
-        let curSubs = Array.isArray(user.subscriptions) ? [...user.subscriptions] : ['Base Flavors', 'Community Legends'];
+        let curSubs = Array.isArray(user.subscriptions) ? [...user.subscriptions] : ['Community Legends'];
 
         if (subName === 'All-Access') {
           if (curSubs.includes('All-Access')) {
-            curSubs = ['Base Flavors', 'Community Legends'];
+            curSubs = ['Community Legends'];
           } else {
             curSubs = [...ALL_CATEGORY_SUBSCRIPTIONS];
           }
         } else {
           if (curSubs.includes(subName)) {
-            if (subName === 'Base Flavors' && curSubs.length === 1) {
-              showToast('Base Flavors is the universal starter pack and cannot be removed.');
+            if (subName === 'Community Legends' && curSubs.length === 1) {
+              showToast('Community Legends is the free community pack and cannot be removed.');
               return;
             }
             curSubs = curSubs.filter(s => s !== subName && s !== 'All-Access');
@@ -9143,9 +9205,19 @@
           showToast('🔒 Please sign in to view your favorite recipes!');
           return;
         }
+        const targetCategory = btn.dataset.category;
+        if (activeCategory === targetCategory && targetCategory !== 'all') {
+          activeCategory = 'all';
+          categoryTabs.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+          const allTab = categoryTabs.querySelector('[data-category="all"]');
+          if (allTab) allTab.classList.add('active');
+          renderRecipes();
+          return;
+        }
+
         categoryTabs.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        activeCategory = btn.dataset.category;
+        activeCategory = targetCategory;
         renderRecipes();
       });
     }
@@ -9257,11 +9329,25 @@
       quickFilterChipsBar.addEventListener('click', (e) => {
         const btn = e.target.closest('.filter-chip');
         if (!btn || btn.id === 'toggleMacroSlidersBtn') return;
+        const filterVal = btn.dataset.filter;
+
+        // If clicking on an already active filter (and it's not 'all'), toggle it off!
+        if (activeQuickFilter === filterVal && filterVal !== 'all') {
+          activeQuickFilter = 'all';
+          quickFilterChipsBar.querySelectorAll('.filter-chip').forEach(b => {
+            if (b.id !== 'toggleMacroSlidersBtn') b.classList.remove('active');
+          });
+          const allChip = quickFilterChipsBar.querySelector('[data-filter="all"]');
+          if (allChip) allChip.classList.add('active');
+          renderRecipes();
+          return;
+        }
+
         quickFilterChipsBar.querySelectorAll('.filter-chip').forEach(b => {
           if (b.id !== 'toggleMacroSlidersBtn') b.classList.remove('active');
         });
         btn.classList.add('active');
-        activeQuickFilter = btn.dataset.filter;
+        activeQuickFilter = filterVal;
         renderRecipes();
       });
     }

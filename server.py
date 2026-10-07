@@ -36,7 +36,7 @@ STATS_DB_FILE = os.path.join(DIRECTORY, 'db_recipe_stats.json')
 DEFAULT_STAPLES = []
 
 ALL_SUBSCRIPTIONS = ["All-Access", "Base Flavors", "Community Legends", "Fan Favorites", "No Protein", "Keto", "Lactose Free"]
-DEFAULT_SUBSCRIPTIONS = ["Base Flavors", "Community Legends"]
+DEFAULT_SUBSCRIPTIONS = ["Community Legends"]
 
 # Admin accounts designated by verified email
 ADMIN_EMAILS = [
