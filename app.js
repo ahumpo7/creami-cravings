@@ -2339,7 +2339,8 @@
         const nameMatch = recipe.name.toLowerCase().includes(q);
         const spinMatch = (recipe.spinSetting || '').toLowerCase().includes(q);
         const ingMatch = (recipe.ingredients || []).some(i => i.name.toLowerCase().includes(q));
-        if (!nameMatch && !spinMatch && !ingMatch) return false;
+        const aliasMatch = (recipe.aliases || []).some(a => a.toLowerCase().includes(q));
+        if (!nameMatch && !spinMatch && !ingMatch && !aliasMatch) return false;
       }
 
       return true;

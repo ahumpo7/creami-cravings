@@ -1024,17 +1024,17 @@ const INGREDIENTS_MASTER = [
   },
   {
       "id": "c4_reeses_protein_powder",
-      "name": "C4 Reese's Protein Powder",
+      "name": "Peanut Butter Cup Protein Powder",
       "category": "protein_powders"
   },
   {
       "id": "c4_vanilla_bean_protein_powder",
-      "name": "C4 Vanilla Bean Protein Powder",
+      "name": "Vanilla Bean Protein Powder",
       "category": "protein_powders"
   },
   {
       "id": "c4_hersheys_protein_powder",
-      "name": "C4 Hershey's Protein Powder",
+      "name": "Milk Chocolate Protein Powder",
       "category": "protein_powders"
   },
   {
@@ -1069,12 +1069,12 @@ const INGREDIENTS_MASTER = [
   },
   {
       "id": "gatsby_chocolate_bar",
-      "name": "Gatsby Chocolate Bar",
+      "name": "Low-Calorie Chocolate Bar",
       "category": "mixins_snacks"
   },
   {
       "id": "cadbury_mini_eggs",
-      "name": "Cadbury Mini Eggs",
+      "name": "Candy-Coated Mini Chocolate Eggs",
       "category": "mixins_snacks"
   },
   {
@@ -1089,7 +1089,7 @@ const INGREDIENTS_MASTER = [
   },
   {
       "id": "legendary_foods_donuts",
-      "name": "Legendary Foods Protein Chocolate Dip Donuts",
+      "name": "Protein Chocolate Glazed Donuts",
       "category": "mixins_snacks"
   }
 
@@ -20031,7 +20031,7 @@ const RECIPES_MASTER = [
         "name": "Fat Free Ultra-Filtered Milk",
         "quantity": "400",
         "unit": "g",
-        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "raw": "400G FAT FREE ULTRA-FILTERED MILK",
         "section": "Base",
         "isMixin": false,
         "notes": ""
@@ -20132,7 +20132,7 @@ const RECIPES_MASTER = [
         "name": "Fat Free Ultra-Filtered Milk",
         "quantity": "400",
         "unit": "g",
-        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "raw": "400G FAT FREE ULTRA-FILTERED MILK",
         "section": "Base",
         "isMixin": false,
         "notes": ""
@@ -20233,7 +20233,7 @@ const RECIPES_MASTER = [
         "name": "Fat Free Ultra-Filtered Milk",
         "quantity": "400",
         "unit": "g",
-        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "raw": "400G FAT FREE ULTRA-FILTERED MILK",
         "section": "Base",
         "isMixin": false,
         "notes": ""
@@ -20435,7 +20435,7 @@ const RECIPES_MASTER = [
         "name": "Peanut Butter Protein Powder",
         "quantity": "0.5",
         "unit": "scoop",
-        "raw": "\u00bd SCOOP PEANUT BUTTER PROTEIN POWDER (I USE RYSE SKIPPY PB PROTEIN) (CAN SUB WITH 2 TBSP OF PB POWDER LIKE PB FIT)",
+        "raw": "\u00bd SCOOP PEANUT BUTTER PROTEIN POWDER (OR 2 TBSP PB POWDER)",
         "section": "Base",
         "isMixin": false,
         "notes": "Can sub with 2 tbsp PB powder like PB Fit"
@@ -20475,7 +20475,7 @@ const RECIPES_MASTER = [
   },
   {
     "id": "reeses_base",
-    "name": "Reese\u2019s",
+    "name": "Peanut Butter Cup",
     "category": "Base Flavors",
     "categories": [
       "Base Flavors"
@@ -20506,17 +20506,17 @@ const RECIPES_MASTER = [
         "name": "Fat Free Ultra-Filtered Milk",
         "quantity": "400",
         "unit": "g",
-        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "raw": "400G FAT FREE ULTRA-FILTERED MILK",
         "section": "Base",
         "isMixin": false,
         "notes": ""
       },
       {
         "id": "c4_reeses_protein_powder",
-        "name": "C4 Reese's Protein Powder",
+        "name": "Peanut Butter Cup Protein Powder",
         "quantity": "1",
         "unit": "scoop",
-        "raw": "1 SCOOP C4 REESE\u2019S PROTEIN POWDER",
+        "raw": "1 SCOOP PEANUT BUTTER CUP PROTEIN POWDER",
         "section": "Base",
         "isMixin": false,
         "notes": ""
@@ -20558,11 +20558,14 @@ const RECIPES_MASTER = [
       "SPIN ON \"LITE ICE CREAM\" SETTING",
       "SPIN ON \"RESPIN\" SETTING",
       "RESPIN AGAIN IF POWDERY",
-      "TOP WITH REESE\u2019S (OPTIONAL)"
+      "TOP WITH PEANUT BUTTER CUP PIECES (OPTIONAL)"
     ],
     "aliases": [
       "reeses_base",
-      "reeses_flavor_base"
+      "reeses_flavor_base",
+      "peanut_butter_cup_base",
+      "reese",
+      "reeses"
     ]
   },
   {
@@ -20598,17 +20601,17 @@ const RECIPES_MASTER = [
         "name": "Fat Free Ultra-Filtered Milk",
         "quantity": "400",
         "unit": "g",
-        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "raw": "400G FAT FREE ULTRA-FILTERED MILK",
         "section": "Base",
         "isMixin": false,
         "notes": ""
       },
       {
         "id": "c4_vanilla_bean_protein_powder",
-        "name": "C4 Vanilla Bean Protein Powder",
+        "name": "Vanilla Bean Protein Powder",
         "quantity": "1",
         "unit": "scoop",
-        "raw": "1 SCOOP C4 VANILLA BEAN PROTEIN POWDER",
+        "raw": "1 SCOOP VANILLA BEAN PROTEIN POWDER",
         "section": "Base",
         "isMixin": false,
         "notes": ""
@@ -20658,7 +20661,7 @@ const RECIPES_MASTER = [
   },
   {
     "id": "hersheys_milk_chocolate_base",
-    "name": "Hershey\u2019s Milk Chocolate",
+    "name": "Classic Milk Chocolate",
     "category": "Base Flavors",
     "categories": [
       "Base Flavors"
@@ -20689,17 +20692,17 @@ const RECIPES_MASTER = [
         "name": "Fat Free Ultra-Filtered Milk",
         "quantity": "400",
         "unit": "g",
-        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "raw": "400G FAT FREE ULTRA-FILTERED MILK",
         "section": "Base",
         "isMixin": false,
         "notes": ""
       },
       {
         "id": "c4_hersheys_protein_powder",
-        "name": "C4 Hershey's Protein Powder",
+        "name": "Milk Chocolate Protein Powder",
         "quantity": "1",
         "unit": "scoop",
-        "raw": "1 SCOOP C4 HERSHEY\u2019S PROTEIN POWDER",
+        "raw": "1 SCOOP MILK CHOCOLATE PROTEIN POWDER",
         "section": "Base",
         "isMixin": false,
         "notes": ""
@@ -20741,11 +20744,14 @@ const RECIPES_MASTER = [
       "SPIN ON \"LITE ICE CREAM\" SETTING",
       "SPIN ON \"RESPIN\" SETTING",
       "RESPIN AGAIN IF POWDERY",
-      "TOP WITH HERSHEY\u2019S CHOCOLATE (OPTIONAL)"
+      "TOP WITH MILK CHOCOLATE PIECES (OPTIONAL)"
     ],
     "aliases": [
       "hersheys_milk_chocolate_base",
-      "hersheys_chocolate_base"
+      "hersheys_chocolate_base",
+      "classic_milk_chocolate_base",
+      "hershey",
+      "hersheys"
     ]
   },
   {
@@ -20781,7 +20787,7 @@ const RECIPES_MASTER = [
         "name": "Fat Free Ultra-Filtered Milk",
         "quantity": "120",
         "unit": "g",
-        "raw": "120G FAT FREE FAIRLIFE MILK",
+        "raw": "120G FAT FREE ULTRA-FILTERED MILK",
         "section": "Base",
         "isMixin": false,
         "notes": ""
@@ -20801,10 +20807,10 @@ const RECIPES_MASTER = [
         "name": "A\u00e7ai Puree",
         "quantity": "1",
         "unit": "packet",
-        "raw": "1 PACKET UNSWEETENED ACAI PUREE (80 CAL 1G P, 1G C, 7G F)",
+        "raw": "1 PACKET UNSWEETENED ACAI PUREE (~80 CAL)",
         "section": "Base",
         "isMixin": false,
-        "notes": "Unsweetened acai puree"
+        "notes": "Unsweetened acai puree (~80 cal)"
       },
       {
         "id": "banana",
@@ -20863,7 +20869,7 @@ const RECIPES_MASTER = [
         "name": "Fat Free Ultra-Filtered Milk",
         "quantity": "400",
         "unit": "g",
-        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "raw": "400G FAT FREE ULTRA-FILTERED MILK",
         "section": "Base",
         "isMixin": false,
         "notes": ""
@@ -20883,7 +20889,7 @@ const RECIPES_MASTER = [
         "name": "Mini Marshmallows",
         "quantity": "15",
         "unit": "g",
-        "raw": "15G MINI MARSHMALLOWS (PRO TIP: TOAST THEM FOR THAT CAMPFIRE-ESQUE FLAVOR)",
+        "raw": "15G MINI MARSHMALLOWS (PRO TIP: TOAST THEM FOR CAMPFIRE FLAVOR)",
         "section": "Base",
         "isMixin": false,
         "notes": "Pro Tip: toast them for campfire flavor"
@@ -20964,7 +20970,7 @@ const RECIPES_MASTER = [
         "name": "Fat Free Ultra-Filtered Milk",
         "quantity": "350",
         "unit": "g",
-        "raw": "350G FAT FREE FAIRLIFE MILK",
+        "raw": "350G FAT FREE ULTRA-FILTERED MILK",
         "section": "Base",
         "isMixin": false,
         "notes": ""
@@ -21075,7 +21081,7 @@ const RECIPES_MASTER = [
         "name": "Fat Free Ultra-Filtered Milk",
         "quantity": "400",
         "unit": "g",
-        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "raw": "400G FAT FREE ULTRA-FILTERED MILK",
         "section": "Base",
         "isMixin": false,
         "notes": ""
@@ -21186,7 +21192,7 @@ const RECIPES_MASTER = [
         "name": "Fat Free Ultra-Filtered Milk",
         "quantity": "400",
         "unit": "g",
-        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "raw": "400G FAT FREE ULTRA-FILTERED MILK",
         "section": "Base",
         "isMixin": false,
         "notes": ""
@@ -21287,7 +21293,7 @@ const RECIPES_MASTER = [
         "name": "Fat Free Ultra-Filtered Milk",
         "quantity": "400",
         "unit": "g",
-        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "raw": "400G FAT FREE ULTRA-FILTERED MILK",
         "section": "Base",
         "isMixin": false,
         "notes": ""
@@ -21659,7 +21665,7 @@ const RECIPES_MASTER = [
         "name": "Fat Free Ultra-Filtered Milk",
         "quantity": "400",
         "unit": "g",
-        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "raw": "400G FAT FREE ULTRA-FILTERED MILK",
         "section": "Base",
         "isMixin": false,
         "notes": ""
@@ -21728,7 +21734,7 @@ const RECIPES_MASTER = [
   },
   {
     "id": "oreo_fan_favorite",
-    "name": "Oreo",
+    "name": "Cookies & Cream Crunch",
     "category": "Fan Favorites",
     "categories": [
       "Fan Favorites"
@@ -21759,7 +21765,7 @@ const RECIPES_MASTER = [
         "name": "Fat Free Ultra-Filtered Milk",
         "quantity": "400",
         "unit": "g",
-        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "raw": "400G FAT FREE ULTRA-FILTERED MILK",
         "section": "Base",
         "isMixin": false,
         "notes": ""
@@ -21809,10 +21815,10 @@ const RECIPES_MASTER = [
         "name": "Oreo Thins",
         "quantity": "3",
         "unit": "cookies",
-        "raw": "3 OREO THINS",
+        "raw": "3 CHOCOLATE SANDWICH COOKIE THINS (E.G. OREO THINS)",
         "section": "Mix-in",
         "isMixin": true,
-        "notes": ""
+        "notes": "Chocolate sandwich cookie thins"
       }
     ],
     "instructions": [
@@ -21826,7 +21832,10 @@ const RECIPES_MASTER = [
     ],
     "aliases": [
       "oreo_fan_favorite",
-      "oreo_creami"
+      "oreo_creami",
+      "cookies_and_cream_crunch",
+      "oreo",
+      "oreos"
     ]
   },
   {
@@ -21862,7 +21871,7 @@ const RECIPES_MASTER = [
         "name": "Fat Free Ultra-Filtered Milk",
         "quantity": "400",
         "unit": "g",
-        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "raw": "400G FAT FREE ULTRA-FILTERED MILK",
         "section": "Base",
         "isMixin": false,
         "notes": ""
@@ -21964,7 +21973,7 @@ const RECIPES_MASTER = [
         "name": "Fat Free Ultra-Filtered Milk",
         "quantity": "400",
         "unit": "g",
-        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "raw": "400G FAT FREE ULTRA-FILTERED MILK",
         "section": "Base",
         "isMixin": false,
         "notes": ""
@@ -21984,10 +21993,10 @@ const RECIPES_MASTER = [
         "name": "Graham Flavored Protein Powder",
         "quantity": "10",
         "unit": "g",
-        "raw": "10G GRAHAM FLAVORED PROTEIN POWDER (I USE BLACK MAGIC HONEY GRAHAMS)",
+        "raw": "10G GRAHAM-FLAVORED PROTEIN POWDER",
         "section": "Base",
         "isMixin": false,
-        "notes": "Black Magic Honey Grahams or similar"
+        "notes": "Graham-flavored protein powder"
       },
       {
         "id": "vanilla_bean_paste",
@@ -22154,10 +22163,10 @@ const RECIPES_MASTER = [
       },
       {
         "id": "gatsby_chocolate_bar",
-        "name": "Gatsby Chocolate Bar",
+        "name": "Low-Calorie Chocolate Bar",
         "quantity": "27",
         "unit": "g",
-        "raw": "\u2153 (27G) OF A GATSBY CHOCOLATE BAR, CHOPPED (60 CAL) \u2014 OR USE CHOCOLATE CHIP HACK (15G CHOCOLATE + 2G COCONUT OIL)",
+        "raw": "\u2153 (27G) LOW-CALORIE CHOCOLATE BAR, CHOPPED (OR USE CHOCOLATE CHIP HACK)",
         "section": "Mix-in",
         "isMixin": true,
         "notes": "\u2153 bar (27g) chopped, or chocolate chip hack"
@@ -22173,7 +22182,9 @@ const RECIPES_MASTER = [
       "RUN THE \"MIX-IN\" CYCLE"
     ],
     "aliases": [
-      "mocha_chip"
+      "mocha_chip",
+      "gatsby_mocha_chip",
+      "gatsby"
     ]
   },
   {
@@ -22269,7 +22280,7 @@ const RECIPES_MASTER = [
         "name": "Reese's PB Cups",
         "quantity": "2",
         "unit": "cups",
-        "raw": "2 REESE\u2019S PB CUPS (41G) OR EQUIVALENT PB CUP",
+        "raw": "2 PEANUT BUTTER CUPS (41G TOTAL)",
         "section": "Mix-in",
         "isMixin": true,
         "notes": "41g total"
@@ -22285,7 +22296,9 @@ const RECIPES_MASTER = [
       "RUN THE \"MIX-IN\" CYCLE"
     ],
     "aliases": [
-      "dark_chocolate_pb_cup"
+      "dark_chocolate_pb_cup",
+      "reese",
+      "reeses"
     ]
   },
   {
@@ -22371,10 +22384,10 @@ const RECIPES_MASTER = [
         "name": "Oreo Thins",
         "quantity": "3",
         "unit": "cookies",
-        "raw": "3 OREO THINS",
+        "raw": "3 CHOCOLATE SANDWICH COOKIE THINS",
         "section": "Mix-in",
         "isMixin": true,
-        "notes": ""
+        "notes": "Chocolate sandwich cookies"
       }
     ],
     "instructions": [
@@ -22388,7 +22401,8 @@ const RECIPES_MASTER = [
     ],
     "aliases": [
       "chocolate_cookies_and_cream",
-      "chocolate_oreo"
+      "chocolate_oreo",
+      "oreo"
     ]
   },
   {
@@ -22474,10 +22488,10 @@ const RECIPES_MASTER = [
         "name": "Reese's PB Cups",
         "quantity": "1",
         "unit": "cup",
-        "raw": "CHOPPED UP PB CUPS",
+        "raw": "CHOPPED PEANUT BUTTER CUPS",
         "section": "Mix-in",
         "isMixin": true,
-        "notes": "Chopped up PB cups"
+        "notes": "Chopped peanut butter cups"
       }
     ],
     "instructions": [
@@ -22490,12 +22504,14 @@ const RECIPES_MASTER = [
       "RUN THE \"MIX-IN\" CYCLE"
     ],
     "aliases": [
-      "chocolate_pb_cup"
+      "chocolate_pb_cup",
+      "reese",
+      "reeses"
     ]
   },
   {
     "id": "mint_oreo",
-    "name": "Mint Oreo (aka Mint Chocolate Cookie)",
+    "name": "Mint Chocolate Cookie",
     "category": "Fan Favorites",
     "categories": [
       "Fan Favorites"
@@ -22526,7 +22542,7 @@ const RECIPES_MASTER = [
         "name": "Fat Free Ultra-Filtered Milk",
         "quantity": "400",
         "unit": "g",
-        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "raw": "400G FAT FREE ULTRA-FILTERED MILK",
         "section": "Base",
         "isMixin": false,
         "notes": ""
@@ -22566,7 +22582,7 @@ const RECIPES_MASTER = [
         "name": "Peppermint Bark Skinny Syrups",
         "quantity": "1",
         "unit": "tsp",
-        "raw": "1 TSP PEPPERMINT BARK SKINNY SYRUPS (OPTIONAL)",
+        "raw": "1 TSP PEPPERMINT BARK SUGAR-FREE SYRUP (OPTIONAL)",
         "section": "Base",
         "isMixin": false,
         "notes": "Optional"
@@ -22596,7 +22612,7 @@ const RECIPES_MASTER = [
         "name": "Oreo Thins",
         "quantity": "3",
         "unit": "cookies",
-        "raw": "3 OREO THINS (OPTIONALLY CRUMBLE ONE MORE ON TOP)",
+        "raw": "3 CHOCOLATE SANDWICH COOKIE THINS (OPTIONALLY CRUMBLE ONE MORE ON TOP)",
         "section": "Mix-in",
         "isMixin": true,
         "notes": "Optionally crumble one more on top"
@@ -22610,11 +22626,13 @@ const RECIPES_MASTER = [
       "RESPIN AGAIN IF POWDERY",
       "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND FILL WITH MIX-INS",
       "RUN THE \"MIX-IN\" CYCLE",
-      "(OPTIONALLY) CRUMBLE THE FINAL OREO ON TOP"
+      "(OPTIONALLY) CRUMBLE THE FINAL COOKIE ON TOP"
     ],
     "aliases": [
       "mint_oreo",
-      "mint_chocolate_cookie"
+      "mint_chocolate_cookie",
+      "oreo",
+      "mint_chocolate_chip_cookie"
     ]
   },
   {
@@ -22690,10 +22708,10 @@ const RECIPES_MASTER = [
         "name": "Prime Bites Protein Brownie",
         "quantity": "0.5",
         "unit": "brownie",
-        "raw": "\u00bd OF A PRIME BITES PROTEIN BROWNIE",
+        "raw": "\u00bd OF A PROTEIN BROWNIE (E.G. PRIME BITES)",
         "section": "Mix-in",
         "isMixin": true,
-        "notes": "Prime Bites brownie chopped into cubes"
+        "notes": "Protein brownie chopped into cubes"
       }
     ],
     "instructions": [
@@ -22742,7 +22760,7 @@ const RECIPES_MASTER = [
         "name": "Fat Free Ultra-Filtered Milk",
         "quantity": "400",
         "unit": "g",
-        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "raw": "400G FAT FREE ULTRA-FILTERED MILK",
         "section": "Base",
         "isMixin": false,
         "notes": ""
@@ -22904,10 +22922,10 @@ const RECIPES_MASTER = [
         "name": "Oreo Thins",
         "quantity": "3",
         "unit": "cookies",
-        "raw": "3 OREO THINS",
+        "raw": "3 CHOCOLATE SANDWICH COOKIE THINS",
         "section": "Mix-in",
         "isMixin": true,
-        "notes": ""
+        "notes": "Chocolate sandwich cookies"
       }
     ],
     "instructions": [
@@ -22915,16 +22933,17 @@ const RECIPES_MASTER = [
       "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
       "SPIN ON \"LITE ICE CREAM\" SETTING",
       "SPIN ON \"RESPIN\" SETTING IF VERY POWDERY",
-      "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND FILL WITH THE OREOS",
+      "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND FILL WITH THE COOKIES",
       "RUN THE \"MIX-IN\" CYCLE"
     ],
     "aliases": [
-      "cookies_and_cream_fan_favorite"
+      "cookies_and_cream_fan_favorite",
+      "oreo"
     ]
   },
   {
     "id": "oreo_n_cold_brew",
-    "name": "Oreo \u2018n Cold Brew",
+    "name": "Cookies \u2018n Cold Brew",
     "category": "Fan Favorites",
     "categories": [
       "Fan Favorites"
@@ -22955,7 +22974,7 @@ const RECIPES_MASTER = [
         "name": "Fat Free Ultra-Filtered Milk",
         "quantity": "400",
         "unit": "g",
-        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "raw": "400G FAT FREE ULTRA-FILTERED MILK",
         "section": "Base",
         "isMixin": false,
         "notes": ""
@@ -22975,10 +22994,10 @@ const RECIPES_MASTER = [
         "name": "Espresso",
         "quantity": "1",
         "unit": "pod/shot",
-        "raw": "1 COMETEER POD (CAN SUB WITH 1 SHOT OF ESPRESSO OR 1 TBSP OF INSTANT COFFEE)",
+        "raw": "1 ESPRESSO POD OR SHOT (OR 1 TBSP INSTANT COFFEE)",
         "section": "Base",
         "isMixin": false,
-        "notes": "1 Cometeer pod or 1 espresso shot / 1 tbsp instant coffee"
+        "notes": "1 espresso pod/shot or 1 tbsp instant coffee"
       },
       {
         "id": "salt",
@@ -23005,7 +23024,7 @@ const RECIPES_MASTER = [
         "name": "Oreo Thins",
         "quantity": "5",
         "unit": "cookies",
-        "raw": "5 OREO THINS (CREAM REMOVED)",
+        "raw": "5 CHOCOLATE SANDWICH COOKIE THINS (CREAM REMOVED)",
         "section": "Mix-in",
         "isMixin": true,
         "notes": "Cream removed"
@@ -23016,17 +23035,19 @@ const RECIPES_MASTER = [
       "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
       "SPIN ON \"LITE ICE CREAM\" SETTING",
       "SPIN ON \"RESPIN\" SETTING IF VERY POWDERY",
-      "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND FILL WITH THE OREOS",
+      "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND FILL WITH THE COOKIES",
       "RUN THE \"MIX-IN\" CYCLE"
     ],
     "aliases": [
       "oreo_n_cold_brew",
-      "oreo_cold_brew"
+      "oreo_cold_brew",
+      "cookies_n_cold_brew",
+      "oreo"
     ]
   },
   {
     "id": "cadbury_mini_egg_mcflurry",
-    "name": "Cadbury Mini Egg McFlurry",
+    "name": "Candy-Coated Mini Egg Flurry",
     "category": "Fan Favorites",
     "categories": [
       "Fan Favorites"
@@ -23050,14 +23071,14 @@ const RECIPES_MASTER = [
     "prepTime": "2 MIN",
     "freezeTime": "16+ HOURS",
     "makes": "1 PINT",
-    "proTip": "FREEZE CHOPPED CADBURY MINI EGGS BEFORE MIXING IN SO THEY WITHSTAND THE MIX-IN SETTING WITHOUT GETTING COMPLETELY PULVERIZED.",
+    "proTip": "FREEZE CHOPPED CANDY-COATED MINI EGGS BEFORE MIXING IN SO THEY WITHSTAND THE MIX-IN SETTING WITHOUT GETTING COMPLETELY PULVERIZED.",
     "ingredients": [
       {
         "id": "fat_free_ultra_filtered_milk",
         "name": "Fat Free Ultra-Filtered Milk",
         "quantity": "400",
         "unit": "g",
-        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "raw": "400G FAT FREE ULTRA-FILTERED MILK",
         "section": "Base",
         "isMixin": false,
         "notes": ""
@@ -23104,10 +23125,10 @@ const RECIPES_MASTER = [
       },
       {
         "id": "cadbury_mini_eggs",
-        "name": "Cadbury Mini Eggs",
+        "name": "Candy-Coated Mini Chocolate Eggs",
         "quantity": "25",
         "unit": "g",
-        "raw": "25G CADBURY MINI EGGS, CHOPPED",
+        "raw": "25G CANDY-COATED MINI CHOCOLATE EGGS, CHOPPED",
         "section": "Mix-in",
         "isMixin": true,
         "notes": "Chopped and frozen"
@@ -23124,7 +23145,11 @@ const RECIPES_MASTER = [
       "RUN THE \"MIX-IN\" CYCLE"
     ],
     "aliases": [
-      "cadbury_mini_egg_mcflurry"
+      "cadbury_mini_egg_mcflurry",
+      "cadbury_mcflurry",
+      "mini_egg_flurry",
+      "cadbury",
+      "mcflurry"
     ]
   },
   {
@@ -23160,7 +23185,7 @@ const RECIPES_MASTER = [
         "name": "Fat Free Ultra-Filtered Milk",
         "quantity": "400",
         "unit": "g",
-        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "raw": "400G FAT FREE ULTRA-FILTERED MILK",
         "section": "Base",
         "isMixin": false,
         "notes": ""
@@ -23220,7 +23245,7 @@ const RECIPES_MASTER = [
         "name": "Fuul Chocolate Chip Cookie Dough Bites",
         "quantity": "0.5",
         "unit": "package",
-        "raw": "\u00bd OF A PACKAGE OF THE FUUL CHOCOLATE CHIP COOKIE DOUGH BITES (CAN SUB FOR ANY COOKIE DOUGH)",
+        "raw": "\u00bd PACKAGE PROTEIN CHOCOLATE CHIP COOKIE DOUGH BITES (CAN SUB FOR ANY COOKIE DOUGH)",
         "section": "Topping",
         "isMixin": true,
         "notes": "Can sub for any cookie dough"
@@ -23280,7 +23305,7 @@ const RECIPES_MASTER = [
         "name": "Fat Free Ultra-Filtered Milk",
         "quantity": "400",
         "unit": "g",
-        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "raw": "400G FAT FREE ULTRA-FILTERED MILK",
         "section": "Base",
         "isMixin": false,
         "notes": ""
@@ -23452,7 +23477,7 @@ const RECIPES_MASTER = [
         "name": "Prime Bites Protein Brownie",
         "quantity": "0.5",
         "unit": "brownie",
-        "raw": "\u00bd OF A PRIME BITES PROTEIN BROWNIE",
+        "raw": "\u00bd OF A PROTEIN BROWNIE (E.G. PRIME BITES)",
         "section": "Topping",
         "isMixin": true,
         "notes": "Chopped up brownie for topping"
@@ -23497,14 +23522,14 @@ const RECIPES_MASTER = [
     "prepTime": "2 MIN",
     "freezeTime": "16+ HOURS",
     "makes": "1 PINT",
-    "proTip": "FREEZE CHEESECAKE BITES AND OREOS BEFORE THE MIX-IN SETTING SO THEY FIRM UP AND WITHSTAND THE BLADE WITHOUT GETTING COMPLETELY PULVERIZED.",
+    "proTip": "FREEZE CHEESECAKE BITES AND COOKIES BEFORE THE MIX-IN SETTING SO THEY FIRM UP AND WITHSTAND THE BLADE WITHOUT GETTING COMPLETELY PULVERIZED.",
     "ingredients": [
       {
         "id": "fat_free_ultra_filtered_milk",
         "name": "Fat Free Ultra-Filtered Milk",
         "quantity": "400",
         "unit": "g",
-        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "raw": "400G FAT FREE ULTRA-FILTERED MILK",
         "section": "Base",
         "isMixin": false,
         "notes": ""
@@ -23564,7 +23589,7 @@ const RECIPES_MASTER = [
         "name": "Oreo Thins",
         "quantity": "4",
         "unit": "cookies",
-        "raw": "4 OREO THINS (CREAM REMOVED)",
+        "raw": "4 CHOCOLATE SANDWICH COOKIE THINS (CREAM REMOVED)",
         "section": "Mix-in",
         "isMixin": true,
         "notes": "Cream removed"
@@ -23582,20 +23607,21 @@ const RECIPES_MASTER = [
     ],
     "instructions": [
       "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
-      "AT THE SAME TIME, PUT THE CHEESECAKE BITES AND OREOS INTO THE FREEZER TO FIRM UP",
+      "AT THE SAME TIME, PUT THE CHEESECAKE BITES AND COOKIES INTO THE FREEZER TO FIRM UP",
       "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
       "SPIN ON \"ICE CREAM\" SETTING",
       "SPIN ON \"RESPIN\" SETTING IF VERY POWDERY",
-      "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND ADD THE FROZEN CHEESECAKE BITES AND OREOS",
+      "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND ADD THE FROZEN CHEESECAKE BITES AND COOKIES",
       "RUN THE \"MIX-IN\" CYCLE"
     ],
     "aliases": [
-      "cookies_n_cream_cheesecake"
+      "cookies_n_cream_cheesecake",
+      "oreo"
     ]
   },
   {
     "id": "chocolate_chip_cookie_dough_blizzard_ff",
-    "name": "Chocolate Chip Cookie Dough Blizzard",
+    "name": "Chocolate Chip Cookie Dough Blast",
     "category": "Fan Favorites",
     "categories": [
       "Fan Favorites"
@@ -23626,7 +23652,7 @@ const RECIPES_MASTER = [
         "name": "Fat Free Ultra-Filtered Milk",
         "quantity": "400",
         "unit": "g",
-        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "raw": "400G FAT FREE ULTRA-FILTERED MILK",
         "section": "Base",
         "isMixin": false,
         "notes": ""
@@ -23676,7 +23702,7 @@ const RECIPES_MASTER = [
         "name": "Fuul Chocolate Chip Cookie Dough Bites",
         "quantity": "0.5",
         "unit": "package",
-        "raw": "\u00bd OF A PACKAGE OF THE FUUL CHOCOLATE CHIP COOKIE DOUGH BITES",
+        "raw": "\u00bd PACKAGE PROTEIN CHOCOLATE CHIP COOKIE DOUGH BITES",
         "section": "Mix-in",
         "isMixin": true,
         "notes": "Half mixed in, half on top"
@@ -23703,7 +23729,10 @@ const RECIPES_MASTER = [
       "TOP WITH THE REST OF THE COOKIE DOUGH BITES"
     ],
     "aliases": [
-      "chocolate_chip_cookie_dough_blizzard_ff"
+      "chocolate_chip_cookie_dough_blizzard_ff",
+      "cookie_dough_blizzard",
+      "cookie_dough_blast",
+      "blizzard"
     ]
   },
   {
@@ -23739,7 +23768,7 @@ const RECIPES_MASTER = [
         "name": "Fat Free Ultra-Filtered Milk",
         "quantity": "400",
         "unit": "g",
-        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "raw": "400G FAT FREE ULTRA-FILTERED MILK",
         "section": "Base",
         "isMixin": false,
         "notes": ""
@@ -23839,7 +23868,7 @@ const RECIPES_MASTER = [
   },
   {
     "id": "chocolate_oreo_mcflurry",
-    "name": "Chocolate Oreo McFlurry",
+    "name": "Chocolate Cookie Crunch Flurry",
     "category": "Fan Favorites",
     "categories": [
       "Fan Favorites"
@@ -23920,7 +23949,7 @@ const RECIPES_MASTER = [
         "name": "Oreo Thins",
         "quantity": "5",
         "unit": "cookies",
-        "raw": "5 OREO THINS (CREAM REMOVED)",
+        "raw": "5 CHOCOLATE SANDWICH COOKIE THINS (CREAM REMOVED)",
         "section": "Mix-in",
         "isMixin": true,
         "notes": "Cream removed"
@@ -23931,16 +23960,20 @@ const RECIPES_MASTER = [
       "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
       "SPIN ON \"LITE ICE CREAM\" SETTING",
       "SPIN ON \"RESPIN\" SETTING IF VERY POWDERY",
-      "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND FILL WITH THE OREOS",
+      "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND FILL WITH THE COOKIES",
       "RUN THE \"MIX-IN\" CYCLE"
     ],
     "aliases": [
-      "chocolate_oreo_mcflurry"
+      "chocolate_oreo_mcflurry",
+      "chocolate_cookie_flurry",
+      "chocolate_mcflurry",
+      "mcflurry",
+      "oreo"
     ]
   },
   {
     "id": "chocolate_devotion",
-    "name": "Chocolate Devotion",
+    "name": "Triple Chocolate Decadence",
     "category": "Fan Favorites",
     "categories": [
       "Fan Favorites"
@@ -24031,7 +24064,7 @@ const RECIPES_MASTER = [
         "name": "Prime Bites Protein Brownie",
         "quantity": "0.5",
         "unit": "brownie",
-        "raw": "\u00bd OF A PRIME BITES PROTEIN BROWNIE, CHOPPED INTO BITE-SIZE CUBES",
+        "raw": "\u00bd OF A PROTEIN BROWNIE, CHOPPED INTO BITE-SIZE CUBES",
         "section": "Topping",
         "isMixin": true,
         "notes": "Chopped into cubes"
@@ -24058,12 +24091,15 @@ const RECIPES_MASTER = [
       "TOP WITH THE CHOCOLATE GANACHE AND BROWNIE PIECES"
     ],
     "aliases": [
-      "chocolate_devotion"
+      "chocolate_devotion",
+      "triple_chocolate_decadence",
+      "cold_stone_chocolate_devotion",
+      "cold_stone"
     ]
   },
   {
     "id": "mocha_brownie_mudslide_blizzard",
-    "name": "Mocha Brownie Mudslide Blizzard",
+    "name": "Mocha Brownie Mudslide Blast",
     "category": "Fan Favorites",
     "categories": [
       "Fan Favorites"
@@ -24094,7 +24130,7 @@ const RECIPES_MASTER = [
         "name": "Fat Free Ultra-Filtered Milk",
         "quantity": "400",
         "unit": "g",
-        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "raw": "400G FAT FREE ULTRA-FILTERED MILK",
         "section": "Base",
         "isMixin": false,
         "notes": ""
@@ -24114,10 +24150,10 @@ const RECIPES_MASTER = [
         "name": "Espresso",
         "quantity": "1",
         "unit": "shot",
-        "raw": "1 SHOT OF ESPRESSO (FEEL FREE TO SUB FOR 1 TBSP OF INSTANT COFFEE OR A COMETEER POD)",
+        "raw": "1 SHOT OF ESPRESSO (OR 1 TBSP INSTANT COFFEE / ESPRESSO POD)",
         "section": "Base",
         "isMixin": false,
-        "notes": "1 shot espresso, 1 tbsp instant coffee, or Cometeer pod"
+        "notes": "1 shot espresso, 1 tbsp instant coffee, or espresso pod"
       },
       {
         "id": "vanilla_bean_paste",
@@ -24164,7 +24200,7 @@ const RECIPES_MASTER = [
         "name": "Prime Bites Protein Brownie",
         "quantity": "0.5",
         "unit": "brownie",
-        "raw": "\u00bd OF A PRIME BITES PROTEIN BROWNIE, CHOPPED INTO BITE-SIZE CUBES",
+        "raw": "\u00bd OF A PROTEIN BROWNIE, CHOPPED INTO BITE-SIZE CUBES",
         "section": "Topping",
         "isMixin": true,
         "notes": "Chopped into cubes"
@@ -24179,7 +24215,9 @@ const RECIPES_MASTER = [
       "TOP WITH THE BROWNIE PIECES"
     ],
     "aliases": [
-      "mocha_brownie_mudslide_blizzard"
+      "mocha_brownie_mudslide_blizzard",
+      "mocha_brownie_mudslide_blast",
+      "blizzard"
     ]
   },
   {
@@ -24215,7 +24253,7 @@ const RECIPES_MASTER = [
         "name": "Fat Free Ultra-Filtered Milk",
         "quantity": "400",
         "unit": "g",
-        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "raw": "400G FAT FREE ULTRA-FILTERED MILK",
         "section": "Base",
         "isMixin": false,
         "notes": ""
@@ -24265,7 +24303,7 @@ const RECIPES_MASTER = [
         "name": "Reduced Fat Whipped Topping",
         "quantity": "40",
         "unit": "g",
-        "raw": "40G REDUCED FAT WHIPPED TOPPING (LIKE COOL WHIP) MIXED WITH 4G (2 TSP) MATCHA",
+        "raw": "40G REDUCED FAT WHIPPED TOPPING MIXED WITH 4G (2 TSP) MATCHA",
         "section": "Mix-in",
         "isMixin": true,
         "notes": "Mixed with 4g / 2 tsp matcha"
@@ -24285,7 +24323,7 @@ const RECIPES_MASTER = [
         "name": "Strawberry Jam",
         "quantity": "1-2",
         "unit": "tbsp",
-        "raw": "1-2 TBSP SUGAR-FREE STRAWBERRY JAM (I USED THE BRAND GOOD GOOD)",
+        "raw": "1-2 TBSP SUGAR-FREE STRAWBERRY JAM",
         "section": "Topping",
         "isMixin": true,
         "notes": "Sugar-free strawberry jam"
@@ -24306,7 +24344,7 @@ const RECIPES_MASTER = [
   },
   {
     "id": "vegan_oreo_mcflurry",
-    "name": "Vegan Oreo McFlurry",
+    "name": "Vegan Cookies & Cream Flurry",
     "category": "Fan Favorites",
     "categories": [
       "Fan Favorites"
@@ -24387,10 +24425,10 @@ const RECIPES_MASTER = [
         "name": "Oreo Thins",
         "quantity": "3",
         "unit": "cookies",
-        "raw": "3 OREO THINS",
+        "raw": "3 CHOCOLATE SANDWICH COOKIE THINS",
         "section": "Mix-in",
         "isMixin": true,
-        "notes": ""
+        "notes": "Chocolate sandwich cookies"
       }
     ],
     "instructions": [
@@ -24398,11 +24436,14 @@ const RECIPES_MASTER = [
       "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
       "SPIN ON \"LITE ICE CREAM\" SETTING",
       "SPIN ON \"RESPIN\" SETTING IF VERY POWDERY",
-      "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND FILL WITH THE OREOS",
+      "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND FILL WITH THE COOKIES",
       "RUN THE \"MIX-IN\" CYCLE"
     ],
     "aliases": [
-      "vegan_oreo_mcflurry"
+      "vegan_oreo_mcflurry",
+      "vegan_cookies_and_cream_flurry",
+      "mcflurry",
+      "oreo"
     ]
   },
   {
@@ -24438,7 +24479,7 @@ const RECIPES_MASTER = [
         "name": "Fat Free Ultra-Filtered Milk",
         "quantity": "400",
         "unit": "g",
-        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "raw": "400G FAT FREE ULTRA-FILTERED MILK",
         "section": "Base",
         "isMixin": false,
         "notes": ""
@@ -24498,10 +24539,10 @@ const RECIPES_MASTER = [
         "name": "Marshmallow Fluff",
         "quantity": "20",
         "unit": "g",
-        "raw": "20G MARSHMALLOW CREME (SAME THING AS MARSHMALLOW FLUFF)",
+        "raw": "20G MARSHMALLOW CREME (OR MARSHMALLOW FLUFF)",
         "section": "Mix-in",
         "isMixin": true,
-        "notes": "Marshmallow Fluff / creme"
+        "notes": "Marshmallow creme or fluff"
       }
     ],
     "instructions": [
@@ -24518,7 +24559,7 @@ const RECIPES_MASTER = [
   },
   {
     "id": "biscoff_blizzard",
-    "name": "Biscoff Blizzard",
+    "name": "Cookie Butter Speculoos Blast",
     "category": "Fan Favorites",
     "categories": [
       "Fan Favorites"
@@ -24542,14 +24583,14 @@ const RECIPES_MASTER = [
     "prepTime": "2 MIN",
     "freezeTime": "16+ HOURS",
     "makes": "1 PINT",
-    "proTip": "MAKE A HOLE ON THE SIDE OF THE PINT WITH A BUTTER KNIFE (TO MITIGATE COOKIES GETTING COMPLETE PULVERIZED) BEFORE ADDING COOKIES.",
+    "proTip": "MAKE A HOLE ON THE SIDE OF THE PINT WITH A BUTTER KNIFE (TO MITIGATE COOKIES GETTING COMPLETELY PULVERIZED) BEFORE ADDING COOKIES.",
     "ingredients": [
       {
         "id": "fat_free_ultra_filtered_milk",
         "name": "Fat Free Ultra-Filtered Milk",
         "quantity": "400",
         "unit": "g",
-        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "raw": "400G FAT FREE ULTRA-FILTERED MILK",
         "section": "Base",
         "isMixin": false,
         "notes": ""
@@ -24599,10 +24640,10 @@ const RECIPES_MASTER = [
         "name": "Lotus Biscoff Cookies",
         "quantity": "25",
         "unit": "g",
-        "raw": "25G (2 LARGE) LOTUS BISCOFF COOKIES",
+        "raw": "25G (2 LARGE) SPECULOOS COOKIES (E.G. LOTUS BISCOFF)",
         "section": "Mix-in",
         "isMixin": true,
-        "notes": "2 large cookies"
+        "notes": "2 large speculoos cookies"
       }
     ],
     "instructions": [
@@ -24614,12 +24655,16 @@ const RECIPES_MASTER = [
       "RUN THE \"MIX-IN\" CYCLE"
     ],
     "aliases": [
-      "biscoff_blizzard"
+      "biscoff_blizzard",
+      "cookie_butter_speculoos_blast",
+      "biscoff_blast",
+      "blizzard",
+      "biscoff"
     ]
   },
   {
     "id": "love_potion_31",
-    "name": "Love Potion #31 (White Chocolate Raspberry)",
+    "name": "White Chocolate Raspberry Swirl",
     "category": "Fan Favorites",
     "categories": [
       "Fan Favorites"
@@ -24650,7 +24695,7 @@ const RECIPES_MASTER = [
         "name": "Fat Free Ultra-Filtered Milk",
         "quantity": "400",
         "unit": "g",
-        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "raw": "400G FAT FREE ULTRA-FILTERED MILK",
         "section": "Base",
         "isMixin": false,
         "notes": ""
@@ -24726,7 +24771,9 @@ const RECIPES_MASTER = [
     ],
     "aliases": [
       "love_potion_31",
-      "white_chocolate_raspberry"
+      "white_chocolate_raspberry_swirl",
+      "baskin_robbins_love_potion",
+      "love_potion"
     ]
   },
   {
@@ -24762,7 +24809,7 @@ const RECIPES_MASTER = [
         "name": "Fat Free Ultra-Filtered Milk",
         "quantity": "400",
         "unit": "g",
-        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "raw": "400G FAT FREE ULTRA-FILTERED MILK",
         "section": "Base",
         "isMixin": false,
         "notes": ""
@@ -24832,10 +24879,10 @@ const RECIPES_MASTER = [
         "name": "Crushed Salted Potato Chips",
         "quantity": "3",
         "unit": "g",
-        "raw": "3G CRUSHED SALTED POTATO CHIPS (I USED SNACKISH)",
+        "raw": "3G CRUSHED SALTED POTATO CHIPS",
         "section": "Topping",
         "isMixin": true,
-        "notes": "Snackish or similar healthy salted potato chips"
+        "notes": "Crushed salted potato chips"
       }
     ],
     "instructions": [
@@ -24853,7 +24900,7 @@ const RECIPES_MASTER = [
   },
   {
     "id": "oreo_pretzel_perfection",
-    "name": "Oreo Pretzel Perfection",
+    "name": "Cookies & Pretzel Perfection",
     "category": "Fan Favorites",
     "categories": [
       "Fan Favorites"
@@ -24884,7 +24931,7 @@ const RECIPES_MASTER = [
         "name": "Fat Free Ultra-Filtered Milk",
         "quantity": "400",
         "unit": "g",
-        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "raw": "400G FAT FREE ULTRA-FILTERED MILK",
         "section": "Base",
         "isMixin": false,
         "notes": ""
@@ -24934,7 +24981,7 @@ const RECIPES_MASTER = [
         "name": "Oreo Thins",
         "quantity": "3",
         "unit": "cookies",
-        "raw": "3 OREO THINS (CREAM REMOVED)",
+        "raw": "3 CHOCOLATE SANDWICH COOKIE THINS (CREAM REMOVED)",
         "section": "Mix-in",
         "isMixin": true,
         "notes": "Cream removed"
@@ -24954,7 +25001,7 @@ const RECIPES_MASTER = [
         "name": "Oreo Thins",
         "quantity": "0.5",
         "unit": "cookie",
-        "raw": "\u00bd OREO THIN FOR TOPPING",
+        "raw": "\u00bd CHOCOLATE SANDWICH COOKIE THIN FOR TOPPING",
         "section": "Topping",
         "isMixin": true,
         "notes": ""
@@ -24995,13 +25042,15 @@ const RECIPES_MASTER = [
       "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
       "SPIN ON \"LITE ICE CREAM\" SETTING",
       "RESPIN IF VERY POWDERY",
-      "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND FILL WITH 3 OREOS AND \u00be OF THE PRETZELS",
+      "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND FILL WITH 3 COOKIES AND \u00be OF THE PRETZELS",
       "RUN THE \"MIX-IN\" CYCLE",
-      "TOP WITH THE REMAINING HALF OREO, \u00bc OF THE PRETZELS, AND CARAMEL SAUCE",
+      "TOP WITH THE REMAINING HALF COOKIE, \u00bc OF THE PRETZELS, AND CARAMEL SAUCE",
       "SPRINKLE WITH FLAKY SALT"
     ],
     "aliases": [
-      "oreo_pretzel_perfection"
+      "oreo_pretzel_perfection",
+      "cookies_and_pretzel_perfection",
+      "oreo"
     ]
   },
   {
@@ -25037,7 +25086,7 @@ const RECIPES_MASTER = [
         "name": "Fat Free Ultra-Filtered Milk",
         "quantity": "400",
         "unit": "g",
-        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "raw": "400G FAT FREE ULTRA-FILTERED MILK",
         "section": "Base",
         "isMixin": false,
         "notes": ""
@@ -25128,7 +25177,7 @@ const RECIPES_MASTER = [
   },
   {
     "id": "reeses_peanut_butter_cup_fan",
-    "name": "Reese\u2019s Peanut Butter Cup",
+    "name": "Loaded Peanut Butter Cup",
     "category": "Fan Favorites",
     "categories": [
       "Fan Favorites"
@@ -25219,7 +25268,7 @@ const RECIPES_MASTER = [
         "name": "Reese's PB Cups",
         "quantity": "1",
         "unit": "cup",
-        "raw": "1 REESE\u2019S PEANUT BUTTER CUP, CHOPPED",
+        "raw": "1 PEANUT BUTTER CUP, CHOPPED",
         "section": "Topping",
         "isMixin": true,
         "notes": "Chopped"
@@ -25232,16 +25281,19 @@ const RECIPES_MASTER = [
       "RESPIN IF VERY POWDERY",
       "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND FILL WITH THE MELTED PEANUT BUTTER CHIPS",
       "RUN THE \"MIX-IN\" CYCLE",
-      "TOP WITH THE CHOPPED UP REESE\u2019S CUP"
+      "TOP WITH THE CHOPPED UP PEANUT BUTTER CUP"
     ],
     "aliases": [
       "reeses_peanut_butter_cup_fan",
-      "reeses_pb_cup"
+      "reeses_pb_cup",
+      "loaded_peanut_butter_cup",
+      "reese",
+      "reeses"
     ]
   },
   {
     "id": "choco_frosted_donut_blizzard",
-    "name": "Choco Frosted Donut Blizzard",
+    "name": "Choco Frosted Donut Blast",
     "category": "Fan Favorites",
     "categories": [
       "Fan Favorites"
@@ -25272,7 +25324,7 @@ const RECIPES_MASTER = [
         "name": "Fat Free Ultra-Filtered Milk",
         "quantity": "400",
         "unit": "g",
-        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "raw": "400G FAT FREE ULTRA-FILTERED MILK",
         "section": "Base",
         "isMixin": false,
         "notes": ""
@@ -25319,10 +25371,10 @@ const RECIPES_MASTER = [
       },
       {
         "id": "legendary_foods_donuts",
-        "name": "Legendary Foods Protein Chocolate Dip Donuts",
+        "name": "Protein Chocolate Glazed Donuts",
         "quantity": "0.75",
         "unit": "package",
-        "raw": "\u00be OF A PACKAGE LEGENDARY FOODS PROTEIN CHOCOLATE DIP DONUTS (CAN SUB WITH ANY HIGH-PROTEIN BAKED GOOD)",
+        "raw": "\u00be PACKAGE PROTEIN CHOCOLATE GLAZED DONUTS (OR ANY HIGH-PROTEIN BAKED GOOD)",
         "section": "Mix-in",
         "isMixin": true,
         "notes": "1 donut for mix-in, \u00bd donut for topping"
@@ -25348,7 +25400,9 @@ const RECIPES_MASTER = [
       "TOP WITH THE OTHER HALF DONUT AND SPRINKLES"
     ],
     "aliases": [
-      "choco_frosted_donut_blizzard"
+      "choco_frosted_donut_blizzard",
+      "choco_frosted_donut_blast",
+      "blizzard"
     ]
   }
 
