@@ -991,7 +991,108 @@ const INGREDIENTS_MASTER = [
       "id": "shredded_coconut",
       "name": "Shredded Coconut",
       "category": "mixins_snacks"
+  },
+  {
+      "id": "unsweetened_soy_milk",
+      "name": "Unsweetened Soy Milk",
+      "category": "dairy_liquids"
+  },
+  {
+      "id": "browned_butter",
+      "name": "Browned Butter",
+      "category": "dairy_liquids"
+  },
+  {
+      "id": "whipped_topping",
+      "name": "Reduced Fat Whipped Topping",
+      "category": "dairy_liquids"
+  },
+  {
+      "id": "salted_caramel_protein_shake",
+      "name": "Salted Caramel Protein Shake",
+      "category": "protein_powders"
+  },
+  {
+      "id": "cookies_and_cream_protein_shake",
+      "name": "Cookies & Cream Protein Shake",
+      "category": "protein_powders"
+  },
+  {
+      "id": "peanut_butter_protein_powder",
+      "name": "Peanut Butter Protein Powder",
+      "category": "protein_powders"
+  },
+  {
+      "id": "c4_reeses_protein_powder",
+      "name": "C4 Reese's Protein Powder",
+      "category": "protein_powders"
+  },
+  {
+      "id": "c4_vanilla_bean_protein_powder",
+      "name": "C4 Vanilla Bean Protein Powder",
+      "category": "protein_powders"
+  },
+  {
+      "id": "c4_hersheys_protein_powder",
+      "name": "C4 Hershey's Protein Powder",
+      "category": "protein_powders"
+  },
+  {
+      "id": "graham_protein_powder",
+      "name": "Graham Flavored Protein Powder",
+      "category": "protein_powders"
+  },
+  {
+      "id": "white_chocolate_pudding_mix",
+      "name": "White Chocolate Pudding Mix",
+      "category": "pudding_mixes"
+  },
+  {
+      "id": "brown_butter_extract",
+      "name": "Brown Butter Extract",
+      "category": "extracts_flavors"
+  },
+  {
+      "id": "black_raspberry_flavoring",
+      "name": "Black Raspberry Flavoring",
+      "category": "extracts_flavors"
+  },
+  {
+      "id": "chocolate_syrup",
+      "name": "Chocolate Syrup",
+      "category": "syrups_sauces"
+  },
+  {
+      "id": "cake_pieces",
+      "name": "Cake Pieces or Mini Muffins",
+      "category": "mixins_snacks"
+  },
+  {
+      "id": "gatsby_chocolate_bar",
+      "name": "Gatsby Chocolate Bar",
+      "category": "mixins_snacks"
+  },
+  {
+      "id": "cadbury_mini_eggs",
+      "name": "Cadbury Mini Eggs",
+      "category": "mixins_snacks"
+  },
+  {
+      "id": "chocolate_covered_potato_chips",
+      "name": "Chocolate Covered Potato Chips",
+      "category": "mixins_snacks"
+  },
+  {
+      "id": "potato_chips",
+      "name": "Crushed Salted Potato Chips",
+      "category": "mixins_snacks"
+  },
+  {
+      "id": "legendary_foods_donuts",
+      "name": "Legendary Foods Protein Chocolate Dip Donuts",
+      "category": "mixins_snacks"
   }
+
 ];
 
 const RECIPES_MASTER = [
@@ -19896,5 +19997,5359 @@ const RECIPES_MASTER = [
           "london_fog_gelato",
           "earl_grey_lavender"
       ]
+  },
+  {
+    "id": "mint_base",
+    "name": "Mint",
+    "category": "Base Flavors",
+    "categories": [
+      "Base Flavors"
+    ],
+    "sources": [
+      {
+        "book": "Base Flavors",
+        "page": 8,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 8,
+    "macros": {
+      "calories": "135",
+      "protein": "22g",
+      "carbs": "10g",
+      "fat": "0g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "",
+    "ingredients": [
+      {
+        "id": "fat_free_ultra_filtered_milk",
+        "name": "Fat Free Ultra-Filtered Milk",
+        "quantity": "400",
+        "unit": "g",
+        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "40-45",
+        "unit": "g",
+        "raw": "40-45G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "vanilla_bean_paste",
+        "name": "Vanilla Bean Paste",
+        "quantity": "5",
+        "unit": "g",
+        "raw": "5G (1 TSP) VANILLA BEAN PASTE (OR EXTRACT)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: 1 tsp; or extract"
+      },
+      {
+        "id": "peppermint_extract",
+        "name": "Peppermint Extract",
+        "quantity": "1/8",
+        "unit": "tsp",
+        "raw": "\u215b TSP PEPPERMINT EXTRACT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "SPIN ON \"RESPIN\" SETTING",
+      "RESPIN AGAIN IF POWDERY"
+    ],
+    "aliases": [
+      "mint_base",
+      "mint"
+    ]
+  },
+  {
+    "id": "peanut_butter_base",
+    "name": "Peanut Butter",
+    "category": "Base Flavors",
+    "categories": [
+      "Base Flavors"
+    ],
+    "sources": [
+      {
+        "book": "Base Flavors",
+        "page": 8,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 8,
+    "macros": {
+      "calories": "240",
+      "protein": "31g",
+      "carbs": "15g",
+      "fat": "6g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "",
+    "ingredients": [
+      {
+        "id": "fat_free_ultra_filtered_milk",
+        "name": "Fat Free Ultra-Filtered Milk",
+        "quantity": "400",
+        "unit": "g",
+        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "40-45",
+        "unit": "g",
+        "raw": "40-45G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "peanut_butter",
+        "name": "Peanut Butter",
+        "quantity": "8",
+        "unit": "g",
+        "raw": "8G (\u00bd TBSP) PEANUT BUTTER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bd tbsp"
+      },
+      {
+        "id": "pb_fit",
+        "name": "PB Fit",
+        "quantity": "16",
+        "unit": "g",
+        "raw": "16G (2 TBSP) PB FIT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: 2 tbsp"
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "SPIN ON \"RESPIN\" SETTING",
+      "RESPIN AGAIN IF POWDERY"
+    ],
+    "aliases": [
+      "peanut_butter_base",
+      "peanut_butter"
+    ]
+  },
+  {
+    "id": "cinnamon_base",
+    "name": "Cinnamon",
+    "category": "Base Flavors",
+    "categories": [
+      "Base Flavors"
+    ],
+    "sources": [
+      {
+        "book": "Base Flavors",
+        "page": 9,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 9,
+    "macros": {
+      "calories": "139",
+      "protein": "22g",
+      "carbs": "12g",
+      "fat": "0g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "",
+    "ingredients": [
+      {
+        "id": "fat_free_ultra_filtered_milk",
+        "name": "Fat Free Ultra-Filtered Milk",
+        "quantity": "400",
+        "unit": "g",
+        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "40-45",
+        "unit": "g",
+        "raw": "40-45G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "ground_cinnamon",
+        "name": "Ground Cinnamon",
+        "quantity": "3",
+        "unit": "g",
+        "raw": "3G (\u00bd TSP) CINNAMON",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bd tsp"
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "SPIN ON \"RESPIN\" SETTING",
+      "RESPIN AGAIN IF POWDERY"
+    ],
+    "aliases": [
+      "cinnamon_base",
+      "cinnamon"
+    ]
+  },
+  {
+    "id": "caramel_base",
+    "name": "Caramel",
+    "category": "Base Flavors",
+    "categories": [
+      "Base Flavors"
+    ],
+    "sources": [
+      {
+        "book": "Base Flavors",
+        "page": 10,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 10,
+    "macros": {
+      "calories": "160",
+      "protein": "30g",
+      "carbs": "4g",
+      "fat": "3g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "",
+    "ingredients": [
+      {
+        "id": "caramel_protein_shake",
+        "name": "Caramel Protein Shake",
+        "quantity": "1",
+        "unit": "shake",
+        "raw": "1 CARAMEL PROTEIN SHAKE (350-400ML)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "350-400ml"
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "20-25",
+        "unit": "g",
+        "raw": "20-25G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "SPIN ON \"RESPIN\" SETTING",
+      "RESPIN AGAIN IF POWDERY"
+    ],
+    "aliases": [
+      "caramel_base",
+      "caramel"
+    ]
+  },
+  {
+    "id": "chocolate_peanut_butter_base",
+    "name": "Chocolate Peanut Butter",
+    "category": "Base Flavors",
+    "categories": [
+      "Base Flavors"
+    ],
+    "sources": [
+      {
+        "book": "Base Flavors",
+        "page": 13,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 13,
+    "macros": {
+      "calories": "248",
+      "protein": "44g",
+      "carbs": "7g",
+      "fat": "5g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "",
+    "ingredients": [
+      {
+        "id": "chocolate_protein_shake",
+        "name": "Chocolate Protein Shake",
+        "quantity": "1",
+        "unit": "shake",
+        "raw": "1 CHOCOLATE PROTEIN SHAKE (350-400ML)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "350-400ml"
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "10",
+        "unit": "g",
+        "raw": "10G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "cocoa_powder",
+        "name": "Cocoa Powder",
+        "quantity": "10",
+        "unit": "g",
+        "raw": "10G COCOA POWDER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "peanut_butter_protein_powder",
+        "name": "Peanut Butter Protein Powder",
+        "quantity": "0.5",
+        "unit": "scoop",
+        "raw": "\u00bd SCOOP PEANUT BUTTER PROTEIN POWDER (I USE RYSE SKIPPY PB PROTEIN) (CAN SUB WITH 2 TBSP OF PB POWDER LIKE PB FIT)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Can sub with 2 tbsp PB powder like PB Fit"
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "SPIN ON \"RESPIN\" SETTING",
+      "RESPIN AGAIN IF POWDERY"
+    ],
+    "aliases": [
+      "chocolate_peanut_butter_base",
+      "chocolate_pb_base"
+    ]
+  },
+  {
+    "id": "reeses_base",
+    "name": "Reese\u2019s",
+    "category": "Base Flavors",
+    "categories": [
+      "Base Flavors"
+    ],
+    "sources": [
+      {
+        "book": "Base Flavors",
+        "page": 13,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 13,
+    "macros": {
+      "calories": "275",
+      "protein": "47g",
+      "carbs": "14g",
+      "fat": "3g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "",
+    "ingredients": [
+      {
+        "id": "fat_free_ultra_filtered_milk",
+        "name": "Fat Free Ultra-Filtered Milk",
+        "quantity": "400",
+        "unit": "g",
+        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "c4_reeses_protein_powder",
+        "name": "C4 Reese's Protein Powder",
+        "quantity": "1",
+        "unit": "scoop",
+        "raw": "1 SCOOP C4 REESE\u2019S PROTEIN POWDER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "20-25",
+        "unit": "g",
+        "raw": "20-25G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "SPIN ON \"RESPIN\" SETTING",
+      "RESPIN AGAIN IF POWDERY",
+      "TOP WITH REESE\u2019S (OPTIONAL)"
+    ],
+    "aliases": [
+      "reeses_base",
+      "reeses_flavor_base"
+    ]
+  },
+  {
+    "id": "vanilla_bean_base",
+    "name": "Vanilla Bean",
+    "category": "Base Flavors",
+    "categories": [
+      "Base Flavors"
+    ],
+    "sources": [
+      {
+        "book": "Base Flavors",
+        "page": 13,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 13,
+    "macros": {
+      "calories": "265",
+      "protein": "47g",
+      "carbs": "14g",
+      "fat": "2g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "",
+    "ingredients": [
+      {
+        "id": "fat_free_ultra_filtered_milk",
+        "name": "Fat Free Ultra-Filtered Milk",
+        "quantity": "400",
+        "unit": "g",
+        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "c4_vanilla_bean_protein_powder",
+        "name": "C4 Vanilla Bean Protein Powder",
+        "quantity": "1",
+        "unit": "scoop",
+        "raw": "1 SCOOP C4 VANILLA BEAN PROTEIN POWDER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "20-25",
+        "unit": "g",
+        "raw": "20-25G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "SPIN ON \"RESPIN\" SETTING",
+      "RESPIN AGAIN IF POWDERY"
+    ],
+    "aliases": [
+      "vanilla_bean_base",
+      "c4_vanilla_bean_base"
+    ]
+  },
+  {
+    "id": "hersheys_milk_chocolate_base",
+    "name": "Hershey\u2019s Milk Chocolate",
+    "category": "Base Flavors",
+    "categories": [
+      "Base Flavors"
+    ],
+    "sources": [
+      {
+        "book": "Base Flavors",
+        "page": 14,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 14,
+    "macros": {
+      "calories": "265",
+      "protein": "47g",
+      "carbs": "14g",
+      "fat": "2g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "",
+    "ingredients": [
+      {
+        "id": "fat_free_ultra_filtered_milk",
+        "name": "Fat Free Ultra-Filtered Milk",
+        "quantity": "400",
+        "unit": "g",
+        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "c4_hersheys_protein_powder",
+        "name": "C4 Hershey's Protein Powder",
+        "quantity": "1",
+        "unit": "scoop",
+        "raw": "1 SCOOP C4 HERSHEY\u2019S PROTEIN POWDER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "20-25",
+        "unit": "g",
+        "raw": "20-25G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "SPIN ON \"RESPIN\" SETTING",
+      "RESPIN AGAIN IF POWDERY",
+      "TOP WITH HERSHEY\u2019S CHOCOLATE (OPTIONAL)"
+    ],
+    "aliases": [
+      "hersheys_milk_chocolate_base",
+      "hersheys_chocolate_base"
+    ]
+  },
+  {
+    "id": "acai_base",
+    "name": "A\u00e7a\u00ed",
+    "category": "Base Flavors",
+    "categories": [
+      "Base Flavors"
+    ],
+    "sources": [
+      {
+        "book": "Base Flavors",
+        "page": 17,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 17,
+    "macros": {
+      "calories": "294",
+      "protein": "32g",
+      "carbs": "17g",
+      "fat": "9g"
+    },
+    "spinSetting": "Smoothie Bowl",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "SCOOP INTO A BOWL AND TOP WITH YOUR FAVORITE ACAI BOWL TOPPINGS.",
+    "ingredients": [
+      {
+        "id": "fat_free_ultra_filtered_milk",
+        "name": "Fat Free Ultra-Filtered Milk",
+        "quantity": "120",
+        "unit": "g",
+        "raw": "120G FAT FREE FAIRLIFE MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "vanilla_protein_powder",
+        "name": "Vanilla Protein Powder",
+        "quantity": "1",
+        "unit": "scoop",
+        "raw": "1 SCOOP VANILLA PROTEIN POWDER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "acai_puree",
+        "name": "A\u00e7ai Puree",
+        "quantity": "1",
+        "unit": "packet",
+        "raw": "1 PACKET UNSWEETENED ACAI PUREE (80 CAL 1G P, 1G C, 7G F)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Unsweetened acai puree"
+      },
+      {
+        "id": "banana",
+        "name": "Banana",
+        "quantity": "50",
+        "unit": "g",
+        "raw": "50G BANANA",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      }
+    ],
+    "instructions": [
+      "IN A BLENDER, BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"SMOOTHIE BOWL\" SETTING",
+      "SPIN ON \"RESPIN\" SETTING",
+      "RESPIN AGAIN IF POWDERY",
+      "(OPTIONAL) SCOOP INTO A BOWL AND TOP WITH YOUR FAVORITE ACAI BOWL TOPPINGS"
+    ],
+    "aliases": [
+      "acai_base",
+      "acai_smoothie_bowl"
+    ]
+  },
+  {
+    "id": "marshmallow_base",
+    "name": "Marshmallow",
+    "category": "Base Flavors",
+    "categories": [
+      "Base Flavors"
+    ],
+    "sources": [
+      {
+        "book": "Base Flavors",
+        "page": 17,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 17,
+    "macros": {
+      "calories": "178",
+      "protein": "22g",
+      "carbs": "22g",
+      "fat": "0g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "TOAST MARSHMALLOWS FOR THAT CAMPFIRE-ESQUE FLAVOR.",
+    "ingredients": [
+      {
+        "id": "fat_free_ultra_filtered_milk",
+        "name": "Fat Free Ultra-Filtered Milk",
+        "quantity": "400",
+        "unit": "g",
+        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "40",
+        "unit": "g",
+        "raw": "40G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "mini_marshmallows",
+        "name": "Mini Marshmallows",
+        "quantity": "15",
+        "unit": "g",
+        "raw": "15G MINI MARSHMALLOWS (PRO TIP: TOAST THEM FOR THAT CAMPFIRE-ESQUE FLAVOR)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Pro Tip: toast them for campfire flavor"
+      },
+      {
+        "id": "vanilla_bean_paste",
+        "name": "Vanilla Bean Paste",
+        "quantity": "5",
+        "unit": "g",
+        "raw": "5G (1 TSP) VANILLA BEAN PASTE (OR EXTRACT)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: 1 tsp; or extract"
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE (MARSHMALLOWS INCLUDED) AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "SPIN ON \"RESPIN\" SETTING",
+      "RESPIN AGAIN IF POWDERY"
+    ],
+    "aliases": [
+      "marshmallow_base",
+      "toasted_marshmallow_base"
+    ]
+  },
+  {
+    "id": "lime_base",
+    "name": "Lime",
+    "category": "Base Flavors",
+    "categories": [
+      "Base Flavors"
+    ],
+    "sources": [
+      {
+        "book": "Base Flavors",
+        "page": 18,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 18,
+    "macros": {
+      "calories": "135",
+      "protein": "19g",
+      "carbs": "15g",
+      "fat": "0g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "",
+    "ingredients": [
+      {
+        "id": "fat_free_ultra_filtered_milk",
+        "name": "Fat Free Ultra-Filtered Milk",
+        "quantity": "350",
+        "unit": "g",
+        "raw": "350G FAT FREE FAIRLIFE MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "lime_juice",
+        "name": "Lime Juice",
+        "quantity": "75",
+        "unit": "g",
+        "raw": "THE JUICE OF 2 LIMES (SHOULD BE ~75G)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Juice of 2 limes (~75g)"
+      },
+      {
+        "id": "lime_zest",
+        "name": "Lime Zest",
+        "quantity": "2",
+        "unit": "limes",
+        "raw": "THE ZEST OF THE SAME 2 LIMES",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Zest of 2 limes"
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "45",
+        "unit": "g",
+        "raw": "45G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "vanilla_bean_paste",
+        "name": "Vanilla Bean Paste",
+        "quantity": "5",
+        "unit": "g",
+        "raw": "5G (1 TSP) VANILLA BEAN PASTE (OR EXTRACT)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: 1 tsp; or extract"
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "SPIN ON \"RESPIN\" SETTING",
+      "RESPIN AGAIN IF POWDERY"
+    ],
+    "aliases": [
+      "lime_base",
+      "fresh_lime_base"
+    ]
+  },
+  {
+    "id": "brown_butter_base",
+    "name": "Brown Butter",
+    "category": "Base Flavors",
+    "categories": [
+      "Base Flavors"
+    ],
+    "sources": [
+      {
+        "book": "Base Flavors",
+        "page": 18,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 18,
+    "macros": {
+      "calories": "168",
+      "protein": "22g",
+      "carbs": "10g",
+      "fat": "4g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "",
+    "ingredients": [
+      {
+        "id": "fat_free_ultra_filtered_milk",
+        "name": "Fat Free Ultra-Filtered Milk",
+        "quantity": "400",
+        "unit": "g",
+        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "40-45",
+        "unit": "g",
+        "raw": "40-45G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "browned_butter",
+        "name": "Browned Butter",
+        "quantity": "5",
+        "unit": "g",
+        "raw": "5G (1 TSP) BROWNED BUTTER (IF NOT USING BROWN BUTTER EXTRACT, DOUBLE THIS)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "If not using brown butter extract, double to 10g"
+      },
+      {
+        "id": "brown_butter_extract",
+        "name": "Brown Butter Extract",
+        "quantity": "1/4",
+        "unit": "tsp",
+        "raw": "(OPTIONAL) \u00bc TSP BROWN BUTTER EXTRACT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Optional"
+      },
+      {
+        "id": "vanilla_bean_paste",
+        "name": "Vanilla Bean Paste",
+        "quantity": "5",
+        "unit": "g",
+        "raw": "5G (1 TSP) VANILLA BEAN PASTE (OR EXTRACT)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: 1 tsp; or extract"
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "SPIN ON \"RESPIN\" SETTING",
+      "RESPIN AGAIN IF POWDERY"
+    ],
+    "aliases": [
+      "brown_butter_base",
+      "browned_butter_base"
+    ]
+  },
+  {
+    "id": "coconut_base",
+    "name": "Coconut",
+    "category": "Base Flavors",
+    "categories": [
+      "Base Flavors"
+    ],
+    "sources": [
+      {
+        "book": "Base Flavors",
+        "page": 19,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 19,
+    "macros": {
+      "calories": "133",
+      "protein": "22g",
+      "carbs": "10g",
+      "fat": "0g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "",
+    "ingredients": [
+      {
+        "id": "fat_free_ultra_filtered_milk",
+        "name": "Fat Free Ultra-Filtered Milk",
+        "quantity": "400",
+        "unit": "g",
+        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "40-45",
+        "unit": "g",
+        "raw": "40-45G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "vanilla_bean_paste",
+        "name": "Vanilla Bean Paste",
+        "quantity": "5",
+        "unit": "g",
+        "raw": "5G (1 TSP) VANILLA BEAN PASTE (OR EXTRACT)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: 1 tsp; or extract"
+      },
+      {
+        "id": "coconut_extract",
+        "name": "Coconut Extract",
+        "quantity": "5",
+        "unit": "g",
+        "raw": "5G (1 TSP) COCONUT EXTRACT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: 1 tsp"
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "SPIN ON \"RESPIN\" SETTING",
+      "RESPIN AGAIN IF POWDERY"
+    ],
+    "aliases": [
+      "coconut_base",
+      "coconut_cream_base"
+    ]
+  },
+  {
+    "id": "cheesecake_base",
+    "name": "Cheesecake",
+    "category": "Base Flavors",
+    "categories": [
+      "Base Flavors"
+    ],
+    "sources": [
+      {
+        "book": "Base Flavors",
+        "page": 19,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 19,
+    "macros": {
+      "calories": "183",
+      "protein": "23g",
+      "carbs": "12g",
+      "fat": "5g"
+    },
+    "spinSetting": "Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "",
+    "ingredients": [
+      {
+        "id": "fat_free_ultra_filtered_milk",
+        "name": "Fat Free Ultra-Filtered Milk",
+        "quantity": "400",
+        "unit": "g",
+        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "whipped_cream_cheese",
+        "name": "Whipped Cream Cheese",
+        "quantity": "22",
+        "unit": "g",
+        "raw": "22G (2 TBSP) WHIPPED (OR REGULAR) CREAM CHEESE",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: 2 tbsp; whipped or regular"
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "40-45",
+        "unit": "g",
+        "raw": "40-45G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "vanilla_bean_paste",
+        "name": "Vanilla Bean Paste",
+        "quantity": "5",
+        "unit": "g",
+        "raw": "5G (1 TSP) VANILLA BEAN PASTE (OR EXTRACT)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: 1 tsp; or extract"
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"ICE CREAM\" SETTING",
+      "SPIN ON \"RESPIN\" SETTING UNTIL IT REACHES YOUR DESIRED CONSISTENCY"
+    ],
+    "aliases": [
+      "cheesecake_base",
+      "classic_cheesecake_base"
+    ]
+  },
+  {
+    "id": "salted_caramel_base",
+    "name": "Salted Caramel",
+    "category": "Base Flavors",
+    "categories": [
+      "Base Flavors"
+    ],
+    "sources": [
+      {
+        "book": "Base Flavors",
+        "page": 20,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 20,
+    "macros": {
+      "calories": "170",
+      "protein": "30g",
+      "carbs": "3g",
+      "fat": "4g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "",
+    "ingredients": [
+      {
+        "id": "salted_caramel_protein_shake",
+        "name": "Salted Caramel Protein Shake",
+        "quantity": "1",
+        "unit": "shake",
+        "raw": "1 SALTED CARAMEL PROTEIN SHAKE (350-400ML)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "350-400ml"
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "20-25",
+        "unit": "g",
+        "raw": "20-25G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      },
+      {
+        "id": "flaky_salt",
+        "name": "Flaky Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF FLAKY SALT",
+        "section": "Topping",
+        "isMixin": true,
+        "notes": "For topping"
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "SPIN ON \"RESPIN\" SETTING",
+      "TOP WITH A PINCH OF FLAKY SALT AND SALTED CARAMEL SAUCE (IF USING)"
+    ],
+    "aliases": [
+      "salted_caramel_base"
+    ]
+  },
+  {
+    "id": "darkest_chocolate_base",
+    "name": "Darkest Chocolate",
+    "category": "Base Flavors",
+    "categories": [
+      "Base Flavors"
+    ],
+    "sources": [
+      {
+        "book": "Base Flavors",
+        "page": 20,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 20,
+    "macros": {
+      "calories": "196",
+      "protein": "34g",
+      "carbs": "7g",
+      "fat": "5g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "",
+    "ingredients": [
+      {
+        "id": "chocolate_protein_shake",
+        "name": "Chocolate Protein Shake",
+        "quantity": "1",
+        "unit": "shake",
+        "raw": "1 CHOCOLATE PROTEIN SHAKE (350-400ML)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "350-400ml"
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "20",
+        "unit": "g",
+        "raw": "20G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "cocoa_powder",
+        "name": "Cocoa Powder",
+        "quantity": "20",
+        "unit": "g",
+        "raw": "20G COCOA POWDER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "SPIN ON \"RESPIN\" SETTING",
+      "RESPIN AGAIN IF POWDERY"
+    ],
+    "aliases": [
+      "darkest_chocolate_base",
+      "dark_chocolate_base"
+    ]
+  },
+  {
+    "id": "vegan_vanilla_base",
+    "name": "Vegan Vanilla",
+    "category": "Base Flavors",
+    "categories": [
+      "Base Flavors"
+    ],
+    "sources": [
+      {
+        "book": "Base Flavors",
+        "page": 21,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 21,
+    "macros": {
+      "calories": "150",
+      "protein": "15g",
+      "carbs": "5g",
+      "fat": "8g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "",
+    "ingredients": [
+      {
+        "id": "unsweetened_soy_milk",
+        "name": "Unsweetened Soy Milk",
+        "quantity": "400",
+        "unit": "g",
+        "raw": "400G UNSWEETENED SOY MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "40-45",
+        "unit": "g",
+        "raw": "40-45G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "vanilla_bean_paste",
+        "name": "Vanilla Bean Paste",
+        "quantity": "5",
+        "unit": "g",
+        "raw": "5G (1 TSP) VANILLA BEAN PASTE (OR EXTRACT)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: 1 tsp; or extract"
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "SPIN ON \"RESPIN\" SETTING",
+      "RESPIN AGAIN IF POWDERY"
+    ],
+    "aliases": [
+      "vegan_vanilla_base",
+      "soy_vanilla_base"
+    ]
+  },
+  {
+    "id": "black_raspberry_base",
+    "name": "Black Raspberry",
+    "category": "Base Flavors",
+    "categories": [
+      "Base Flavors"
+    ],
+    "sources": [
+      {
+        "book": "Base Flavors",
+        "page": 21,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 21,
+    "macros": {
+      "calories": "133",
+      "protein": "22g",
+      "carbs": "10g",
+      "fat": "0g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "",
+    "ingredients": [
+      {
+        "id": "fat_free_ultra_filtered_milk",
+        "name": "Fat Free Ultra-Filtered Milk",
+        "quantity": "400",
+        "unit": "g",
+        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "40-45",
+        "unit": "g",
+        "raw": "40-45G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "vanilla_bean_paste",
+        "name": "Vanilla Bean Paste",
+        "quantity": "5",
+        "unit": "g",
+        "raw": "5G (1 TSP) VANILLA BEAN PASTE (OR EXTRACT)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: 1 tsp; or extract"
+      },
+      {
+        "id": "black_raspberry_flavoring",
+        "name": "Black Raspberry Flavoring",
+        "quantity": "5",
+        "unit": "g",
+        "raw": "5G (1 TSP) BLACK RASPBERRY FLAVORING",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: 1 tsp"
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "SPIN ON \"RESPIN\" SETTING",
+      "RESPIN AGAIN IF POWDERY"
+    ],
+    "aliases": [
+      "black_raspberry_base"
+    ]
+  },
+  {
+    "id": "oreo_fan_favorite",
+    "name": "Oreo",
+    "category": "Fan Favorites",
+    "categories": [
+      "Fan Favorites"
+    ],
+    "sources": [
+      {
+        "book": "Fan Favorites",
+        "page": 23,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 23,
+    "macros": {
+      "calories": "240",
+      "protein": "23g",
+      "carbs": "26g",
+      "fat": "4g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "",
+    "ingredients": [
+      {
+        "id": "fat_free_ultra_filtered_milk",
+        "name": "Fat Free Ultra-Filtered Milk",
+        "quantity": "400",
+        "unit": "g",
+        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "40-45",
+        "unit": "g",
+        "raw": "40-45G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "vanilla_bean_paste",
+        "name": "Vanilla Bean Paste",
+        "quantity": "5",
+        "unit": "g",
+        "raw": "5G (1 TSP) VANILLA BEAN PASTE (OR EXTRACT)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: 1 tsp; or extract"
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      },
+      {
+        "id": "oreo_thins",
+        "name": "Oreo Thins",
+        "quantity": "3",
+        "unit": "cookies",
+        "raw": "3 OREO THINS",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": ""
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "SPIN ON \"RESPIN\" SETTING",
+      "RESPIN AGAIN IF POWDERY",
+      "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND FILL WITH MIX-INS",
+      "RUN THE \"MIX-IN\" CYCLE"
+    ],
+    "aliases": [
+      "oreo_fan_favorite",
+      "oreo_creami"
+    ]
+  },
+  {
+    "id": "cake_batter_crumble",
+    "name": "Cake Batter Crumble",
+    "category": "Fan Favorites",
+    "categories": [
+      "Fan Favorites"
+    ],
+    "sources": [
+      {
+        "book": "Fan Favorites",
+        "page": 24,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 24,
+    "macros": {
+      "calories": "270",
+      "protein": "24g",
+      "carbs": "29g",
+      "fat": "6g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "",
+    "ingredients": [
+      {
+        "id": "fat_free_ultra_filtered_milk",
+        "name": "Fat Free Ultra-Filtered Milk",
+        "quantity": "400",
+        "unit": "g",
+        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "40-45",
+        "unit": "g",
+        "raw": "40-45G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "cake_batter_extract",
+        "name": "Cake Batter Extract",
+        "quantity": "5",
+        "unit": "g",
+        "raw": "5G (1 TSP) CAKE BATTER EXTRACT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: 1 tsp"
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      },
+      {
+        "id": "cake_pieces",
+        "name": "Cake Pieces or Mini Muffins",
+        "quantity": "35",
+        "unit": "g",
+        "raw": "35G CAKE PIECES OR MINI MUFFINS",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": "Cake pieces or mini muffins"
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "SPIN ON \"RESPIN\" SETTING",
+      "RESPIN AGAIN IF POWDERY",
+      "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND FILL WITH MIX-INS",
+      "RUN THE \"MIX-IN\" CYCLE"
+    ],
+    "aliases": [
+      "cake_batter_crumble"
+    ]
+  },
+  {
+    "id": "smores_fan_favorite",
+    "name": "S\u2019mores",
+    "category": "Fan Favorites",
+    "categories": [
+      "Fan Favorites"
+    ],
+    "sources": [
+      {
+        "book": "Fan Favorites",
+        "page": 26,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 26,
+    "macros": {
+      "calories": "286",
+      "protein": "30g",
+      "carbs": "38g",
+      "fat": "2g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "",
+    "ingredients": [
+      {
+        "id": "fat_free_ultra_filtered_milk",
+        "name": "Fat Free Ultra-Filtered Milk",
+        "quantity": "400",
+        "unit": "g",
+        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "40",
+        "unit": "g",
+        "raw": "40G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "graham_protein_powder",
+        "name": "Graham Flavored Protein Powder",
+        "quantity": "10",
+        "unit": "g",
+        "raw": "10G GRAHAM FLAVORED PROTEIN POWDER (I USE BLACK MAGIC HONEY GRAHAMS)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Black Magic Honey Grahams or similar"
+      },
+      {
+        "id": "vanilla_bean_paste",
+        "name": "Vanilla Bean Paste",
+        "quantity": "5",
+        "unit": "g",
+        "raw": "5G (1 TSP) VANILLA BEAN PASTE (OR EXTRACT)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: 1 tsp; or extract"
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      },
+      {
+        "id": "mini_marshmallows",
+        "name": "Mini Marshmallows",
+        "quantity": "15",
+        "unit": "g",
+        "raw": "15G MINI MARSHMALLOWS",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": ""
+      },
+      {
+        "id": "graham_cracker",
+        "name": "Graham Cracker",
+        "quantity": "0.5",
+        "unit": "sheet",
+        "raw": "\u00bd SHEET OF A GRAHAM CRACKER",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": ""
+      },
+      {
+        "id": "chocolate_syrup",
+        "name": "Chocolate Syrup",
+        "quantity": "7",
+        "unit": "g",
+        "raw": "7G (\u00bd TBSP) CHOCOLATE SYRUP",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": "Alt measurement: \u00bd tbsp"
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "SPIN ON \"RESPIN\" SETTING",
+      "RESPIN AGAIN IF POWDERY",
+      "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND FILL WITH MIX-INS",
+      "RUN THE \"MIX-IN\" CYCLE"
+    ],
+    "aliases": [
+      "smores_fan_favorite",
+      "smores_classic"
+    ]
+  },
+  {
+    "id": "mocha_chip",
+    "name": "Mocha Chip",
+    "category": "Fan Favorites",
+    "categories": [
+      "Fan Favorites"
+    ],
+    "sources": [
+      {
+        "book": "Fan Favorites",
+        "page": 28,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 28,
+    "macros": {
+      "calories": "233",
+      "protein": "33g",
+      "carbs": "21g",
+      "fat": "9g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "THE CHOCOLATE CHIP HACK: RIGHT BEFORE THE MIX-IN CYCLE, COMBINE 15G CHOCOLATE WITH 2G COCONUT OIL, MELT IN THE MICROWAVE (30 SEC INTERVALS, STIRRING IN BETWEEN), HOLLOW OUT A HOLE IN THE CENTER OF THE BASE, AND POUR IN. AFTER SPINNING ON THE MIX-IN SETTING, IT'LL TURN INTO PERFECT, CREAMY CHOCOLATE CHIPS.",
+    "ingredients": [
+      {
+        "id": "chocolate_protein_shake",
+        "name": "Chocolate Protein Shake",
+        "quantity": "1",
+        "unit": "shake",
+        "raw": "1 CHOCOLATE PROTEIN SHAKE (350-400ML)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "350-400ml"
+      },
+      {
+        "id": "espresso",
+        "name": "Espresso",
+        "quantity": "1",
+        "unit": "shot",
+        "raw": "1 SHOT OF ESPRESSO",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "20",
+        "unit": "g",
+        "raw": "20G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "cocoa_powder",
+        "name": "Cocoa Powder",
+        "quantity": "10",
+        "unit": "g",
+        "raw": "10G COCOA POWDER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      },
+      {
+        "id": "gatsby_chocolate_bar",
+        "name": "Gatsby Chocolate Bar",
+        "quantity": "27",
+        "unit": "g",
+        "raw": "\u2153 (27G) OF A GATSBY CHOCOLATE BAR, CHOPPED (60 CAL) \u2014 OR USE CHOCOLATE CHIP HACK (15G CHOCOLATE + 2G COCONUT OIL)",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": "\u2153 bar (27g) chopped, or chocolate chip hack"
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "SPIN ON \"RESPIN\" SETTING",
+      "RESPIN AGAIN IF POWDERY",
+      "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND FILL WITH CHOCOLATE",
+      "RUN THE \"MIX-IN\" CYCLE"
+    ],
+    "aliases": [
+      "mocha_chip"
+    ]
+  },
+  {
+    "id": "dark_chocolate_pb_cup",
+    "name": "Dark Chocolate PB Cup",
+    "category": "Fan Favorites",
+    "categories": [
+      "Fan Favorites"
+    ],
+    "sources": [
+      {
+        "book": "Fan Favorites",
+        "page": 28,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 28,
+    "macros": {
+      "calories": "404",
+      "protein": "39g",
+      "carbs": "29g",
+      "fat": "18g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "",
+    "ingredients": [
+      {
+        "id": "chocolate_protein_shake",
+        "name": "Chocolate Protein Shake",
+        "quantity": "1",
+        "unit": "shake",
+        "raw": "1 CHOCOLATE PROTEIN SHAKE (350-400ML)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "350-400ml"
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "20",
+        "unit": "g",
+        "raw": "20G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "cocoa_powder",
+        "name": "Cocoa Powder",
+        "quantity": "10",
+        "unit": "g",
+        "raw": "10G COCOA POWDER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "black_cocoa_powder",
+        "name": "Black Cocoa Powder",
+        "quantity": "10",
+        "unit": "g",
+        "raw": "10G BLACK COCOA POWDER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      },
+      {
+        "id": "reeses_pb_cups",
+        "name": "Reese's PB Cups",
+        "quantity": "2",
+        "unit": "cups",
+        "raw": "2 REESE\u2019S PB CUPS (41G) OR EQUIVALENT PB CUP",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": "41g total"
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "SPIN ON \"RESPIN\" SETTING",
+      "RESPIN AGAIN IF POWDERY",
+      "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND FILL WITH CHOPPED UP PB CUPS",
+      "RUN THE \"MIX-IN\" CYCLE"
+    ],
+    "aliases": [
+      "dark_chocolate_pb_cup"
+    ]
+  },
+  {
+    "id": "chocolate_cookies_and_cream",
+    "name": "Chocolate Cookies & Cream",
+    "category": "Fan Favorites",
+    "categories": [
+      "Fan Favorites"
+    ],
+    "sources": [
+      {
+        "book": "Fan Favorites",
+        "page": 36,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 36,
+    "macros": {
+      "calories": "278",
+      "protein": "33g",
+      "carbs": "20g",
+      "fat": "8g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "",
+    "ingredients": [
+      {
+        "id": "chocolate_protein_shake",
+        "name": "Chocolate Protein Shake",
+        "quantity": "1",
+        "unit": "shake",
+        "raw": "1 CHOCOLATE PROTEIN SHAKE (350-400ML)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "350-400ml"
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "20",
+        "unit": "g",
+        "raw": "20G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "cocoa_powder",
+        "name": "Cocoa Powder",
+        "quantity": "10",
+        "unit": "g",
+        "raw": "10G COCOA POWDER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      },
+      {
+        "id": "oreo_thins",
+        "name": "Oreo Thins",
+        "quantity": "3",
+        "unit": "cookies",
+        "raw": "3 OREO THINS",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": ""
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "SPIN ON \"RESPIN\" SETTING",
+      "RESPIN AGAIN IF POWDERY",
+      "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND FILL WITH MIX-INS",
+      "RUN THE \"MIX-IN\" CYCLE"
+    ],
+    "aliases": [
+      "chocolate_cookies_and_cream",
+      "chocolate_oreo"
+    ]
+  },
+  {
+    "id": "chocolate_pb_cup",
+    "name": "Chocolate PB Cup",
+    "category": "Fan Favorites",
+    "categories": [
+      "Fan Favorites"
+    ],
+    "sources": [
+      {
+        "book": "Fan Favorites",
+        "page": 37,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 37,
+    "macros": {
+      "calories": "299",
+      "protein": "34g",
+      "carbs": "22g",
+      "fat": "12g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "",
+    "ingredients": [
+      {
+        "id": "chocolate_protein_shake",
+        "name": "Chocolate Protein Shake",
+        "quantity": "1",
+        "unit": "shake",
+        "raw": "1 CHOCOLATE PROTEIN SHAKE (350-400ML)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "350-400ml"
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "20-25",
+        "unit": "g",
+        "raw": "20-25G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "cocoa_powder",
+        "name": "Cocoa Powder",
+        "quantity": "10",
+        "unit": "g",
+        "raw": "10G COCOA POWDER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      },
+      {
+        "id": "reeses_pb_cups",
+        "name": "Reese's PB Cups",
+        "quantity": "1",
+        "unit": "cup",
+        "raw": "CHOPPED UP PB CUPS",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": "Chopped up PB cups"
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "SPIN ON \"RESPIN\" SETTING",
+      "RESPIN AGAIN IF POWDERY",
+      "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND FILL WITH CHOPPED UP PB CUPS",
+      "RUN THE \"MIX-IN\" CYCLE"
+    ],
+    "aliases": [
+      "chocolate_pb_cup"
+    ]
+  },
+  {
+    "id": "mint_oreo",
+    "name": "Mint Oreo (aka Mint Chocolate Cookie)",
+    "category": "Fan Favorites",
+    "categories": [
+      "Fan Favorites"
+    ],
+    "sources": [
+      {
+        "book": "Fan Favorites",
+        "page": 37,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 37,
+    "macros": {
+      "calories": "240",
+      "protein": "23g",
+      "carbs": "26g",
+      "fat": "5g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "",
+    "ingredients": [
+      {
+        "id": "fat_free_ultra_filtered_milk",
+        "name": "Fat Free Ultra-Filtered Milk",
+        "quantity": "400",
+        "unit": "g",
+        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "40",
+        "unit": "g",
+        "raw": "40G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "vanilla_bean_paste",
+        "name": "Vanilla Bean Paste",
+        "quantity": "2.5",
+        "unit": "g",
+        "raw": "2.5G (\u00bd TSP) VANILLA BEAN PASTE (OR EXTRACT)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bd tsp; or extract"
+      },
+      {
+        "id": "peppermint_extract",
+        "name": "Peppermint Extract",
+        "quantity": "1/8",
+        "unit": "tsp",
+        "raw": "\u215b TSP PEPPERMINT EXTRACT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "peppermint_bark_skinny_syrups",
+        "name": "Peppermint Bark Skinny Syrups",
+        "quantity": "1",
+        "unit": "tsp",
+        "raw": "1 TSP PEPPERMINT BARK SKINNY SYRUPS (OPTIONAL)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Optional"
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      },
+      {
+        "id": "oreo_thins",
+        "name": "Oreo Thins",
+        "quantity": "3",
+        "unit": "cookies",
+        "raw": "3 OREO THINS (OPTIONALLY CRUMBLE ONE MORE ON TOP)",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": "Optionally crumble one more on top"
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "SPIN ON \"RESPIN\" SETTING",
+      "RESPIN AGAIN IF POWDERY",
+      "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND FILL WITH MIX-INS",
+      "RUN THE \"MIX-IN\" CYCLE",
+      "(OPTIONALLY) CRUMBLE THE FINAL OREO ON TOP"
+    ],
+    "aliases": [
+      "mint_oreo",
+      "mint_chocolate_cookie"
+    ]
+  },
+  {
+    "id": "salted_caramel_brownie",
+    "name": "Salted Caramel Brownie",
+    "category": "Fan Favorites",
+    "categories": [
+      "Fan Favorites"
+    ],
+    "sources": [
+      {
+        "book": "Fan Favorites",
+        "page": 50,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 50,
+    "macros": {
+      "calories": "270",
+      "protein": "40g",
+      "carbs": "14g",
+      "fat": "7g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "",
+    "ingredients": [
+      {
+        "id": "salted_caramel_protein_shake",
+        "name": "Salted Caramel Protein Shake",
+        "quantity": "1",
+        "unit": "shake",
+        "raw": "1 SALTED CARAMEL PROTEIN SHAKE (350-400ML)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "350-400ml"
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "20-25",
+        "unit": "g",
+        "raw": "20-25G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      },
+      {
+        "id": "prime_bites_protein_brownie",
+        "name": "Prime Bites Protein Brownie",
+        "quantity": "0.5",
+        "unit": "brownie",
+        "raw": "\u00bd OF A PRIME BITES PROTEIN BROWNIE",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": "Prime Bites brownie chopped into cubes"
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "SPIN ON \"RESPIN\" SETTING",
+      "RESPIN AGAIN IF POWDERY",
+      "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND FILL WITH THE BROWNIE",
+      "RUN THE \"MIX-IN\" CYCLE"
+    ],
+    "aliases": [
+      "salted_caramel_brownie"
+    ]
+  },
+  {
+    "id": "salted_caramel_almond",
+    "name": "Salted Caramel Almond",
+    "category": "Fan Favorites",
+    "categories": [
+      "Fan Favorites"
+    ],
+    "sources": [
+      {
+        "book": "Fan Favorites",
+        "page": 54,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 54,
+    "macros": {
+      "calories": "288",
+      "protein": "25g",
+      "carbs": "16g",
+      "fat": "11g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "THE CHOCOLATE CHIP HACK: RIGHT BEFORE THE MIX-IN CYCLE, COMBINE 15G CHOCOLATE WITH 2G COCONUT OIL, MELT IN MICROWAVE (30 SEC INTERVALS, STIRRING IN BETWEEN), HOLLOW OUT HOLE IN CENTER OF BASE, AND POUR IN FOR CREAMY CHOCOLATE CHIPS, OR POUR ON TOP AFTER SPINNING FOR A HARD CHOCOLATE SHELL.",
+    "ingredients": [
+      {
+        "id": "fat_free_ultra_filtered_milk",
+        "name": "Fat Free Ultra-Filtered Milk",
+        "quantity": "400",
+        "unit": "g",
+        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "40-45",
+        "unit": "g",
+        "raw": "40-45G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "vanilla_bean_paste",
+        "name": "Vanilla Bean Paste",
+        "quantity": "5",
+        "unit": "g",
+        "raw": "5G (1 TSP) VANILLA BEAN PASTE (OR EXTRACT)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: 1 tsp; or extract"
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      },
+      {
+        "id": "almonds",
+        "name": "Almonds",
+        "quantity": "10",
+        "unit": "g",
+        "raw": "10G SLICED ALMONDS",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": "Sliced almonds"
+      },
+      {
+        "id": "salted_caramel_sauce",
+        "name": "Salted Caramel Sauce",
+        "quantity": "7",
+        "unit": "g",
+        "raw": "7G SALTED CARAMEL SAUCE",
+        "section": "Topping",
+        "isMixin": true,
+        "notes": ""
+      },
+      {
+        "id": "sugar_free_chocolate_chips",
+        "name": "Sugar-Free Chocolate Chips",
+        "quantity": "15",
+        "unit": "g",
+        "raw": "15G CHOCOLATE CHIPS + 2G COCONUT OIL (USE AS MIX-IN OR HARD CHOCOLATE SHELL)",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": "Melted with 2g coconut oil for chips or shell"
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "SPIN ON \"RESPIN\" SETTING IF POWDERY",
+      "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND FILL WITH THE CHOCOLATE (SKIP THIS STEP IF YOU WANT THE CHOCOLATE SHELL TOPPING)",
+      "RUN THE \"MIX-IN\" CYCLE (SKIP THIS STEP IF YOU WANT THE CHOCOLATE SHELL TOPPING)",
+      "TOP WITH THE ALMONDS AND SALTED CARAMEL SAUCE (+ CHOCOLATE IF YOU\u2019RE DOING THE SHELL)"
+    ],
+    "aliases": [
+      "salted_caramel_almond"
+    ]
+  },
+  {
+    "id": "cookies_and_cream_fan_favorite",
+    "name": "Cookies & Cream",
+    "category": "Fan Favorites",
+    "categories": [
+      "Fan Favorites"
+    ],
+    "sources": [
+      {
+        "book": "Fan Favorites",
+        "page": 56,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 56,
+    "macros": {
+      "calories": "255",
+      "protein": "33g",
+      "carbs": "18g",
+      "fat": "5g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "",
+    "ingredients": [
+      {
+        "id": "cookies_and_cream_protein_shake",
+        "name": "Cookies & Cream Protein Shake",
+        "quantity": "1",
+        "unit": "shake",
+        "raw": "1 COOKIES & CREAM PROTEIN SHAKE (350-400ML)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "350-400ml"
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "20-25",
+        "unit": "g",
+        "raw": "20-25G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      },
+      {
+        "id": "oreo_thins",
+        "name": "Oreo Thins",
+        "quantity": "3",
+        "unit": "cookies",
+        "raw": "3 OREO THINS",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": ""
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "SPIN ON \"RESPIN\" SETTING IF VERY POWDERY",
+      "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND FILL WITH THE OREOS",
+      "RUN THE \"MIX-IN\" CYCLE"
+    ],
+    "aliases": [
+      "cookies_and_cream_fan_favorite"
+    ]
+  },
+  {
+    "id": "oreo_n_cold_brew",
+    "name": "Oreo \u2018n Cold Brew",
+    "category": "Fan Favorites",
+    "categories": [
+      "Fan Favorites"
+    ],
+    "sources": [
+      {
+        "book": "Fan Favorites",
+        "page": 58,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 58,
+    "macros": {
+      "calories": "233",
+      "protein": "23g",
+      "carbs": "29g",
+      "fat": "2g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "",
+    "ingredients": [
+      {
+        "id": "fat_free_ultra_filtered_milk",
+        "name": "Fat Free Ultra-Filtered Milk",
+        "quantity": "400",
+        "unit": "g",
+        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "40-45",
+        "unit": "g",
+        "raw": "40-45G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "espresso",
+        "name": "Espresso",
+        "quantity": "1",
+        "unit": "pod/shot",
+        "raw": "1 COMETEER POD (CAN SUB WITH 1 SHOT OF ESPRESSO OR 1 TBSP OF INSTANT COFFEE)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "1 Cometeer pod or 1 espresso shot / 1 tbsp instant coffee"
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      },
+      {
+        "id": "oreo_thins",
+        "name": "Oreo Thins",
+        "quantity": "5",
+        "unit": "cookies",
+        "raw": "5 OREO THINS (CREAM REMOVED)",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": "Cream removed"
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "SPIN ON \"RESPIN\" SETTING IF VERY POWDERY",
+      "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND FILL WITH THE OREOS",
+      "RUN THE \"MIX-IN\" CYCLE"
+    ],
+    "aliases": [
+      "oreo_n_cold_brew",
+      "oreo_cold_brew"
+    ]
+  },
+  {
+    "id": "cadbury_mini_egg_mcflurry",
+    "name": "Cadbury Mini Egg McFlurry",
+    "category": "Fan Favorites",
+    "categories": [
+      "Fan Favorites"
+    ],
+    "sources": [
+      {
+        "book": "Fan Favorites",
+        "page": 59,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 59,
+    "macros": {
+      "calories": "258",
+      "protein": "23g",
+      "carbs": "27g",
+      "fat": "5g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "FREEZE CHOPPED CADBURY MINI EGGS BEFORE MIXING IN SO THEY WITHSTAND THE MIX-IN SETTING WITHOUT GETTING COMPLETELY PULVERIZED.",
+    "ingredients": [
+      {
+        "id": "fat_free_ultra_filtered_milk",
+        "name": "Fat Free Ultra-Filtered Milk",
+        "quantity": "400",
+        "unit": "g",
+        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "40-45",
+        "unit": "g",
+        "raw": "40-45G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "vanilla_bean_paste",
+        "name": "Vanilla Bean Paste",
+        "quantity": "5",
+        "unit": "g",
+        "raw": "5G (1 TSP) VANILLA BEAN PASTE (OR EXTRACT)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: 1 tsp; or extract"
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      },
+      {
+        "id": "cadbury_mini_eggs",
+        "name": "Cadbury Mini Eggs",
+        "quantity": "25",
+        "unit": "g",
+        "raw": "25G CADBURY MINI EGGS, CHOPPED",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": "Chopped and frozen"
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "AT THE SAME TIME, PUT THE CHOPPED MINI EGGS INTO THE FREEZER TO FIRM UP",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "SPIN ON \"RESPIN\" SETTING",
+      "RESPIN AGAIN IF POWDERY",
+      "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND FILL WITH THE FROZEN MINI EGGS",
+      "RUN THE \"MIX-IN\" CYCLE"
+    ],
+    "aliases": [
+      "cadbury_mini_egg_mcflurry"
+    ]
+  },
+  {
+    "id": "double_dough",
+    "name": "Double Dough",
+    "category": "Fan Favorites",
+    "categories": [
+      "Fan Favorites"
+    ],
+    "sources": [
+      {
+        "book": "Fan Favorites",
+        "page": 60,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 60,
+    "macros": {
+      "calories": "268",
+      "protein": "29g",
+      "carbs": "28g",
+      "fat": "4g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "",
+    "ingredients": [
+      {
+        "id": "fat_free_ultra_filtered_milk",
+        "name": "Fat Free Ultra-Filtered Milk",
+        "quantity": "400",
+        "unit": "g",
+        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "brown_sugar_sweetener",
+        "name": "Brown Sugar Sweetener",
+        "quantity": "40-45",
+        "unit": "g",
+        "raw": "40-45G BROWN SUGAR SUBSTITUTE",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "brown_butter_extract",
+        "name": "Brown Butter Extract",
+        "quantity": "1/4",
+        "unit": "tsp",
+        "raw": "\u00bc TSP BROWN BUTTER EXTRACT (CAN SUB WITH 5G/1 TSP BROWNED BUTTER)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Can sub with 5g/1 tsp browned butter"
+      },
+      {
+        "id": "vanilla_bean_paste",
+        "name": "Vanilla Bean Paste",
+        "quantity": "5",
+        "unit": "g",
+        "raw": "5G (1 TSP) VANILLA BEAN PASTE (OR EXTRACT)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: 1 tsp; or extract"
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A big pinch",
+        "unit": "pinch",
+        "raw": "A BIG PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      },
+      {
+        "id": "fuul_chocolate_chip_cookie_dough_bites",
+        "name": "Fuul Chocolate Chip Cookie Dough Bites",
+        "quantity": "0.5",
+        "unit": "package",
+        "raw": "\u00bd OF A PACKAGE OF THE FUUL CHOCOLATE CHIP COOKIE DOUGH BITES (CAN SUB FOR ANY COOKIE DOUGH)",
+        "section": "Topping",
+        "isMixin": true,
+        "notes": "Can sub for any cookie dough"
+      },
+      {
+        "id": "flaky_salt",
+        "name": "Flaky Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "PINCH OF FLAKY SALT",
+        "section": "Topping",
+        "isMixin": true,
+        "notes": ""
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "SPIN ON \"RESPIN\" SETTING IF POWDERY",
+      "TOP WITH THE COOKIE DOUGH BITES AND FLAKY SALT"
+    ],
+    "aliases": [
+      "double_dough"
+    ]
+  },
+  {
+    "id": "vanilla_caramel_fudge",
+    "name": "Vanilla Caramel Fudge",
+    "category": "Fan Favorites",
+    "categories": [
+      "Fan Favorites"
+    ],
+    "sources": [
+      {
+        "book": "Fan Favorites",
+        "page": 61,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 61,
+    "macros": {
+      "calories": "231",
+      "protein": "23g",
+      "carbs": "16g",
+      "fat": "6g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "THE CHOCOLATE CHIP HACK: COMBINE 15G CHOCOLATE WITH 2G COCONUT OIL, MELT IN MICROWAVE (30 SEC INTERVALS, STIRRING IN BETWEEN), HOLLOW OUT HOLE IN CENTER OF BASE, AND POUR IN BEFORE MIX-IN CYCLE FOR CREAMY CHOCOLATE CHIPS.",
+    "ingredients": [
+      {
+        "id": "fat_free_ultra_filtered_milk",
+        "name": "Fat Free Ultra-Filtered Milk",
+        "quantity": "400",
+        "unit": "g",
+        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "40-45",
+        "unit": "g",
+        "raw": "40-45G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "vanilla_bean_paste",
+        "name": "Vanilla Bean Paste",
+        "quantity": "5",
+        "unit": "g",
+        "raw": "5G (1 TSP) VANILLA BEAN PASTE (OR EXTRACT)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: 1 tsp; or extract"
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      },
+      {
+        "id": "sugar_free_chocolate_chips",
+        "name": "Sugar-Free Chocolate Chips",
+        "quantity": "15",
+        "unit": "g",
+        "raw": "15G CHOCOLATE CHIPS (60 CAL) MIXED WITH 2G OF COCONUT OIL (18 CAL)",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": "Mixed with 2g coconut oil"
+      },
+      {
+        "id": "caramel_syrup",
+        "name": "Caramel Syrup",
+        "quantity": "7",
+        "unit": "g",
+        "raw": "7G CARAMEL SAUCE",
+        "section": "Topping",
+        "isMixin": true,
+        "notes": ""
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "SPIN ON \"RESPIN\" SETTING IF VERY POWDERY",
+      "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND FILL WITH THE MELTED CHOCOLATE",
+      "RUN THE \"MIX-IN\" CYCLE",
+      "TOP WITH THE CARAMEL SAUCE"
+    ],
+    "aliases": [
+      "vanilla_caramel_fudge"
+    ]
+  },
+  {
+    "id": "confetti_brownie_batter",
+    "name": "Confetti Brownie Batter",
+    "category": "Fan Favorites",
+    "categories": [
+      "Fan Favorites"
+    ],
+    "sources": [
+      {
+        "book": "Fan Favorites",
+        "page": 62,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 62,
+    "macros": {
+      "calories": "343",
+      "protein": "45g",
+      "carbs": "19g",
+      "fat": "12g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "",
+    "ingredients": [
+      {
+        "id": "chocolate_protein_shake",
+        "name": "Chocolate Protein Shake",
+        "quantity": "1",
+        "unit": "shake",
+        "raw": "1 CHOCOLATE PROTEIN SHAKE (350-400ML)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "350-400ml"
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "20-25",
+        "unit": "g",
+        "raw": "20-25G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "black_cocoa_powder",
+        "name": "Black Cocoa Powder",
+        "quantity": "20",
+        "unit": "g",
+        "raw": "20G BLACK COCOA POWDER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      },
+      {
+        "id": "rainbow_sprinkles",
+        "name": "Rainbow Sprinkles",
+        "quantity": "8",
+        "unit": "g",
+        "raw": "8G RAINBOW SPRINKLES",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": "Half mixed in, half on top"
+      },
+      {
+        "id": "prime_bites_protein_brownie",
+        "name": "Prime Bites Protein Brownie",
+        "quantity": "0.5",
+        "unit": "brownie",
+        "raw": "\u00bd OF A PRIME BITES PROTEIN BROWNIE",
+        "section": "Topping",
+        "isMixin": true,
+        "notes": "Chopped up brownie for topping"
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "SPIN ON \"RESPIN\" SETTING IF VERY POWDERY",
+      "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND FILL WITH HALF OF YOUR SPRINKLES",
+      "RUN THE \"MIX-IN\" CYCLE",
+      "TOP WITH THE CHOPPED UP BROWNIE AND REST OF THE SPRINKLES"
+    ],
+    "aliases": [
+      "confetti_brownie_batter"
+    ]
+  },
+  {
+    "id": "cookies_n_cream_cheesecake",
+    "name": "Cookies 'n Cream Cheesecake",
+    "category": "Fan Favorites",
+    "categories": [
+      "Fan Favorites"
+    ],
+    "sources": [
+      {
+        "book": "Fan Favorites",
+        "page": 62,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 62,
+    "macros": {
+      "calories": "355",
+      "protein": "26g",
+      "carbs": "33g",
+      "fat": "14g"
+    },
+    "spinSetting": "Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "FREEZE CHEESECAKE BITES AND OREOS BEFORE THE MIX-IN SETTING SO THEY FIRM UP AND WITHSTAND THE BLADE WITHOUT GETTING COMPLETELY PULVERIZED.",
+    "ingredients": [
+      {
+        "id": "fat_free_ultra_filtered_milk",
+        "name": "Fat Free Ultra-Filtered Milk",
+        "quantity": "400",
+        "unit": "g",
+        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "whipped_cream_cheese",
+        "name": "Whipped Cream Cheese",
+        "quantity": "22",
+        "unit": "g",
+        "raw": "22G (2 TBSP) WHIPPED (OR REGULAR) CREAM CHEESE",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: 2 tbsp; whipped or regular"
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "40-45",
+        "unit": "g",
+        "raw": "40-45G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "vanilla_bean_paste",
+        "name": "Vanilla Bean Paste",
+        "quantity": "5",
+        "unit": "g",
+        "raw": "5G (1 TSP) VANILLA BEAN PASTE (OR EXTRACT)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: 1 tsp; or extract"
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      },
+      {
+        "id": "oreo_thins",
+        "name": "Oreo Thins",
+        "quantity": "4",
+        "unit": "cookies",
+        "raw": "4 OREO THINS (CREAM REMOVED)",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": "Cream removed"
+      },
+      {
+        "id": "cheesecake_bites",
+        "name": "Cheesecake Bites",
+        "quantity": "30",
+        "unit": "g",
+        "raw": "30G CHEESECAKE BITES (~100 CALORIES WORTH OF ANY CHEESECAKE, CHOPPED INTO BITE SIZE PIECES)",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": "~100 cal worth chopped into bite size pieces"
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "AT THE SAME TIME, PUT THE CHEESECAKE BITES AND OREOS INTO THE FREEZER TO FIRM UP",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"ICE CREAM\" SETTING",
+      "SPIN ON \"RESPIN\" SETTING IF VERY POWDERY",
+      "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND ADD THE FROZEN CHEESECAKE BITES AND OREOS",
+      "RUN THE \"MIX-IN\" CYCLE"
+    ],
+    "aliases": [
+      "cookies_n_cream_cheesecake"
+    ]
+  },
+  {
+    "id": "chocolate_chip_cookie_dough_blizzard_ff",
+    "name": "Chocolate Chip Cookie Dough Blizzard",
+    "category": "Fan Favorites",
+    "categories": [
+      "Fan Favorites"
+    ],
+    "sources": [
+      {
+        "book": "Fan Favorites",
+        "page": 63,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 63,
+    "macros": {
+      "calories": "285",
+      "protein": "30g",
+      "carbs": "29g",
+      "fat": "5g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "TO MAKE LOW CAL CHOCOLATE GANACHE, COMBINE 5G OF UNSWEETENED COCOA POWDER WITH 10G OF SUGAR FREE SYRUP.",
+    "ingredients": [
+      {
+        "id": "fat_free_ultra_filtered_milk",
+        "name": "Fat Free Ultra-Filtered Milk",
+        "quantity": "400",
+        "unit": "g",
+        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "40-45",
+        "unit": "g",
+        "raw": "40-45G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "vanilla_bean_paste",
+        "name": "Vanilla Bean Paste",
+        "quantity": "5",
+        "unit": "g",
+        "raw": "5G (1 TSP) VANILLA BEAN PASTE (OR EXTRACT)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: 1 tsp; or extract"
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      },
+      {
+        "id": "fuul_chocolate_chip_cookie_dough_bites",
+        "name": "Fuul Chocolate Chip Cookie Dough Bites",
+        "quantity": "0.5",
+        "unit": "package",
+        "raw": "\u00bd OF A PACKAGE OF THE FUUL CHOCOLATE CHIP COOKIE DOUGH BITES",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": "Half mixed in, half on top"
+      },
+      {
+        "id": "low_calorie_chocolate_ganache",
+        "name": "Low Calorie Chocolate Ganache",
+        "quantity": "15",
+        "unit": "g",
+        "raw": "15G LOW CAL CHOCOLATE GANACHE (5G UNSWEETENED COCOA POWDER + 10G SUGAR FREE SYRUP)",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": "5g cocoa powder + 10g sugar free syrup"
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "PREP YOUR CHOCOLATE GANACHE (COMBINE 5G COCOA POWDER WITH 10G SUGAR FREE SYRUP)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "RESPIN AGAIN IF VERY POWDERY",
+      "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND FILL WITH THE GANACHE AND HALF OF THE COOKIE DOUGH BITES",
+      "RUN THE \"MIX-IN\" CYCLE",
+      "TOP WITH THE REST OF THE COOKIE DOUGH BITES"
+    ],
+    "aliases": [
+      "chocolate_chip_cookie_dough_blizzard_ff"
+    ]
+  },
+  {
+    "id": "chocolate_chip_banana_bread",
+    "name": "Chocolate Chip Banana Bread",
+    "category": "Fan Favorites",
+    "categories": [
+      "Fan Favorites"
+    ],
+    "sources": [
+      {
+        "book": "Fan Favorites",
+        "page": 63,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 63,
+    "macros": {
+      "calories": "299",
+      "protein": "23g",
+      "carbs": "32g",
+      "fat": "7g"
+    },
+    "spinSetting": "Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "THE CHOCOLATE CHIP HACK: COMBINE 15G CHOCOLATE WITH 2G COCONUT OIL, MELT IN MICROWAVE (30 SEC INTERVALS, STIRRING IN BETWEEN), HOLLOW OUT HOLE IN CENTER OF BASE, AND POUR IN BEFORE MIX-IN CYCLE FOR CREAMY CHOCOLATE CHIPS.",
+    "ingredients": [
+      {
+        "id": "fat_free_ultra_filtered_milk",
+        "name": "Fat Free Ultra-Filtered Milk",
+        "quantity": "400",
+        "unit": "g",
+        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "40",
+        "unit": "g",
+        "raw": "40G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "vanilla_bean_paste",
+        "name": "Vanilla Bean Paste",
+        "quantity": "5",
+        "unit": "g",
+        "raw": "5G (1 TSP) VANILLA BEAN PASTE (OR EXTRACT)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: 1 tsp; or extract"
+      },
+      {
+        "id": "banana",
+        "name": "Banana",
+        "quantity": "100",
+        "unit": "g",
+        "raw": "1 SMALL BANANA (~100G)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "~100g"
+      },
+      {
+        "id": "ground_cinnamon",
+        "name": "Ground Cinnamon",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) CINNAMON",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      },
+      {
+        "id": "pumpkin_pie_spice",
+        "name": "Pumpkin Pie Spice",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) PUMPKIN PIE SPICE (CAN SUB WITH A DASH OF NUTMEG)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp; or dash of nutmeg"
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      },
+      {
+        "id": "sugar_free_chocolate_chips",
+        "name": "Sugar-Free Chocolate Chips",
+        "quantity": "15",
+        "unit": "g",
+        "raw": "15G CHOCOLATE CHIPS (60 CAL) MIXED WITH 2G OF COCONUT OIL (19 CAL)",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": "Mixed with 2g coconut oil"
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"ICE CREAM\" SETTING",
+      "SPIN ON \"RESPIN\" SETTING IF VERY POWDERY",
+      "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND FILL WITH THE MELTED CHOCOLATE",
+      "RUN THE \"MIX-IN\" CYCLE"
+    ],
+    "aliases": [
+      "chocolate_chip_banana_bread"
+    ]
+  },
+  {
+    "id": "chocolate_oreo_mcflurry",
+    "name": "Chocolate Oreo McFlurry",
+    "category": "Fan Favorites",
+    "categories": [
+      "Fan Favorites"
+    ],
+    "sources": [
+      {
+        "book": "Fan Favorites",
+        "page": 65,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 65,
+    "macros": {
+      "calories": "273",
+      "protein": "33g",
+      "carbs": "23g",
+      "fat": "6g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "",
+    "ingredients": [
+      {
+        "id": "chocolate_protein_shake",
+        "name": "Chocolate Protein Shake",
+        "quantity": "1",
+        "unit": "shake",
+        "raw": "1 CHOCOLATE PROTEIN SHAKE (350-400ML)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "350-400ml"
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "25",
+        "unit": "g",
+        "raw": "25G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "cocoa_powder",
+        "name": "Cocoa Powder",
+        "quantity": "10",
+        "unit": "g",
+        "raw": "10G COCOA POWDER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      },
+      {
+        "id": "oreo_thins",
+        "name": "Oreo Thins",
+        "quantity": "5",
+        "unit": "cookies",
+        "raw": "5 OREO THINS (CREAM REMOVED)",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": "Cream removed"
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "SPIN ON \"RESPIN\" SETTING IF VERY POWDERY",
+      "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND FILL WITH THE OREOS",
+      "RUN THE \"MIX-IN\" CYCLE"
+    ],
+    "aliases": [
+      "chocolate_oreo_mcflurry"
+    ]
+  },
+  {
+    "id": "chocolate_devotion",
+    "name": "Chocolate Devotion",
+    "category": "Fan Favorites",
+    "categories": [
+      "Fan Favorites"
+    ],
+    "sources": [
+      {
+        "book": "Fan Favorites",
+        "page": 65,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 65,
+    "macros": {
+      "calories": "370",
+      "protein": "44g",
+      "carbs": "11g",
+      "fat": "14g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "CHOCOLATE CHIP SWIRL: MELT 10G CHOCOLATE CHIPS + 1.5G COCONUT OIL IN MICROWAVE. GANACHE: MIX 10G COCOA POWDER WITH ~20G SUGAR FREE MAPLE SYRUP UNTIL SMOOTH.",
+    "ingredients": [
+      {
+        "id": "chocolate_protein_shake",
+        "name": "Chocolate Protein Shake",
+        "quantity": "1",
+        "unit": "shake",
+        "raw": "1 CHOCOLATE PROTEIN SHAKE (350-400ML)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "350-400ml"
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "20-25",
+        "unit": "g",
+        "raw": "20-25G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "cocoa_powder",
+        "name": "Cocoa Powder",
+        "quantity": "10",
+        "unit": "g",
+        "raw": "10G COCOA POWDER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      },
+      {
+        "id": "sugar_free_chocolate_chips",
+        "name": "Sugar-Free Chocolate Chips",
+        "quantity": "10",
+        "unit": "g",
+        "raw": "10G CHOCOLATE CHIPS + 1.5G COCONUT OIL",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": "Melted with 1.5g coconut oil"
+      },
+      {
+        "id": "prime_bites_protein_brownie",
+        "name": "Prime Bites Protein Brownie",
+        "quantity": "0.5",
+        "unit": "brownie",
+        "raw": "\u00bd OF A PRIME BITES PROTEIN BROWNIE, CHOPPED INTO BITE-SIZE CUBES",
+        "section": "Topping",
+        "isMixin": true,
+        "notes": "Chopped into cubes"
+      },
+      {
+        "id": "low_calorie_chocolate_ganache",
+        "name": "Low Calorie Chocolate Ganache",
+        "quantity": "30",
+        "unit": "g",
+        "raw": "30G (2 TBSP) LOW CALORIE CHOCOLATE GANACHE (10G COCOA POWDER + ~20G SUGAR FREE MAPLE SYRUP)",
+        "section": "Topping",
+        "isMixin": true,
+        "notes": "10g cocoa powder mixed with ~20g sugar free maple syrup"
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "PREP YOUR CHOCOLATE GANACHE (10G COCOA POWDER MIXED WITH ~20G SUGAR FREE MAPLE SYRUP)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "SPIN ON \"RESPIN\" SETTING IF VERY POWDERY",
+      "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND FILL WITH THE MELTED CHOCOLATE CHIPS",
+      "RUN THE \"MIX-IN\" CYCLE",
+      "TOP WITH THE CHOCOLATE GANACHE AND BROWNIE PIECES"
+    ],
+    "aliases": [
+      "chocolate_devotion"
+    ]
+  },
+  {
+    "id": "mocha_brownie_mudslide_blizzard",
+    "name": "Mocha Brownie Mudslide Blizzard",
+    "category": "Fan Favorites",
+    "categories": [
+      "Fan Favorites"
+    ],
+    "sources": [
+      {
+        "book": "Fan Favorites",
+        "page": 66,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 66,
+    "macros": {
+      "calories": "321",
+      "protein": "32g",
+      "carbs": "14g",
+      "fat": "11g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "THE CHOCOLATE CHIP HACK: COMBINE 15G CHOCOLATE WITH 2G COCONUT OIL, MELT IN MICROWAVE (30 SEC INTERVALS, STIRRING IN BETWEEN), HOLLOW OUT HOLE IN CENTER OF BASE, AND POUR IN BEFORE MIX-IN CYCLE FOR CREAMY CHOCOLATE CHIPS.",
+    "ingredients": [
+      {
+        "id": "fat_free_ultra_filtered_milk",
+        "name": "Fat Free Ultra-Filtered Milk",
+        "quantity": "400",
+        "unit": "g",
+        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "40-45",
+        "unit": "g",
+        "raw": "40-45G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "espresso",
+        "name": "Espresso",
+        "quantity": "1",
+        "unit": "shot",
+        "raw": "1 SHOT OF ESPRESSO (FEEL FREE TO SUB FOR 1 TBSP OF INSTANT COFFEE OR A COMETEER POD)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "1 shot espresso, 1 tbsp instant coffee, or Cometeer pod"
+      },
+      {
+        "id": "vanilla_bean_paste",
+        "name": "Vanilla Bean Paste",
+        "quantity": "5",
+        "unit": "g",
+        "raw": "5G (1 TSP) VANILLA BEAN PASTE (OR EXTRACT)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: 1 tsp; or extract"
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      },
+      {
+        "id": "sugar_free_chocolate_chips",
+        "name": "Sugar-Free Chocolate Chips",
+        "quantity": "15",
+        "unit": "g",
+        "raw": "15G CHOCOLATE CHIPS (60 CAL) MIXED WITH 2G OF COCONUT OIL (18 CAL)",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": "Mixed with 2g coconut oil"
+      },
+      {
+        "id": "prime_bites_protein_brownie",
+        "name": "Prime Bites Protein Brownie",
+        "quantity": "0.5",
+        "unit": "brownie",
+        "raw": "\u00bd OF A PRIME BITES PROTEIN BROWNIE, CHOPPED INTO BITE-SIZE CUBES",
+        "section": "Topping",
+        "isMixin": true,
+        "notes": "Chopped into cubes"
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND FILL WITH THE MELTED CHOCOLATE",
+      "RUN THE \"MIX-IN\" CYCLE",
+      "TOP WITH THE BROWNIE PIECES"
+    ],
+    "aliases": [
+      "mocha_brownie_mudslide_blizzard"
+    ]
+  },
+  {
+    "id": "matchapolitan",
+    "name": "Matchapolitan",
+    "category": "Fan Favorites",
+    "categories": [
+      "Fan Favorites"
+    ],
+    "sources": [
+      {
+        "book": "Fan Favorites",
+        "page": 66,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 66,
+    "macros": {
+      "calories": "239",
+      "protein": "22g",
+      "carbs": "26g",
+      "fat": "4g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "",
+    "ingredients": [
+      {
+        "id": "fat_free_ultra_filtered_milk",
+        "name": "Fat Free Ultra-Filtered Milk",
+        "quantity": "400",
+        "unit": "g",
+        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "40-45",
+        "unit": "g",
+        "raw": "40-45G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "vanilla_bean_paste",
+        "name": "Vanilla Bean Paste",
+        "quantity": "5",
+        "unit": "g",
+        "raw": "5G (1 TSP) VANILLA BEAN PASTE (OR EXTRACT)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: 1 tsp; or extract"
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      },
+      {
+        "id": "whipped_topping",
+        "name": "Reduced Fat Whipped Topping",
+        "quantity": "40",
+        "unit": "g",
+        "raw": "40G REDUCED FAT WHIPPED TOPPING (LIKE COOL WHIP) MIXED WITH 4G (2 TSP) MATCHA",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": "Mixed with 4g / 2 tsp matcha"
+      },
+      {
+        "id": "matcha",
+        "name": "Matcha",
+        "quantity": "4",
+        "unit": "g",
+        "raw": "4G (2 TSP) MATCHA",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": "Alt measurement: 2 tsp"
+      },
+      {
+        "id": "strawberry_jam",
+        "name": "Strawberry Jam",
+        "quantity": "1-2",
+        "unit": "tbsp",
+        "raw": "1-2 TBSP SUGAR-FREE STRAWBERRY JAM (I USED THE BRAND GOOD GOOD)",
+        "section": "Topping",
+        "isMixin": true,
+        "notes": "Sugar-free strawberry jam"
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "SPIN ON \"RESPIN\" SETTING IF VERY POWDERY",
+      "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND FILL WITH THE MATCHA WHIPPED TOPPING",
+      "RUN THE \"MIX-IN\" CYCLE",
+      "TOP WITH THE STRAWBERRY JAM AND MIX IN BY HAND"
+    ],
+    "aliases": [
+      "matchapolitan"
+    ]
+  },
+  {
+    "id": "vegan_oreo_mcflurry",
+    "name": "Vegan Oreo McFlurry",
+    "category": "Fan Favorites",
+    "categories": [
+      "Fan Favorites"
+    ],
+    "sources": [
+      {
+        "book": "Fan Favorites",
+        "page": 67,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 67,
+    "macros": {
+      "calories": "250",
+      "protein": "17g",
+      "carbs": "23g",
+      "fat": "10g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "",
+    "ingredients": [
+      {
+        "id": "unsweetened_soy_milk",
+        "name": "Unsweetened Soy Milk",
+        "quantity": "400",
+        "unit": "g",
+        "raw": "400G UNSWEETENED SOY MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "40-45",
+        "unit": "g",
+        "raw": "40-45G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "vanilla_bean_paste",
+        "name": "Vanilla Bean Paste",
+        "quantity": "5",
+        "unit": "g",
+        "raw": "5G (1 TSP) VANILLA BEAN PASTE (OR EXTRACT)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: 1 tsp; or extract"
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      },
+      {
+        "id": "oreo_thins",
+        "name": "Oreo Thins",
+        "quantity": "3",
+        "unit": "cookies",
+        "raw": "3 OREO THINS",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": ""
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "SPIN ON \"RESPIN\" SETTING IF VERY POWDERY",
+      "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND FILL WITH THE OREOS",
+      "RUN THE \"MIX-IN\" CYCLE"
+    ],
+    "aliases": [
+      "vegan_oreo_mcflurry"
+    ]
+  },
+  {
+    "id": "fluffernutter",
+    "name": "Fluffernutter",
+    "category": "Fan Favorites",
+    "categories": [
+      "Fan Favorites"
+    ],
+    "sources": [
+      {
+        "book": "Fan Favorites",
+        "page": 67,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 67,
+    "macros": {
+      "calories": "306",
+      "protein": "31g",
+      "carbs": "31g",
+      "fat": "6g"
+    },
+    "spinSetting": "Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "",
+    "ingredients": [
+      {
+        "id": "fat_free_ultra_filtered_milk",
+        "name": "Fat Free Ultra-Filtered Milk",
+        "quantity": "400",
+        "unit": "g",
+        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "40-45",
+        "unit": "g",
+        "raw": "40-45G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "peanut_butter",
+        "name": "Peanut Butter",
+        "quantity": "8",
+        "unit": "g",
+        "raw": "8G (\u00bd TBSP) PEANUT BUTTER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bd tbsp"
+      },
+      {
+        "id": "pb_fit",
+        "name": "PB Fit",
+        "quantity": "16",
+        "unit": "g",
+        "raw": "16G (2 TBSP) PB FIT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: 2 tbsp"
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      },
+      {
+        "id": "marshmallow_fluff",
+        "name": "Marshmallow Fluff",
+        "quantity": "20",
+        "unit": "g",
+        "raw": "20G MARSHMALLOW CREME (SAME THING AS MARSHMALLOW FLUFF)",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": "Marshmallow Fluff / creme"
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"ICE CREAM\" SETTING",
+      "SPIN ON \"RESPIN\" SETTING IF POWDERY",
+      "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND FILL WITH THE FLUFF",
+      "RUN THE \"MIX-IN\" CYCLE"
+    ],
+    "aliases": [
+      "fluffernutter"
+    ]
+  },
+  {
+    "id": "biscoff_blizzard",
+    "name": "Biscoff Blizzard",
+    "category": "Fan Favorites",
+    "categories": [
+      "Fan Favorites"
+    ],
+    "sources": [
+      {
+        "book": "Fan Favorites",
+        "page": 68,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 68,
+    "macros": {
+      "calories": "253",
+      "protein": "23g",
+      "carbs": "28g",
+      "fat": "5g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "MAKE A HOLE ON THE SIDE OF THE PINT WITH A BUTTER KNIFE (TO MITIGATE COOKIES GETTING COMPLETE PULVERIZED) BEFORE ADDING COOKIES.",
+    "ingredients": [
+      {
+        "id": "fat_free_ultra_filtered_milk",
+        "name": "Fat Free Ultra-Filtered Milk",
+        "quantity": "400",
+        "unit": "g",
+        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "40-45",
+        "unit": "g",
+        "raw": "40-45G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "vanilla_bean_paste",
+        "name": "Vanilla Bean Paste",
+        "quantity": "5",
+        "unit": "g",
+        "raw": "5G (1 TSP) VANILLA BEAN PASTE (OR EXTRACT)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: 1 tsp; or extract"
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      },
+      {
+        "id": "lotus_biscoff_cookies",
+        "name": "Lotus Biscoff Cookies",
+        "quantity": "25",
+        "unit": "g",
+        "raw": "25G (2 LARGE) LOTUS BISCOFF COOKIES",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": "2 large cookies"
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "RESPIN AGAIN IF VERY POWDERY",
+      "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE ON THE SIDE OF THE PINT AND FILL WITH THE COOKIES",
+      "RUN THE \"MIX-IN\" CYCLE"
+    ],
+    "aliases": [
+      "biscoff_blizzard"
+    ]
+  },
+  {
+    "id": "love_potion_31",
+    "name": "Love Potion #31 (White Chocolate Raspberry)",
+    "category": "Fan Favorites",
+    "categories": [
+      "Fan Favorites"
+    ],
+    "sources": [
+      {
+        "book": "Fan Favorites",
+        "page": 68,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 68,
+    "macros": {
+      "calories": "278",
+      "protein": "23g",
+      "carbs": "25g",
+      "fat": "7g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "THE CHOCOLATE CHIP HACK: COMBINE 15G DARK CHOCOLATE CHIPS WITH 2G COCONUT OIL, MELT IN MICROWAVE (30 SEC INTERVALS, STIRRING IN BETWEEN), HOLLOW OUT HOLE IN CENTER OF BASE, AND POUR IN BEFORE MIX-IN CYCLE FOR CREAMY CHOCOLATE CHIPS.",
+    "ingredients": [
+      {
+        "id": "fat_free_ultra_filtered_milk",
+        "name": "Fat Free Ultra-Filtered Milk",
+        "quantity": "400",
+        "unit": "g",
+        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "40",
+        "unit": "g",
+        "raw": "40G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "white_chocolate_pudding_mix",
+        "name": "White Chocolate Pudding Mix",
+        "quantity": "10",
+        "unit": "g",
+        "raw": "10G WHITE CHOCOLATE JELLO PUDDING MIX",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "vanilla_bean_paste",
+        "name": "Vanilla Bean Paste",
+        "quantity": "5",
+        "unit": "g",
+        "raw": "5G (1 TSP) VANILLA BEAN PASTE (OR EXTRACT)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: 1 tsp; or extract"
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sugar_free_dark_chocolate_chips",
+        "name": "Sugar-Free Dark Chocolate Chips",
+        "quantity": "15",
+        "unit": "g",
+        "raw": "15G DARK CHOCOLATE CHIPS MIXED WITH 2G OF COCONUT OIL",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": "Mixed with 2g coconut oil"
+      },
+      {
+        "id": "frozen_raspberries",
+        "name": "Frozen Raspberries",
+        "quantity": "50",
+        "unit": "g",
+        "raw": "50G FROZEN RASPBERRIES",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": ""
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "SPIN ON \"RESPIN\" SETTING IF VERY POWDERY",
+      "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND FILL WITH THE RASPBERRIES AND MELTED CHOCOLATE",
+      "RUN THE \"MIX-IN\" CYCLE"
+    ],
+    "aliases": [
+      "love_potion_31",
+      "white_chocolate_raspberry"
+    ]
+  },
+  {
+    "id": "late_night_snack",
+    "name": "Late Night Snack",
+    "category": "Fan Favorites",
+    "categories": [
+      "Fan Favorites"
+    ],
+    "sources": [
+      {
+        "book": "Fan Favorites",
+        "page": 69,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 69,
+    "macros": {
+      "calories": "295",
+      "protein": "25g",
+      "carbs": "19g",
+      "fat": "10g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "",
+    "ingredients": [
+      {
+        "id": "fat_free_ultra_filtered_milk",
+        "name": "Fat Free Ultra-Filtered Milk",
+        "quantity": "400",
+        "unit": "g",
+        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "40-45",
+        "unit": "g",
+        "raw": "40-45G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "vanilla_bean_paste",
+        "name": "Vanilla Bean Paste",
+        "quantity": "5",
+        "unit": "g",
+        "raw": "5G (1 TSP) VANILLA BEAN PASTE (OR EXTRACT)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: 1 tsp; or extract"
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      },
+      {
+        "id": "chocolate_covered_potato_chips",
+        "name": "Chocolate Covered Potato Chips",
+        "quantity": "30",
+        "unit": "g",
+        "raw": "30G CHOCOLATE COVERED POTATO CHIPS",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": "Store bought or melted chocolate + coconut oil in 7:1 ratio coated & frozen"
+      },
+      {
+        "id": "salted_caramel_sauce",
+        "name": "Salted Caramel Sauce",
+        "quantity": "7",
+        "unit": "g",
+        "raw": "7G SALTED CARAMEL",
+        "section": "Topping",
+        "isMixin": true,
+        "notes": ""
+      },
+      {
+        "id": "potato_chips",
+        "name": "Crushed Salted Potato Chips",
+        "quantity": "3",
+        "unit": "g",
+        "raw": "3G CRUSHED SALTED POTATO CHIPS (I USED SNACKISH)",
+        "section": "Topping",
+        "isMixin": true,
+        "notes": "Snackish or similar healthy salted potato chips"
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "RESPIN IF VERY POWDERY",
+      "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND FILL WITH THE CHOCOLATE COVERED POTATO CHIPS",
+      "RUN THE \"MIX-IN\" CYCLE",
+      "TOP WITH SALTED CARAMEL AND CRUSHED CHIPS"
+    ],
+    "aliases": [
+      "late_night_snack"
+    ]
+  },
+  {
+    "id": "oreo_pretzel_perfection",
+    "name": "Oreo Pretzel Perfection",
+    "category": "Fan Favorites",
+    "categories": [
+      "Fan Favorites"
+    ],
+    "sources": [
+      {
+        "book": "Fan Favorites",
+        "page": 69,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 69,
+    "macros": {
+      "calories": "262",
+      "protein": "24g",
+      "carbs": "35g",
+      "fat": "2g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "",
+    "ingredients": [
+      {
+        "id": "fat_free_ultra_filtered_milk",
+        "name": "Fat Free Ultra-Filtered Milk",
+        "quantity": "400",
+        "unit": "g",
+        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "40-45",
+        "unit": "g",
+        "raw": "40-45G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "vanilla_bean_paste",
+        "name": "Vanilla Bean Paste",
+        "quantity": "5",
+        "unit": "g",
+        "raw": "5G (1 TSP) VANILLA BEAN PASTE (OR EXTRACT)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: 1 tsp; or extract"
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      },
+      {
+        "id": "oreo_thins",
+        "name": "Oreo Thins",
+        "quantity": "3",
+        "unit": "cookies",
+        "raw": "3 OREO THINS (CREAM REMOVED)",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": "Cream removed"
+      },
+      {
+        "id": "pretzels",
+        "name": "Pretzels",
+        "quantity": "7.5",
+        "unit": "g",
+        "raw": "7.5G PRETZELS (\u00be OF 10G PRETZELS)",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": "\u00be of 10g pretzels"
+      },
+      {
+        "id": "oreo_thins",
+        "name": "Oreo Thins",
+        "quantity": "0.5",
+        "unit": "cookie",
+        "raw": "\u00bd OREO THIN FOR TOPPING",
+        "section": "Topping",
+        "isMixin": true,
+        "notes": ""
+      },
+      {
+        "id": "pretzels",
+        "name": "Pretzels",
+        "quantity": "2.5",
+        "unit": "g",
+        "raw": "2.5G PRETZELS (\u00bc OF 10G PRETZELS)",
+        "section": "Topping",
+        "isMixin": true,
+        "notes": "\u00bc of 10g pretzels"
+      },
+      {
+        "id": "caramel_syrup",
+        "name": "Caramel Syrup",
+        "quantity": "7",
+        "unit": "g",
+        "raw": "7G CARAMEL SAUCE",
+        "section": "Topping",
+        "isMixin": true,
+        "notes": ""
+      },
+      {
+        "id": "flaky_salt",
+        "name": "Flaky Salt",
+        "quantity": "A sprinkle",
+        "unit": "pinch",
+        "raw": "A SPRINKLE OF FLAKY SALT",
+        "section": "Topping",
+        "isMixin": true,
+        "notes": ""
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "RESPIN IF VERY POWDERY",
+      "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND FILL WITH 3 OREOS AND \u00be OF THE PRETZELS",
+      "RUN THE \"MIX-IN\" CYCLE",
+      "TOP WITH THE REMAINING HALF OREO, \u00bc OF THE PRETZELS, AND CARAMEL SAUCE",
+      "SPRINKLE WITH FLAKY SALT"
+    ],
+    "aliases": [
+      "oreo_pretzel_perfection"
+    ]
+  },
+  {
+    "id": "peanut_butter_chocolate_banana",
+    "name": "Peanut Butter Chocolate Banana",
+    "category": "Fan Favorites",
+    "categories": [
+      "Fan Favorites"
+    ],
+    "sources": [
+      {
+        "book": "Fan Favorites",
+        "page": 70,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 70,
+    "macros": {
+      "calories": "362",
+      "protein": "32g",
+      "carbs": "27g",
+      "fat": "13g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "THE CHOCOLATE CHIP HACK: COMBINE 15G CHOCOLATE WITH 2G COCONUT OIL, MELT IN MICROWAVE (30 SEC INTERVALS, STIRRING IN BETWEEN), HOLLOW OUT HOLE IN CENTER OF BASE, AND POUR IN BEFORE MIX-IN CYCLE FOR CREAMY CHOCOLATE CHIPS.",
+    "ingredients": [
+      {
+        "id": "fat_free_ultra_filtered_milk",
+        "name": "Fat Free Ultra-Filtered Milk",
+        "quantity": "400",
+        "unit": "g",
+        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "40-45",
+        "unit": "g",
+        "raw": "40-45G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "peanut_butter",
+        "name": "Peanut Butter",
+        "quantity": "8",
+        "unit": "g",
+        "raw": "8G (\u00bd TBSP) PEANUT BUTTER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bd tbsp"
+      },
+      {
+        "id": "pb_fit",
+        "name": "PB Fit",
+        "quantity": "16",
+        "unit": "g",
+        "raw": "16G (2 TBSP) PB FIT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: 2 tbsp"
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      },
+      {
+        "id": "sugar_free_chocolate_chips",
+        "name": "Sugar-Free Chocolate Chips",
+        "quantity": "15",
+        "unit": "g",
+        "raw": "15G CHOCOLATE CHIPS (60 CAL) MIXED WITH 2G OF COCONUT OIL (27 CAL)",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": "Mixed with 2g coconut oil"
+      },
+      {
+        "id": "banana",
+        "name": "Banana",
+        "quantity": "50",
+        "unit": "g",
+        "raw": "50G SLICED BANANA",
+        "section": "Topping",
+        "isMixin": true,
+        "notes": "Sliced banana"
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "SPIN ON \"RESPIN\" SETTING IF VERY POWDERY",
+      "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND FILL WITH THE MELTED CHOCOLATE",
+      "RUN THE \"MIX-IN\" CYCLE",
+      "TOP WITH THE SLICED BANANA"
+    ],
+    "aliases": [
+      "peanut_butter_chocolate_banana"
+    ]
+  },
+  {
+    "id": "reeses_peanut_butter_cup_fan",
+    "name": "Reese\u2019s Peanut Butter Cup",
+    "category": "Fan Favorites",
+    "categories": [
+      "Fan Favorites"
+    ],
+    "sources": [
+      {
+        "book": "Fan Favorites",
+        "page": 71,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 71,
+    "macros": {
+      "calories": "375",
+      "protein": "37g",
+      "carbs": "23g",
+      "fat": "17g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "PEANUT BUTTER CHIP SWIRL: RIGHT BEFORE THE MIX-IN CYCLE, COMBINE 15G PEANUT BUTTER CHIPS, 2G COCONUT OIL, AND A PINCH OF SALT, MELT IN THE MICROWAVE (30 SEC INTERVALS, STIRRING IN BETWEEN), HOLLOW OUT A HOLE IN THE CENTER OF BASE, AND POUR IN.",
+    "ingredients": [
+      {
+        "id": "chocolate_protein_shake",
+        "name": "Chocolate Protein Shake",
+        "quantity": "1",
+        "unit": "shake",
+        "raw": "1 CHOCOLATE PROTEIN SHAKE (350-400ML)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "350-400ml"
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "20-25",
+        "unit": "g",
+        "raw": "20-25G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "cocoa_powder",
+        "name": "Cocoa Powder",
+        "quantity": "10",
+        "unit": "g",
+        "raw": "10G COCOA POWDER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      },
+      {
+        "id": "peanut_butter_chips",
+        "name": "Peanut Butter Chips",
+        "quantity": "15",
+        "unit": "g",
+        "raw": "15G PEANUT BUTTER CHIPS + 2G COCONUT OIL + A PINCH OF SALT",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": "Melted with 2g coconut oil & pinch of salt"
+      },
+      {
+        "id": "reeses_pb_cups",
+        "name": "Reese's PB Cups",
+        "quantity": "1",
+        "unit": "cup",
+        "raw": "1 REESE\u2019S PEANUT BUTTER CUP, CHOPPED",
+        "section": "Topping",
+        "isMixin": true,
+        "notes": "Chopped"
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "RESPIN IF VERY POWDERY",
+      "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND FILL WITH THE MELTED PEANUT BUTTER CHIPS",
+      "RUN THE \"MIX-IN\" CYCLE",
+      "TOP WITH THE CHOPPED UP REESE\u2019S CUP"
+    ],
+    "aliases": [
+      "reeses_peanut_butter_cup_fan",
+      "reeses_pb_cup"
+    ]
+  },
+  {
+    "id": "choco_frosted_donut_blizzard",
+    "name": "Choco Frosted Donut Blizzard",
+    "category": "Fan Favorites",
+    "categories": [
+      "Fan Favorites"
+    ],
+    "sources": [
+      {
+        "book": "Fan Favorites",
+        "page": 71,
+        "sourceFile": "Creami Cravings 9.29.26.pdf"
+      }
+    ],
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "page": 71,
+    "macros": {
+      "calories": "269",
+      "protein": "37g",
+      "carbs": "18g",
+      "fat": "5g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "16+ HOURS",
+    "makes": "1 PINT",
+    "proTip": "",
+    "ingredients": [
+      {
+        "id": "fat_free_ultra_filtered_milk",
+        "name": "Fat Free Ultra-Filtered Milk",
+        "quantity": "400",
+        "unit": "g",
+        "raw": "400G FAT FREE FAIRLIFE MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "40-45",
+        "unit": "g",
+        "raw": "40-45G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "vanilla_bean_paste",
+        "name": "Vanilla Bean Paste",
+        "quantity": "5",
+        "unit": "g",
+        "raw": "5G (1 TSP) VANILLA BEAN PASTE (OR EXTRACT)",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: 1 tsp; or extract"
+      },
+      {
+        "id": "salt",
+        "name": "Salt",
+        "quantity": "A pinch",
+        "unit": "pinch",
+        "raw": "A PINCH OF SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G (\u00bc TSP) XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Alt measurement: \u00bc tsp"
+      },
+      {
+        "id": "legendary_foods_donuts",
+        "name": "Legendary Foods Protein Chocolate Dip Donuts",
+        "quantity": "0.75",
+        "unit": "package",
+        "raw": "\u00be OF A PACKAGE LEGENDARY FOODS PROTEIN CHOCOLATE DIP DONUTS (CAN SUB WITH ANY HIGH-PROTEIN BAKED GOOD)",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": "1 donut for mix-in, \u00bd donut for topping"
+      },
+      {
+        "id": "rainbow_sprinkles",
+        "name": "Rainbow Sprinkles",
+        "quantity": "1",
+        "unit": "tsp",
+        "raw": "1 TSP RAINBOW SPRINKLES",
+        "section": "Topping",
+        "isMixin": true,
+        "notes": ""
+      }
+    ],
+    "instructions": [
+      "BLEND ALL INGREDIENTS FOR THE BASE AND FREEZE (AT LEAST 16 HOURS)",
+      "RUN YOUR PINT UNDER HOT WATER FOR AT LEAST 60 SECONDS",
+      "SPIN ON \"LITE ICE CREAM\" SETTING",
+      "RESPIN IF POWDERY",
+      "MAKE A HOLE DOWN TO THE BOTTOM WITH A BUTTER KNIFE AND FILL WITH 1 DONUT",
+      "RUN THE \"MIX-IN\" CYCLE",
+      "TOP WITH THE OTHER HALF DONUT AND SPRINKLES"
+    ],
+    "aliases": [
+      "choco_frosted_donut_blizzard"
+    ]
   }
+
 ];
