@@ -826,6 +826,14 @@
             </div>
           </div>
 
+          <div class="bap-category-field" id="bapCategoryFieldGroup">
+            <label for="bapCategory">Cookbook / Category</label>
+            <select id="bapCategory" class="bap-select-input">
+              <option value="Custom">Custom Recipe</option>
+            </select>
+            <small class="bap-category-hint" id="bapCategoryHint"></small>
+          </div>
+
           <div class="bap-size-field">
             <label>Machine / Pint Size</label>
             <div class="bap-size-toggle-group">
@@ -1072,17 +1080,12 @@
               <label for="crName">Recipe Title *</label>
               <input type="text" id="crName" required placeholder="e.g. Pistachio Matcha Swirl">
             </div>
-            <div class="form-group flex-1">
+            <div class="form-group flex-1" id="crCategoryFieldGroup">
               <label for="crCategory">Cookbook / Category</label>
               <select id="crCategory">
                 <option value="Custom">Custom Recipe</option>
-                <option value="Base Flavors">Base Flavors</option>
-                <option value="Community Legends">Community Legends</option>
-                <option value="Fan Favorites">Fan Favorites</option>
-                <option value="Keto">Keto</option>
-                <option value="Lactose Free">Lactose Free</option>
-                <option value="No Protein">No Protein</option>
               </select>
+              <small class="form-hint" id="crCategoryHint" style="display: block; margin-top: 4px; font-size: 0.74rem;"></small>
             </div>
           </div>
 

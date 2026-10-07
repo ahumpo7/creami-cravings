@@ -95,6 +95,7 @@
     "email": "eli@fitnessproductfinder.com",
     "password": "f3c13397f8e1ec4a028a44af2cbd5075820b184faa1fa5f9659cb60ee5970ad1",
     "role": "creator",
+    "creatorId": "fitness_product_finder",
     "pantry": [
       "fat_free_ultra_filtered_milk",
       "sweetener",

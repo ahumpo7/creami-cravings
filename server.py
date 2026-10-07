@@ -103,6 +103,7 @@ if not eli_user:
         'email': eli_email,
         'password': eli_hash,
         'role': 'creator',
+        'creatorId': 'fitness_product_finder',
         'pantry': list(DEFAULT_STAPLES),
         'favorites': [],
         'madeCounts': {},
@@ -115,8 +116,9 @@ if not eli_user:
         'last_active': datetime.utcnow().isoformat(),
         'token': 'token_creator_eli_001'
     }
-elif eli_user.get('role') != 'creator' or 'All-Access' not in eli_user.get('subscriptions', []):
+elif eli_user.get('role') != 'creator' or 'All-Access' not in eli_user.get('subscriptions', []) or not eli_user.get('creatorId'):
     eli_user['role'] = 'creator'
+    eli_user['creatorId'] = 'fitness_product_finder'
     eli_user['subscriptions'] = list(ALL_SUBSCRIPTIONS)
 
 save_json_file(USERS_DB_FILE, users_db)
@@ -197,12 +199,25 @@ def compute_community_stats():
         made_summary[r_id] = m_count
         total_community_batches += m_count
 
+    published_recipes = []
+    seen_ids = set()
+    for u in users_db.values():
+        if u.get('role') in ['admin', 'creator']:
+            for r in u.get('customRecipes', []):
+                r_id = r.get('id')
+                r_cat = r.get('category')
+                is_pers = r.get('isPersonal', False)
+                if r_id and r_id not in seen_ids and r_cat and r_cat != 'Custom' and not is_pers:
+                    published_recipes.append(r)
+                    seen_ids.add(r_id)
+
     return {
         'status': 'ok',
         'success': True,
         'ratings': ratings_summary,
         'madeCounts': made_summary,
-        'totalBatches': total_community_batches
+        'totalBatches': total_community_batches,
+        'publishedRecipes': published_recipes
     }
 
 class RecipeServer(http.server.SimpleHTTPRequestHandler):
@@ -292,6 +307,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 'email': user.get('email', ''),
                 'picture': user.get('picture', ''),
                 'role': user.get('role', 'user'),
+                'creatorId': user.get('creatorId', ''),
                 'pantry': user.get('pantry') if user.get('pantry') is not None else list(DEFAULT_STAPLES),
                 'favorites': user.get('favorites', []),
                 'madeCounts': user.get('madeCounts', {}),
@@ -317,6 +333,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                     'email': u.get('email', ''),
                     'picture': u.get('picture', ''),
                     'role': u.get('role', 'user'),
+                    'creatorId': u.get('creatorId', ''),
                     'created_at': u.get('created_at', ''),
                     'last_active': u.get('last_active', ''),
                     'subscriptions': u.get('subscriptions', list(DEFAULT_SUBSCRIPTIONS)),
@@ -507,6 +524,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                     'email': user.get('email'),
                     'picture': user.get('picture', ''),
                     'role': user.get('role', 'user'),
+                    'creatorId': user.get('creatorId', ''),
                     'pantry': user.get('pantry') if user.get('pantry') is not None else list(DEFAULT_STAPLES),
                     'favorites': user.get('favorites', []),
                     'madeCounts': user.get('madeCounts', {}),
@@ -747,6 +765,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                     'name': target_user.get('name') or target_user.get('username'),
                     'email': target_user.get('email', ''),
                     'role': target_user.get('role', 'user'),
+                    'creatorId': target_user.get('creatorId', ''),
                     'subscriptions': target_user.get('subscriptions', list(DEFAULT_SUBSCRIPTIONS)),
                     'pantry': target_user.get('pantry') if target_user.get('pantry') is not None else list(DEFAULT_STAPLES),
                     'favorites': target_user.get('favorites', []),
@@ -803,6 +822,13 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                     self._send_json({'error': 'Cannot demote root administrator email'}, 400)
                     return
                 target_user['role'] = data['role']
+                if data['role'] == 'creator' and not target_user.get('creatorId'):
+                    c_id = data.get('creatorId', '').strip()
+                    if not c_id:
+                        u_name = target_user.get('username', '').lower()
+                        u_mail = target_user.get('email', '').lower()
+                        c_id = 'fitness_product_finder' if ('eli' in u_name or 'eli' in u_mail) else f"creator_{u_name}"
+                    target_user['creatorId'] = c_id
 
             # Update category subscription packs
             if 'subscriptions' in data and isinstance(data['subscriptions'], list):
@@ -902,7 +928,12 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
 
             # Password hashing
             default_pass = password if password else 'creami123'
-            pass_hash = hash_password(default_pass)
+            creator_id = data.get('creatorId', '').strip()
+            if role == 'creator' and not creator_id:
+                if 'eli' in username or 'eli' in email:
+                    creator_id = 'fitness_product_finder'
+                else:
+                    creator_id = f"creator_{username}"
 
             new_user = {
                 'id': user_id,
@@ -911,6 +942,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 'email': email,
                 'password': pass_hash,
                 'role': role,
+                'creatorId': creator_id,
                 'pantry': list(DEFAULT_STAPLES),
                 'favorites': [],
                 'madeCounts': {},

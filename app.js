@@ -335,6 +335,7 @@
   let pantryState = new Set();
   let favoritesState = new Set();
   let customRecipesState = [];
+  let serverPublishedRecipes = [];
   let lastLocalMutationTime = 0;
   let allRecipes = [];
   let ingredientRecipeCount = {};
@@ -1076,6 +1077,10 @@
             totalSpins: data.totalSpins || 0,
             totalUsers: data.totalUsers || 1
           };
+          if (Array.isArray(data.publishedRecipes)) {
+            serverPublishedRecipes = data.publishedRecipes;
+            mergeRecipes();
+          }
           saveCommunityStats();
           renderRecipes();
         }
@@ -1406,7 +1411,22 @@
         nameEl.textContent = currentUser.name || currentUser.email.split('@')[0];
       }
       // Show + Custom Recipe button only for signed-in user
-      if (customActions) customActions.style.display = 'block';
+      if (customActions) {
+        customActions.style.display = 'block';
+        const addBtn = document.getElementById('addCustomRecipeBtn');
+        if (addBtn) {
+          if (currentUser.role === 'admin') {
+            addBtn.innerHTML = '➕ Add Recipe';
+            addBtn.title = 'Add new recipe or publish to any cookbook (Admin)';
+          } else if (currentUser.role === 'creator') {
+            addBtn.innerHTML = '➕ Add Recipe';
+            addBtn.title = 'Add new recipe or publish to your cookbooks (Creator)';
+          } else {
+            addBtn.innerHTML = '➕ Custom Recipe';
+            addBtn.title = 'Add your personal Creami recipe (saved to your Google account)';
+          }
+        }
+      }
       if (customTab) {
         customTab.style.display = (customRecipesState.length > 0) ? 'inline-flex' : 'none';
       }
@@ -1454,7 +1474,7 @@
 
   function getAccessibleRecipeCategories(recipe) {
     if (!recipe) return [];
-    if (recipe.category === 'Custom' || recipe.isPersonal || (recipe.id && recipe.id.startsWith('custom_'))) {
+    if (recipe.category === 'Custom' || recipe.isPersonal) {
       return ['Custom'];
     }
     // Universal free starter trio strictly shows Base Flavors tag unless user owns more packs
@@ -1481,7 +1501,7 @@
 
   function getRecipeRequiredTier(recipe) {
     if (!recipe) return 'All-Access';
-    if (recipe.category === 'Custom' || recipe.isPersonal || (recipe.id && recipe.id.startsWith('custom_'))) {
+    if (recipe.category === 'Custom' || recipe.isPersonal) {
       return 'Custom';
     }
     const cats = (recipe.categories && recipe.categories.length > 0)
@@ -1503,10 +1523,10 @@
 
   function isRecipeAccessible(recipe) {
     if (!recipe) return true;
-    if (recipe.category === 'Custom' || recipe.isPersonal || (recipe.id && recipe.id.startsWith('custom_'))) {
+    if (recipe.category === 'Custom' || recipe.isPersonal) {
       return true;
     }
-    // Free universal starter base trio (Chocolate, Vanilla, Strawberry)
+    // Universal free starter base trio (Chocolate, Vanilla, Strawberry)
     if (isExactBaseTrio(recipe)) {
       return true;
     }
@@ -1521,6 +1541,9 @@
 
     // All remaining recipes are Eli (FPF) recipes! Gated behind the Eli paywall.
     if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'vip' || currentUser.role === 'creator')) {
+      return true;
+    }
+    if (currentUser && recipe.userId && recipe.userId === currentUser.id) {
       return true;
     }
     const subs = (currentUser && Array.isArray(currentUser.subscriptions)) ? currentUser.subscriptions : ['Community Legends'];
@@ -1552,7 +1575,6 @@
       (recipe.categories && recipe.categories.includes('Community Legends')) ||
       recipe.category === 'Custom' ||
       recipe.isPersonal ||
-      (recipe.id && recipe.id.startsWith('custom_')) ||
       recipe.sourceFile === 'Community Legends' ||
       isExactBaseTrio(recipe)
     ) {
@@ -1569,7 +1591,6 @@
       (recipe.categories && recipe.categories.includes('Community Legends')) ||
       recipe.category === 'Custom' ||
       recipe.isPersonal ||
-      (recipe.id && recipe.id.startsWith('custom_')) ||
       recipe.sourceFile === 'Community Legends' ||
       isExactBaseTrio(recipe)
     ) {
@@ -1586,6 +1607,185 @@
       if (match) return match;
     }
     return BOOKS_MASTER.find(b => b.id === 'fpf_complete_bundle') || null;
+  }
+
+  function getCreatorIdForUser(user) {
+    if (!user) return null;
+    if (user.creatorId) return user.creatorId;
+    const email = (user.email || '').toLowerCase();
+    const username = (user.username || '').toLowerCase();
+    const name = (user.name || '').toLowerCase();
+
+    if (email.includes('fitnessproductfinder') || username === 'eli' || name.includes('eli')) {
+      return 'fitness_product_finder';
+    }
+
+    if (typeof CREATORS_MASTER !== 'undefined') {
+      const matched = CREATORS_MASTER.find(c => 
+        (c.id && (c.id === user.creatorId || email.includes(c.id))) ||
+        (c.name && name.includes(c.name.toLowerCase())) ||
+        (c.brandName && name.includes(c.brandName.toLowerCase()))
+      );
+      if (matched) return matched.id;
+    }
+
+    if (user.role === 'creator') {
+      return 'fitness_product_finder';
+    }
+    return null;
+  }
+
+  function getCategoriesForCreator(creatorId) {
+    if (!creatorId || typeof BOOKS_MASTER === 'undefined') return [];
+    const books = BOOKS_MASTER.filter(b => b.creatorId === creatorId);
+    const cats = new Set();
+    books.forEach(b => {
+      if (b.categoryKey) cats.add(b.categoryKey);
+      if (b.categories && Array.isArray(b.categories)) {
+        b.categories.forEach(c => cats.add(c));
+      }
+    });
+    return Array.from(cats);
+  }
+
+  function getAllowedRecipeCategoriesForUser(user) {
+    // 1. Standard users (or guest): strictly Custom
+    if (!user || (user.role !== 'admin' && user.role !== 'creator')) {
+      return [
+        { value: 'Custom', label: 'Custom Recipe (Personal)' }
+      ];
+    }
+
+    // 2. Admin: can choose ANY cookbook / category
+    if (user.role === 'admin') {
+      const allCats = [
+        { value: 'Custom', label: 'Custom Recipe (Personal)' },
+        { value: 'Base Flavors', label: 'Base Flavors (FPF - Eli)' },
+        { value: 'Community Legends', label: 'Community Legends (Universal Free)' },
+        { value: 'Fan Favorites', label: 'Fan Favorites (FPF - Eli)' },
+        { value: 'Keto', label: 'Keto & Low Carb (FPF - Eli)' },
+        { value: 'Lactose Free', label: 'Lactose Free (FPF - Eli)' },
+        { value: 'No Protein', label: 'No Protein (FPF - Eli)' }
+      ];
+      if (typeof BOOKS_MASTER !== 'undefined') {
+        BOOKS_MASTER.forEach(b => {
+          if (b.categoryKey && !allCats.some(c => c.value === b.categoryKey)) {
+            const creator = (typeof CREATORS_MASTER !== 'undefined') ? CREATORS_MASTER.find(cr => cr.id === b.creatorId) : null;
+            const cLabel = creator ? `${b.categoryKey} (${creator.name})` : b.categoryKey;
+            allCats.push({ value: b.categoryKey, label: cLabel });
+          }
+        });
+      }
+      return allCats;
+    }
+
+    // 3. Content Creator: can choose any of THEIR categories, but only those categories (+ Custom for personal recipes)
+    if (user.role === 'creator') {
+      const creatorId = getCreatorIdForUser(user);
+      const creatorObj = (typeof CREATORS_MASTER !== 'undefined') ? CREATORS_MASTER.find(c => c.id === creatorId) : null;
+      const creatorName = creatorObj ? creatorObj.name : 'Creator';
+
+      const options = [
+        { value: 'Custom', label: 'Custom Recipe (Personal)' }
+      ];
+
+      const creatorCats = getCategoriesForCreator(creatorId);
+      creatorCats.forEach(cat => {
+        options.push({
+          value: cat,
+          label: `${cat} (${creatorName}'s Book)`
+        });
+      });
+
+      return options;
+    }
+
+    return [{ value: 'Custom', label: 'Custom Recipe (Personal)' }];
+  }
+
+  function updateRecipeCategorySelectors() {
+    const crCatEl = document.getElementById('crCategory');
+    const crHintEl = document.getElementById('crCategoryHint');
+    const bapCatEl = document.getElementById('bapCategory');
+    const bapHintEl = document.getElementById('bapCategoryHint');
+
+    const options = getAllowedRecipeCategoriesForUser(currentUser);
+    const isAdmin = Boolean(currentUser && currentUser.role === 'admin');
+    const isCreator = Boolean(currentUser && currentUser.role === 'creator');
+    const isStandard = !isAdmin && !isCreator;
+
+    const buildOptionsHtml = () => {
+      return options.map(opt => `<option value="${opt.value}">${opt.label}</option>`).join('');
+    };
+
+    let hintText = '';
+    let hintClass = 'standard-hint';
+
+    if (isAdmin) {
+      hintText = '👑 Admin Access: You can publish into any official cookbook or personal Custom library.';
+      hintClass = 'admin-hint';
+    } else if (isCreator) {
+      const creatorId = getCreatorIdForUser(currentUser);
+      const creatorObj = (typeof CREATORS_MASTER !== 'undefined') ? CREATORS_MASTER.find(c => c.id === creatorId) : null;
+      const cName = creatorObj ? creatorObj.name : 'Creator';
+      hintText = `🧑‍🍳 Creator Access: You can publish to any of ${cName}'s official cookbooks or personal Custom.`;
+      hintClass = 'creator-hint';
+    } else {
+      hintText = '🔒 Standard users can only create personal Custom recipes. Official cookbook publishing is reserved for Creators and Admins.';
+      hintClass = 'standard-hint';
+    }
+
+    [crCatEl, bapCatEl].forEach(sel => {
+      if (sel) {
+        const currentVal = sel.value;
+        sel.innerHTML = buildOptionsHtml();
+        if (options.some(o => o.value === currentVal)) {
+          sel.value = currentVal;
+        } else {
+          sel.value = options[0].value;
+        }
+        sel.disabled = isStandard;
+      }
+    });
+
+    [crHintEl, bapHintEl].forEach(hint => {
+      if (hint) {
+        hint.textContent = hintText;
+        hint.className = (hint.id === 'crCategoryHint' ? 'form-hint ' : 'bap-category-hint ') + hintClass;
+      }
+    });
+  }
+
+  function validateAndResolveRecipeCategory(chosenCategory) {
+    const isAdmin = Boolean(currentUser && currentUser.role === 'admin');
+    const isCreator = Boolean(currentUser && currentUser.role === 'creator');
+
+    let finalCategory = 'Custom';
+    let creatorId = null;
+
+    if (isAdmin) {
+      finalCategory = chosenCategory || 'Custom';
+      if (finalCategory !== 'Custom' && finalCategory !== 'Community Legends') {
+        const book = (typeof BOOKS_MASTER !== 'undefined') ? BOOKS_MASTER.find(b => b.categoryKey === finalCategory) : null;
+        if (book && book.creatorId) {
+          creatorId = book.creatorId;
+        }
+      }
+    } else if (isCreator) {
+      const cId = getCreatorIdForUser(currentUser);
+      const allowedCats = getCategoriesForCreator(cId);
+      if (allowedCats.includes(chosenCategory)) {
+        finalCategory = chosenCategory;
+        creatorId = cId;
+      } else {
+        finalCategory = 'Custom';
+      }
+    } else {
+      // Standard user strictly forced to Custom
+      finalCategory = 'Custom';
+    }
+
+    return { finalCategory, creatorId };
   }
 
   // --- Modal Scroll & Overscroll Containment Helpers ---
@@ -1878,7 +2078,9 @@
 
   function mergeRecipes() {
     const baseRecipes = (typeof RECIPES_MASTER !== 'undefined') ? RECIPES_MASTER : [];
-    allRecipes = [...baseRecipes, ...customRecipesState];
+    const myRecipes = customRecipesState || [];
+    const otherPublished = (serverPublishedRecipes || []).filter(pr => !myRecipes.some(mr => mr.id === pr.id));
+    allRecipes = [...baseRecipes, ...otherPublished, ...myRecipes];
     migrateOldRecipeKeys();
   }
 
@@ -2438,7 +2640,13 @@
         if (!favoritesState.has(recipe.id)) return false;
       } else if (activeCategory !== 'all') {
         const accessibleCats = getAccessibleRecipeCategories(recipe);
-        if (!accessibleCats.includes(activeCategory)) return false;
+        if (!accessibleCats.includes(activeCategory)) {
+          if (activeCategory === 'Custom' && currentUser && recipe.userId === currentUser.id) {
+            // Show authored recipes in personal My Recipes tab
+          } else {
+            return false;
+          }
+        }
       }
 
       // Ready Only filter
@@ -2654,7 +2862,7 @@
     // Update Locked Badge and Book Tags
     const bookTags = card.querySelector('.card-book-tags');
     if (bookTags) {
-      const isPersonal = Boolean(recipe.isPersonal || (recipe.id && recipe.id.startsWith('custom_')));
+      const isPersonal = Boolean(recipe.category === 'Custom' || recipe.isPersonal);
       const accessibleCategories = getAccessibleRecipeCategories(recipe);
       const requiredTier = getRecipeRequiredTier(recipe);
       const creator = getRecipeCreator(recipe);
@@ -2746,7 +2954,7 @@
     }
 
     // Update Community Rating if present
-    const isPersonal = Boolean(recipe.isPersonal || (recipe.id && recipe.id.startsWith('custom_')));
+    const isPersonal = Boolean(recipe.category === 'Custom' || recipe.isPersonal);
     const commRating = communityStats.ratings[recipe.id];
     const hasCommRating = Boolean(!isPersonal && commRating && commRating.count > 0);
     let commRatingEl = card.querySelector('.card-community-rating');
@@ -2809,7 +3017,7 @@
 
     const accessibleCategories = getAccessibleRecipeCategories(recipe);
 
-    const isPersonal = Boolean(recipe.isPersonal || (recipe.id && recipe.id.startsWith('custom_')));
+    const isPersonal = Boolean(recipe.category === 'Custom' || recipe.isPersonal);
     const commRating = communityStats.ratings[recipe.id];
     const hasCommRating = Boolean(!isPersonal && commRating && commRating.count > 0);
     const commAvg = hasCommRating ? commRating.avg : 0;
@@ -5127,7 +5335,7 @@
       1: 0
     };
 
-    const isPersonal = Boolean(recipe.isPersonal || (recipe.id && recipe.id.startsWith('custom_')));
+    const isPersonal = Boolean(recipe.category === 'Custom' || recipe.isPersonal);
     const pintsInFreezer = freezerPintsState.filter(p => p.recipeId === recipe.id || p.recipeName.toLowerCase() === recipe.name.toLowerCase());
 
     recipeModalBody.innerHTML = `
@@ -7943,14 +8151,26 @@
     }
     instructions.push('Grab a spoon and enjoy your custom balanced Creami creation!');
 
+    const chosenCat = (document.getElementById('bapCategory') ? document.getElementById('bapCategory').value : 'Custom') || 'Custom';
+    const { finalCategory, creatorId: recipeCreatorId } = validateAndResolveRecipeCategory(chosenCat);
+    const isPersonalRecipe = (finalCategory === 'Custom');
+
+    const matchedBook = (typeof BOOKS_MASTER !== 'undefined' && !isPersonalRecipe)
+      ? BOOKS_MASTER.find(b => b.categoryKey === finalCategory || (b.categories && b.categories.includes(finalCategory)))
+      : null;
+    const recipeSourceFile = isPersonalRecipe 
+      ? 'Personal Custom' 
+      : (matchedBook ? matchedBook.title : finalCategory);
+
     const newRecipe = {
-      id: `custom_${currentUser.id}_${Date.now()}`,
+      id: isPersonalRecipe ? `custom_${currentUser.id}_${Date.now()}` : `pub_${currentUser.id}_${Date.now()}`,
       name: title,
-      category: 'Custom',
-      categories: ['Custom'],
+      category: finalCategory,
+      categories: [finalCategory],
       userId: currentUser.id,
-      isPersonal: true,
-      sourceFile: 'Personal Custom',
+      isPersonal: isPersonalRecipe,
+      sourceFile: recipeSourceFile,
+      creatorId: recipeCreatorId,
       page: 1,
       macros: {
         calories: String(nutrition.totalKcal),
@@ -7998,8 +8218,10 @@
     if (addedCustomItems.length > 0) {
       const summaryList = addedCustomItems.map(c => `"${c.name}" (${c.catTitle})`).join(', ');
       showToast(`🧪 Saved recipe "${title}"! Added to your pantry: ${summaryList}`);
-    } else {
+    } else if (isPersonalRecipe) {
       showToast(`🧪 Saved balanced recipe "${title}" and added ingredients to your pantry!`);
+    } else {
+      showToast(`🧪 Published balanced recipe "${title}" to official cookbook "${finalCategory}"!`);
     }
   }
 
@@ -8485,6 +8707,18 @@
       if (btnPrev) btnPrev.addEventListener('click', () => switchBapStep(bapState.currentStep - 1));
       if (btnNext) btnNext.addEventListener('click', () => switchBapStep(bapState.currentStep + 1));
 
+      // Category sync between Wizard & Manual forms
+      const bapCatEl = document.getElementById('bapCategory');
+      const crCatEl = document.getElementById('crCategory');
+      if (bapCatEl && crCatEl) {
+        bapCatEl.addEventListener('change', () => {
+          crCatEl.value = bapCatEl.value;
+        });
+        crCatEl.addEventListener('change', () => {
+          bapCatEl.value = crCatEl.value;
+        });
+      }
+
       // Auto-name & Save buttons
       const btnAutoName = document.getElementById('bapBtnAutoName');
       const btnSave = document.getElementById('bapBtnSave');
@@ -8534,6 +8768,23 @@
   function openCustomRecipeModal() {
     if (customRecipeForm) customRecipeForm.reset();
     initBuildAPint();
+    updateRecipeCategorySelectors();
+
+    const modalMainTitle = document.getElementById('bapModalMainTitle');
+    const modalSubTitle = document.getElementById('bapModalSubTitle');
+    if (modalMainTitle && modalSubTitle) {
+      if (currentUser && currentUser.role === 'admin') {
+        modalMainTitle.textContent = '🧪 Create & Publish Recipe';
+        modalSubTitle.textContent = 'Formulate balanced recipes with real-time texture diagnostics and publish into any official cookbook or personal Custom library.';
+      } else if (currentUser && currentUser.role === 'creator') {
+        modalMainTitle.textContent = '🧪 Create & Publish Recipe';
+        modalSubTitle.textContent = 'Formulate balanced recipes with real-time texture diagnostics and publish into your official cookbooks or personal Custom library.';
+      } else {
+        modalMainTitle.textContent = '🧪 Build-A-Pint Balancing Wizard';
+        modalSubTitle.textContent = 'Formulate balanced, high-protein custom Creami recipes with real-time texture diagnostics, Creaminess Score (1–10), and auto-computed nutrition.';
+      }
+    }
+
     customRecipeModalOverlay.classList.add('active');
     customRecipeModalOverlay.setAttribute('aria-hidden', 'false');
     lockBackgroundScroll();
@@ -8553,7 +8804,17 @@
       return;
     }
     const name = document.getElementById('crName').value.trim();
-    const category = document.getElementById('crCategory').value;
+    const chosenCat = (document.getElementById('crCategory') ? document.getElementById('crCategory').value : 'Custom') || 'Custom';
+    const { finalCategory, creatorId: recipeCreatorId } = validateAndResolveRecipeCategory(chosenCat);
+    const isPersonalRecipe = (finalCategory === 'Custom');
+
+    const matchedBook = (typeof BOOKS_MASTER !== 'undefined' && !isPersonalRecipe)
+      ? BOOKS_MASTER.find(b => b.categoryKey === finalCategory || (b.categories && b.categories.includes(finalCategory)))
+      : null;
+    const recipeSourceFile = isPersonalRecipe 
+      ? 'Personal Custom' 
+      : (matchedBook ? matchedBook.title : finalCategory);
+
     const calories = document.getElementById('crCalories').value.trim() || '0';
     const protein = document.getElementById('crProtein').value.trim() || '0g';
     const carbs = document.getElementById('crCarbs').value.trim() || '0g';
@@ -8591,13 +8852,14 @@
     const parsedInst = instructionsRaw.map(l => l.trim()).filter(l => l.length > 0);
 
     const newRecipe = {
-      id: `custom_${currentUser.id}_${Date.now()}`,
+      id: isPersonalRecipe ? `custom_${currentUser.id}_${Date.now()}` : `pub_${currentUser.id}_${Date.now()}`,
       name: name,
-      category: 'Custom',
-      categories: ['Custom'],
+      category: finalCategory,
+      categories: [finalCategory],
       userId: currentUser.id,
-      isPersonal: true,
-      sourceFile: 'Personal Custom',
+      isPersonal: isPersonalRecipe,
+      sourceFile: recipeSourceFile,
+      creatorId: recipeCreatorId,
       page: 1,
       macros: {
         calories: calories,
@@ -8637,7 +8899,11 @@
     renderPantryList();
     renderRecipes();
     updateStats();
-    showToast(`✨ Saved personal recipe "${name}" and added ${parsedIngs.length} required ingredients to your pantry!`);
+    if (isPersonalRecipe) {
+      showToast(`✨ Saved personal recipe "${name}" and added ${parsedIngs.length} required ingredients to your pantry!`);
+    } else {
+      showToast(`✨ Published recipe "${name}" to official cookbook "${finalCategory}"!`);
+    }
   }
 
   async function deleteCustomRecipe(recipeId) {
