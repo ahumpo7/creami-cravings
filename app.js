@@ -1442,7 +1442,7 @@
     if (!categoryName || categoryName === 'all' || categoryName === 'Community Legends' || categoryName === 'favorites' || categoryName === 'Custom') {
       return true;
     }
-    if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'vip')) return true;
+    if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'vip' || currentUser.role === 'creator')) return true;
     const subs = (currentUser && Array.isArray(currentUser.subscriptions)) ? currentUser.subscriptions : ['Community Legends'];
     if (subs.includes('All-Access')) return true;
     const norm = normalizeCategoryName(categoryName);
@@ -1520,7 +1520,7 @@
     }
 
     // All remaining recipes are Eli (FPF) recipes! Gated behind the Eli paywall.
-    if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'vip')) {
+    if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'vip' || currentUser.role === 'creator')) {
       return true;
     }
     const subs = (currentUser && Array.isArray(currentUser.subscriptions)) ? currentUser.subscriptions : ['Community Legends'];
@@ -3051,7 +3051,7 @@
     activeStoreCreatorId = null;
   }
 
-  function showCreatorCatalogView(creatorId = 'fitness_product_finder') {
+  function showCreatorCatalogView(creatorId = 'fitness_product_finder', viewPerksFirst = false) {
     const dirView = document.getElementById('creatorsDirectoryView');
     const catView = document.getElementById('creatorCatalogView');
     if (dirView) dirView.style.display = 'none';
@@ -3076,8 +3076,29 @@
         storeBtn.innerHTML = `<span>Visit ${creator.name}'s Storefront ↗</span>`;
       }
       renderCreatorPerks(creator);
+
+      // If user already owns the books or requested perks first, place perks section FIRST!
+      const hasAllBooks = isCategoryUnlocked('All-Access') ||
+        (currentUser && (currentUser.role === 'admin' || currentUser.role === 'vip' || currentUser.role === 'creator')) ||
+        ['Fan Favorites', 'Keto', 'Lactose Free', 'No Protein'].every(p => isCategoryUnlocked(p));
+
+      const perksSection = document.getElementById('creatorPerksSection');
+      const packsGrid = document.getElementById('recipePacksGrid');
+      if (perksSection && packsGrid) {
+        if (hasAllBooks || viewPerksFirst) {
+          packsGrid.parentNode.insertBefore(perksSection, packsGrid);
+        } else {
+          packsGrid.parentNode.insertBefore(perksSection, packsGrid.nextSibling);
+        }
+      }
     } else {
       renderCreatorPerks(null);
+    }
+
+    if (recipePacksModalOverlay) {
+      const modalContent = recipePacksModalOverlay.querySelector('.modal-content');
+      if (modalContent) modalContent.scrollTop = 0;
+      recipePacksModalOverlay.scrollTop = 0;
     }
 
     updatePacksModalStatuses();
@@ -3148,15 +3169,18 @@
     });
   }
 
-  function openRecipePacksModal(creatorId = null) {
+  function openRecipePacksModal(creatorId = null, viewPerksFirst = false) {
     if (!recipePacksModalOverlay) return;
     if (creatorId) {
-      showCreatorCatalogView(creatorId);
+      showCreatorCatalogView(creatorId, viewPerksFirst);
     } else {
       showCreatorDirectoryView();
     }
     recipePacksModalOverlay.classList.add('active');
     recipePacksModalOverlay.setAttribute('aria-hidden', 'false');
+    const modalContent = recipePacksModalOverlay.querySelector('.modal-content');
+    if (modalContent) modalContent.scrollTop = 0;
+    recipePacksModalOverlay.scrollTop = 0;
     lockBackgroundScroll();
   }
 
@@ -5052,6 +5076,17 @@
 
     renderRecipeModalContent(recipe);
 
+    // Reset modal scroll position to top every time a recipe opens
+    const modalContent = recipeModalOverlay.querySelector('.modal-content');
+    if (modalContent) {
+      modalContent.scrollTop = 0;
+      requestAnimationFrame(() => {
+        modalContent.scrollTop = 0;
+      });
+    }
+    if (recipeModalBody) recipeModalBody.scrollTop = 0;
+    recipeModalOverlay.scrollTop = 0;
+
     recipeModalOverlay.classList.add('active');
     recipeModalOverlay.setAttribute('aria-hidden', 'false');
     lockBackgroundScroll();
@@ -5132,6 +5167,7 @@
         const book = getRecipeBook(recipe);
         if (!creator || !book) return '';
         const pageNum = recipe.sourcePage || (recipe.sources && recipe.sources[0]?.sourcePage);
+        const hasAccess = isRecipeAccessible(recipe) || isCategoryUnlocked(book.bookKey) || isCategoryUnlocked(book.categoryKey) || isCategoryUnlocked('All-Access');
         return `
           <div class="creator-attribution-card">
             <div class="creator-attribution-left">
@@ -5144,14 +5180,20 @@
               </div>
             </div>
             <div class="creator-attribution-actions">
-              <a href="${book.url}" target="_blank" rel="noopener noreferrer" class="btn-creator-buy">
-                <span>Buy E-Book (${book.price})</span>
-                <span style="font-size: 0.9em;">↗</span>
-              </a>
-              <a href="https://fitnessproductfinder.com/products/complete-4-book-bundle" target="_blank" rel="noopener noreferrer" class="btn-creator-bundle">
-                <span>4-Book Bundle ($49.99)</span>
-                <span style="font-size: 0.9em;">↗</span>
-              </a>
+              ${hasAccess ? `
+                <span class="creator-book-owned-badge" title="Unlocked and active in your library">
+                  <span>✅ Active in Library</span>
+                </span>
+              ` : `
+                <a href="${book.url}" target="_blank" rel="noopener noreferrer" class="btn-creator-buy">
+                  <span>Buy E-Book (${book.price})</span>
+                  <span style="font-size: 0.9em;">↗</span>
+                </a>
+                <a href="https://fitnessproductfinder.com/products/complete-4-book-bundle" target="_blank" rel="noopener noreferrer" class="btn-creator-bundle">
+                  <span>4-Book Bundle ($49.99)</span>
+                  <span style="font-size: 0.9em;">↗</span>
+                </a>
+              `}
             </div>
           </div>
         `;
@@ -5731,7 +5773,7 @@
       btnModalPerks.addEventListener('click', () => {
         const creatorId = btnModalPerks.dataset.creatorId || 'fitness_product_finder';
         closeRecipeModal();
-        openRecipePacksModal(creatorId);
+        openRecipePacksModal(creatorId, true);
       });
     }
 
@@ -6118,6 +6160,9 @@
     recipeModalOverlay.classList.remove('active');
     recipeModalOverlay.setAttribute('aria-hidden', 'true');
     unlockBackgroundScroll();
+    const modalContent = recipeModalOverlay.querySelector('.modal-content');
+    if (modalContent) modalContent.scrollTop = 0;
+    if (recipeModalBody) recipeModalBody.scrollTop = 0;
     currentModalRecipe = null;
   }
 
