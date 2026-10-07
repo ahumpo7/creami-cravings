@@ -4015,23 +4015,24 @@ body.modal-open .cookie-consent-banner {
     align-items: center !important;
     width: 100% !important;
     margin-bottom: 10px;
-    gap: 8px;
-    flex-wrap: nowrap !important;
+    gap: 6px;
+    flex-wrap: wrap !important;
   }
 
   #authHeaderContainer {
     display: flex;
     align-items: center;
-    flex-shrink: 0;
+    flex-shrink: 1;
+    min-width: 0;
   }
 
   .header-actions {
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    gap: 8px;
+    gap: 5px;
     width: auto;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     flex-shrink: 0;
   }
 
@@ -4055,9 +4056,37 @@ body.modal-open .cookie-consent-banner {
     display: inline !important;
   }
 
+  .admin-text-desktop {
+    display: none !important;
+  }
+
+  .admin-text-mobile {
+    display: inline !important;
+  }
+
   .btn-install-pwa {
-    padding: 6px 11px;
-    font-size: 0.78rem;
+    padding: 0 9px;
+    font-size: 0.76rem;
+    height: 34px;
+    min-height: 34px;
+    white-space: nowrap;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-admin-header {
+    padding: 0 9px !important;
+    font-size: 0.78rem !important;
+    font-weight: 700 !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    white-space: nowrap !important;
+    border-radius: 999px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
   }
 
   .install-platform-tabs {
@@ -4068,13 +4097,13 @@ body.modal-open .cookie-consent-banner {
   .btn-header-icon,
   .btn-sound-toggle,
   .theme-toggle-btn {
-    width: 36px !important;
-    height: 36px !important;
-    min-width: 36px !important;
-    min-height: 36px !important;
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    min-height: 34px !important;
     padding: 0 !important;
     border-radius: 50% !important;
-    font-size: 1.05rem;
+    font-size: 0.95rem !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -4086,40 +4115,63 @@ body.modal-open .cookie-consent-banner {
   }
 
   .btn-secondary-action {
-    padding: 0 12px;
-    font-size: 0.82rem;
+    padding: 0 10px;
+    font-size: 0.8rem;
     font-weight: 700;
-    height: 36px;
+    height: 34px;
   }
 
   .btn-google-signin {
-    padding: 0 12px;
-    font-size: 0.82rem;
+    padding: 0 10px;
+    font-size: 0.8rem;
     font-weight: 600;
-    height: 36px;
-    min-height: 36px;
-    gap: 6px;
+    height: 34px;
+    min-height: 34px;
+    gap: 5px;
   }
 
   .btn-google-signin .google-svg {
-    width: 15px;
-    height: 15px;
+    width: 14px;
+    height: 14px;
   }
 
   .user-profile-widget {
-    padding: 2px 8px 2px 4px;
-    height: 36px;
-    gap: 6px;
+    padding: 2px 7px 2px 4px;
+    height: 34px;
+    gap: 5px;
+    max-width: 100%;
+    min-width: 0;
   }
 
   .user-avatar-circle {
-    width: 26px;
-    height: 26px;
+    width: 24px;
+    height: 24px;
+  }
+
+  .user-meta-col {
+    min-width: 0;
+    max-width: 65px;
   }
 
   .user-name-text {
-    max-width: 75px;
-    font-size: 0.76rem;
+    max-width: 65px;
+    font-size: 0.74rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .user-sync-indicator {
+    font-size: 0.62rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .btn-signout {
+    padding: 2px 6px;
+    font-size: 0.68rem;
+    height: 22px;
   }
 
   /* Hero Content - Sleek & Compact */
@@ -6827,6 +6879,14 @@ body.modal-open .cookie-consent-banner {
   background: linear-gradient(135deg, rgba(245, 158, 11, 0.35) 0%, rgba(217, 119, 6, 0.45) 100%) !important;
   border-color: #f59e0b !important;
   box-shadow: 0 0 15px rgba(245, 158, 11, 0.35) !important;
+}
+
+.admin-text-desktop {
+  display: inline;
+}
+
+.admin-text-mobile {
+  display: none;
 }
 
 /* Accessible Only Filter Checkbox */
