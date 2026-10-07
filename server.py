@@ -305,6 +305,19 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
 
         return None
 
+    def do_HEAD(self):
+        if self.path.startswith('/recipe/') or self.path in ['/sitemap.xml', '/robots.txt']:
+            self.send_response(200)
+            if self.path == '/sitemap.xml':
+                self.send_header('Content-Type', 'application/xml; charset=utf-8')
+            elif self.path == '/robots.txt':
+                self.send_header('Content-Type', 'text/plain; charset=utf-8')
+            else:
+                self.send_header('Content-Type', 'text/html; charset=utf-8')
+            self.end_headers()
+            return
+        super().do_HEAD()
+
     def do_GET(self):
         if self.path == '/api/config':
             self._send_json({
