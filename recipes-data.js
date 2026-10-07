@@ -15,6 +15,91 @@ const INGREDIENT_CATEGORIES = {
   "mixins_snacks": "Mix-Ins, Cookies & Candies"
 };
 
+const CREATORS_MASTER = [
+  {
+    "id": "fitness_product_finder",
+    "name": "Eli",
+    "brandName": "Fitness Product Finder",
+    "handle": "@fitnessproductfinder",
+    "url": "https://fitnessproductfinder.com",
+    "storeUrl": "https://fitnessproductfinder.com/collections/creami-cravings-recipe-books",
+    "bio": "Creator of the original best-selling Creami Cravings high-protein and low-calorie recipe books."
+  }
+];
+
+const BOOKS_MASTER = [
+  {
+    "id": "fpf_complete_bundle",
+    "creatorId": "fitness_product_finder",
+    "title": "Creami Cravings: The High Protein 4-Book Bundle",
+    "shortTitle": "4-Book Bundle",
+    "bookKey": "All-Access",
+    "categoryKey": "Base Flavors",
+    "sourceFile": "Creami Cravings 9.29.26.pdf",
+    "price": "$49.99",
+    "url": "https://fitnessproductfinder.com/products/complete-4-book-bundle",
+    "imageUrl": "https://cdn.shopify.com/s/files/1/0770/1797/2901/files/bundle-cover-ipad-fan-4books_706b8b31-f2f1-4090-92c9-17eae1691f04.png?v=1782237564",
+    "recipeCount": 243,
+    "description": "The complete 4-book collection across copycat, keto, lactose-free & no-protein recipes."
+  },
+  {
+    "id": "fpf_fan_favorites",
+    "creatorId": "fitness_product_finder",
+    "title": "High Protein Copycat Ninja Creami Recipes (Fan Favorites)",
+    "shortTitle": "Fan Favorites",
+    "categoryKey": "Fan Favorites",
+    "bookKey": "Fan Favorites",
+    "sourceFile": "fan favorites 8-6.pdf",
+    "price": "$27.99",
+    "url": "https://fitnessproductfinder.com/products/high-protein-copycat-ninja-creami-recipes",
+    "imageUrl": "https://cdn.shopify.com/s/files/1/0770/1797/2901/files/book-cover-ipad-fan-favorites_b68df96f-dc7c-4a8c-834a-2bad2467c64c.png?v=1782237563",
+    "recipeCount": 76,
+    "description": "Viral ice cream parlour dupes and decadent bakery creations."
+  },
+  {
+    "id": "fpf_no_protein",
+    "creatorId": "fitness_product_finder",
+    "title": "No Protein Powder Ninja Creami Recipes",
+    "shortTitle": "No Protein",
+    "categoryKey": "No Protein",
+    "bookKey": "No Protein",
+    "sourceFile": "No protein 8-6.pdf",
+    "price": "$27.99",
+    "url": "https://fitnessproductfinder.com/products/no-protein-powder-ninja-creami-recipes",
+    "imageUrl": "https://cdn.shopify.com/s/files/1/0770/1797/2901/files/book-cover-ipad-no-protein-powder_b86914f4-ac37-4aed-8b99-f155cb68f372.png?v=1782237564",
+    "recipeCount": 88,
+    "description": "Classic artisanal ice cream parlor flavor crafted without protein powders."
+  },
+  {
+    "id": "fpf_keto",
+    "creatorId": "fitness_product_finder",
+    "title": "Low Carb Ninja Creami Recipes (Keto)",
+    "shortTitle": "Keto & Low Carb",
+    "categoryKey": "Keto",
+    "bookKey": "Keto",
+    "sourceFile": "Keto 8-6.pdf",
+    "price": "$27.99",
+    "url": "https://fitnessproductfinder.com/products/low-carb-ninja-creami-recipes",
+    "imageUrl": "https://cdn.shopify.com/s/files/1/0770/1797/2901/files/book-cover-ipad-keto_bee4ef90-d3c6-4ca3-a00c-bad333a31e70.png?v=1782237563",
+    "recipeCount": 28,
+    "description": "Ultra-low net carb pints with smooth texture under 5g net carbs."
+  },
+  {
+    "id": "fpf_lactose_free",
+    "creatorId": "fitness_product_finder",
+    "title": "Lactose-Free Ninja Creami Recipes",
+    "shortTitle": "Lactose Free",
+    "categoryKey": "Lactose Free",
+    "bookKey": "Lactose Free",
+    "sourceFile": "lactose free 8-6.pdf",
+    "price": "$27.99",
+    "url": "https://fitnessproductfinder.com/products/lactose-free-ninja-creami-recipes",
+    "imageUrl": "https://cdn.shopify.com/s/files/1/0770/1797/2901/files/book-cover-ipad-lactose-free_15544142-911c-498a-9d82-196fc46ed61f.png?v=1782237564",
+    "recipeCount": 51,
+    "description": "100% real dairy taste using ultra-filtered milk and lactose-free bases."
+  }
+];
+
 const INGREDIENTS_MASTER = [
   {
     "id": "almond_nog",

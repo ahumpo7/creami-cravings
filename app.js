@@ -1460,6 +1460,47 @@
     return getAccessibleRecipeCategories(recipe).length > 0;
   }
 
+  function getRecipeCreator(recipe) {
+    if (!recipe) return null;
+    if (
+      recipe.category === 'Community Legends' ||
+      (recipe.categories && recipe.categories.includes('Community Legends')) ||
+      recipe.category === 'Custom' ||
+      recipe.isPersonal ||
+      (recipe.id && recipe.id.startsWith('custom_')) ||
+      recipe.sourceFile === 'Community Legends'
+    ) {
+      return null;
+    }
+    const creatorId = recipe.creatorId || 'fitness_product_finder';
+    return (typeof CREATORS_MASTER !== 'undefined') ? CREATORS_MASTER.find(c => c.id === creatorId) : null;
+  }
+
+  function getRecipeBook(recipe) {
+    if (!recipe || typeof BOOKS_MASTER === 'undefined') return null;
+    if (
+      recipe.category === 'Community Legends' ||
+      (recipe.categories && recipe.categories.includes('Community Legends')) ||
+      recipe.category === 'Custom' ||
+      recipe.isPersonal ||
+      (recipe.id && recipe.id.startsWith('custom_')) ||
+      recipe.sourceFile === 'Community Legends'
+    ) {
+      return null;
+    }
+    const sourceFile = recipe.sourceFile || (recipe.sources && recipe.sources[0]?.sourceFile);
+    if (sourceFile) {
+      const match = BOOKS_MASTER.find(b => b.sourceFile === sourceFile);
+      if (match) return match;
+    }
+    const cats = (recipe.categories && recipe.categories.length > 0) ? recipe.categories : [recipe.category];
+    for (const cat of cats) {
+      const match = BOOKS_MASTER.find(b => b.categoryKey === cat || b.bookKey === cat);
+      if (match) return match;
+    }
+    return BOOKS_MASTER.find(b => b.id === 'fpf_fan_favorites') || null;
+  }
+
   // --- Modal Scroll & Overscroll Containment Helpers ---
   let isScrollLocked = false;
 
@@ -2659,12 +2700,14 @@
     const userFeedback = userRecipeData[recipe.id] || {};
     const userMade = recipeMadeCounts[recipe.id] || 0;
     const commMade = communityStats.madeCounts[recipe.id] || 0;
+    const creator = getRecipeCreator(recipe);
 
     card.innerHTML = `
       <div class="recipe-card-body">
         <div class="recipe-card-top">
           <div class="card-book-tags">
             ${isPersonal ? `<span class="book-tag custom" title="Personal custom recipe saved to your Google account">🔒 Personal Recipe</span>` : accessibleCategories.map(c => `<span class="book-tag ${getCategoryClass(c)}">${c}</span>`).join('')}
+            ${creator ? `<span class="creator-badge-tag" title="Recipe by ${creator.name} (${creator.brandName})">📖 ${creator.name} (FPF)</span>` : ''}
             ${!isAccessible ? `<span class="locked-badge" title="Exclusive ${requiredTier} pack">🔒 ${requiredTier} Pack</span>` : ''}
             ${recipe.creaminessScore ? `<span class="recipe-creaminess-badge" title="Build-A-Pint Creaminess Score">🧪 ${recipe.creaminessScore}/10</span>` : ''}
           </div>
@@ -2846,27 +2889,27 @@
     const packInfo = {
       'Fan Favorites': {
         icon: '⭐',
-        title: 'Fan Favorites Collection (75 Recipes)',
+        title: 'Fan Favorites E-Book by Eli (75 Recipes)',
         desc: 'Unlock 75 signature recipes including viral dessert dupes, mix-in masterpieces, and bakery creations like Oreo McFlurry, Cookie Dough Craze, Cosmic Brownie, and Birthday Cake.',
-        btnText: '🛒 Unlock Fan Favorites Pack'
+        btnText: '🛒 Buy E-Book ($27.99) ↗'
       },
       'Keto': {
         icon: '🥑',
-        title: 'Keto & Low-Carb Collection (22 Recipes)',
+        title: 'Keto & Low-Carb E-Book by Eli (22 Recipes)',
         desc: 'Ultra-low net carbs without sacrificing rich, creamy texture. Includes Keto Chocolate Fudge, Peanut Butter Swirl, Mint Chip, Butter Pecan, and Sea Salt Caramel (under 5g net carbs).',
-        btnText: '🛒 Unlock Keto Pack'
+        btnText: '🛒 Buy E-Book ($27.99) ↗'
       },
       'Lactose Free': {
         icon: '🥛',
-        title: 'Lactose-Free Collection (43 Recipes)',
+        title: 'Lactose-Free E-Book by Eli (43 Recipes)',
         desc: '100% real dairy flavor without digestive distress, formulated with ultra-filtered Fairlife and lactase enzyme bases. Includes Vanilla Latte, Strawberry Cheesecake & Mocha Chip.',
-        btnText: '🛒 Unlock Lactose Free Pack'
+        btnText: '🛒 Buy E-Book ($27.99) ↗'
       },
       'No Protein': {
         icon: '💪',
-        title: 'No Protein Powder Collection (83 Recipes)',
+        title: 'No Protein Powder E-Book by Eli (83 Recipes)',
         desc: 'Pure, authentic ice cream parlor decadence made without any protein powders. Whole milk, pudding bases, and authentic churned texture for true dessert lovers.',
-        btnText: '🛒 Unlock No Protein Pack'
+        btnText: '🛒 Buy E-Book ($27.99) ↗'
       }
     };
 
@@ -2911,52 +2954,85 @@
       const isUnlocked = isCategoryUnlocked(p.id);
       const card = recipePacksModalOverlay.querySelector(`.recipe-pack-card[data-pack="${p.id}"]`);
       const btn = card ? card.querySelector('.btn-action-pack') : null;
+      const book = (typeof BOOKS_MASTER !== 'undefined')
+        ? BOOKS_MASTER.find(b => b.bookKey === p.id || b.categoryKey === p.id || b.id === p.id)
+        : null;
+      const price = book ? book.price : (p.id === 'All-Access' ? '$49.99' : '$27.99');
 
       if (el) {
         if (isUnlocked) {
           el.innerHTML = '<span class="pack-status-active">✅ In Your Library</span>';
         } else {
-          el.innerHTML = '<span class="pack-status-available">🛍️ Available for Purchase</span>';
+          el.innerHTML = `<span class="pack-status-available">🛍️ Available on Fitness Product Finder (${price})</span>`;
         }
       }
       if (btn) {
         if (isUnlocked) {
           btn.disabled = true;
-          btn.innerHTML = '<span>✅ Active</span>';
+          btn.innerHTML = '<span>✅ Active in Library</span>';
           btn.style.opacity = '0.6';
           btn.style.cursor = 'default';
         } else {
           btn.disabled = false;
           btn.style.opacity = '1';
           btn.style.cursor = 'pointer';
-          btn.innerHTML = p.id === 'All-Access' ? '<span>👑 Unlock All-Access Bundle</span>' : `<span>🛒 Unlock ${p.id} Pack</span>`;
+          btn.innerHTML = p.id === 'All-Access' 
+            ? `<span>👑 Buy 4-Book Bundle (${price}) ↗</span>` 
+            : `<span>🛒 Buy E-Book (${price}) ↗</span>`;
         }
       }
     });
   }
 
   async function handlePackPurchase(packName) {
+    const book = (typeof BOOKS_MASTER !== 'undefined')
+      ? BOOKS_MASTER.find(b => b.bookKey === packName || b.categoryKey === packName || b.id === packName)
+      : null;
+    const url = book ? book.url : 'https://fitnessproductfinder.com/collections/creami-cravings-recipe-books';
+    const bookTitle = book ? (book.shortTitle || book.title) : packName;
+
+    // Open the creator's product page in a new window/tab
+    window.open(url, '_blank', 'noopener,noreferrer');
+    showToast(`🛒 Opening ${bookTitle} on Fitness Product Finder...`);
+
+    if (currentUser) {
+      try {
+        await fetch('/api/purchase-inquiry', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: currentUser.email,
+            userId: currentUser.id,
+            pack: packName,
+            url: url,
+            timestamp: new Date().toISOString()
+          })
+        });
+      } catch (e) {
+        console.warn('Purchase inquiry send error:', e);
+      }
+    }
+  }
+
+  function handleClaimPackAccess(packName) {
     if (!currentUser) {
       closeRecipePacksModal();
       openGoogleAuthModal();
-      showToast('🔑 Please sign in with Google to purchase recipe packs!');
+      showToast('🔑 Please sign in with Google to claim access to your purchased e-book!');
       return;
     }
-    showToast(`✉️ Purchase request for "${packName}" submitted! Admin notified for ${currentUser.email}.`);
-    try {
-      await fetch('/api/purchase-inquiry', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: currentUser.email,
-          userId: currentUser.id,
-          pack: packName,
-          timestamp: new Date().toISOString()
-        })
-      });
-    } catch (e) {
-      console.warn('Purchase inquiry send error:', e);
-    }
+    showToast(`✉️ Access claim for "${packName} E-Book" submitted for ${currentUser.email}! Verification in progress.`);
+    fetch('/api/purchase-inquiry', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: currentUser.email,
+        userId: currentUser.id,
+        action: 'claim_existing',
+        pack: packName,
+        timestamp: new Date().toISOString()
+      })
+    }).catch(e => console.warn('Claim inquiry send error:', e));
   }
 
   function updateCategoryCounts() {
@@ -4823,6 +4899,36 @@
         ` : ''}
       </div>
 
+      ${(() => {
+        const creator = getRecipeCreator(recipe);
+        const book = getRecipeBook(recipe);
+        if (!creator || !book) return '';
+        const pageNum = recipe.sourcePage || (recipe.sources && recipe.sources[0]?.sourcePage);
+        return `
+          <div class="creator-attribution-card">
+            <div class="creator-attribution-left">
+              <div class="creator-attribution-icon">📖</div>
+              <div class="creator-attribution-details">
+                <div class="creator-attribution-title">
+                  From <strong>${book.shortTitle || book.title}</strong>${pageNum ? `<span class="creator-book-page">(Page ${pageNum})</span>` : ''}
+                </div>
+                <div class="creator-attribution-byline">by <strong>${creator.name}</strong> • ${creator.brandName}</div>
+              </div>
+            </div>
+            <div class="creator-attribution-actions">
+              <a href="${book.url}" target="_blank" rel="noopener noreferrer" class="btn-creator-buy">
+                <span>Buy E-Book (${book.price})</span>
+                <span style="font-size: 0.9em;">↗</span>
+              </a>
+              <a href="https://fitnessproductfinder.com/products/complete-4-book-bundle" target="_blank" rel="noopener noreferrer" class="btn-creator-bundle">
+                <span>4-Book Bundle ($49.99)</span>
+                <span style="font-size: 0.9em;">↗</span>
+              </a>
+            </div>
+          </div>
+        `;
+      })()}
+
       ${(pintsInFreezer.length > 0 && isAccessible) ? (() => {
         const hasReady = pintsInFreezer.some(p => computePintStatus(p).isReady);
         const topPint = pintsInFreezer[0];
@@ -4918,6 +5024,26 @@
               : `Currently browsing as <strong>Guest</strong> (Standard Base Flavors tier)`}
           </div>
           <div class="locked-teaser-actions">
+            ${(() => {
+              const book = getRecipeBook(recipe);
+              const creator = getRecipeCreator(recipe);
+              const bookUrl = book ? book.url : 'https://fitnessproductfinder.com/collections/creami-cravings-recipe-books';
+              const bookTitle = book ? (book.shortTitle || book.title) : `${requiredTier} E-Book`;
+              const bookPrice = book ? book.price : '$27.99';
+              return `
+                <div class="locked-creator-store-box">
+                  <a href="${bookUrl}" target="_blank" rel="noopener noreferrer" class="btn-creator-store-direct">
+                    <span>📖 Buy ${bookTitle} (${bookPrice}) on Fitness Product Finder ↗</span>
+                  </a>
+                  <a href="https://fitnessproductfinder.com/products/complete-4-book-bundle" target="_blank" rel="noopener noreferrer" class="btn-creator-bundle-direct">
+                    <span>✨ Get All 4 E-Books for $49.99 ($112 Value) ↗</span>
+                  </a>
+                  <a href="#" class="btn-pack-own-link" id="btnLockedAlreadyOwn">
+                    Already own this book from ${creator ? creator.name : 'Eli'}? Claim access here &rarr;
+                  </a>
+                </div>
+              `;
+            })()}
             ${!currentUser ? `
               <button class="btn-primary" id="btnLockedSignIn">
                 <span>🔑 Sign In to Unlock</span>
@@ -5180,6 +5306,33 @@
       btnLockedContactAdmin.addEventListener('click', () => {
         const requiredTier = getRecipeRequiredTier(recipe);
         showToast(`Please ask an administrator to grant access to the ${requiredTier} Pack.`);
+      });
+    }
+
+    const btnLockedAlreadyOwn = recipeModalBody.querySelector('#btnLockedAlreadyOwn');
+    if (btnLockedAlreadyOwn) {
+      btnLockedAlreadyOwn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const requiredTier = getRecipeRequiredTier(recipe);
+        if (!currentUser) {
+          showToast(`Please sign in first to claim access to your ${requiredTier} e-book!`);
+          closeRecipeModal();
+          openGoogleAuthModal();
+        } else {
+          showToast(`✉️ Access claim for "${requiredTier} E-Book" submitted for ${currentUser.email}! Verification in progress.`);
+          fetch('/api/purchase-inquiry', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: currentUser.email,
+              userId: currentUser.id,
+              action: 'claim_existing',
+              pack: requiredTier,
+              recipeId: recipe.id,
+              timestamp: new Date().toISOString()
+            })
+          }).catch(err => console.warn('Claim inquiry send error:', err));
+        }
       });
     }
     // Freeze This Pint Button (Roadmap Item 8 & 17)
@@ -9163,6 +9316,13 @@
         btn.addEventListener('click', () => {
           const pack = btn.dataset.pack;
           if (pack) handlePackPurchase(pack);
+        });
+      });
+      recipePacksModalOverlay.querySelectorAll('.btn-pack-own-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          const pack = link.dataset.claimPack;
+          if (pack) handleClaimPackAccess(pack);
         });
       });
     }
