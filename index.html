@@ -1215,162 +1215,238 @@
       <div class="modal-handle-bar" aria-hidden="true"></div>
       <button class="modal-close" id="closeRecipePacksModalBtn" aria-label="Close modal">&times;</button>
       
-      <div class="modal-header-compact">
-        <div class="modal-title-row">
-          <span class="modal-title-icon">🛍️</span>
-          <div>
-            <h2 class="modal-title">Creator E-Books &amp; Recipe Packs</h2>
-            <p class="modal-subtitle">Handcrafted collections from featured fitness creators. Support creators directly on their storefronts to unlock full recipes here.</p>
+      <!-- VIEW 1: CREATOR DIRECTORY -->
+      <div id="creatorsDirectoryView" class="creators-view-panel">
+        <div class="modal-header-compact">
+          <div class="modal-title-row">
+            <span class="modal-title-icon">👩‍🍳</span>
+            <div>
+              <h2 class="modal-title">Featured Recipe Creators</h2>
+              <p class="modal-subtitle">Handcrafted collections from verified fitness and dessert creators. Choose a creator to browse their official recipe books.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="creators-directory-grid" id="creatorsDirectoryGrid">
+          <!-- Eli (Fitness Product Finder) Card -->
+          <div class="creator-directory-card" data-creator-id="fitness_product_finder">
+            <div class="creator-card-badge-row">
+              <span class="creator-badge-featured">⭐ Launch Partner</span>
+              <span class="creator-book-count-pill">5 Books • 243 Recipes</span>
+            </div>
+            <div class="creator-card-header">
+              <div class="creator-avatar-wrap">
+                <span class="creator-avatar-icon">📖</span>
+              </div>
+              <div class="creator-card-info">
+                <h3 class="creator-name">Eli</h3>
+                <div class="creator-brand">Fitness Product Finder <span class="creator-handle">@fitnessproductfinder</span></div>
+              </div>
+            </div>
+            <p class="creator-bio">
+              Creator of the original best-selling Creami Cravings recipe books. Specializing in high-protein ice cream parlour dupes, keto pints, lactose-free bases, and pure dessert formulas.
+            </p>
+            <div class="creator-stats-row">
+              <span class="creator-stat-pill">🍨 Copycat dupes</span>
+              <span class="creator-stat-pill">🥑 Low carb / Keto</span>
+              <span class="creator-stat-pill">🥛 Lactose-free</span>
+              <span class="creator-stat-pill">💪 No protein powder</span>
+            </div>
+            <div class="creator-card-actions">
+              <button type="button" class="btn-primary btn-browse-creator-books" data-creator-id="fitness_product_finder">
+                <span>Browse Eli's Books (5) &rarr;</span>
+              </button>
+              <a href="https://fitnessproductfinder.com/collections/creami-cravings-recipe-books" target="_blank" rel="noopener noreferrer" class="btn-creator-website-link">
+                Storefront ↗
+              </a>
+            </div>
+          </div>
+
+          <!-- Creator Partnership Callout Card -->
+          <div class="creator-partner-card">
+            <div class="creator-partner-icon">🤝</div>
+            <h3 class="creator-partner-title">Are You a Ninja Creami Creator?</h3>
+            <p class="creator-partner-desc">
+              Feature your e-books or digital recipe packs on Creami Cravings! Your audience gets interactive smart ingredient pantry matching, 1-click batch scaling, defrost timers, and nutrition tracking, while purchases happen directly on your storefront.
+            </p>
+            <a href="mailto:andrew@creamicravings.com?subject=Creator%20Partnership%20Inquiry%20-%20Creami%20Cravings" class="btn-creator-partner-action">
+              <span>✉️ Inquire as a Content Creator</span>
+            </a>
           </div>
         </div>
       </div>
 
-      <div class="recipe-packs-grid" id="recipePacksGrid">
-        <!-- Fan Favorites Pack -->
-        <div class="recipe-pack-card" data-pack="Fan Favorites">
-          <div class="pack-card-header">
-            <span class="pack-card-icon">⭐</span>
-            <div class="pack-card-title-col">
-              <div class="pack-card-title-row">
-                <h3 class="pack-card-name">Fan Favorites Pack</h3>
-                <span class="pack-card-badge fan-fav">75 Recipes</span>
-              </div>
-              <span class="pack-card-tagline">Viral dupes, desserts &amp; bakery creations • by Eli (FPF)</span>
-            </div>
-          </div>
-          <p class="pack-card-desc">
-            The ultimate crowd-pleasing collection from Eli at Fitness Product Finder. Includes Oreo McFlurry, Cosmic Brownie, Cookie Dough Craze, Birthday Cake Pint, Reese's Peanut Butter Cup, Kit Kat Crunch, and Snickers Swirl.
-          </p>
-          <div class="pack-card-footer">
-            <div class="pack-card-status" id="statusPackFan">
-              <span class="pack-status-available">🛍️ Available on Fitness Product Finder ($27.99)</span>
-            </div>
-            <button type="button" class="btn-primary btn-sm btn-action-pack" data-pack="Fan Favorites">
-              <span>🛒 Buy E-Book ($27.99) ↗</span>
-            </button>
-          </div>
-          <div style="text-align: center; margin-top: 6px;">
-            <a href="#" class="btn-pack-own-link" data-claim-pack="Fan Favorites">Already own this book from Eli? Claim access &rarr;</a>
+      <!-- VIEW 2: CREATOR CATALOG / BOOKS -->
+      <div id="creatorCatalogView" class="creators-view-panel" style="display: none;">
+        <div class="creator-catalog-nav">
+          <button type="button" class="btn-back-to-creators" id="btnBackToCreators">
+            <span>&larr; Back to All Creators</span>
+          </button>
+          <div class="creator-catalog-breadcrumbs">
+            <span>Creators</span> &rsaquo; <strong id="catalogCreatorBreadcrumb">Eli (Fitness Product Finder)</strong>
           </div>
         </div>
 
-        <!-- Keto & Low Carb Pack -->
-        <div class="recipe-pack-card" data-pack="Keto">
-          <div class="pack-card-header">
-            <span class="pack-card-icon">🥑</span>
-            <div class="pack-card-title-col">
-              <div class="pack-card-title-row">
-                <h3 class="pack-card-name">Keto &amp; Low-Carb Pack</h3>
-                <span class="pack-card-badge keto">22 Recipes</span>
+        <div class="creator-catalog-banner" id="creatorCatalogBanner">
+          <div class="creator-banner-left">
+            <div class="creator-banner-avatar">📖</div>
+            <div>
+              <h2 class="creator-banner-name" id="catalogCreatorName">Eli's Recipe Books</h2>
+              <p class="creator-banner-subtitle" id="catalogCreatorSubtitle">Fitness Product Finder • Official e-books &amp; bundles</p>
+            </div>
+          </div>
+          <a href="https://fitnessproductfinder.com/collections/creami-cravings-recipe-books" target="_blank" rel="noopener noreferrer" class="btn-creator-store-visit" id="catalogCreatorStoreBtn">
+            <span>Visit Eli's Storefront ↗</span>
+          </a>
+        </div>
+
+        <div class="recipe-packs-grid" id="recipePacksGrid">
+          <!-- Fan Favorites Pack -->
+          <div class="recipe-pack-card" data-pack="Fan Favorites">
+            <div class="pack-card-header">
+              <span class="pack-card-icon">⭐</span>
+              <div class="pack-card-title-col">
+                <div class="pack-card-title-row">
+                  <h3 class="pack-card-name">Fan Favorites Pack</h3>
+                  <span class="pack-card-badge fan-fav">75 Recipes</span>
+                </div>
+                <span class="pack-card-tagline">Viral dupes, desserts &amp; bakery creations • by Eli (FPF)</span>
               </div>
-              <span class="pack-card-tagline">Sugar-free indulgence under 5g net carbs • by Eli (FPF)</span>
+            </div>
+            <p class="pack-card-desc">
+              The ultimate crowd-pleasing collection from Eli at Fitness Product Finder. Includes Oreo McFlurry, Cosmic Brownie, Cookie Dough Craze, Birthday Cake Pint, Reese's Peanut Butter Cup, Kit Kat Crunch, and Snickers Swirl.
+            </p>
+            <div class="pack-card-footer">
+              <div class="pack-card-status" id="statusPackFan">
+                <span class="pack-status-available">🛍️ Available on Fitness Product Finder ($27.99)</span>
+              </div>
+              <button type="button" class="btn-primary btn-sm btn-action-pack" data-pack="Fan Favorites">
+                <span>🛒 Buy E-Book ($27.99) ↗</span>
+              </button>
+            </div>
+            <div style="text-align: center; margin-top: 6px;">
+              <a href="#" class="btn-pack-own-link" data-claim-pack="Fan Favorites">Already own this book from Eli? Claim access &rarr;</a>
             </div>
           </div>
-          <p class="pack-card-desc">
-            Ultra-low net carbs without sacrificing silky soft-serve texture. Includes Keto Chocolate Fudge, Peanut Butter Swirl, Mint Chip, Butter Pecan, and Sea Salt Caramel.
-          </p>
-          <div class="pack-card-footer">
-            <div class="pack-card-status" id="statusPackKeto">
-              <span class="pack-status-available">🛍️ Available on Fitness Product Finder ($27.99)</span>
+
+          <!-- Keto & Low Carb Pack -->
+          <div class="recipe-pack-card" data-pack="Keto">
+            <div class="pack-card-header">
+              <span class="pack-card-icon">🥑</span>
+              <div class="pack-card-title-col">
+                <div class="pack-card-title-row">
+                  <h3 class="pack-card-name">Keto &amp; Low-Carb Pack</h3>
+                  <span class="pack-card-badge keto">22 Recipes</span>
+                </div>
+                <span class="pack-card-tagline">Sugar-free indulgence under 5g net carbs • by Eli (FPF)</span>
+              </div>
             </div>
-            <button type="button" class="btn-primary btn-sm btn-action-pack" data-pack="Keto">
-              <span>🛒 Buy E-Book ($27.99) ↗</span>
-            </button>
+            <p class="pack-card-desc">
+              Ultra-low net carbs without sacrificing silky soft-serve texture. Includes Keto Chocolate Fudge, Peanut Butter Swirl, Mint Chip, Butter Pecan, and Sea Salt Caramel.
+            </p>
+            <div class="pack-card-footer">
+              <div class="pack-card-status" id="statusPackKeto">
+                <span class="pack-status-available">🛍️ Available on Fitness Product Finder ($27.99)</span>
+              </div>
+              <button type="button" class="btn-primary btn-sm btn-action-pack" data-pack="Keto">
+                <span>🛒 Buy E-Book ($27.99) ↗</span>
+              </button>
+            </div>
+            <div style="text-align: center; margin-top: 6px;">
+              <a href="#" class="btn-pack-own-link" data-claim-pack="Keto">Already own this book from Eli? Claim access &rarr;</a>
+            </div>
           </div>
-          <div style="text-align: center; margin-top: 6px;">
-            <a href="#" class="btn-pack-own-link" data-claim-pack="Keto">Already own this book from Eli? Claim access &rarr;</a>
+
+          <!-- Lactose Free Pack -->
+          <div class="recipe-pack-card" data-pack="Lactose Free">
+            <div class="pack-card-header">
+              <span class="pack-card-icon">🥛</span>
+              <div class="pack-card-title-col">
+                <div class="pack-card-title-row">
+                  <h3 class="pack-card-name">Lactose-Free Pack</h3>
+                  <span class="pack-card-badge lactose">43 Recipes</span>
+                </div>
+                <span class="pack-card-tagline">100% real dairy flavor, zero digestive distress • by Eli (FPF)</span>
+              </div>
+            </div>
+            <p class="pack-card-desc">
+              Formulated with ultra-filtered Fairlife and lactase enzyme bases. Includes Creamy Vanilla Latte, Strawberry Cheesecake, Mocha Chip, and Real Fruit Sorbets.
+            </p>
+            <div class="pack-card-footer">
+              <div class="pack-card-status" id="statusPackLactose">
+                <span class="pack-status-available">🛍️ Available on Fitness Product Finder ($27.99)</span>
+              </div>
+              <button type="button" class="btn-primary btn-sm btn-action-pack" data-pack="Lactose Free">
+                <span>🛒 Buy E-Book ($27.99) ↗</span>
+              </button>
+            </div>
+            <div style="text-align: center; margin-top: 6px;">
+              <a href="#" class="btn-pack-own-link" data-claim-pack="Lactose Free">Already own this book from Eli? Claim access &rarr;</a>
+            </div>
+          </div>
+
+          <!-- No Protein Powder Pack -->
+          <div class="recipe-pack-card" data-pack="No Protein">
+            <div class="pack-card-header">
+              <span class="pack-card-icon">💪</span>
+              <div class="pack-card-title-col">
+                <div class="pack-card-title-row">
+                  <h3 class="pack-card-name">No Protein Powder Pack</h3>
+                  <span class="pack-card-badge nopro">83 Recipes</span>
+                </div>
+                <span class="pack-card-tagline">Classic artisanal ice cream parlor flavor • by Eli (FPF)</span>
+              </div>
+            </div>
+            <p class="pack-card-desc">
+              Pure ice cream decadence made without any protein powders. Pure milk, pudding bases, and authentic churned texture for true dessert connoisseurs.
+            </p>
+            <div class="pack-card-footer">
+              <div class="pack-card-status" id="statusPackNoProtein">
+                <span class="pack-status-available">🛍️ Available on Fitness Product Finder ($27.99)</span>
+              </div>
+              <button type="button" class="btn-primary btn-sm btn-action-pack" data-pack="No Protein">
+                <span>🛒 Buy E-Book ($27.99) ↗</span>
+              </button>
+            </div>
+            <div style="text-align: center; margin-top: 6px;">
+              <a href="#" class="btn-pack-own-link" data-claim-pack="No Protein">Already own this book from Eli? Claim access &rarr;</a>
+            </div>
+          </div>
+
+          <!-- All-Access Bundle -->
+          <div class="recipe-pack-card vip-bundle" data-pack="All-Access">
+            <div class="pack-card-header">
+              <span class="pack-card-icon">👑</span>
+              <div class="pack-card-title-col">
+                <div class="pack-card-title-row">
+                  <h3 class="pack-card-name">Creami Cravings 4-Book Bundle</h3>
+                  <span class="pack-card-badge vip">All 243 Recipes</span>
+                </div>
+                <span class="pack-card-tagline">Best Value • All 4 Books by Eli ($112 Value for $49.99)</span>
+              </div>
+            </div>
+            <p class="pack-card-desc">
+              Instantly unlock all 4 premium collections (Fan Favorites, No Protein, Keto &amp; Lactose Free), every secret ingredient ratio, step-by-step spin instructions, and all future recipe updates.
+            </p>
+            <div class="pack-card-footer">
+              <div class="pack-card-status" id="statusPackAllAccess">
+                <span class="pack-status-available">🛍️ Available on Fitness Product Finder ($49.99)</span>
+              </div>
+              <button type="button" class="btn-primary btn-sm btn-action-pack vip-btn" data-pack="All-Access">
+                <span>👑 Buy 4-Book Bundle ($49.99) ↗</span>
+              </button>
+            </div>
+            <div style="text-align: center; margin-top: 6px;">
+              <a href="#" class="btn-pack-own-link" data-claim-pack="All-Access">Already own the bundle from Eli? Claim access &rarr;</a>
+            </div>
           </div>
         </div>
 
-        <!-- Lactose Free Pack -->
-        <div class="recipe-pack-card" data-pack="Lactose Free">
-          <div class="pack-card-header">
-            <span class="pack-card-icon">🥛</span>
-            <div class="pack-card-title-col">
-              <div class="pack-card-title-row">
-                <h3 class="pack-card-name">Lactose-Free Pack</h3>
-                <span class="pack-card-badge lactose">43 Recipes</span>
-              </div>
-              <span class="pack-card-tagline">100% real dairy flavor, zero digestive distress • by Eli (FPF)</span>
-            </div>
-          </div>
-          <p class="pack-card-desc">
-            Formulated with ultra-filtered Fairlife and lactase enzyme bases. Includes Creamy Vanilla Latte, Strawberry Cheesecake, Mocha Chip, and Real Fruit Sorbets.
+        <div class="packs-modal-footer">
+          <p class="packs-footer-hint">
+            💡 After purchase or request, your access is automatically linked to your account across all your devices.
           </p>
-          <div class="pack-card-footer">
-            <div class="pack-card-status" id="statusPackLactose">
-              <span class="pack-status-available">🛍️ Available on Fitness Product Finder ($27.99)</span>
-            </div>
-            <button type="button" class="btn-primary btn-sm btn-action-pack" data-pack="Lactose Free">
-              <span>🛒 Buy E-Book ($27.99) ↗</span>
-            </button>
-          </div>
-          <div style="text-align: center; margin-top: 6px;">
-            <a href="#" class="btn-pack-own-link" data-claim-pack="Lactose Free">Already own this book from Eli? Claim access &rarr;</a>
-          </div>
         </div>
-
-        <!-- No Protein Powder Pack -->
-        <div class="recipe-pack-card" data-pack="No Protein">
-          <div class="pack-card-header">
-            <span class="pack-card-icon">💪</span>
-            <div class="pack-card-title-col">
-              <div class="pack-card-title-row">
-                <h3 class="pack-card-name">No Protein Powder Pack</h3>
-                <span class="pack-card-badge nopro">83 Recipes</span>
-              </div>
-              <span class="pack-card-tagline">Classic artisanal ice cream parlor flavor • by Eli (FPF)</span>
-            </div>
-          </div>
-          <p class="pack-card-desc">
-            Pure ice cream decadence made without any protein powders. Pure milk, pudding bases, and authentic churned texture for true dessert connoisseurs.
-          </p>
-          <div class="pack-card-footer">
-            <div class="pack-card-status" id="statusPackNoProtein">
-              <span class="pack-status-available">🛍️ Available on Fitness Product Finder ($27.99)</span>
-            </div>
-            <button type="button" class="btn-primary btn-sm btn-action-pack" data-pack="No Protein">
-              <span>🛒 Buy E-Book ($27.99) ↗</span>
-            </button>
-          </div>
-          <div style="text-align: center; margin-top: 6px;">
-            <a href="#" class="btn-pack-own-link" data-claim-pack="No Protein">Already own this book from Eli? Claim access &rarr;</a>
-          </div>
-        </div>
-
-        <!-- All-Access Bundle -->
-        <div class="recipe-pack-card vip-bundle" data-pack="All-Access">
-          <div class="pack-card-header">
-            <span class="pack-card-icon">👑</span>
-            <div class="pack-card-title-col">
-              <div class="pack-card-title-row">
-                <h3 class="pack-card-name">Creami Cravings 4-Book Bundle</h3>
-                <span class="pack-card-badge vip">All 243 Recipes</span>
-              </div>
-              <span class="pack-card-tagline">Best Value • All 4 Books by Eli ($112 Value for $49.99)</span>
-            </div>
-          </div>
-          <p class="pack-card-desc">
-            Instantly unlock all 4 premium collections (Fan Favorites, No Protein, Keto &amp; Lactose Free), every secret ingredient ratio, step-by-step spin instructions, and all future recipe updates.
-          </p>
-          <div class="pack-card-footer">
-            <div class="pack-card-status" id="statusPackAllAccess">
-              <span class="pack-status-available">🛍️ Available on Fitness Product Finder ($49.99)</span>
-            </div>
-            <button type="button" class="btn-primary btn-sm btn-action-pack vip-btn" data-pack="All-Access">
-              <span>👑 Buy 4-Book Bundle ($49.99) ↗</span>
-            </button>
-          </div>
-          <div style="text-align: center; margin-top: 6px;">
-            <a href="#" class="btn-pack-own-link" data-claim-pack="All-Access">Already own the bundle from Eli? Claim access &rarr;</a>
-          </div>
-        </div>
-      </div>
-
-      <div class="packs-modal-footer">
-        <p class="packs-footer-hint">
-          💡 After purchase or request, your access is automatically linked to your account across all your devices.
-        </p>
       </div>
     </div>
   </div>
@@ -1391,6 +1467,18 @@
         </div>
       </div>
 
+      <!-- Admin Navigation Tabs -->
+      <div class="admin-tab-bar">
+        <button type="button" class="admin-tab-btn active" id="tabBtnAdminUsers">
+          <span>👥 User Directory</span>
+          <span class="admin-tab-count" id="adminTabUsersBadge">0</span>
+        </button>
+        <button type="button" class="admin-tab-btn" id="tabBtnAdminClaims">
+          <span>📬 Access Claims &amp; Inquiries</span>
+          <span class="admin-tab-count" id="adminTabClaimsBadge">0</span>
+        </button>
+      </div>
+
       <!-- Quick Stats Summary -->
       <div class="admin-stats-row">
         <div class="admin-stat-card">
@@ -1402,27 +1490,56 @@
           <span class="admin-stat-label">Admins</span>
         </div>
         <div class="admin-stat-card">
+          <span class="admin-stat-num" id="adminTotalCreators">0</span>
+          <span class="admin-stat-label">Creators</span>
+        </div>
+        <div class="admin-stat-card">
           <span class="admin-stat-num" id="adminTotalAllAccess">0</span>
-          <span class="admin-stat-label">All-Access Passes</span>
+          <span class="admin-stat-label">All-Access</span>
+        </div>
+        <div class="admin-stat-card alert">
+          <span class="admin-stat-num" id="adminTotalClaims">0</span>
+          <span class="admin-stat-label">Pending Claims</span>
         </div>
       </div>
 
-      <!-- Search & Filters Toolbar -->
-      <div class="admin-toolbar">
-        <div class="admin-search-wrap">
-          <input type="text" id="adminUserSearchInput" placeholder="Search by name, email, or role..." class="admin-search-input">
+      <!-- PANEL 1: USER DIRECTORY -->
+      <div id="adminPanelUsers" class="admin-tab-panel">
+        <div class="admin-toolbar">
+          <div class="admin-search-wrap">
+            <input type="text" id="adminUserSearchInput" placeholder="Search by name, email, or role..." class="admin-search-input">
+          </div>
+          <div class="admin-filter-pills" id="adminRoleFilterPills">
+            <button type="button" class="btn-time-preset active" data-role="all">All Users</button>
+            <button type="button" class="btn-time-preset" data-role="admin">👑 Admins</button>
+            <button type="button" class="btn-time-preset" data-role="creator">🧑‍🍳 Creators</button>
+            <button type="button" class="btn-time-preset" data-role="vip">⭐ VIPs</button>
+            <button type="button" class="btn-time-preset" data-role="user">👤 Standard</button>
+            <button type="button" class="btn-time-preset" data-role="allaccess">✨ All-Access</button>
+          </div>
+          <button type="button" class="btn-secondary" id="adminRefreshUsersBtn" title="Refresh user list">🔄 Refresh</button>
         </div>
-        <div class="admin-filter-pills" id="adminRoleFilterPills">
-          <button type="button" class="btn-time-preset active" data-role="all">All Users</button>
-          <button type="button" class="btn-time-preset" data-role="admin">Admins</button>
-          <button type="button" class="btn-time-preset" data-role="user">Standard</button>
+
+        <div class="admin-users-list" id="adminUsersList">
+          <!-- Rendered dynamically by app.js -->
         </div>
-        <button type="button" class="btn-secondary" id="adminRefreshUsersBtn" title="Refresh user list">🔄 Refresh</button>
       </div>
 
-      <!-- User Directory Cards List -->
-      <div class="admin-users-list" id="adminUsersList">
-        <!-- Rendered dynamically by app.js -->
+      <!-- PANEL 2: ACCESS CLAIMS & INQUIRIES -->
+      <div id="adminPanelClaims" class="admin-tab-panel" style="display: none;">
+        <div class="admin-toolbar">
+          <div class="admin-filter-pills" id="adminClaimsFilterPills">
+            <button type="button" class="btn-time-preset active" data-claim-status="all">All Claims</button>
+            <button type="button" class="btn-time-preset" data-claim-status="pending">⏳ Pending Review</button>
+            <button type="button" class="btn-time-preset" data-claim-status="approved">✅ Approved</button>
+            <button type="button" class="btn-time-preset" data-claim-status="dismissed">✕ Dismissed</button>
+          </div>
+          <button type="button" class="btn-secondary" id="adminRefreshClaimsBtn" title="Refresh claims list">🔄 Refresh</button>
+        </div>
+
+        <div class="admin-claims-list" id="adminClaimsList">
+          <!-- Rendered dynamically by app.js -->
+        </div>
       </div>
     </div>
   </div>

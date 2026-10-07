@@ -528,7 +528,10 @@
   const recipePacksModalOverlay = document.getElementById('recipePacksModalOverlay');
   const closeRecipePacksModalBtn = document.getElementById('closeRecipePacksModalBtn');
   let adminUsersState = [];
+  let adminClaimsState = [];
+  let adminActiveTab = 'users';
   let adminFilterRole = 'all';
+  let adminFilterClaimStatus = 'all';
   let adminSearchQuery = '';
 
   const themeToggleBtn = document.getElementById('themeToggleBtn');
@@ -1406,7 +1409,7 @@
     if (!categoryName || categoryName === 'all' || categoryName === 'Base Flavors' || categoryName === 'Community Legends' || categoryName === 'favorites' || categoryName === 'Custom') {
       return true;
     }
-    if (currentUser && currentUser.role === 'admin') return true;
+    if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'vip')) return true;
     const subs = (currentUser && Array.isArray(currentUser.subscriptions)) ? currentUser.subscriptions : ['Base Flavors', 'Community Legends'];
     if (subs.includes('All-Access')) return true;
     const norm = normalizeCategoryName(categoryName);
@@ -2924,9 +2927,52 @@
     }
   }
 
-  function openRecipePacksModal() {
-    if (!recipePacksModalOverlay) return;
+  let activeStoreCreatorId = null;
+
+  function showCreatorDirectoryView() {
+    const dirView = document.getElementById('creatorsDirectoryView');
+    const catView = document.getElementById('creatorCatalogView');
+    if (dirView) dirView.style.display = 'block';
+    if (catView) catView.style.display = 'none';
+    activeStoreCreatorId = null;
+  }
+
+  function showCreatorCatalogView(creatorId = 'fitness_product_finder') {
+    const dirView = document.getElementById('creatorsDirectoryView');
+    const catView = document.getElementById('creatorCatalogView');
+    if (dirView) dirView.style.display = 'none';
+    if (catView) catView.style.display = 'block';
+    activeStoreCreatorId = creatorId;
+
+    const creator = (typeof CREATORS_MASTER !== 'undefined')
+      ? CREATORS_MASTER.find(c => c.id === creatorId)
+      : null;
+
+    const breadcrumb = document.getElementById('catalogCreatorBreadcrumb');
+    const nameEl = document.getElementById('catalogCreatorName');
+    const subEl = document.getElementById('catalogCreatorSubtitle');
+    const storeBtn = document.getElementById('catalogCreatorStoreBtn');
+
+    if (creator) {
+      if (breadcrumb) breadcrumb.textContent = `${creator.name} (${creator.brandName})`;
+      if (nameEl) nameEl.textContent = `${creator.name}'s Recipe Books`;
+      if (subEl) subEl.textContent = `${creator.brandName} • Official e-books & bundles`;
+      if (storeBtn) {
+        storeBtn.href = creator.storeUrl || creator.url;
+        storeBtn.innerHTML = `<span>Visit ${creator.name}'s Storefront ↗</span>`;
+      }
+    }
+
     updatePacksModalStatuses();
+  }
+
+  function openRecipePacksModal(creatorId = null) {
+    if (!recipePacksModalOverlay) return;
+    if (creatorId) {
+      showCreatorCatalogView(creatorId);
+    } else {
+      showCreatorDirectoryView();
+    }
     recipePacksModalOverlay.classList.add('active');
     recipePacksModalOverlay.setAttribute('aria-hidden', 'false');
     lockBackgroundScroll();
@@ -8435,7 +8481,9 @@
       adminModalOverlay.classList.add('active');
       adminModalOverlay.setAttribute('aria-hidden', 'false');
       lockBackgroundScroll();
+      switchAdminTab('users');
       fetchAdminUsers();
+      fetchAdminClaims();
     }
   }
 
@@ -8444,6 +8492,28 @@
       adminModalOverlay.classList.remove('active');
       adminModalOverlay.setAttribute('aria-hidden', 'true');
       unlockBackgroundScroll();
+    }
+  }
+
+  function switchAdminTab(tab) {
+    adminActiveTab = tab;
+    const btnUsers = document.getElementById('tabBtnAdminUsers');
+    const btnClaims = document.getElementById('tabBtnAdminClaims');
+    const panelUsers = document.getElementById('adminPanelUsers');
+    const panelClaims = document.getElementById('adminPanelClaims');
+
+    if (tab === 'users') {
+      if (btnUsers) btnUsers.classList.add('active');
+      if (btnClaims) btnClaims.classList.remove('active');
+      if (panelUsers) panelUsers.style.display = 'block';
+      if (panelClaims) panelClaims.style.display = 'none';
+      renderAdminUsers();
+    } else {
+      if (btnUsers) btnUsers.classList.remove('active');
+      if (btnClaims) btnClaims.classList.add('active');
+      if (panelUsers) panelUsers.style.display = 'none';
+      if (panelClaims) panelClaims.style.display = 'block';
+      renderAdminClaims();
     }
   }
 
@@ -8481,12 +8551,47 @@
     }
   }
 
+  async function fetchAdminClaims() {
+    if (!currentUser || currentUser.role !== 'admin') return;
+    try {
+      const res = await fetch('/api/admin/inquiries', {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': currentUser.token ? `Bearer ${currentUser.token}` : '',
+          'X-User-Email': currentUser.email || ''
+        }
+      });
+      const data = await res.json();
+      if (res.ok && data.inquiries) {
+        adminClaimsState = data.inquiries;
+        updateAdminStats();
+        if (adminActiveTab === 'claims') {
+          renderAdminClaims();
+        }
+      }
+    } catch (err) {
+      console.warn('Fetch admin claims error:', err);
+    }
+  }
+
   function updateAdminStats() {
     if (adminTotalUsers) adminTotalUsers.textContent = adminUsersState.length;
     const adminCount = adminUsersState.filter(u => u.role === 'admin').length;
     if (adminTotalAdmins) adminTotalAdmins.textContent = adminCount;
+    const creatorCount = adminUsersState.filter(u => u.role === 'creator').length;
+    const adminTotalCreators = document.getElementById('adminTotalCreators');
+    if (adminTotalCreators) adminTotalCreators.textContent = creatorCount;
     const allAccessCount = adminUsersState.filter(u => Array.isArray(u.subscriptions) && u.subscriptions.includes('All-Access')).length;
     if (adminTotalAllAccess) adminTotalAllAccess.textContent = allAccessCount;
+
+    const pendingClaimsCount = adminClaimsState.filter(c => !c.status || c.status === 'pending').length;
+    const adminTotalClaims = document.getElementById('adminTotalClaims');
+    if (adminTotalClaims) adminTotalClaims.textContent = pendingClaimsCount;
+
+    const tabUsersBadge = document.getElementById('adminTabUsersBadge');
+    if (tabUsersBadge) tabUsersBadge.textContent = adminUsersState.length;
+    const tabClaimsBadge = document.getElementById('adminTabClaimsBadge');
+    if (tabClaimsBadge) tabClaimsBadge.textContent = pendingClaimsCount;
   }
 
   function renderAdminUsers() {
@@ -8496,12 +8601,17 @@
     const roleFilter = adminFilterRole || 'all';
 
     const filtered = adminUsersState.filter(u => {
-      if (roleFilter !== 'all' && u.role !== roleFilter) return false;
+      const subs = Array.isArray(u.subscriptions) ? u.subscriptions : ['Base Flavors', 'Community Legends'];
+      if (roleFilter === 'admin' && u.role !== 'admin') return false;
+      if (roleFilter === 'creator' && u.role !== 'creator') return false;
+      if (roleFilter === 'vip' && u.role !== 'vip') return false;
+      if (roleFilter === 'user' && (u.role && u.role !== 'user')) return false;
+      if (roleFilter === 'allaccess' && !subs.includes('All-Access')) return false;
       if (q) {
         const nameMatch = (u.name || u.username || '').toLowerCase().includes(q);
         const emailMatch = (u.email || '').toLowerCase().includes(q);
         const roleMatch = (u.role || '').toLowerCase().includes(q);
-        const subMatch = (u.subscriptions || []).some(s => s.toLowerCase().includes(q));
+        const subMatch = subs.some(s => s.toLowerCase().includes(q));
         if (!nameMatch && !emailMatch && !roleMatch && !subMatch) return false;
       }
       return true;
@@ -8529,6 +8639,10 @@
       const createdDate = u.created_at ? new Date(u.created_at).toLocaleDateString() : 'N/A';
       const lastActiveDate = u.last_active ? new Date(u.last_active).toLocaleDateString() : 'Active';
 
+      const roleBadge = u.role === 'admin' 
+        ? '👑 Admin' 
+        : (u.role === 'creator' ? '🧑‍🍳 Creator' : (u.role === 'vip' ? '⭐ VIP' : '👤 Standard'));
+
       return `
         <div class="admin-user-card" data-user-id="${u.id}" data-user-email="${u.email}">
           <div class="admin-user-top">
@@ -8537,17 +8651,20 @@
               <div>
                 <div class="admin-user-name-row">
                   <span class="admin-user-name">${u.name || u.username || 'Unnamed User'}</span>
-                  <span class="admin-user-badge ${u.role}">${u.role === 'admin' ? '👑 Admin' : '👤 Standard'}</span>
+                  <span class="admin-user-badge ${u.role || 'user'}">${roleBadge}</span>
                   ${isCurrentAdmin ? `<span class="badge" style="font-size: 0.68rem; background: rgba(5, 150, 105, 0.2); color: #34d399; padding: 2px 6px; border-radius: 4px; font-weight: 700;">You</span>` : ''}
                 </div>
                 <div class="admin-user-email">${u.email || 'No email attached'}</div>
               </div>
             </div>
 
-            <div class="admin-user-actions">
-              <button class="btn-role-toggle" data-user-id="${u.id}" data-current-role="${u.role}" ${isRootAdmin ? 'disabled title="Root administrator cannot be demoted"' : `title="Toggle role between Admin and Standard User"`}>
-                ${u.role === 'admin' ? 'Demote to User' : 'Promote to Admin'}
-              </button>
+            <div class="admin-user-actions" style="display: flex; align-items: center; gap: 8px;">
+              <select class="admin-role-select" data-user-id="${u.id}" ${isRootAdmin ? 'disabled title="Root administrator role cannot be changed"' : 'title="Change user system role"'}>
+                <option value="user" ${(!u.role || u.role === 'user') ? 'selected' : ''}>👤 Standard User</option>
+                <option value="creator" ${u.role === 'creator' ? 'selected' : ''}>🧑‍🍳 Content Creator</option>
+                <option value="vip" ${u.role === 'vip' ? 'selected' : ''}>⭐ VIP / Tester</option>
+                <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>👑 Administrator</option>
+              </select>
               ${(!isRootAdmin && !isCurrentAdmin) ? `
                 <button class="btn-admin-del-user" data-user-id="${u.id}" data-user-email="${u.email}" title="Delete user account">
                   🗑️
@@ -8566,7 +8683,17 @@
           </div>
 
           <div class="admin-subs-section">
-            <div class="admin-subs-title">📦 Category Pack Subscriptions:</div>
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+              <div class="admin-subs-title">📦 Recipe Pack Permissions:</div>
+              <div class="admin-presets-row">
+                <button type="button" class="btn-preset-all-access" data-user-id="${u.id}" title="1-Click: Unlock all 5 packs + All-Access pass">
+                  👑 Grant All-Access
+                </button>
+                <button type="button" class="btn-preset-reset-free" data-user-id="${u.id}" title="1-Click: Reset to standard Base Flavors & Community Legends">
+                  🔒 Reset to Free
+                </button>
+              </div>
+            </div>
             <div class="admin-subs-chips-wrap">
               ${ALL_CATEGORY_SUBSCRIPTIONS.map(subName => {
                 const isActive = hasAllAccess || subs.includes(subName);
@@ -8593,20 +8720,36 @@
   function bindAdminUserCardEvents() {
     if (!adminUsersList) return;
 
-    // Role Toggle Buttons
-    adminUsersList.querySelectorAll('.btn-role-toggle').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const userId = btn.dataset.userId;
-        const currentRole = btn.dataset.currentRole;
-        const newRole = currentRole === 'admin' ? 'user' : 'admin';
+    // Role Dropdown Select
+    adminUsersList.querySelectorAll('.admin-role-select').forEach(sel => {
+      sel.addEventListener('change', async () => {
+        const userId = sel.dataset.userId;
+        const newRole = sel.value;
         const user = adminUsersState.find(u => u.id === userId);
         if (!user) return;
-
-        if (!confirm(`Are you sure you want to change ${user.name || user.email}'s role to "${newRole.toUpperCase()}"?`)) {
-          return;
-        }
-
         await updateUserPermissions(user.id, user.email, user.subscriptions || ['Base Flavors'], newRole);
+      });
+    });
+
+    // Preset: Grant All-Access
+    adminUsersList.querySelectorAll('.btn-preset-all-access').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const userId = btn.dataset.userId;
+        const user = adminUsersState.find(u => u.id === userId);
+        if (!user) return;
+        const newSubs = [...ALL_CATEGORY_SUBSCRIPTIONS];
+        await updateUserPermissions(user.id, user.email, newSubs, user.role || 'user');
+      });
+    });
+
+    // Preset: Reset to Free Starter Tiers
+    adminUsersList.querySelectorAll('.btn-preset-reset-free').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const userId = btn.dataset.userId;
+        const user = adminUsersState.find(u => u.id === userId);
+        if (!user) return;
+        const newSubs = ['Base Flavors', 'Community Legends'];
+        await updateUserPermissions(user.id, user.email, newSubs, user.role || 'user');
       });
     });
 
@@ -8638,16 +8781,12 @@
 
         if (subName === 'All-Access') {
           if (curSubs.includes('All-Access')) {
-            // Turn off All-Access, reset to Free Tiers
             curSubs = ['Base Flavors', 'Community Legends'];
           } else {
-            // Grant All-Access
             curSubs = [...ALL_CATEGORY_SUBSCRIPTIONS];
           }
         } else {
-          // Individual category pack toggle
           if (curSubs.includes(subName)) {
-            // Prevent removing Base Flavors if it's the only one
             if (subName === 'Base Flavors' && curSubs.length === 1) {
               showToast('Base Flavors is the universal starter pack and cannot be removed.');
               return;
@@ -8655,7 +8794,6 @@
             curSubs = curSubs.filter(s => s !== subName && s !== 'All-Access');
           } else {
             curSubs.push(subName);
-            // If all individual packs are active, enable All-Access as well
             const nonAll = ALL_CATEGORY_SUBSCRIPTIONS.filter(s => s !== 'All-Access');
             if (nonAll.every(s => curSubs.includes(s))) {
               curSubs.push('All-Access');
@@ -8666,6 +8804,124 @@
         await updateUserPermissions(user.id, user.email, curSubs, user.role);
       });
     });
+  }
+
+  function renderAdminClaims() {
+    const listEl = document.getElementById('adminClaimsList');
+    if (!listEl) return;
+
+    const filterStatus = adminFilterClaimStatus || 'all';
+    const filtered = adminClaimsState.filter(c => {
+      const st = c.status || 'pending';
+      if (filterStatus !== 'all' && st !== filterStatus) return false;
+      return true;
+    });
+
+    if (filtered.length === 0) {
+      listEl.innerHTML = `
+        <div style="text-align: center; padding: 40px 20px; color: var(--text-dim);">
+          <div style="font-size: 2rem; margin-bottom: 8px;">📬</div>
+          <div>No ${filterStatus !== 'all' ? filterStatus : ''} claims or inquiries found.</div>
+        </div>
+      `;
+      return;
+    }
+
+    listEl.innerHTML = filtered.map(c => {
+      const isPending = !c.status || c.status === 'pending';
+      const isApproved = c.status === 'approved';
+      const isDismissed = c.status === 'dismissed';
+      const dateStr = c.timestamp ? new Date(c.timestamp).toLocaleString() : 'N/A';
+      const actionType = (c.action === 'claim_existing') ? 'E-Book Access Claim' : 'Purchase Request';
+
+      return `
+        <div class="claim-card ${c.status || 'pending'}" data-inquiry-id="${c.id}">
+          <div class="claim-info-left">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="claim-email">${c.email}</span>
+              <span class="claim-badge-status ${c.status || 'pending'}">${c.status || 'pending'}</span>
+            </div>
+            <div class="claim-details-row">
+              <span class="claim-pack-badge">📦 ${c.pack}</span>
+              <span>• Type: <strong>${actionType}</strong></span>
+              <span>• ${dateStr}</span>
+            </div>
+          </div>
+          <div class="claim-actions">
+            ${isPending ? `
+              <button type="button" class="btn-claim-approve" data-inquiry-id="${c.id}" data-email="${c.email}" data-pack="${c.pack}">
+                ✓ Approve &amp; Grant Pack
+              </button>
+              <button type="button" class="btn-claim-dismiss" data-inquiry-id="${c.id}">
+                ✕ Dismiss
+              </button>
+            ` : `
+              <span style="font-size: 0.8rem; color: var(--text-muted); font-style: italic;">
+                ${isApproved ? '✅ Access granted' : '✕ Dismissed'}
+              </span>
+            `}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    bindAdminClaimsEvents();
+  }
+
+  function bindAdminClaimsEvents() {
+    const listEl = document.getElementById('adminClaimsList');
+    if (!listEl) return;
+
+    listEl.querySelectorAll('.btn-claim-approve').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const inquiryId = btn.dataset.inquiryId;
+        const email = btn.dataset.email;
+        const pack = btn.dataset.pack;
+        if (!confirm(`Approve access claim and automatically grant "${pack}" pack to ${email}?`)) {
+          return;
+        }
+        await resolveAdminClaim(inquiryId, 'approve');
+      });
+    });
+
+    listEl.querySelectorAll('.btn-claim-dismiss').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const inquiryId = btn.dataset.inquiryId;
+        await resolveAdminClaim(inquiryId, 'dismiss');
+      });
+    });
+  }
+
+  async function resolveAdminClaim(inquiryId, action) {
+    try {
+      showToast('Processing claim...');
+      const res = await fetch('/api/admin/inquiry/resolve', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': currentUser.token ? `Bearer ${currentUser.token}` : '',
+          'X-User-Email': currentUser.email || ''
+        },
+        body: JSON.stringify({
+          token: currentUser.token,
+          adminEmail: currentUser.email,
+          inquiryId,
+          action
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showToast(action === 'approve' ? '✅ Claim approved and pack granted!' : 'Claim dismissed.');
+        await fetchAdminUsers();
+        await fetchAdminClaims();
+      } else {
+        showToast('Error: ' + (data.error || 'Failed to update claim'));
+      }
+    } catch (err) {
+      console.error('Resolve claim error:', err);
+      showToast('Connection error while updating claim.');
+    }
   }
 
   async function updateUserPermissions(userId, email, newSubs, newRole) {
@@ -9272,6 +9528,16 @@
       });
     }
 
+    // Admin Navigation Tabs Switcher
+    const tabBtnAdminUsers = document.getElementById('tabBtnAdminUsers');
+    if (tabBtnAdminUsers) {
+      tabBtnAdminUsers.addEventListener('click', () => switchAdminTab('users'));
+    }
+    const tabBtnAdminClaims = document.getElementById('tabBtnAdminClaims');
+    if (tabBtnAdminClaims) {
+      tabBtnAdminClaims.addEventListener('click', () => switchAdminTab('claims'));
+    }
+
     if (adminUserSearchInput) {
       adminUserSearchInput.addEventListener('input', (e) => {
         adminSearchQuery = e.target.value;
@@ -9290,14 +9556,31 @@
       });
     }
 
+    const adminClaimsFilterPills = document.getElementById('adminClaimsFilterPills');
+    if (adminClaimsFilterPills) {
+      adminClaimsFilterPills.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-claim-status]');
+        if (!btn) return;
+        adminClaimsFilterPills.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        adminFilterClaimStatus = btn.dataset.claimStatus;
+        renderAdminClaims();
+      });
+    }
+
+    const adminRefreshClaimsBtn = document.getElementById('adminRefreshClaimsBtn');
+    if (adminRefreshClaimsBtn) {
+      adminRefreshClaimsBtn.addEventListener('click', fetchAdminClaims);
+    }
+
     if (btnAvailablePacksBadge) {
-      btnAvailablePacksBadge.addEventListener('click', openRecipePacksModal);
+      btnAvailablePacksBadge.addEventListener('click', () => openRecipePacksModal());
     }
     if (btnBrowsePacksBanner) {
-      btnBrowsePacksBanner.addEventListener('click', openRecipePacksModal);
+      btnBrowsePacksBanner.addEventListener('click', () => openRecipePacksModal());
     }
     if (btnViewAllPacksFromCategory) {
-      btnViewAllPacksFromCategory.addEventListener('click', openRecipePacksModal);
+      btnViewAllPacksFromCategory.addEventListener('click', () => openRecipePacksModal());
     }
     if (btnUnlockCurrentCategory) {
       btnUnlockCurrentCategory.addEventListener('click', () => {
@@ -9308,16 +9591,31 @@
     if (closeRecipePacksModalBtn) {
       closeRecipePacksModalBtn.addEventListener('click', closeRecipePacksModal);
     }
+
+    const btnBackToCreators = document.getElementById('btnBackToCreators');
+    if (btnBackToCreators) {
+      btnBackToCreators.addEventListener('click', showCreatorDirectoryView);
+    }
+
     if (recipePacksModalOverlay) {
       recipePacksModalOverlay.addEventListener('click', (e) => {
         if (e.target === recipePacksModalOverlay) closeRecipePacksModal();
       });
+
+      recipePacksModalOverlay.querySelectorAll('.btn-browse-creator-books').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const cId = btn.dataset.creatorId || 'fitness_product_finder';
+          showCreatorCatalogView(cId);
+        });
+      });
+
       recipePacksModalOverlay.querySelectorAll('.btn-action-pack').forEach(btn => {
         btn.addEventListener('click', () => {
           const pack = btn.dataset.pack;
           if (pack) handlePackPurchase(pack);
         });
       });
+
       recipePacksModalOverlay.querySelectorAll('.btn-pack-own-link').forEach(link => {
         link.addEventListener('click', (e) => {
           e.preventDefault();

@@ -299,6 +299,14 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 })
             self._send_json({'status': 'ok', 'users': users_list})
 
+        elif self.path == '/api/admin/inquiries':
+            user = self._get_user_from_token()
+            if not user or user.get('role') != 'admin':
+                self._send_json({'error': 'Unauthorized admin access'}, 403)
+                return
+            inquiries = stats_db.get('purchase_inquiries', [])
+            self._send_json({'status': 'ok', 'inquiries': inquiries})
+
         elif self.path == '/service-worker.js':
             sw_path = os.path.join(DIRECTORY, 'service-worker.js')
             if os.path.exists(sw_path):
@@ -750,7 +758,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 return
 
             # Update role if provided
-            if 'role' in data and data['role'] in ['admin', 'user']:
+            if 'role' in data and data['role'] in ['admin', 'creator', 'vip', 'user']:
                 # Protect root admin emails from demotion
                 if target_user.get('email', '').lower() in ADMIN_EMAILS and data['role'] != 'admin':
                     self._send_json({'error': 'Cannot demote root administrator email'}, 400)
@@ -803,7 +811,46 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
             save_json_file(USERS_DB_FILE, users_db)
             self._send_json({'status': 'ok', 'success': True})
 
-        # 8. Purchase Inquiry (Store available pack requests)
+        # Admin: Resolve Access Claim / Inquiry
+        elif self.path == '/api/admin/inquiry/resolve':
+            admin_user = self._get_user_from_token(data)
+            if not admin_user or admin_user.get('role') != 'admin':
+                self._send_json({'error': 'Unauthorized admin access'}, 403)
+                return
+
+            inquiry_id = data.get('inquiryId')
+            action = data.get('action', 'approve')
+            inquiries = stats_db.get('purchase_inquiries', [])
+
+            target = next((i for i in inquiries if i.get('id') == inquiry_id), None)
+            if not target:
+                self._send_json({'error': 'Inquiry not found'}, 404)
+                return
+
+            if action == 'approve':
+                target_email = target.get('email', '').strip().lower()
+                pack = target.get('pack')
+                target['status'] = 'approved'
+                target['resolved_at'] = datetime.utcnow().isoformat()
+                # Automatically grant pack to matching user
+                for u in users_db.values():
+                    if u.get('email', '').lower() == target_email:
+                        subs = u.get('subscriptions', list(DEFAULT_SUBSCRIPTIONS))
+                        if pack == 'All-Access':
+                            subs = list(ALL_SUBSCRIPTIONS)
+                        elif pack and pack not in subs:
+                            subs.append(pack)
+                        u['subscriptions'] = list(set(subs))
+                        save_json_file(USERS_DB_FILE, users_db)
+                        break
+            else:
+                target['status'] = 'dismissed'
+                target['resolved_at'] = datetime.utcnow().isoformat()
+
+            save_json_file(STATS_DB_FILE, stats_db)
+            self._send_json({'status': 'ok', 'success': True, 'inquiry': target})
+
+        # 8. Purchase Inquiry / Access Claim (Store available pack requests)
         elif self.path == '/api/purchase-inquiry':
             email = data.get('email', '').strip()
             pack = data.get('pack', '').strip()
@@ -819,6 +866,8 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 'email': email,
                 'userId': data.get('userId'),
                 'pack': pack,
+                'action': data.get('action', 'purchase_interest'),
+                'status': 'pending',
                 'timestamp': datetime.utcnow().isoformat()
             }
             stats_db['purchase_inquiries'].append(inquiry)
