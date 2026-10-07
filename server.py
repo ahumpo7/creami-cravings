@@ -33,14 +33,7 @@ USERS_DB_FILE = os.path.join(DIRECTORY, 'db_users.json')
 RATINGS_DB_FILE = os.path.join(DIRECTORY, 'db_ratings.json')
 STATS_DB_FILE = os.path.join(DIRECTORY, 'db_recipe_stats.json')
 
-DEFAULT_STAPLES = [
-    'fat_free_ultra_filtered_milk',
-    'sweetener',
-    'xanthan_gum',
-    'salt',
-    'vanilla_bean_paste',
-    'cocoa_powder'
-]
+DEFAULT_STAPLES = []
 
 ALL_SUBSCRIPTIONS = ["All-Access", "Base Flavors", "Community Legends", "Fan Favorites", "No Protein", "Keto", "Lactose Free"]
 DEFAULT_SUBSCRIPTIONS = ["Base Flavors", "Community Legends"]

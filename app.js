@@ -18,14 +18,7 @@
   const FREEZER_STORAGE_KEY = 'creami_freezer_pints_v2';
 
   // Default Staples Checked for New Users
-  const DEFAULT_STAPLES = [
-    'fat_free_ultra_filtered_milk',
-    'sweetener',
-    'xanthan_gum',
-    'salt',
-    'vanilla_bean_paste',
-    'cocoa_powder'
-  ];
+  const DEFAULT_STAPLES = [];
 
   // Presets Mapping
   const PANTRY_PRESETS = {
@@ -1312,6 +1305,7 @@
 
     updateAuthUI();
     updateFreezerBadges();
+    recipeCardCache.clear();
     renderRecipes();
 
     if (!data.isSilent) {
@@ -1360,6 +1354,7 @@
       }
     }
     updateAuthUI();
+    recipeCardCache.clear();
     renderRecipes();
     showToast('Signed out of Google account. Switched to local session pantry.');
   }
@@ -1407,6 +1402,32 @@
     return String(cat).toLowerCase().replace(/[^a-z0-9]/g, '');
   }
 
+  function isCategoryUnlocked(categoryName) {
+    if (!categoryName || categoryName === 'all' || categoryName === 'Base Flavors' || categoryName === 'Community Legends' || categoryName === 'favorites' || categoryName === 'Custom') {
+      return true;
+    }
+    if (currentUser && currentUser.role === 'admin') return true;
+    const subs = (currentUser && Array.isArray(currentUser.subscriptions)) ? currentUser.subscriptions : ['Base Flavors', 'Community Legends'];
+    if (subs.includes('All-Access')) return true;
+    const norm = normalizeCategoryName(categoryName);
+    return subs.some(s => {
+      const normS = normalizeCategoryName(s);
+      return normS.includes(norm) || norm.includes(normS);
+    });
+  }
+
+  function getAccessibleRecipeCategories(recipe) {
+    if (!recipe) return [];
+    if (recipe.category === 'Custom' || recipe.isPersonal || (recipe.id && recipe.id.startsWith('custom_'))) {
+      return ['Custom'];
+    }
+    const cats = (recipe.categories && recipe.categories.length > 0)
+      ? recipe.categories
+      : [recipe.category || 'Base Flavors'];
+
+    return cats.filter(c => isCategoryUnlocked(c));
+  }
+
   function getRecipeRequiredTier(recipe) {
     if (!recipe) return 'Base Flavors';
     if (recipe.category === 'Custom' || recipe.isPersonal || (recipe.id && recipe.id.startsWith('custom_'))) {
@@ -1436,37 +1457,7 @@
     if (recipe.category === 'Custom' || recipe.isPersonal || (recipe.id && recipe.id.startsWith('custom_'))) {
       return true;
     }
-
-    const cats = (recipe.categories && recipe.categories.length > 0)
-      ? recipe.categories
-      : [recipe.category || 'Base Flavors'];
-
-    // Universal free starter tier: Base Flavors is always accessible to everyone
-    if (cats.some(c => normalizeCategoryName(c).includes('base'))) {
-      return true;
-    }
-
-    // Admins have all-access
-    if (currentUser && currentUser.role === 'admin') {
-      return true;
-    }
-
-    const subs = (currentUser && Array.isArray(currentUser.subscriptions))
-      ? currentUser.subscriptions
-      : ['Base Flavors', 'Community Legends'];
-
-    if (subs.includes('All-Access')) {
-      return true;
-    }
-
-    // Check if any category of the recipe matches an active subscription
-    return cats.some(c => {
-      const normC = normalizeCategoryName(c);
-      return subs.some(s => {
-        const normS = normalizeCategoryName(s);
-        return normS.includes(normC) || normC.includes(normS);
-      });
-    });
+    return getAccessibleRecipeCategories(recipe).length > 0;
   }
 
   // --- Modal Scroll & Overscroll Containment Helpers ---
@@ -2292,8 +2283,8 @@
       if (activeCategory === 'favorites') {
         if (!favoritesState.has(recipe.id)) return false;
       } else if (activeCategory !== 'all') {
-        const cats = recipe.categories || (recipe.category ? [recipe.category] : []);
-        if (!cats.includes(activeCategory)) return false;
+        const accessibleCats = getAccessibleRecipeCategories(recipe);
+        if (!accessibleCats.includes(activeCategory)) return false;
       }
 
       // Ready Only filter
@@ -2387,8 +2378,8 @@
       } else if (sortBy === 'name_asc') {
         return a.recipe.name.localeCompare(b.recipe.name);
       } else if (sortBy === 'book_asc') {
-        const catA = (a.recipe.categories && a.recipe.categories[0]) || a.recipe.category || '';
-        const catB = (b.recipe.categories && b.recipe.categories[0]) || b.recipe.category || '';
+        const catA = (getAccessibleRecipeCategories(a.recipe)[0]) || a.recipe.category || '';
+        const catB = (getAccessibleRecipeCategories(b.recipe)[0]) || b.recipe.category || '';
         if (catA !== catB) {
           return catA.localeCompare(catB);
         }
@@ -2505,20 +2496,26 @@
       viewBtn.textContent = isAccessible ? 'View Recipe' : '🔒 Locked Preview';
     }
 
-    // Update Locked Badge
+    // Update Locked Badge and Book Tags
     const bookTags = card.querySelector('.card-book-tags');
-    let lockedBadge = card.querySelector('.locked-badge');
-    if (!isAccessible) {
+    if (bookTags) {
+      const isPersonal = Boolean(recipe.isPersonal || (recipe.id && recipe.id.startsWith('custom_')));
+      const accessibleCategories = getAccessibleRecipeCategories(recipe);
       const requiredTier = getRecipeRequiredTier(recipe);
-      if (!lockedBadge && bookTags) {
-        const badge = document.createElement('span');
-        badge.className = 'locked-badge';
-        badge.title = `Exclusive ${requiredTier} pack`;
-        badge.textContent = `🔒 ${requiredTier} Pack`;
-        bookTags.appendChild(badge);
+
+      let tagsHtml = '';
+      if (isPersonal) {
+        tagsHtml = '<span class="book-tag custom" title="Personal custom recipe saved to your Google account">🔒 Personal Recipe</span>';
+      } else {
+        tagsHtml = accessibleCategories.map(c => `<span class="book-tag ${getCategoryClass(c)}">${c}</span>`).join('');
       }
-    } else if (lockedBadge) {
-      lockedBadge.remove();
+      if (!isAccessible) {
+        tagsHtml += `<span class="locked-badge" title="Exclusive ${requiredTier} pack">🔒 ${requiredTier} Pack</span>`;
+      }
+      if (recipe.creaminessScore) {
+        tagsHtml += `<span class="recipe-creaminess-badge" title="Build-A-Pint Creaminess Score">🧪 ${recipe.creaminessScore}/10</span>`;
+      }
+      bookTags.innerHTML = tagsHtml;
     }
 
     // Update Favorite Button
@@ -2651,9 +2648,7 @@
     const previewIngs = ings.slice(0, 4);
     const remainingCount = ings.length - previewIngs.length;
 
-    const categories = recipe.categories && recipe.categories.length > 0 
-      ? recipe.categories 
-      : [recipe.category || 'Fan Favorites'];
+    const accessibleCategories = getAccessibleRecipeCategories(recipe);
 
     const isPersonal = Boolean(recipe.isPersonal || (recipe.id && recipe.id.startsWith('custom_')));
     const commRating = communityStats.ratings[recipe.id];
@@ -2668,7 +2663,7 @@
       <div class="recipe-card-body">
         <div class="recipe-card-top">
           <div class="card-book-tags">
-            ${isPersonal ? `<span class="book-tag custom" title="Personal custom recipe saved to your Google account">🔒 Personal Recipe</span>` : categories.map(c => `<span class="book-tag ${getCategoryClass(c)}">${c}</span>`).join('')}
+            ${isPersonal ? `<span class="book-tag custom" title="Personal custom recipe saved to your Google account">🔒 Personal Recipe</span>` : accessibleCategories.map(c => `<span class="book-tag ${getCategoryClass(c)}">${c}</span>`).join('')}
             ${!isAccessible ? `<span class="locked-badge" title="Exclusive ${requiredTier} pack">🔒 ${requiredTier} Pack</span>` : ''}
             ${recipe.creaminessScore ? `<span class="recipe-creaminess-badge" title="Build-A-Pint Creaminess Score">🧪 ${recipe.creaminessScore}/10</span>` : ''}
           </div>
@@ -2798,6 +2793,7 @@
     if (!category) return '';
     const c = category.toLowerCase();
     if (c.includes('base')) return 'base-flavors';
+    if (c.includes('legend') || c.includes('community')) return 'community-legends';
     if (c.includes('fan')) return 'fan-favorites';
     if (c.includes('keto')) return 'keto';
     if (c.includes('lactose')) return 'lactose-free';
@@ -2838,20 +2834,6 @@
       }
       updateCategoryCounts();
     }
-  }
-
-  function isCategoryUnlocked(categoryName) {
-    if (!categoryName || categoryName === 'all' || categoryName === 'Base Flavors' || categoryName === 'Community Legends' || categoryName === 'favorites' || categoryName === 'Custom') {
-      return true;
-    }
-    if (currentUser && currentUser.role === 'admin') return true;
-    const subs = (currentUser && Array.isArray(currentUser.subscriptions)) ? currentUser.subscriptions : ['Base Flavors', 'Community Legends'];
-    if (subs.includes('All-Access')) return true;
-    const norm = normalizeCategoryName(categoryName);
-    return subs.some(s => {
-      const normS = normalizeCategoryName(s);
-      return normS.includes(norm) || norm.includes(normS);
-    });
   }
 
   function updateCategoryPackPromo(category) {
@@ -2982,6 +2964,7 @@
     const counts = {
       all: accessible.length,
       'Base Flavors': 0,
+      'Community Legends': 0,
       'Fan Favorites': 0,
       'Keto': 0,
       'Lactose Free': 0,
@@ -2990,7 +2973,7 @@
     };
 
     accessible.forEach(r => {
-      const cats = r.categories || (r.category ? [r.category] : []);
+      const cats = getAccessibleRecipeCategories(r);
       cats.forEach(cat => {
         if (counts[cat] !== undefined) {
           counts[cat]++;
@@ -4784,6 +4767,7 @@
     const isFav = favoritesState.has(recipe.id);
     const isAccessible = isRecipeAccessible(recipe);
     const requiredTier = getRecipeRequiredTier(recipe);
+    const accessibleCategories = getAccessibleRecipeCategories(recipe);
 
     const baseIngs = (recipe.ingredients || []).filter(i => !i.isMixin);
     const mixinIngs = (recipe.ingredients || []).filter(i => i.isMixin);
@@ -4819,7 +4803,7 @@
 
       <div class="modal-header">
         <div class="modal-meta-row">
-          ${isPersonal ? `<span class="book-tag custom">🔒 Personal Recipe</span>` : (recipe.categories && recipe.categories.length > 0 ? recipe.categories : [recipe.category]).map(cat => {
+          ${isPersonal ? `<span class="book-tag custom">🔒 Personal Recipe</span>` : accessibleCategories.map(cat => {
             return `<span class="book-tag ${getCategoryClass(cat)}">${cat}</span>`;
           }).join('')}
           ${!isAccessible ? `<span class="locked-badge" title="Exclusive ${requiredTier} tier recipe pack">🔒 ${requiredTier} Pack</span>` : ''}
@@ -4830,10 +4814,10 @@
         </div>
         <h2 class="modal-title">${recipe.name}</h2>
         <p class="modal-subtitle">${isPersonal ? '🔒 Private personal recipe tied only to your Google account.' : 'Official Creami Cravings recipe for Ninja Creami ice cream maker.'}</p>
-        ${(recipe.sources && recipe.sources.length > 1) ? `
+        ${(recipe.sources && recipe.sources.length > 1 && accessibleCategories.length > 1) ? `
           <div class="multi-book-banner">
             <span>📚</span>
-            <span>Featured in <strong>${recipe.sources.length} Creami books:</strong> ${recipe.categories.join(' • ')}</span>
+            <span>Featured in <strong>${accessibleCategories.length} Creami books:</strong> ${accessibleCategories.join(' • ')}</span>
           </div>
         ` : ''}
       </div>
@@ -9841,6 +9825,7 @@
     mergeRecipes();
     calculateIngredientUsage();
     renderPantryList();
+    recipeCardCache.clear();
     renderRecipes();
     updateFreezerBadges();
     updateShoppingListBadge();
