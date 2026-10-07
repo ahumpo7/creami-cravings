@@ -629,6 +629,37 @@
     if (window.innerWidth <= 768) {
       setMobileView('recipes');
     }
+
+    // Deep-linked recipe navigation & SEO routing (Roadmap Item 22)
+    let initialRecipeId = null;
+    const pathMatch = window.location.pathname.match(/^\/recipe\/([a-zA-Z0-9_\-]+)/);
+    if (pathMatch) {
+      initialRecipeId = decodeURIComponent(pathMatch[1]);
+    } else {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has('recipe')) {
+        initialRecipeId = urlParams.get('recipe');
+      }
+    }
+
+    if (initialRecipeId) {
+      const targetRecipe = allRecipes.find(r => r.id === initialRecipeId || (r.name && r.name.toLowerCase() === initialRecipeId.toLowerCase()));
+      if (targetRecipe) {
+        setTimeout(() => {
+          openRecipeModal(targetRecipe, false, false);
+        }, 120);
+      }
+    }
+
+    // Handle browser back / forward buttons
+    window.addEventListener('popstate', (e) => {
+      if (recipeModalOverlay && recipeModalOverlay.classList.contains('active')) {
+        closeRecipeModal(false);
+      } else if (e.state && e.state.recipeId) {
+        const rec = allRecipes.find(r => r.id === e.state.recipeId);
+        if (rec) openRecipeModal(rec, false, false);
+      }
+    });
   }
 
   // --- Storage Management ---
@@ -3046,6 +3077,9 @@
               </span>
             ` : ''}
             ${userFeedback.rating ? `<span class="recipe-card-rating" title="Your rating: ${userFeedback.rating} stars">⭐ You: ${userFeedback.rating}★</span>` : ''}
+            <button class="card-share-btn" data-recipe-id="${recipe.id}" title="Share recipe link">
+              🔗
+            </button>
             <button class="favorite-btn ${isFav ? 'is-favorite' : ''}" title="${isFav ? 'Remove from favorites' : 'Add to favorites'}">
               ${isFav ? '💖' : '🤍'}
             </button>
@@ -3142,6 +3176,15 @@
           }
         });
       }
+    }
+
+    // Card Share button click
+    const cardShareBtn = card.querySelector('.card-share-btn');
+    if (cardShareBtn) {
+      cardShareBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        shareRecipe(recipe, cardShareBtn);
+      });
     }
 
     // View button click & card click
@@ -3753,6 +3796,45 @@
         }
       });
     }
+  }
+
+  // 1-Tap Recipe Sharing & Deep Linking (Roadmap Item 22)
+  function shareRecipe(recipe, buttonEl) {
+    if (!recipe) return;
+    const shareUrl = `${window.location.origin}/recipe/${encodeURIComponent(recipe.id)}`;
+    const macroStr = recipe.macros ? ` (${recipe.macros.protein || ''} protein, ${recipe.macros.calories || ''} cal)` : '';
+    const shareData = {
+      title: `${recipe.name} — Creami Cravings`,
+      text: `Check out ${recipe.name} on Creami Cravings!${macroStr}`,
+      url: shareUrl
+    };
+
+    if (navigator.share && /mobile|android|iphone|ipad/i.test(navigator.userAgent)) {
+      navigator.share(shareData).catch((err) => {
+        if (err.name !== 'AbortError') {
+          copyRecipeLinkFallback(shareUrl, recipe.name, buttonEl);
+        }
+      });
+    } else {
+      copyRecipeLinkFallback(shareUrl, recipe.name, buttonEl);
+    }
+  }
+
+  function copyRecipeLinkFallback(url, recipeName, buttonEl) {
+    copyTextToClipboard(url).then(() => {
+      if (buttonEl) {
+        const origHtml = buttonEl.innerHTML;
+        buttonEl.innerHTML = '<span>✓ Copied!</span>';
+        buttonEl.classList.add('copied');
+        setTimeout(() => {
+          buttonEl.innerHTML = origHtml;
+          buttonEl.classList.remove('copied');
+        }, 2500);
+      }
+      showToast(`🔗 Share link for "${recipeName}" copied to clipboard!`);
+    }).catch(() => {
+      showToast('Failed to copy link to clipboard');
+    });
   }
 
   // Craving / Mood Flavor Matching (Roadmap Item 12)
@@ -5272,7 +5354,7 @@
   }
 
   // --- Recipe Detail Modal ---
-  function openRecipeModal(recipe, isRoulettePick = false) {
+  function openRecipeModal(recipe, isRoulettePick = false, updateHistory = true) {
     currentModalRecipe = recipe;
     isCurrentModalRoulette = Boolean(isRoulettePick);
     if (timerInterval) {
@@ -5298,6 +5380,17 @@
     recipeModalOverlay.classList.add('active');
     recipeModalOverlay.setAttribute('aria-hidden', 'false');
     lockBackgroundScroll();
+
+    // Sync browser URL with recipe deep-link
+    if (updateHistory && recipe && recipe.id) {
+      const targetPath = `/recipe/${encodeURIComponent(recipe.id)}`;
+      if (window.location.pathname !== targetPath) {
+        try {
+          history.pushState({ modal: 'recipe', recipeId: recipe.id }, '', targetPath);
+        } catch (e) {}
+      }
+      document.title = `${recipe.name} — Creami Cravings`;
+    }
 
     if (recipe) {
       trackAnalyticsEvent('view_item', {
@@ -5359,6 +5452,9 @@
           <span class="book-tag">🌀 ${recipe.spinSetting || 'Lite Ice Cream'}</span>
           <span class="book-tag">⏱️ Prep: ${recipe.prepTime || '2 min'}</span>
           <span class="book-tag">❄️ Freeze: ${recipe.freezeTime || '16+ hrs'}</span>
+          <button class="btn-modal-meta-share" id="modalMetaShareBtn" title="Share recipe link">
+            <span>🔗 Share</span>
+          </button>
         </div>
         <h2 class="modal-title">${recipe.name}</h2>
         <p class="modal-subtitle">${isPersonal ? '🔒 Private personal recipe tied only to your Google account.' : 'Official Creami Cravings recipe for Ninja Creami ice cream maker.'}</p>
@@ -5762,6 +5858,9 @@
               🧊 Freeze This Pint
             </button>
           ` : ''}
+          <button class="btn-secondary btn-share-recipe" id="modalShareBtn" title="Share this recipe">
+            <span>🔗 Share Recipe</span>
+          </button>
           <button class="btn-secondary" id="modalFavBtn">
             ${isFav ? '💖 Favorited' : '🤍 Add to Favorites'}
           </button>
@@ -6149,6 +6248,21 @@
       });
     }
 
+    // Share Buttons (Roadmap Item 22)
+    const modalMetaShareBtn = recipeModalBody.querySelector('#modalMetaShareBtn');
+    if (modalMetaShareBtn) {
+      modalMetaShareBtn.addEventListener('click', () => {
+        shareRecipe(recipe, modalMetaShareBtn);
+      });
+    }
+
+    const modalShareBtn = recipeModalBody.querySelector('#modalShareBtn');
+    if (modalShareBtn) {
+      modalShareBtn.addEventListener('click', () => {
+        shareRecipe(recipe, modalShareBtn);
+      });
+    }
+
     // Favorite Button
     const modalFavBtn = recipeModalBody.querySelector('#modalFavBtn');
     if (modalFavBtn) {
@@ -6357,7 +6471,7 @@
     `;
   }
 
-  function closeRecipeModal() {
+  function closeRecipeModal(updateHistory = true) {
     if (timerInterval) {
       clearInterval(timerInterval);
       timerInterval = null;
@@ -6372,6 +6486,13 @@
     if (modalContent) modalContent.scrollTop = 0;
     if (recipeModalBody) recipeModalBody.scrollTop = 0;
     currentModalRecipe = null;
+
+    if (updateHistory && window.location.pathname.startsWith('/recipe/')) {
+      try {
+        history.pushState({ modal: null }, '', '/');
+      } catch (e) {}
+      document.title = 'Creami Cravings';
+    }
   }
 
   // --- Shopping List Modal ---

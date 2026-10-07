@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /api/admin/
+Disallow: /api/user/
+
+Sitemap: https://creamicravings.com/sitemap.xml

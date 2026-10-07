@@ -7,6 +7,7 @@ import uuid
 import urllib.request
 import urllib.parse
 import base64
+import re
 from datetime import datetime
 
 DIRECTORY = os.path.dirname(os.path.abspath(__file__))
@@ -71,6 +72,26 @@ def hash_password(password):
 users_db = load_json_file(USERS_DB_FILE, {})
 ratings_db = load_json_file(RATINGS_DB_FILE, {})
 stats_db = load_json_file(STATS_DB_FILE, {})
+
+RECIPES_MASTER = []
+RECIPES_BY_ID = {}
+
+def load_recipes_master():
+    global RECIPES_MASTER, RECIPES_BY_ID
+    recipes_js_path = os.path.join(DIRECTORY, 'recipes-data.js')
+    if os.path.exists(recipes_js_path):
+        try:
+            with open(recipes_js_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            m = re.search(r'const RECIPES_MASTER\s*=\s*(\[[\s\S]*?\]);', content)
+            if m:
+                RECIPES_MASTER = json.loads(m.group(1))
+                RECIPES_BY_ID = {r['id']: r for r in RECIPES_MASTER if 'id' in r}
+                print(f"Loaded {len(RECIPES_MASTER)} master recipes for SEO & deep linking.")
+        except Exception as e:
+            print(f"Error loading recipes for SEO: {e}")
+
+load_recipes_master()
 
 # Ensure admin account exists
 admin_hash = hash_password('admin123')
@@ -406,6 +427,147 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
             else:
                 self.send_error(404, "File not found")
                 return
+
+        elif self.path.startswith('/recipe/'):
+            # Handle deep-linked recipe URL with dynamic SEO & Open Graph meta tags
+            req_slug = urllib.parse.unquote(self.path[len('/recipe/'):].split('?')[0].strip('/'))
+            recipe = RECIPES_BY_ID.get(req_slug)
+            
+            index_path = os.path.join(DIRECTORY, 'index.html')
+            if not os.path.exists(index_path):
+                self.send_error(404, "Page not found")
+                return
+
+            with open(index_path, 'r', encoding='utf-8') as f:
+                html = f.read()
+
+            if recipe:
+                rec_name = recipe.get('name', 'Ninja Creami Recipe')
+                rec_cat = recipe.get('category', 'Ninja Creami')
+                macros = recipe.get('macros', {})
+                cal = macros.get('calories', '250')
+                pro = macros.get('protein', '30g')
+                carbs = macros.get('carbs', '10g')
+                fat = macros.get('fat', '5g')
+                spin = recipe.get('spinSetting', 'Lite Ice Cream')
+
+                meta_title = f"{rec_name} — High-Protein Ninja Creami Recipe | Creami Cravings"
+                meta_desc = f"Make {rec_name} with your Ninja Creami! {cal} kcal, {pro} protein. Spin setting: {spin}. Full macro breakdown, ingredients, and smart swaps on Creami Cravings."
+                page_url = f"https://creamicravings.com/recipe/{urllib.parse.quote(req_slug)}"
+                image_url = "https://creamicravings.com/icon-512.png"
+
+                # Schema.org JSON-LD structured data for Google Rich Snippets
+                json_ld = {
+                    "@context": "https://schema.org",
+                    "@type": "Recipe",
+                    "name": rec_name,
+                    "description": meta_desc,
+                    "recipeCategory": rec_cat,
+                    "recipeYield": recipe.get('makes', '1 pint'),
+                    "prepTime": "PT5M",
+                    "totalTime": "PT16H",
+                    "nutrition": {
+                        "@type": "NutritionInformation",
+                        "calories": f"{cal} calories",
+                        "proteinContent": pro,
+                        "carbohydrateContent": carbs,
+                        "fatContent": fat
+                    },
+                    "author": {
+                        "@type": "Organization",
+                        "name": "Creami Cravings",
+                        "url": "https://creamicravings.com"
+                    }
+                }
+                json_ld_str = json.dumps(json_ld, ensure_ascii=False, indent=2)
+
+                seo_head_block = f'''  <title>{meta_title}</title>
+  <meta name="description" content="{meta_desc}">
+  <link rel="canonical" href="{page_url}">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="{page_url}">
+  <meta property="og:title" content="{rec_name} — Ninja Creami Recipe">
+  <meta property="og:description" content="{cal} kcal • {pro} protein • Spin on {spin}. Discover ingredients and macro-balanced scoops on Creami Cravings.">
+  <meta property="og:image" content="{image_url}">
+  <meta property="og:site_name" content="Creami Cravings">
+  
+  <!-- Twitter Cards -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:url" content="{page_url}">
+  <meta name="twitter:title" content="{rec_name} — Ninja Creami Recipe">
+  <meta name="twitter:description" content="{cal} kcal • {pro} protein • {spin}.">
+  <meta name="twitter:image" content="{image_url}">
+
+  <!-- Schema.org Recipe Structured Data for Google Rich Snippets -->
+  <script type="application/ld+json">
+{json_ld_str}
+  </script>'''
+
+                # Replace default title and description in index.html, inject SEO tags before </head>
+                html = re.sub(r'<title>.*?</title>', f'<title>{meta_title}</title>', html, count=1)
+                html = re.sub(r'<meta name="description" content=".*?">', f'<meta name="description" content="{meta_desc}">', html, count=1)
+                html = html.replace('</head>', f'{seo_head_block}\n</head>', 1)
+
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/html; charset=utf-8')
+            self.end_headers()
+            self.wfile.write(html.encode('utf-8'))
+            return
+
+        elif self.path == '/sitemap.xml':
+            xml_lines = [
+                '<?xml version="1.0" encoding="UTF-8"?>',
+                '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+                '  <url>',
+                '    <loc>https://creamicravings.com/</loc>',
+                '    <changefreq>daily</changefreq>',
+                '    <priority>1.0</priority>',
+                '  </url>',
+                '  <url>',
+                '    <loc>https://creamicravings.com/privacy.html</loc>',
+                '    <changefreq>monthly</changefreq>',
+                '    <priority>0.3</priority>',
+                '  </url>',
+                '  <url>',
+                '    <loc>https://creamicravings.com/terms.html</loc>',
+                '    <changefreq>monthly</changefreq>',
+                '    <priority>0.3</priority>',
+                '  </url>'
+            ]
+            for r in RECIPES_MASTER:
+                rid = r.get('id')
+                if rid:
+                    r_url = f"https://creamicravings.com/recipe/{urllib.parse.quote(rid)}"
+                    xml_lines.append('  <url>')
+                    xml_lines.append(f'    <loc>{r_url}</loc>')
+                    xml_lines.append('    <changefreq>weekly</changefreq>')
+                    xml_lines.append('    <priority>0.8</priority>')
+                    xml_lines.append('  </url>')
+            xml_lines.append('</urlset>')
+            sitemap_data = '\n'.join(xml_lines).encode('utf-8')
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/xml; charset=utf-8')
+            self.send_header('Cache-Control', 'public, max-age=86400')
+            self.end_headers()
+            self.wfile.write(sitemap_data)
+            return
+
+        elif self.path == '/robots.txt':
+            robots_content = (
+                "User-agent: *\n"
+                "Allow: /\n"
+                "Disallow: /api/admin/\n"
+                "Disallow: /api/user/\n\n"
+                "Sitemap: https://creamicravings.com/sitemap.xml\n"
+            )
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/plain; charset=utf-8')
+            self.send_header('Cache-Control', 'public, max-age=86400')
+            self.end_headers()
+            self.wfile.write(robots_content.encode('utf-8'))
+            return
 
         else:
             super().do_GET()
