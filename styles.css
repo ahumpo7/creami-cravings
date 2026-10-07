@@ -4086,9 +4086,8 @@ body.modal-open .cookie-consent-banner {
     min-height: 32px !important;
     white-space: nowrap !important;
     border-radius: 999px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
+    align-items: center;
+    justify-content: center;
     gap: 2px !important;
     flex-shrink: 0;
   }
@@ -6876,6 +6875,13 @@ body.modal-open .cookie-consent-banner {
    ========================================================================== */
 
 /* Admin Header Button */
+.btn-admin-header.hidden,
+.btn-admin-header[style*="display: none"],
+#openAdminPortalBtn.hidden,
+#openAdminPortalBtn[style*="display: none"] {
+  display: none !important;
+}
+
 .btn-admin-header {
   background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(217, 119, 6, 0.25) 100%) !important;
   border-color: rgba(245, 158, 11, 0.45) !important;

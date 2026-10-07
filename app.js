@@ -1462,7 +1462,14 @@
         customTab.style.display = (customRecipesState.length > 0) ? 'inline-flex' : 'none';
       }
       if (openAdminPortalBtn) {
-        openAdminPortalBtn.style.display = (currentUser && currentUser.role === 'admin') ? 'inline-flex' : 'none';
+        const isAdmin = !!(currentUser && currentUser.role === 'admin');
+        if (isAdmin) {
+          openAdminPortalBtn.style.setProperty('display', 'inline-flex', 'important');
+          openAdminPortalBtn.classList.remove('hidden');
+        } else {
+          openAdminPortalBtn.style.setProperty('display', 'none', 'important');
+          openAdminPortalBtn.classList.add('hidden');
+        }
       }
     } else {
       if (signInBtn) signInBtn.style.display = 'inline-flex';
@@ -1471,7 +1478,8 @@
       if (customActions) customActions.style.display = 'none';
       if (customTab) customTab.style.display = 'none';
       if (openAdminPortalBtn) {
-        openAdminPortalBtn.style.display = 'none';
+        openAdminPortalBtn.style.setProperty('display', 'none', 'important');
+        openAdminPortalBtn.classList.add('hidden');
       }
     }
   }
