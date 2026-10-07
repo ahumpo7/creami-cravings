@@ -23,7 +23,54 @@ const CREATORS_MASTER = [
     "handle": "@fitnessproductfinder",
     "url": "https://fitnessproductfinder.com",
     "storeUrl": "https://fitnessproductfinder.com/collections/creami-cravings-recipe-books",
-    "bio": "Creator of the original best-selling Creami Cravings high-protein and low-calorie recipe books."
+    "bio": "Creator of the original best-selling Creami Cravings high-protein and low-calorie recipe books.",
+    "perks": [
+      {
+        "id": "lakanto",
+        "brand": "Lakanto Monk Fruit Sweetener",
+        "category": "Zero-Calorie Sweetener",
+        "code": "ELI15",
+        "discount": "15% OFF",
+        "description": "Eli's signature 1:1 sugar replacement used across his recipes that doesn't recrystallize when frozen.",
+        "url": "https://www.lakanto.com/?utm_source=Product%20Fitness%20Finder&utm_medium=recipebook&utm_campaign=influencer&utm_content=recipe%20book"
+      },
+      {
+        "id": "prime_bites",
+        "brand": "Prime Bites Protein Brownies",
+        "category": "High-Protein Mix-Ins",
+        "code": "FPF",
+        "discount": "15% OFF",
+        "description": "Chewy, high-protein brownies and mini muffins (19g protein) that maintain a soft texture when frozen.",
+        "url": "https://www.primebites.com/FPF"
+      },
+      {
+        "id": "tryfuul",
+        "brand": "FUUL Protein Cookie Dough",
+        "category": "Mix-In Bites",
+        "code": "FPF",
+        "discount": "15% OFF",
+        "description": "15g protein shelf-stable cookie dough bites firm enough to hold up through the Creami mix-in cycle.",
+        "url": "https://www.tryfuul.com/FPF"
+      },
+      {
+        "id": "hormbles",
+        "brand": "Hormbles Chormbles Chocolate",
+        "category": "Protein Chocolate Bars",
+        "code": "FPF",
+        "discount": "Special Discount",
+        "description": "High-protein artisan chocolate chunks for authentic mix-in texture and rich cocoa taste.",
+        "url": "https://hormbles.com/FPF"
+      },
+      {
+        "id": "amazon_storefront",
+        "brand": "Eli's Amazon Storefront",
+        "category": "Creami Essentials & Scales",
+        "code": null,
+        "discount": "Curated Kitchen",
+        "description": "Eli's curated list of 0.1g precision scales, extra pint containers, Fairlife shakes, and Creami tools.",
+        "url": "https://urlgeni.us/amazon/owizeD"
+      }
+    ]
   }
 ];
 
@@ -1224,10 +1271,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -1349,10 +1396,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20-25",
         "unit": "g",
-        "raw": "20-25G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20-25G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -1470,10 +1517,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40",
         "unit": "g",
-        "raw": "40G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "cinnamon",
@@ -1520,10 +1567,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20-25",
         "unit": "g",
-        "raw": "20-25G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20-25G SWEETENER",
         "section": "Mix-in",
         "isMixin": true,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "sugar_free_syrup",
@@ -1622,10 +1669,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -1745,10 +1792,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40",
         "unit": "g",
-        "raw": "40G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "banana",
@@ -1855,10 +1902,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40",
         "unit": "g",
-        "raw": "40G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "banana",
@@ -1988,10 +2035,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "30",
         "unit": "g",
-        "raw": "30G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "30G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "banana",
@@ -2112,10 +2159,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "frozen_berries_of_choice",
@@ -2263,10 +2310,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "cake_batter_extract",
@@ -2374,10 +2421,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "loranns_cookie_butter_emulsion",
@@ -2495,10 +2542,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20-25",
         "unit": "g",
-        "raw": "20-25G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20-25G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -2612,10 +2659,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40",
         "unit": "g",
-        "raw": "40G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "banana",
@@ -2662,10 +2709,10 @@ const RECIPES_MASTER = [
         "name": "Prime Bites Chocolate Chip Mini Muffins",
         "quantity": "2",
         "unit": "",
-        "raw": "2 PRIME BITES (CODE FPF SAVES YOU 15%) CHOCOLATE CHIP MINI MUFFINS FRIED IN 2G OF BUTTER",
+        "raw": "2 PRIME BITES CHOCOLATE CHIP MINI MUFFINS FRIED IN 2G OF BUTTER",
         "section": "Mix-in",
         "isMixin": true,
-        "notes": "CODE FPF SAVES YOU 15%; FRIED IN 2G OF BUTTER"
+        "notes": "FRIED IN 2G OF BUTTER"
       }
     ],
     "instructions": [
@@ -2734,10 +2781,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20",
         "unit": "g",
-        "raw": "20G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "black_cocoa_powder",
@@ -2834,10 +2881,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20-25",
         "unit": "g",
-        "raw": "20-25G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20-25G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "black_cocoa_powder",
@@ -2949,10 +2996,10 @@ const RECIPES_MASTER = [
         "name": "Brown Sugar Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G BROWN SUGAR SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G BROWN SUGAR SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -3085,10 +3132,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20-25",
         "unit": "g",
-        "raw": "20-25G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20-25G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "salt",
@@ -3176,10 +3223,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "cake_batter_extract",
@@ -3308,10 +3355,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -3418,10 +3465,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40",
         "unit": "g",
-        "raw": "40G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "cake_batter_extract",
@@ -3554,10 +3601,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20-25",
         "unit": "g",
-        "raw": "20-25G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20-25G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "salt",
@@ -3637,10 +3684,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40",
         "unit": "g",
-        "raw": "40G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -3741,10 +3788,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20-25",
         "unit": "g",
-        "raw": "20-25G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20-25G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "salt",
@@ -3913,10 +3960,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "35-40",
         "unit": "g",
-        "raw": "35-40G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "35-40G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "salt",
@@ -4015,10 +4062,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -4122,10 +4169,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20",
         "unit": "g",
-        "raw": "20G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -4235,10 +4282,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -4357,10 +4404,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20",
         "unit": "g",
-        "raw": "20G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "cocoa_powder",
@@ -4451,10 +4498,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20",
         "unit": "g",
-        "raw": "20G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "cocoa_powder",
@@ -4557,10 +4604,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20-25",
         "unit": "g",
-        "raw": "20-25G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20-25G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "cheesecake_jello_pudding_mix",
@@ -4668,10 +4715,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -4774,10 +4821,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -4884,10 +4931,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20-25",
         "unit": "g",
-        "raw": "20-25G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20-25G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "salt",
@@ -4996,10 +5043,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20",
         "unit": "g",
-        "raw": "20G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "cocoa_powder",
@@ -5102,10 +5149,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20-25",
         "unit": "g",
-        "raw": "20-25G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20-25G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "cocoa_powder",
@@ -5223,10 +5270,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -5329,10 +5376,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20-25",
         "unit": "g",
-        "raw": "20-25G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20-25G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "cocoa_powder",
@@ -5455,10 +5502,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20-25",
         "unit": "g",
-        "raw": "20-25G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20-25G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "whipped_cream_cheese",
@@ -5606,10 +5653,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -5739,10 +5786,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40",
         "unit": "g",
-        "raw": "40G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "banana",
@@ -5871,10 +5918,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -6002,10 +6049,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%) (OR FAVORITE SUGAR SUBSTITUTE)",
+        "raw": "40-45G SWEETENER (OR FAVORITE SUGAR SUBSTITUTE)",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%; OR FAVORITE SUGAR SUBSTITUTE"
+        "notes": "OR FAVORITE SUGAR SUBSTITUTE"
       },
       {
         "id": "vanilla_bean_paste",
@@ -6123,10 +6170,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -6246,10 +6293,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20-25",
         "unit": "g",
-        "raw": "20-25G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20-25G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "espresso",
@@ -6346,10 +6393,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "espresso",
@@ -6452,10 +6499,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "espresso",
@@ -6562,10 +6609,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -6683,10 +6730,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -6788,10 +6835,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20-25",
         "unit": "g",
-        "raw": "20-25G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20-25G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -6892,10 +6939,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -6942,10 +6989,10 @@ const RECIPES_MASTER = [
         "name": "Fuul Chocolate Chip Cookie Dough Bites",
         "quantity": "½",
         "unit": "",
-        "raw": "½ OF A PACKAGE OF THE FUUL CHOCOLATE CHIP COOKIE DOUGH BITES (CODE FPF SAVES YOU 15%)",
+        "raw": "½ OF A PACKAGE OF THE FUUL CHOCOLATE CHIP COOKIE DOUGH BITES",
         "section": "Mix-in",
         "isMixin": true,
-        "notes": "CODE FPF SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "oreo_thins",
@@ -7018,10 +7065,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20",
         "unit": "g",
-        "raw": "20G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "black_cocoa_powder",
@@ -7134,10 +7181,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "lorann_cotton_candy_flavoring",
@@ -7240,10 +7287,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20",
         "unit": "g",
-        "raw": "20G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "cocoa_powder",
@@ -7361,10 +7408,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20-25",
         "unit": "g",
-        "raw": "20-25G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20-25G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "cocoa_powder",
@@ -7483,10 +7530,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40",
         "unit": "g",
-        "raw": "40G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_pudding_mix",
@@ -7637,10 +7684,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20-30",
         "unit": "g",
-        "raw": "20-30G (2 TBSP) SWEETENER (CODE ELI15 SAVES YOU 15%), OPTIONAL BUT RECOMMENDED",
+        "raw": "20-30G (2 TBSP) SWEETENER, OPTIONAL BUT RECOMMENDED",
         "section": "Base",
         "isMixin": false,
-        "notes": "Alt measurement: 2 TBSP; CODE ELI15 SAVES YOU 15%; Optional but recommended"
+        "notes": "Alt measurement: 2 TBSP; Optional but recommended"
       },
       {
         "id": "vanilla_bean_paste",
@@ -7714,10 +7761,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20-25",
         "unit": "g",
-        "raw": "20-25G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20-25G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "black_cocoa_powder",
@@ -7836,10 +7883,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20-25",
         "unit": "g",
-        "raw": "20-25G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20-25G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "salt",
@@ -7920,10 +7967,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "30-35",
         "unit": "g",
-        "raw": "30-35G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "30-35G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "pistachio_butter",
@@ -8081,10 +8128,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "35-40",
         "unit": "g",
-        "raw": "35-40G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "35-40G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "nutmeg",
@@ -8195,10 +8242,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20-25",
         "unit": "g",
-        "raw": "20-25G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20-25G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "cocoa_powder",
@@ -8335,10 +8382,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40",
         "unit": "g",
-        "raw": "40G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "cake_batter_extract",
@@ -8481,10 +8528,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "10",
         "unit": "g",
-        "raw": "10G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "10G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       }
     ],
     "instructions": [
@@ -8544,10 +8591,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "35",
         "unit": "g",
-        "raw": "35G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "35G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -8677,10 +8724,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "25",
         "unit": "g",
-        "raw": "25G (2 TBSP) SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "25G (2 TBSP) SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "Alt measurement: 2 TBSP; CODE ELI15 SAVES YOU 15%"
+        "notes": "Alt measurement: 2 TBSP"
       },
       {
         "id": "salt",
@@ -8766,10 +8813,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -8872,10 +8919,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20-25",
         "unit": "g",
-        "raw": "20-25G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20-25G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "toasted_mini_marshmallows",
@@ -9008,10 +9055,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20-25",
         "unit": "g",
-        "raw": "20-25G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20-25G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "cocoa_powder",
@@ -9144,10 +9191,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -9332,10 +9379,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20-25",
         "unit": "g",
-        "raw": "20-25G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20-25G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "cocoa_powder",
@@ -9446,10 +9493,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -9578,10 +9625,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -9682,10 +9729,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20-25",
         "unit": "g",
-        "raw": "20-25G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20-25G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "cocoa_powder",
@@ -9788,10 +9835,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20-25",
         "unit": "g",
-        "raw": "20-25G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20-25G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "cocoa_powder",
@@ -9920,10 +9967,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20-25",
         "unit": "g",
-        "raw": "20-25G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20-25G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "salt",
@@ -10061,10 +10108,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "45",
         "unit": "g",
-        "raw": "45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -10178,10 +10225,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20-25",
         "unit": "g",
-        "raw": "20-25G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20-25G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -10313,10 +10360,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "15-20",
         "unit": "g",
-        "raw": "15-20G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "15-20G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -10392,10 +10439,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "25-30",
         "unit": "g",
-        "raw": "25-30G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "25-30G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "sugar_free_syrup",
@@ -10492,10 +10539,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40",
         "unit": "g",
-        "raw": "40G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "mini_marshmallows",
@@ -10649,10 +10696,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -10760,10 +10807,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "salt",
@@ -10871,10 +10918,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20-25",
         "unit": "g",
-        "raw": "20-25G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20-25G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "cocoa_powder",
@@ -10991,10 +11038,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -11114,10 +11161,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40",
         "unit": "g",
-        "raw": "40G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "peppermint_extract",
@@ -11230,10 +11277,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20-25",
         "unit": "g",
-        "raw": "20-25G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20-25G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "black_cocoa_powder",
@@ -11355,10 +11402,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -11459,10 +11506,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -11569,10 +11616,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20",
         "unit": "g",
-        "raw": "20G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "cocoa_powder",
@@ -11673,10 +11720,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -11794,10 +11841,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "peanut_butter",
@@ -11925,10 +11972,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20-25",
         "unit": "g",
-        "raw": "20-25G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20-25G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "cocoa_powder",
@@ -12070,10 +12117,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20-25",
         "unit": "g",
-        "raw": "20-25G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20-25G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "cocoa_powder",
@@ -12183,10 +12230,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40",
         "unit": "g",
-        "raw": "40G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -12309,10 +12356,10 @@ const RECIPES_MASTER = [
         "name": "Brown Sugar Sweetener",
         "quantity": "25",
         "unit": "g",
-        "raw": "25G BROWN SUGAR SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "25G BROWN SUGAR SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "butter_extract",
@@ -12430,10 +12477,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40",
         "unit": "g",
-        "raw": "40G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "banana",
@@ -12583,10 +12630,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20",
         "unit": "g",
-        "raw": "20G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_extract",
@@ -12682,10 +12729,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -12788,10 +12835,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20-25",
         "unit": "g",
-        "raw": "20-25G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20-25G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "cocoa_powder",
@@ -12934,10 +12981,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "25",
         "unit": "g",
-        "raw": "25G (2 TBSP) SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "25G (2 TBSP) SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "Alt measurement: 2 TBSP; CODE ELI15 SAVES YOU 15%"
+        "notes": "Alt measurement: 2 TBSP"
       },
       {
         "id": "salt",
@@ -13026,10 +13073,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "peanut_butter",
@@ -13147,10 +13194,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "peanut_butter",
@@ -13272,10 +13319,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "peanut_butter",
@@ -13393,10 +13440,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20-25",
         "unit": "g",
-        "raw": "20-25G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20-25G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "cocoa_powder",
@@ -13514,10 +13561,10 @@ const RECIPES_MASTER = [
         "name": "Brown Sugar Sweetener",
         "quantity": "40",
         "unit": "g",
-        "raw": "40G BROWN SUGAR SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40G BROWN SUGAR SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -13635,10 +13682,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40",
         "unit": "g",
-        "raw": "40G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -13749,10 +13796,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40",
         "unit": "g",
-        "raw": "40G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -13874,10 +13921,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40",
         "unit": "g",
-        "raw": "40G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -13934,10 +13981,10 @@ const RECIPES_MASTER = [
         "name": "Prime Bites Chocolate Fudge Mini Muffins",
         "quantity": "1",
         "unit": "package",
-        "raw": "1 PACKAGE PRIME BITES (CODE FPF SAVES YOU 15%) CHOCOLATE FUDGE MINI MUFFINS (195 CAL 15G PRO; CAN SUB WITH ANY CHOCOLATE MUFFIN)",
+        "raw": "1 PACKAGE PRIME BITES CHOCOLATE FUDGE MINI MUFFINS (195 CAL 15G PRO; CAN SUB WITH ANY CHOCOLATE MUFFIN)",
         "section": "Mix-in",
         "isMixin": true,
-        "notes": "CODE FPF SAVES YOU 15%; 195 CAL 15G PRO; CAN SUB WITH ANY CHOCOLATE MUFFIN"
+        "notes": "195 CAL 15G PRO; CAN SUB WITH ANY CHOCOLATE MUFFIN"
       }
     ],
     "instructions": [
@@ -14035,10 +14082,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20",
         "unit": "g",
-        "raw": "20G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "cocoa_powder",
@@ -14129,10 +14176,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "25",
         "unit": "g",
-        "raw": "25G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "25G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "cocoa_powder",
@@ -14271,10 +14318,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "30-35",
         "unit": "g",
-        "raw": "30-35G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "30-35G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -14376,10 +14423,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "30-35",
         "unit": "g",
-        "raw": "30-35G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "30-35G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "pistachio_butter",
@@ -14503,10 +14550,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -14543,10 +14590,10 @@ const RECIPES_MASTER = [
         "name": "Prime Bites Pumpkin Spice Brownie",
         "quantity": "1",
         "unit": "",
-        "raw": "1 PRIME BITES (CODE FPF SAVES YOU 15%) PUMPKIN SPICE BROWNIE (CAN SUB WITH ANY KIND OF PUMPKIN BREAD OR COOKIE)",
+        "raw": "1 PRIME BITES PUMPKIN SPICE BROWNIE (CAN SUB WITH ANY KIND OF PUMPKIN BREAD OR COOKIE)",
         "section": "Mix-in",
         "isMixin": true,
-        "notes": "CODE FPF SAVES YOU 15%; CAN SUB WITH ANY KIND OF PUMPKIN BREAD OR COOKIE"
+        "notes": "CAN SUB WITH ANY KIND OF PUMPKIN BREAD OR COOKIE"
       }
     ],
     "instructions": [
@@ -14614,10 +14661,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "canned_pumpkin",
@@ -14761,10 +14808,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "canned_pumpkin",
@@ -14894,10 +14941,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "pure_pumpkin",
@@ -15014,10 +15061,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "canned_pumpkin",
@@ -15164,10 +15211,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -15316,10 +15363,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20-25",
         "unit": "g",
-        "raw": "20-25G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20-25G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "salt",
@@ -15427,10 +15474,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20-25",
         "unit": "g",
-        "raw": "20-25G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20-25G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "salt",
@@ -15537,10 +15584,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -15649,10 +15696,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -15775,10 +15822,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -15879,10 +15926,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "35-40",
         "unit": "g",
-        "raw": "35-40G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "35-40G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "mini_marshmallows",
@@ -16009,10 +16056,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20",
         "unit": "g",
-        "raw": "20G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "cocoa_powder",
@@ -16141,10 +16188,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20-25",
         "unit": "g",
-        "raw": "20-25G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20-25G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "salt",
@@ -16225,10 +16272,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20-25",
         "unit": "g",
-        "raw": "20-25G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20-25G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -16351,10 +16398,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20-25",
         "unit": "g",
-        "raw": "20-25G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20-25G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -16482,10 +16529,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "peanut_butter",
@@ -16597,10 +16644,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20-25",
         "unit": "g",
-        "raw": "20-25G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20-25G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "salt",
@@ -16706,10 +16753,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -16843,10 +16890,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20",
         "unit": "g",
-        "raw": "20G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -16974,10 +17021,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40",
         "unit": "g",
-        "raw": "40G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "mini_marshmallows",
@@ -17115,10 +17162,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "cake_batter_extract",
@@ -17248,10 +17295,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20-25",
         "unit": "g",
-        "raw": "20-25G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20-25G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "salt",
@@ -17411,10 +17458,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20-25",
         "unit": "g",
-        "raw": "20-25G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20-25G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "salt",
@@ -17555,10 +17602,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-50",
         "unit": "g",
-        "raw": "40-50G (¼ CUP) SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-50G (¼ CUP) SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "Alt measurement: ¼ CUP; CODE ELI15 SAVES YOU 15%"
+        "notes": "Alt measurement: ¼ CUP"
       }
     ],
     "instructions": [
@@ -17632,10 +17679,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40",
         "unit": "g",
-        "raw": "40G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -17736,10 +17783,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20",
         "unit": "g",
-        "raw": "20G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "cocoa_powder",
@@ -17868,10 +17915,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40",
         "unit": "g",
-        "raw": "40G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "mascarpone",
@@ -18010,10 +18057,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -18138,10 +18185,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -18242,10 +18289,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-50",
         "unit": "g",
-        "raw": "40-50G (¼ CUP) SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-50G (¼ CUP) SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "Alt measurement: ¼ CUP; CODE ELI15 SAVES YOU 15%"
+        "notes": "Alt measurement: ¼ CUP"
       }
     ],
     "instructions": [
@@ -18315,10 +18362,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -18415,10 +18462,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -18548,10 +18595,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "20-25",
         "unit": "g",
-        "raw": "20-25G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "20-25G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "vanilla_bean_paste",
@@ -18642,10 +18689,10 @@ const RECIPES_MASTER = [
         "name": "Sweetener",
         "quantity": "40-45",
         "unit": "g",
-        "raw": "40-45G SWEETENER (CODE ELI15 SAVES YOU 15%)",
+        "raw": "40-45G SWEETENER",
         "section": "Base",
         "isMixin": false,
-        "notes": "CODE ELI15 SAVES YOU 15%"
+        "notes": ""
       },
       {
         "id": "instant_coffee",

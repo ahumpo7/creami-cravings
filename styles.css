@@ -8781,6 +8781,245 @@ body.modal-open .cookie-consent-banner {
 }
 
 /* ==========================================================================
+   Creator Perks & Ingredient Discounts Styling
+   ========================================================================== */
+.creator-perks-section {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px dashed rgba(245, 158, 11, 0.35);
+}
+
+.creator-perks-header {
+  margin-bottom: 14px;
+}
+
+.creator-perks-title-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.creator-perks-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  padding: 8px;
+  border-radius: 10px;
+}
+
+.creator-perks-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.creator-perks-subtitle {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  margin: 3px 0 0;
+  line-height: 1.35;
+}
+
+.creator-perks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.creator-perk-card {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.04) 0%, rgba(30, 41, 59, 0.55) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.creator-perk-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  border-color: rgba(245, 158, 11, 0.5);
+}
+
+.perk-card-top {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.perk-card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.perk-category-pill {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  letter-spacing: 0.5px;
+}
+
+.perk-discount-badge {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 999px;
+  box-shadow: 0 2px 6px rgba(245, 158, 11, 0.3);
+}
+
+.perk-brand-name {
+  font-size: 0.96rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 2px 0 0;
+}
+
+.perk-desc {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.35;
+  margin: 0;
+}
+
+.perk-card-bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.perk-code-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px dashed rgba(245, 158, 11, 0.45);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+}
+
+.perk-code-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--text-dim);
+}
+
+.perk-code-val {
+  font-family: monospace;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #fbbf24;
+  letter-spacing: 1px;
+}
+
+.btn-copy-perk-code {
+  background: rgba(245, 158, 11, 0.2);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #fbbf24;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-copy-perk-code:hover {
+  background: rgba(245, 158, 11, 0.35);
+}
+
+.btn-copy-perk-code.copied {
+  background: rgba(16, 185, 129, 0.25);
+  border-color: #10b981;
+  color: #34d399;
+}
+
+.btn-perk-shop {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 12px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-item);
+  border-radius: var(--radius-sm);
+  color: var(--text-main) !important;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none !important;
+  transition: all 0.15s ease;
+}
+
+.btn-perk-shop:hover {
+  background: var(--bg-hover);
+  border-color: rgba(245, 158, 11, 0.5);
+  color: #fbbf24 !important;
+}
+
+/* Recipe Detail Modal: Author Perks Callout */
+.recipe-creator-perks-callout {
+  margin: 16px 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(30, 41, 59, 0.5) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: var(--radius-md);
+  font-size: 0.82rem;
+  flex-wrap: wrap;
+}
+
+.perks-callout-icon {
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+.perks-callout-body {
+  flex: 1;
+  min-width: 220px;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+.perks-callout-body code {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  padding: 1px 5px;
+  border-radius: 4px;
+  color: #fbbf24;
+  font-weight: 700;
+  font-size: 0.85em;
+}
+
+.btn-view-creator-perks {
+  background: transparent;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #fbbf24;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.btn-view-creator-perks:hover {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: #f59e0b;
+}
+
+/* ==========================================================================
    ADMIN PORTAL UPGRADED ROLES & CLAIMS STYLES
    ========================================================================== */
 

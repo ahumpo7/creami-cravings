@@ -3075,9 +3075,77 @@
         storeBtn.href = creator.storeUrl || creator.url;
         storeBtn.innerHTML = `<span>Visit ${creator.name}'s Storefront ↗</span>`;
       }
+      renderCreatorPerks(creator);
+    } else {
+      renderCreatorPerks(null);
     }
 
     updatePacksModalStatuses();
+  }
+
+  function renderCreatorPerks(creator) {
+    const perksSection = document.getElementById('creatorPerksSection');
+    const perksGrid = document.getElementById('creatorPerksGrid');
+    const perksTitle = document.getElementById('creatorPerksTitle');
+    if (!perksSection || !perksGrid) return;
+
+    if (!creator || !creator.perks || creator.perks.length === 0) {
+      perksSection.style.display = 'none';
+      perksGrid.innerHTML = '';
+      return;
+    }
+
+    if (perksTitle) {
+      perksTitle.textContent = `${creator.name}'s Creator Perks & Ingredient Discounts`;
+    }
+    perksSection.style.display = 'block';
+
+    perksGrid.innerHTML = creator.perks.map(perk => {
+      const hasCode = Boolean(perk.code);
+      return `
+        <div class="creator-perk-card" data-perk-id="${perk.id}">
+          <div class="perk-card-top">
+            <div class="perk-card-meta">
+              <span class="perk-category-pill">${perk.category}</span>
+              <span class="perk-discount-badge">${perk.discount}</span>
+            </div>
+            <h4 class="perk-brand-name">${perk.brand}</h4>
+            <p class="perk-desc">${perk.description}</p>
+          </div>
+          <div class="perk-card-bottom">
+            ${hasCode ? `
+              <div class="perk-code-box" title="Click to copy discount code">
+                <span class="perk-code-label">PROMO CODE:</span>
+                <span class="perk-code-val">${perk.code}</span>
+                <button type="button" class="btn-copy-perk-code" data-code="${perk.code}" data-brand="${perk.brand}">
+                  <span>📋 Copy</span>
+                </button>
+              </div>
+            ` : ''}
+            <a href="${perk.url}" target="_blank" rel="noopener noreferrer" class="btn-perk-shop">
+              <span>Shop ${perk.brand.split(' ')[0]} ↗</span>
+            </a>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    perksGrid.querySelectorAll('.btn-copy-perk-code').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const code = btn.dataset.code;
+        const brand = btn.dataset.brand;
+        copyTextToClipboard(code);
+        showToast(`📋 Copied code "${code}" for ${brand}!`);
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<span>✓ Copied!</span>';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.innerHTML = originalHtml;
+          btn.classList.remove('copied');
+        }, 1800);
+      });
+    });
   }
 
   function openRecipePacksModal(creatorId = null) {
@@ -5256,6 +5324,24 @@
           </div>
         ` : ''}
 
+        <!-- Author Ingredient Discounts Callout -->
+        ${(() => {
+          const creator = getRecipeCreator(recipe);
+          if (!creator || !creator.perks || creator.perks.length === 0) return '';
+          return `
+            <div class="recipe-creator-perks-callout">
+              <span class="perks-callout-icon">🎁</span>
+              <div class="perks-callout-body">
+                <strong>${creator.name}'s Ingredient Discounts Available:</strong>
+                <span>Get 15% off Lakanto Monk Fruit Sweetener (code <code>ELI15</code>) and 15% off Prime Bites &amp; FUUL (code <code>FPF</code>).</span>
+              </div>
+              <button type="button" class="btn-view-creator-perks" id="btnModalViewCreatorPerks" data-creator-id="${creator.id}">
+                <span>View All Perks &amp; Codes ↗</span>
+              </button>
+            </div>
+          `;
+        })()}
+
         <!-- Step-by-Step Instructions -->
         <h3 class="modal-section-title">📝 Instructions</h3>
         <div class="modal-instructions-list">
@@ -5639,6 +5725,16 @@
       });
     }
 
+    // View Creator Perks from Recipe Modal
+    const btnModalPerks = recipeModalBody.querySelector('#btnModalViewCreatorPerks');
+    if (btnModalPerks) {
+      btnModalPerks.addEventListener('click', () => {
+        const creatorId = btnModalPerks.dataset.creatorId || 'fitness_product_finder';
+        closeRecipeModal();
+        openRecipePacksModal(creatorId);
+      });
+    }
+
     // Step Item Cross Off
     recipeModalBody.querySelectorAll('.modal-step-item').forEach(stepItem => {
       stepItem.addEventListener('click', (e) => {
@@ -5939,6 +6035,7 @@
     const swapCount = swapData ? swapData.options.length : 0;
 
     let displayNotes = ing.notes || '';
+    displayNotes = displayNotes.replace(/(?:;\s*)?CODE\s+[A-Z0-9]+(?:\s+SAVES\s+YOU\s+\d+%\s*|TO\s+SAVE\s*)?/gi, '').replace(/^;\s*|;\s*$/g, '').trim();
     if (subText && displayNotes) {
       const escapedSub = subText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       displayNotes = displayNotes.replace(new RegExp(`(?:;\\s*)?\\bOR\\s+${escapedSub}\\b`, 'i'), '').trim();
