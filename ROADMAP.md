@@ -202,15 +202,52 @@ A prioritized checklist of fixes, features, and refinements for the Creami Cravi
   - "Restore Backup" file picker with safety validation and merge/overwrite options, allowing frictionless data migration without requiring sign-in.
   - Factory reset safety tool to clear local kitchen caches.
 
+### 21. ✉️ Admin Account Email Setup & Transactional Messaging
+- [ ] **Custom Domain Business Email (`admin@creamicravings.com`):**
+  - Establish a professional custom domain mailbox or email forwarding route (via Cloudflare Email Routing, Google Workspace, Zoho Mail, or Forward Email).
+  - Configure MX records, SPF (`v=spf1`), DKIM, and DMARC policies on DNS to guarantee high deliverability and prevent spoofing.
+- [ ] **Transactional Email Provider & SMTP Integration:**
+  - Connect a reliable developer-friendly transactional email service (Resend, SendGrid, Amazon SES, or Postmark) with credentials stored securely in `.env`.
+  - Build a centralized email utility module in `server.py` supporting branded HTML & plain-text fallback templates.
+- [ ] **Admin Inbound & System Event Alerts:**
+  - Automated alert emails dispatched to `admin@creamicravings.com` when:
+    - A creator submits new recipes or requests a creator account.
+    - System health checks detect server or storage exceptions.
+    - Contact or feedback forms are submitted by users.
+- [ ] **User-Facing Transactional Notifications:**
+  - Welcome email on initial registration with quick-start tips and PWA install guide.
+  - Account verification or passwordless magic link sign-in option.
+  - Creator approval notification and cookbook release alerts to subscribed users.
+
+### 22. 🔍 Search Engine Optimization (SEO) & Web Discoverability
+- [ ] **Schema.org JSON-LD Structured Data for Recipes:**
+  - Embed valid Google-compliant `Recipe` schema markup (`name`, `description`, `image`, `recipeIngredient`, `recipeInstructions`, `nutrition`, `prepTime`, `cookTime`, `aggregateRating`).
+  - Enable Google Rich Snippets (star ratings, calorie counts, photos directly in Google Search and Discover cards).
+- [ ] **Dynamic XML Sitemap & Search Engine Directives (`sitemap.xml` & `robots.txt`):**
+  - Deploy a dynamically generated `/sitemap.xml` indexing all public recipes, creator showcase pages, and guides.
+  - Optimize `/robots.txt` to allow complete search engine crawling while disallowing administrative or sensitive endpoints (`/api/admin/*`).
+- [ ] **Social Sharing Cards (Open Graph & Twitter Cards):**
+  - Add dynamic `<meta property="og:...">` and `<meta name="twitter:...">` tags.
+  - Ensure recipe links shared across iMessage, Discord, Twitter/X, and Facebook render rich cards with high-res ice cream pint photos, macro callouts, and creator attribution.
+- [ ] **Canonical URLs & Indexable Recipe Routing:**
+  - Implement clean permalinks / deep linking (e.g. `/recipe/[slug]` or prerendered static snapshots) so search engine crawlers can index individual recipe pages without requiring client-side JavaScript execution.
+  - Specify canonical tags (`<link rel="canonical">`) to consolidate link equity and eliminate duplicate content penalties.
+- [ ] **Core Web Vitals & Target Keyword Strategy:**
+  - Optimize Lighthouse SEO and Performance scores (LCP, CLS, INP) for fast crawler rendering.
+  - On-page keyword optimization targeting high-intent search terms (e.g., *"Ninja Creami protein ice cream recipes"*, *"low calorie ninja creami"*, *"keto creami recipes"*, *"ninja creami swaps"*).
+
 ---
 
 ## 🏆 Remaining Items Ranked by Logical Order
 
 | Step | Task | Why & Scope | Est. Effort | Status |
-| :---: | :--- | :--- | :--- | :---: |
+| :---: | :--- | :--- | :--- | :--- |
 | **Step 5** | **Item 19: 🛡️ Store Compliance & 1-Tap PWA Install** | Compliance `/privacy.html` (mandatory for Play Store), `/terms.html`, trademark disclaimers, and 1-tap `📲 Install App` prompt. | 🟢 ~15–20 mins | ✅ **Done** |
 | **Step 6** | **Item 20: 🔊 Audio, Haptics & Local Data Backup** | Web Audio slot sounds/timer chimes, mobile haptics, and JSON export/import for disaster recovery. | 🟢 ~20–25 mins | ✅ **Done** |
 | **Step 7** | **Item 1: 🔑 Finish Google Sign-In** | Production Google Cloud Console OAuth 2.0 Client ID configured in `.env` and `app.js` with One-Tap and theme matching. | ⚪ Completed | ✅ **Done** |
-| **Step 8** | **Item 14: 🤖 Google Play Store Android App (Bubblewrap)** | Generate signed `.aab` bundle, deploy `assetlinks.json`, generate $1024\times500$ banner and $512\times512$ store icon. | 🟠 ~30–45 mins | ⏳ **Final** |
+| **Step 8** | **Item 14: 🤖 Google Play Store Android App (Bubblewrap)** | Generate signed `.aab` bundle, deploy `assetlinks.json`, generate $1024\times500$ banner and $512\times512$ store icon. | 🟠 ~30–45 mins | ⏳ **Next** |
+| **Step 9** | **Item 21: ✉️ Admin Email Setup & Notifications** | Domain inbox (`admin@creamicravings.com`), transactional SMTP (Resend/SendGrid), SPF/DKIM/DMARC DNS, and admin alert triggers. | 🟡 ~25–35 mins | 📋 **Planned** |
+| **Step 10** | **Item 22: 🔍 SEO & Rich Recipe Snippets** | Schema.org JSON-LD recipes for Google rich snippets, sitemap.xml, robots.txt, Open Graph preview cards, and crawlable permalinks. | 🟡 ~30–40 mins | 📋 **Planned** |
+
 
 
