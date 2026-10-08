@@ -25,121 +25,222 @@ def create_png_bytes(width, height, get_pixel_func):
     idat = zlib.compress(bytes(raw), 9)
     return b'\x89PNG\r\n\x1a\n' + chunk(b'IHDR', ihdr) + chunk(b'IDAT', idat) + chunk(b'IEND', b'')
 
+def create_ico_bytes(png_images):
+    """Encodes a multi-resolution ICO file containing PNG streams."""
+    header = struct.pack('<HHH', 0, 1, len(png_images))
+    entries = []
+    offset = 6 + len(png_images) * 16
+    for width, height, png_bytes in png_images:
+        w_byte = 0 if width >= 256 else width
+        h_byte = 0 if height >= 256 else height
+        entry = struct.pack('<BBBBHHII', w_byte, h_byte, 0, 0, 1, 32, len(png_bytes), offset)
+        entries.append(entry)
+        offset += len(png_bytes)
+    return header + b''.join(entries) + b''.join([p[2] for p in png_images])
+
 def render_creami_icon(x, y, w, h, is_maskable=False):
     # Normalized coordinates (-1.0 to 1.0)
     nx = (x / (w - 1)) * 2.0 - 1.0
     ny = (y / (h - 1)) * 2.0 - 1.0
 
-    # Maskable icons need content contained in the inner 80% safe zone
-    scale = 0.72 if is_maskable else 0.88
+    # Safe zone scaling for maskable vs standard
+    scale = 0.74 if is_maskable else 0.88
     sx = nx / scale
     sy = ny / scale
 
-    # Background: dark cosmic gradient with subtle radial glow
-    dist_center = math.sqrt(nx * nx + ny * ny)
-    bg_r = 12 + max(0, int(25 * (1.0 - dist_center * 0.7)))
-    bg_g = 15 + max(0, int(15 * (1.0 - dist_center * 0.7)))
-    bg_b = 26 + max(0, int(45 * (1.0 - dist_center * 0.7)))
-
-    # Outer rounded squircle background (if not maskable, soften edges)
-    # Maskable covers entire area; standard icons have sleek rounded rect
+    # 1. Base squircle with corner smoothing
     if not is_maskable:
-        # Corner radius check
         corner_r = 0.28
         ax = abs(nx) - (1.0 - corner_r)
         ay = abs(ny) - (1.0 - corner_r)
         if ax > 0 and ay > 0:
             corner_dist = math.sqrt(ax * ax + ay * ay)
             if corner_dist > corner_r:
-                # Anti-aliased transparent edge
-                alpha_edge = max(0.0, min(1.0, (corner_r + 0.03 - corner_dist) / 0.03))
+                alpha_edge = max(0.0, min(1.0, (corner_r + 0.025 - corner_dist) / 0.025))
                 return (0, 0, 0, int(alpha_edge * 255))
 
-    # Base background color
-    cur_r, cur_g, cur_b, cur_a = bg_r, bg_g, bg_b, 255
+    # Dark plum cosmic background
+    dist_c = math.sqrt(nx * nx + ny * ny)
+    cur_r = int(26 + 18 * max(0, 1.0 - dist_c * 0.8))
+    cur_g = int(14 + 10 * max(0, 1.0 - dist_c * 0.8))
+    cur_b = int(36 + 22 * max(0, 1.0 - dist_c * 0.8))
+    cur_a = 255
 
-    # Glowing emblem circle in center
-    emblem_radius = 0.76
-    emblem_dist = math.sqrt(sx * sx + (sy + 0.05) ** 2)
-    if emblem_dist < emblem_radius:
-        # Outer ring glow: magenta/pink to purple gradient
-        angle = math.atan2(sy + 0.05, sx)
-        glow_factor = (emblem_dist / emblem_radius)
-        if emblem_dist > emblem_radius - 0.08:
-            ring_alpha = min(1.0, (emblem_dist - (emblem_radius - 0.08)) / 0.04)
-            cur_r = int(cur_r * (1 - ring_alpha) + (236 if angle > 0 else 168) * ring_alpha)
-            cur_g = int(cur_g * (1 - ring_alpha) + (72 if angle > 0 else 85) * ring_alpha)
-            cur_b = int(cur_b * (1 - ring_alpha) + (153 if angle > 0 else 247) * ring_alpha)
-        else:
-            # Inner circle fill
-            inner_glow = 1.0 - (emblem_dist / (emblem_radius - 0.08))
-            cur_r = min(255, cur_r + int(40 * inner_glow))
-            cur_g = min(255, cur_g + int(10 * inner_glow))
-            cur_b = min(255, cur_b + int(45 * inner_glow))
+    # Glowing neon border ring
+    if not is_maskable:
+        ring_box = max(abs(nx), abs(ny))
+        if ring_box > 0.86:
+            ring_factor = min(1.0, (ring_box - 0.86) / 0.07)
+            # Magenta to violet gradient based on angle
+            angle = math.atan2(ny, nx)
+            mix = (math.sin(angle) + 1.0) * 0.5
+            ring_r = int(255 * (1 - mix) + 139 * mix)
+            ring_g = int(42 * (1 - mix) + 92 * mix)
+            ring_b = int(133 * (1 - mix) + 246 * mix)
+            cur_r = int(cur_r * (1 - ring_factor) + ring_r * ring_factor)
+            cur_g = int(cur_g * (1 - ring_factor) + ring_g * ring_factor)
+            cur_b = int(cur_b * (1 - ring_factor) + ring_b * ring_factor)
 
-    # Creami Pint Cup shape (trapezoid at bottom: sy between 0.08 and 0.55)
-    cup_top_y = 0.08
-    cup_bot_y = 0.52
-    if cup_top_y <= sy <= cup_bot_y:
-        cup_prog = (sy - cup_top_y) / (cup_bot_y - cup_top_y)
-        cup_half_w = 0.38 - 0.08 * cup_prog
-        if abs(sx) <= cup_half_w:
-            # Pint body: frosted glass gradient
-            rim_dist = cup_half_w - abs(sx)
-            cup_shade = 0.7 + 0.3 * (rim_dist / cup_half_w)
-            # Tinted with soft purple/cyan
-            cur_r = int(28 * cup_shade + 180 * (1 - cup_shade))
-            cur_g = int(36 * cup_shade + 120 * (1 - cup_shade))
-            cur_b = int(62 * cup_shade + 230 * (1 - cup_shade))
+    # 2. Golden Sparkles
+    # Star 1 (upper-left)
+    s1_x, s1_y = -0.58, -0.42
+    d1 = abs(sx - s1_x) + abs(sy - s1_y)
+    if d1 < 0.16:
+        glow_s = max(0, 1.0 - d1 / 0.16)
+        cur_r = min(255, cur_r + int(250 * glow_s))
+        cur_g = min(255, cur_g + int(200 * glow_s))
+        cur_b = min(255, cur_b + int(80 * glow_s))
 
-    # Creami Pint Rim Ring
-    if abs(sy - 0.08) < 0.035 and abs(sx) < 0.42:
-        cur_r = 236
-        cur_g = 72
-        cur_b = 153
+    # Star 2 (right-middle)
+    s2_x, s2_y = 0.62, -0.22
+    d2 = abs(sx - s2_x) + abs(sy - s2_y)
+    if d2 < 0.12:
+        glow_s2 = max(0, 1.0 - d2 / 0.12)
+        cur_r = min(255, cur_r + int(250 * glow_s2))
+        cur_g = min(255, cur_g + int(210 * glow_s2))
+        cur_b = min(255, cur_b + int(90 * glow_s2))
 
-    # Ice Cream Soft-Serve Swirls (sy from -0.52 to 0.08)
-    # Tier 1 (bottom swirl)
-    t1_y = -0.04
-    t1_w = 0.36 * (1.0 - ((sy - t1_y) / 0.16) ** 2) if abs(sy - t1_y) < 0.14 else 0
-    if t1_w > 0 and abs(sx) < t1_w:
-        shading = 0.85 + 0.15 * math.sin(sx * 10)
-        cur_r = int(253 * shading)
-        cur_g = int(232 * shading)
-        cur_b = int(242 * shading)
+    # 3. Creami Pint Cup Body (sy from 0.12 to 0.84)
+    cup_t, cup_b = 0.12, 0.84
+    if cup_t <= sy <= cup_b:
+        prog = (sy - cup_t) / (cup_b - cup_t)
+        cup_w = 0.48 - 0.10 * prog
+        if abs(sx) <= cup_w:
+            # Inside core ice cream
+            inner_w = cup_w - 0.035
+            if abs(sx) <= inner_w and sy < cup_b - 0.04:
+                # Strawberry cream gradient
+                core_p = (sy - cup_t) / (cup_b - cup_t)
+                cur_r = int(251 - 20 * core_p)
+                cur_g = int(113 - 40 * core_p)
+                cur_b = int(133 + 60 * core_p)
+            else:
+                # Dark frosted container edge
+                cur_r, cur_g, cur_b = 30, 41, 59
 
-    # Tier 2 (middle swirl)
-    t2_y = -0.20
-    t2_w = 0.28 * (1.0 - ((sy - t2_y) / 0.14) ** 2) if abs(sy - t2_y) < 0.12 else 0
-    if t2_w > 0 and abs(sx - 0.02) < t2_w:
-        shading = 0.9 + 0.1 * math.sin(sx * 12)
-        cur_r = int(244 * shading)
-        cur_g = int(114 * shading)
-        cur_b = int(182 * shading)
+            # Frosted glass reflection ridges
+            for rx, rw, op in [(0.0, 0.04, 0.5), (-0.16, 0.03, 0.35), (0.16, 0.025, 0.25)]:
+                if abs(sx - rx) < rw:
+                    cur_r = min(255, cur_r + int(120 * op))
+                    cur_g = min(255, cur_g + int(120 * op))
+                    cur_b = min(255, cur_b + int(140 * op))
 
-    # Tier 3 (top swirl tip)
-    t3_y = -0.34
-    t3_w = 0.18 * (1.0 - ((sy - t3_y) / 0.12) ** 2) if abs(sy - t3_y) < 0.10 else 0
-    if t3_w > 0 and abs(sx + 0.01) < t3_w:
+    # Pint Rim Collar (sy from 0.06 to 0.14)
+    if 0.06 <= sy <= 0.14 and abs(sx) <= 0.54:
+        # Hot pink rim
+        edge_f = max(0.0, 1.0 - (sy - 0.06) / 0.08)
+        cur_r = int(255 * edge_f + 225 * (1 - edge_f))
+        cur_g = int(42 * edge_f + 29 * (1 - edge_f))
+        cur_b = int(133 * edge_f + 72 * (1 - edge_f))
+        if abs(sy - 0.07) < 0.02: # Glint on top of rim
+            cur_r = min(255, cur_r + 60)
+            cur_g = min(255, cur_g + 50)
+            cur_b = min(255, cur_b + 50)
+
+    # 4. Ice Cream Soft-Serve Swirl Tiers
+    # Tier 1 (Bottom wide swirl: sy from -0.10 to 0.08)
+    t1_y = -0.01
+    if abs(sy - t1_y) < 0.11:
+        t1_w = 0.50 * math.sqrt(max(0.0, 1.0 - ((sy - t1_y) / 0.11) ** 2))
+        if abs(sx) < t1_w:
+            fold = math.sin((sx / t1_w) * math.pi * 1.5)
+            # Delicious strawberry cream shading
+            cur_r = int(255 - max(0, fold * 35))
+            cur_g = int(210 - max(0, fold * 90))
+            cur_b = int(230 - max(0, fold * 60))
+            # Bright crest highlight
+            if abs(sy - (t1_y - 0.03)) < 0.025:
+                cur_r = 255
+                cur_g = 250
+                cur_b = 255
+
+    # Tier 2 (Middle swirl: sy from -0.28 to -0.06)
+    t2_y = -0.17
+    if abs(sy - t2_y) < 0.11:
+        t2_w = 0.40 * math.sqrt(max(0.0, 1.0 - ((sy - t2_y) / 0.11) ** 2))
+        if abs(sx - 0.02) < t2_w:
+            fold = math.sin(((sx - 0.02) / t2_w) * math.pi * 1.5)
+            cur_r = int(255 - max(0, fold * 25))
+            cur_g = int(225 - max(0, fold * 80))
+            cur_b = int(240 - max(0, fold * 50))
+            if abs(sy - (t2_y - 0.03)) < 0.025:
+                cur_r = 255
+                cur_g = 252
+                cur_b = 255
+
+    # Tier 3 (Top swirl peak: sy from -0.46 to -0.24)
+    t3_y = -0.35
+    if abs(sy - t3_y) < 0.11:
+        t3_w = 0.28 * math.sqrt(max(0.0, 1.0 - ((sy - t3_y) / 0.11) ** 2))
+        if abs(sx + 0.01) < t3_w:
+            cur_r = 255
+            cur_g = 248
+            cur_b = 252
+            if sy < t3_y:
+                cur_r = 255
+                cur_g = 255
+                cur_b = 255
+
+    # Swirl Curl Tip (sy from -0.52 to -0.42)
+    curl_cx, curl_cy = 0.05, -0.48
+    curl_d = math.sqrt((sx - curl_cx) ** 2 + (sy - curl_cy) ** 2)
+    if curl_d < 0.08:
         cur_r = 255
         cur_g = 255
         cur_b = 255
 
-    # Swirl peak curl at the very top (cherry on top)
-    cherry_cx = 0.04
-    cherry_cy = -0.44
-    cherry_dist = math.sqrt((sx - cherry_cx) ** 2 + (sy - cherry_cy) ** 2)
-    if cherry_dist < 0.075:
-        cur_r = 239
-        cur_g = 68
-        cur_b = 68
-        if cherry_dist < 0.03 and sx < cherry_cx:
-            # Highlight glint
-            cur_r, cur_g, cur_b = 255, 200, 200
+    # Colorful Sprinkles on Swirl
+    sprinkles = [
+        (-0.25, 0.00, 56, 189, 248),  # Sky blue
+        (0.24, -0.02, 168, 85, 247),  # Purple
+        (-0.08, -0.18, 251, 191, 36), # Gold
+        (0.18, -0.16, 74, 222, 128)   # Green
+    ]
+    for sp_x, sp_y, sr, sg, sb in sprinkles:
+        sp_d = math.sqrt((sx - sp_x) ** 2 + (sy - sp_y) ** 2)
+        if sp_d < 0.032:
+            cur_r, cur_g, cur_b = sr, sg, sb
+
+    # 5. Cherry on Top
+    # Stem
+    stem_dx = sx - 0.18
+    stem_dy = sy - (-0.68)
+    if -0.74 <= sy <= -0.58 and abs(stem_dx - (sy + 0.65) * 0.8) < 0.022:
+        cur_r, cur_g, cur_b = 34, 197, 94
+
+    # Cherry Body
+    ch_x, ch_y = 0.14, -0.57
+    ch_d = math.sqrt((sx - ch_x) ** 2 + (sy - ch_y) ** 2)
+    if ch_d < 0.125:
+        # Glossy ruby red
+        ch_shade = min(1.0, ch_d / 0.125)
+        cur_r = int(255 * (1 - ch_shade * 0.4))
+        cur_g = int(30 * (1 - ch_shade))
+        cur_b = int(70 * (1 - ch_shade))
+        # Glint reflection
+        if math.sqrt((sx - (ch_x - 0.04)) ** 2 + (sy - (ch_y - 0.04)) ** 2) < 0.042:
+            cur_r = 255
+            cur_g = 220
+            cur_b = 230
 
     return (cur_r, cur_g, cur_b, cur_a)
 
 def generate_all():
+    print("Generating icons with vibrant ice cream pint & cherry...")
+    
+    # Generate multi-size PNGs for ICO
+    ico_pngs = []
+    for s in [16, 32, 48]:
+        print(f"Generating favicon {s}x{s}...")
+        pdata = create_png_bytes(s, s, lambda x, y, w, h: render_creami_icon(x, y, w, h, False))
+        ico_pngs.append((s, s, pdata))
+    
+    ico_bytes = create_ico_bytes(ico_pngs)
+    with open('favicon.ico', 'wb') as f:
+        f.write(ico_bytes)
+    print(f"Saved favicon.ico ({len(ico_bytes)} bytes)")
+
+    # Standard PWA and Touch Icons
     sizes = [
         ('icon-192.png', 192, False),
         ('icon-512.png', 512, False),
@@ -154,59 +255,6 @@ def generate_all():
         with open(fname, 'wb') as f:
             f.write(png_data)
         print(f"Saved {fname} ({len(png_data)} bytes)")
-
-    # SVG Favicon / Vector Icon
-    svg_content = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <defs>
-    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#1e1026"/>
-      <stop offset="100%" stop-color="#090c15"/>
-    </linearGradient>
-    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#ec4899"/>
-      <stop offset="50%" stop-color="#d946ef"/>
-      <stop offset="100%" stop-color="#8b5cf6"/>
-    </linearGradient>
-    <linearGradient id="swirlGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#ffffff"/>
-      <stop offset="50%" stop-color="#fbcfe8"/>
-      <stop offset="100%" stop-color="#f472b6"/>
-    </linearGradient>
-    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="16" result="blur"/>
-      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
-    </filter>
-  </defs>
-
-  <!-- Background Squircle -->
-  <rect width="512" height="512" rx="128" fill="url(#bgGrad)"/>
-  <rect x="16" y="16" width="480" height="480" rx="112" fill="none" stroke="url(#ringGrad)" stroke-width="8" opacity="0.6"/>
-
-  <!-- Glowing Emblem Circle -->
-  <circle cx="256" cy="256" r="190" fill="#131726" stroke="url(#ringGrad)" stroke-width="12" filter="url(#glow)"/>
-
-  <!-- Pint Cup -->
-  <path d="M 160 280 L 180 400 Q 185 415 200 415 L 312 415 Q 327 415 332 400 L 352 280 Z" fill="#20273f" stroke="#8b5cf6" stroke-width="6"/>
-  <!-- Rim -->
-  <rect x="150" y="270" width="212" height="18" rx="9" fill="#ec4899"/>
-
-  <!-- Swirl Tiers -->
-  <!-- Tier 1 -->
-  <path d="M 170 270 Q 256 220 342 270 Q 310 230 256 230 Q 200 230 170 270 Z" fill="#f472b6"/>
-  <!-- Tier 2 -->
-  <path d="M 190 235 Q 256 185 322 235 Q 300 195 256 195 Q 210 195 190 235 Z" fill="#fbcfe8"/>
-  <!-- Tier 3 Tip -->
-  <path d="M 220 200 Q 256 150 285 190 Q 275 160 256 160 Q 235 160 220 200 Z" fill="#ffffff"/>
-
-  <!-- Cherry / Sparkle -->
-  <circle cx="268" cy="145" r="22" fill="#ef4444" filter="url(#glow)"/>
-  <circle cx="262" cy="139" r="6" fill="#ffffff" opacity="0.8"/>
-  <path d="M 268 123 Q 285 95 315 105" fill="none" stroke="#22c55e" stroke-width="5" stroke-linecap="round"/>
-</svg>
-'''
-    with open('favicon.svg', 'w', encoding='utf-8') as f:
-        f.write(svg_content)
-    print("Saved favicon.svg")
 
 if __name__ == '__main__':
     generate_all()

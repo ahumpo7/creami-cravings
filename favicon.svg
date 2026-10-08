@@ -1,47 +1,148 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
+    <!-- Background Gradient -->
     <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#1e1026"/>
-      <stop offset="100%" stop-color="#090c15"/>
+      <stop offset="0%" stop-color="#1e0d2b"/>
+      <stop offset="50%" stop-color="#141829"/>
+      <stop offset="100%" stop-color="#0a0e1a"/>
     </linearGradient>
-    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#ec4899"/>
-      <stop offset="50%" stop-color="#d946ef"/>
-      <stop offset="100%" stop-color="#8b5cf6"/>
+
+    <!-- Glowing Perimeter Ring -->
+    <linearGradient id="borderRing" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff2a85"/>
+      <stop offset="40%" stop-color="#ec4899"/>
+      <stop offset="75%" stop-color="#a855f7"/>
+      <stop offset="100%" stop-color="#6366f1"/>
     </linearGradient>
-    <linearGradient id="swirlGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+
+    <!-- Rim Collar Gradient -->
+    <linearGradient id="rimGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff2a85"/>
+      <stop offset="50%" stop-color="#f43f5e"/>
+      <stop offset="100%" stop-color="#e11d48"/>
+    </linearGradient>
+
+    <!-- Pint Body Gradient -->
+    <linearGradient id="pintCupGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b" stop-opacity="0.95"/>
+      <stop offset="50%" stop-color="#0f172a" stop-opacity="0.98"/>
+      <stop offset="100%" stop-color="#090d16"/>
+    </linearGradient>
+
+    <!-- Inside Pint Ice Cream Scoop -->
+    <linearGradient id="pintInsideGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#fb7185"/>
+      <stop offset="35%" stop-color="#f43f5e"/>
+      <stop offset="70%" stop-color="#ec4899"/>
+      <stop offset="100%" stop-color="#c084fc"/>
+    </linearGradient>
+
+    <!-- Swirl Tiers Gradients -->
+    <linearGradient id="swirlTier1" x1="0%" y1="0%" x2="0%" y2="100%">
       <stop offset="0%" stop-color="#ffffff"/>
-      <stop offset="50%" stop-color="#fbcfe8"/>
+      <stop offset="35%" stop-color="#fce7f3"/>
+      <stop offset="75%" stop-color="#f472b6"/>
+      <stop offset="100%" stop-color="#e11d48"/>
+    </linearGradient>
+
+    <linearGradient id="swirlTier2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="50%" stop-color="#fdf2f8"/>
       <stop offset="100%" stop-color="#f472b6"/>
     </linearGradient>
+
+    <!-- Cherry Gradient -->
+    <linearGradient id="cherryGrad" x1="25%" y1="25%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff4d6d"/>
+      <stop offset="40%" stop-color="#e11d48"/>
+      <stop offset="100%" stop-color="#880d25"/>
+    </linearGradient>
+
+    <!-- Gold Sparkle Gradient -->
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+
+    <!-- Drop Shadow / Glow -->
+    <filter id="shadow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
     <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="16" result="blur"/>
+      <feGaussianBlur stdDeviation="5" result="blur"/>
       <feComposite in="SourceGraphic" in2="blur" operator="over"/>
     </filter>
   </defs>
 
-  <!-- Background Squircle -->
-  <rect width="512" height="512" rx="128" fill="url(#bgGrad)"/>
-  <rect x="16" y="16" width="480" height="480" rx="112" fill="none" stroke="url(#ringGrad)" stroke-width="8" opacity="0.6"/>
+  <!-- Squircle Base for High Contrast against both White and Black Browser Tabs -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)"/>
+  <rect x="12" y="12" width="488" height="488" rx="102" fill="none" stroke="url(#borderRing)" stroke-width="12" opacity="0.85"/>
 
-  <!-- Glowing Emblem Circle -->
-  <circle cx="256" cy="256" r="190" fill="#131726" stroke="url(#ringGrad)" stroke-width="12" filter="url(#glow)"/>
+  <g filter="url(#shadow)">
+    <!-- ==================== PINT CUP ==================== -->
+    <!-- Pint Body Outer Shell -->
+    <path d="M 134 290 L 162 448 C 165 464 178 476 195 476 L 317 476 C 334 476 347 464 350 448 L 378 290 Z" 
+          fill="url(#pintCupGrad)" stroke="#475569" stroke-width="6"/>
 
-  <!-- Pint Cup -->
-  <path d="M 160 280 L 180 400 Q 185 415 200 415 L 312 415 Q 327 415 332 400 L 352 280 Z" fill="#20273f" stroke="#8b5cf6" stroke-width="6"/>
-  <!-- Rim -->
-  <rect x="150" y="270" width="212" height="18" rx="9" fill="#ec4899"/>
+    <!-- Ice Cream Visible Inside Pint Container -->
+    <path d="M 144 302 L 167 438 C 169 450 178 458 190 458 L 322 458 C 334 458 343 450 345 438 L 368 302 Z" 
+          fill="url(#pintInsideGrad)" opacity="0.9"/>
 
-  <!-- Swirl Tiers -->
-  <!-- Tier 1 -->
-  <path d="M 170 270 Q 256 220 342 270 Q 310 230 256 230 Q 200 230 170 270 Z" fill="#f472b6"/>
-  <!-- Tier 2 -->
-  <path d="M 190 235 Q 256 185 322 235 Q 300 195 256 195 Q 210 195 190 235 Z" fill="#fbcfe8"/>
-  <!-- Tier 3 Tip -->
-  <path d="M 220 200 Q 256 150 285 190 Q 275 160 256 160 Q 235 160 220 200 Z" fill="#ffffff"/>
+    <!-- Vertical Frosted Ribs / Reflections on Pint -->
+    <line x1="212" y1="314" x2="220" y2="446" stroke="#ffffff" stroke-width="6" stroke-linecap="round" opacity="0.35"/>
+    <line x1="256" y1="314" x2="256" y2="448" stroke="#ffffff" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
+    <line x1="300" y1="314" x2="292" y2="446" stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity="0.25"/>
+    <path d="M 152 312 L 170 436" stroke="#ffffff" stroke-width="8" stroke-linecap="round" opacity="0.4"/>
 
-  <!-- Cherry / Sparkle -->
-  <circle cx="268" cy="145" r="22" fill="#ef4444" filter="url(#glow)"/>
-  <circle cx="262" cy="139" r="6" fill="#ffffff" opacity="0.8"/>
-  <path d="M 268 123 Q 285 95 315 105" fill="none" stroke="#22c55e" stroke-width="5" stroke-linecap="round"/>
+    <!-- Pint Rim Collar -->
+    <rect x="114" y="274" width="284" height="24" rx="12" fill="url(#rimGrad)" stroke="#ffffff" stroke-width="3" stroke-opacity="0.7"/>
+
+    <!-- ==================== SWIRL TIERS ==================== -->
+    <!-- Tier 1: Wide Bottom Swirl -->
+    <path d="M 122 280 C 130 228 180 214 230 218 C 290 222 360 214 390 278 C 365 290 320 292 256 292 C 190 292 146 290 122 280 Z" 
+          fill="url(#swirlTier1)" stroke="#be123c" stroke-width="3"/>
+    <path d="M 138 274 C 180 232 260 232 372 272" 
+          fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round" opacity="0.85"/>
+
+    <!-- Tier 2: Middle Swirl -->
+    <path d="M 150 230 C 160 178 210 166 260 170 C 314 174 350 188 362 230 C 330 240 290 244 256 244 C 215 244 180 240 150 230 Z" 
+          fill="url(#swirlTier2)" stroke="#e11d48" stroke-width="2.5"/>
+    <path d="M 170 220 C 210 182 280 182 342 218" 
+          fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round" opacity="0.9"/>
+
+    <!-- Tier 3: Top Swirl Peak -->
+    <path d="M 186 178 C 198 128 240 112 274 120 C 304 128 326 148 322 180 C 295 188 270 191 248 191 C 220 191 198 186 186 178 Z" 
+          fill="#ffffff" stroke="#f43f5e" stroke-width="2"/>
+    <path d="M 202 166 C 230 132 272 132 302 162" 
+          fill="none" stroke="#fce7f3" stroke-width="6" stroke-linecap="round"/>
+
+    <!-- Swirl Tip Curlicue -->
+    <path d="M 252 124 C 256 98 276 94 284 106 C 290 116 280 130 268 130" 
+          fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round"/>
+
+    <!-- Colorful Sprinkles -->
+    <rect x="172" y="246" width="15" height="6" rx="3" transform="rotate(-25 172 246)" fill="#38bdf8"/>
+    <rect x="332" y="243" width="15" height="6" rx="3" transform="rotate(35 332 243)" fill="#a855f7"/>
+    <rect x="234" y="203" width="14" height="5" rx="2.5" transform="rotate(15 234 203)" fill="#fbbf24"/>
+    <rect x="286" y="213" width="14" height="5" rx="2.5" transform="rotate(-40 286 213)" fill="#4ade80"/>
+
+    <!-- ==================== CHERRY ON TOP ==================== -->
+    <!-- Stem -->
+    <path d="M 292 98 C 305 58 340 42 364 50" 
+          fill="none" stroke="#22c55e" stroke-width="7" stroke-linecap="round"/>
+    <path d="M 346 46 C 354 38 368 40 366 50" 
+          fill="none" stroke="#15803d" stroke-width="4" stroke-linecap="round"/>
+
+    <!-- Cherry Body -->
+    <circle cx="290" cy="102" r="34" fill="url(#cherryGrad)" stroke="#ffffff" stroke-width="2.5" filter="url(#glow)"/>
+    <!-- Glint -->
+    <ellipse cx="278" cy="90" rx="11" ry="6" transform="rotate(-30 278 90)" fill="#ffffff" opacity="0.9"/>
+    <circle cx="270" cy="106" r="3.5" fill="#ffffff" opacity="0.6"/>
+
+    <!-- Magic Golden Sparkles -->
+    <path d="M 85 130 Q 85 152 62 152 Q 85 152 85 174 Q 85 152 108 152 Q 85 152 85 130 Z" 
+          fill="url(#goldGrad)" filter="url(#glow)"/>
+    <path d="M 425 175 Q 425 192 408 192 Q 425 192 425 209 Q 425 192 442 192 Q 425 192 425 175 Z" 
+          fill="url(#goldGrad)" filter="url(#glow)"/>
+  </g>
 </svg>
