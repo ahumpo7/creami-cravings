@@ -110,6 +110,9 @@ def get_smtp_config():
     use_tls = str(os.environ.get('SMTP_USE_TLS') or cfg.get('use_tls') or 'true').lower() in ['1', 'true', 'yes']
 
     if host and user and password:
+        password = password.strip()
+        if 'gmail' in host.lower() or len(password.replace(' ', '')) == 16:
+            password = password.replace(' ', '')
         return {
             'host': host,
             'port': port,
