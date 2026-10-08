@@ -1538,8 +1538,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
 
         # User Feedback & Feature Requests (Roadmap Item 21)
         elif self.path == '/api/feedback':
-            data = self._read_json_body()
-            if not data:
+            if not isinstance(data, dict):
                 self._send_json({'error': 'Invalid JSON body'}, 400)
                 return
 
@@ -1581,13 +1580,12 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
 
         # Admin: Update Feedback Status (Reviewed, Implemented, Dismissed)
         elif self.path == '/api/admin/feedback/status':
-            user = self._get_user_from_token()
+            user = self._get_user_from_token(data)
             if not user or (user.get('role') != 'admin' and user.get('email', '').lower() != 'ahumpo7@gmail.com'):
                 self._send_json({'error': 'Unauthorized admin access'}, 403)
                 return
 
-            data = self._read_json_body()
-            if not data:
+            if not isinstance(data, dict):
                 self._send_json({'error': 'Invalid JSON'}, 400)
                 return
 
