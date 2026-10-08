@@ -596,6 +596,18 @@
     initCookieConsent();
     initFeedbackSystem();
 
+    // Check for password reset direct link from email (?reset_token=...&email=...)
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const resetToken = urlParams.get('reset_token');
+      const resetEmail = urlParams.get('email');
+      if (resetToken && resetEmail) {
+        setTimeout(() => {
+          openPasswordResetDirect(resetEmail, resetToken);
+        }, 400);
+      }
+    } catch (e) {}
+
     // If user is already logged in, immediately fetch latest synchronized cloud data
     if (currentUser && (currentUser.token || currentUser.email)) {
       fetchLatestUserData();
@@ -1298,6 +1310,7 @@
     const tabRegister = document.getElementById('tabAuthRegister');
     const formSignIn = document.getElementById('passwordAuthForm');
     const formRegister = document.getElementById('registerAuthForm');
+    const formReset = document.getElementById('resetAuthForm');
     clearAuthError();
 
     if (mode === 'register') {
@@ -1310,10 +1323,36 @@
         tabRegister.setAttribute('aria-selected', 'true');
       }
       if (formSignIn) formSignIn.style.display = 'none';
+      if (formReset) formReset.style.display = 'none';
       if (formRegister) {
         formRegister.style.display = 'block';
         const emailInput = document.getElementById('authRegisterEmail');
         if (emailInput) setTimeout(() => emailInput.focus(), 60);
+      }
+    } else if (mode === 'reset') {
+      if (tabSignIn) {
+        tabSignIn.classList.remove('active');
+        tabSignIn.setAttribute('aria-selected', 'false');
+      }
+      if (tabRegister) {
+        tabRegister.classList.remove('active');
+        tabRegister.setAttribute('aria-selected', 'false');
+      }
+      if (formSignIn) formSignIn.style.display = 'none';
+      if (formRegister) formRegister.style.display = 'none';
+      if (formReset) {
+        formReset.style.display = 'block';
+        const stepReq = document.getElementById('resetStepRequest');
+        const stepVer = document.getElementById('resetStepVerify');
+        if (stepVer && stepVer.style.display !== 'none') {
+          const codeInput = document.getElementById('authResetCode');
+          if (codeInput) setTimeout(() => codeInput.focus(), 60);
+        } else {
+          if (stepReq) stepReq.style.display = 'block';
+          if (stepVer) stepVer.style.display = 'none';
+          const emailInput = document.getElementById('authResetEmail');
+          if (emailInput) setTimeout(() => emailInput.focus(), 60);
+        }
       }
     } else {
       if (tabSignIn) {
@@ -1324,12 +1363,13 @@
         tabRegister.classList.remove('active');
         tabRegister.setAttribute('aria-selected', 'false');
       }
+      if (formRegister) formRegister.style.display = 'none';
+      if (formReset) formReset.style.display = 'none';
       if (formSignIn) {
         formSignIn.style.display = 'block';
         const userInput = document.getElementById('authLoginUsername');
         if (userInput) setTimeout(() => userInput.focus(), 60);
       }
-      if (formRegister) formRegister.style.display = 'none';
     }
   }
 
@@ -1413,6 +1453,129 @@
     } finally {
       if (btn) btn.disabled = false;
     }
+  }
+
+  async function handleRequestResetCode(email) {
+    if (!email || !email.includes('@')) {
+      showAuthError('Please enter a valid email address.');
+      return;
+    }
+    clearAuthError();
+    const btn = document.getElementById('btnSendResetCode');
+    if (btn) btn.disabled = true;
+
+    try {
+      showToast('Sending reset code...');
+      const res = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim() })
+      });
+      const data = await res.json();
+      if (res.ok && (data.status === 'ok' || data.success)) {
+        const stepReq = document.getElementById('resetStepRequest');
+        const stepVer = document.getElementById('resetStepVerify');
+        const emailDisplay = document.getElementById('resetEmailSentDisplay');
+        if (stepReq) stepReq.style.display = 'none';
+        if (stepVer) stepVer.style.display = 'block';
+        if (emailDisplay) emailDisplay.textContent = email.trim();
+
+        if (data.devCode) {
+          const codeInput = document.getElementById('authResetCode');
+          if (codeInput) codeInput.value = data.devCode;
+          showToast(`✉️ Code generated: ${data.devCode}`);
+        } else {
+          showToast('✉️ 6-digit code sent to your email!');
+        }
+
+        const codeField = document.getElementById('authResetCode');
+        if (codeField) setTimeout(() => codeField.focus(), 60);
+      } else {
+        const errorMsg = data.error || data.message || 'Could not send reset code.';
+        showAuthError(errorMsg);
+        showToast(errorMsg);
+      }
+    } catch (err) {
+      console.error('Request reset code error:', err);
+      showAuthError('Connection error. Please check your internet connection.');
+      showToast('Connection error during reset request.');
+    } finally {
+      if (btn) btn.disabled = false;
+    }
+  }
+
+  async function handleSubmitResetPassword(email, code, newPassword, confirmPassword) {
+    if (!email) {
+      showAuthError('Please provide your email address.');
+      return;
+    }
+    const token = (document.getElementById('authResetToken')?.value || '').trim();
+    if (!code && !token) {
+      showAuthError('Please enter the 6-digit verification code.');
+      return;
+    }
+    if (!newPassword || newPassword.length < 6) {
+      showAuthError('New password must be at least 6 characters long.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      showAuthError('Passwords do not match. Please re-enter them carefully.');
+      return;
+    }
+
+    clearAuthError();
+    const btn = document.getElementById('btnSubmitResetPassword');
+    if (btn) btn.disabled = true;
+
+    try {
+      showToast('Resetting password...');
+      const res = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: email.trim(),
+          code: code.trim(),
+          token: token,
+          newPassword: newPassword.trim()
+        })
+      });
+      const data = await res.json();
+      if (res.ok && (data.status === 'ok' || data.success)) {
+        applyUserSession(data, 'password_reset');
+        closeGoogleAuthModal();
+        showToast(`🎉 Password reset successful! Welcome back, ${data.user.name || data.user.email}!`);
+      } else {
+        const errorMsg = data.error || data.message || 'Failed to reset password.';
+        showAuthError(errorMsg);
+        showToast(`Reset failed: ${errorMsg}`);
+      }
+    } catch (err) {
+      console.error('Reset password error:', err);
+      showAuthError('Connection error during password reset.');
+      showToast('Connection error during password reset.');
+    } finally {
+      if (btn) btn.disabled = false;
+    }
+  }
+
+  function openPasswordResetDirect(email, token) {
+    openGoogleAuthModal();
+    switchAuthTab('reset');
+    const stepReq = document.getElementById('resetStepRequest');
+    const stepVer = document.getElementById('resetStepVerify');
+    const emailInput = document.getElementById('authResetEmail');
+    const tokenInput = document.getElementById('authResetToken');
+    const emailDisplay = document.getElementById('resetEmailSentDisplay');
+
+    if (emailInput && email) emailInput.value = email;
+    if (tokenInput && token) tokenInput.value = token;
+    if (emailDisplay && email) emailDisplay.textContent = email;
+
+    if (stepReq) stepReq.style.display = 'none';
+    if (stepVer) stepVer.style.display = 'block';
+
+    const passField = document.getElementById('authResetNewPassword');
+    if (passField) setTimeout(() => passField.focus(), 80);
   }
 
   function applyUserSession(data, method = 'google') {
@@ -2342,6 +2505,66 @@
         } else {
           showAuthError('Please enter email and password.');
         }
+      });
+    }
+
+    // Forgot Password link & Reset Form Listeners
+    const btnForgotPass = document.getElementById('btnForgotPassLink');
+    if (btnForgotPass) {
+      btnForgotPass.addEventListener('click', () => switchAuthTab('reset'));
+    }
+
+    const linkBackSignIn = document.getElementById('linkBackToSignIn');
+    if (linkBackSignIn) {
+      linkBackSignIn.addEventListener('click', () => switchAuthTab('signin'));
+    }
+
+    const btnSendReset = document.getElementById('btnSendResetCode');
+    if (btnSendReset) {
+      btnSendReset.addEventListener('click', () => {
+        const emailInput = document.getElementById('authResetEmail');
+        handleRequestResetCode(emailInput ? emailInput.value : '');
+      });
+    }
+
+    const resetForm = document.getElementById('resetAuthForm');
+    if (resetForm) {
+      resetForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const stepVer = document.getElementById('resetStepVerify');
+        if (stepVer && stepVer.style.display !== 'none') {
+          const email = (document.getElementById('authResetEmail')?.value || '').trim();
+          const code = (document.getElementById('authResetCode')?.value || '').trim();
+          const newPass = (document.getElementById('authResetNewPassword')?.value || '').trim();
+          const confPass = (document.getElementById('authResetConfirmPassword')?.value || '').trim();
+          handleSubmitResetPassword(email, code, newPass, confPass);
+        } else {
+          const emailInput = document.getElementById('authResetEmail');
+          handleRequestResetCode(emailInput ? emailInput.value : '');
+        }
+      });
+    }
+
+    const linkChangeEmail = document.getElementById('linkChangeResetEmail');
+    if (linkChangeEmail) {
+      linkChangeEmail.addEventListener('click', () => {
+        const stepReq = document.getElementById('resetStepRequest');
+        const stepVer = document.getElementById('resetStepVerify');
+        clearAuthError();
+        if (stepVer) stepVer.style.display = 'none';
+        if (stepReq) {
+          stepReq.style.display = 'block';
+          const emailInput = document.getElementById('authResetEmail');
+          if (emailInput) setTimeout(() => emailInput.focus(), 60);
+        }
+      });
+    }
+
+    const linkResend = document.getElementById('linkResendResetCode');
+    if (linkResend) {
+      linkResend.addEventListener('click', () => {
+        const emailInput = document.getElementById('authResetEmail');
+        handleRequestResetCode(emailInput ? emailInput.value : '');
       });
     }
 
@@ -10002,6 +10225,9 @@
                 <option value="vip" ${u.role === 'vip' ? 'selected' : ''}>⭐ VIP / Tester</option>
                 <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>👑 Administrator</option>
               </select>
+              <button class="btn-admin-reset-pw" data-user-id="${u.id}" data-user-email="${u.email}" title="Reset user password directly">
+                🔑
+              </button>
               ${(!isRootAdmin && !isCurrentAdmin) ? `
                 <button class="btn-admin-del-user" data-user-id="${u.id}" data-user-email="${u.email}" title="Delete user account">
                   🗑️
@@ -10103,6 +10329,15 @@
         }
 
         await deleteUserAccount(userId, userEmail);
+      });
+    });
+
+    // Admin Reset Password Buttons
+    adminUsersList.querySelectorAll('.btn-admin-reset-pw').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const userId = btn.dataset.userId;
+        const userEmail = btn.dataset.userEmail;
+        await adminResetUserPassword(userId, userEmail);
       });
     });
 
@@ -10560,6 +10795,45 @@
     } catch (err) {
       console.error('Delete user error:', err);
       showToast('Could not delete user account.');
+    }
+  }
+
+  async function adminResetUserPassword(userId, email) {
+    const targetDesc = email || userId || 'user';
+    const newPassword = prompt(`🔑 Set new password for ${targetDesc}:\n(Must be at least 6 characters. Leave empty to cancel)`);
+    if (!newPassword) return;
+    if (newPassword.length < 6) {
+      showToast('❌ Password must be at least 6 characters long.');
+      return;
+    }
+
+    try {
+      showToast('Updating password...');
+      const res = await fetch('/api/admin/user/reset-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': currentUser.token ? `Bearer ${currentUser.token}` : '',
+          'X-User-Email': currentUser.email || ''
+        },
+        body: JSON.stringify({
+          token: currentUser.token,
+          adminEmail: currentUser.email,
+          userId,
+          email,
+          newPassword
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok && (data.status === 'ok' || data.success)) {
+        showToast(`✅ Password updated for ${targetDesc}!`);
+      } else {
+        showToast('❌ ' + (data.error || 'Failed to update password.'));
+      }
+    } catch (err) {
+      console.error('Admin password reset error:', err);
+      showToast('❌ Network error updating password.');
     }
   }
 

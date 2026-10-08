@@ -9,9 +9,13 @@ import urllib.request
 import urllib.parse
 import base64
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 import time
 import html
+import secrets
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 
@@ -89,6 +93,127 @@ def verify_password(stored_hash, password):
     # Fallback to legacy sha256
     legacy = hashlib.sha256(password.encode('utf-8')).hexdigest()
     return hmac.compare_digest(stored_hash, legacy)
+
+SMTP_CONFIG_FILE = os.path.join(DIRECTORY, 'config_smtp.json')
+
+def get_smtp_config():
+    cfg = load_json_file(SMTP_CONFIG_FILE, {})
+    host = os.environ.get('SMTP_HOST') or cfg.get('host') or cfg.get('smtp_host')
+    port_val = os.environ.get('SMTP_PORT') or cfg.get('port') or cfg.get('smtp_port') or 587
+    try:
+        port = int(port_val)
+    except Exception:
+        port = 587
+    user = os.environ.get('SMTP_USER') or cfg.get('user') or cfg.get('smtp_user')
+    password = os.environ.get('SMTP_PASS') or os.environ.get('SMTP_PASSWORD') or cfg.get('pass') or cfg.get('password') or cfg.get('smtp_pass')
+    sender = os.environ.get('SMTP_FROM') or cfg.get('from') or cfg.get('smtp_from') or 'Creami Cravings <noreply@creamicravings.com>'
+    use_tls = str(os.environ.get('SMTP_USE_TLS') or cfg.get('use_tls') or 'true').lower() in ['1', 'true', 'yes']
+
+    if host and user and password:
+        return {
+            'host': host,
+            'port': port,
+            'user': user,
+            'password': password,
+            'sender': sender,
+            'use_tls': use_tls
+        }
+    return None
+
+def send_password_reset_email(to_email, to_name, code, token):
+    smtp = get_smtp_config()
+    reset_link = f"https://creamicravings.com/?reset_token={token}&email={urllib.parse.quote(to_email)}"
+
+    # Always log to server journal for audit / zero-delay recovery
+    print(f"[AUTH PASSWORD RESET] To: {to_email} | Code: {code} | Link: {reset_link}")
+
+    if not smtp:
+        return False, "SMTP not configured"
+
+    try:
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = f"Your Creami Cravings Password Reset Code: {code}"
+        msg['From'] = smtp['sender']
+        msg['To'] = to_email
+
+        text_content = f"""Hi {to_name or 'there'},
+
+You recently requested to reset the password for your Creami Cravings account ({to_email}).
+
+Your 6-digit verification code is: {code}
+
+Or use this link directly to set a new password:
+{reset_link}
+
+This code and link will expire in 30 minutes. If you did not make this request, you can safely ignore this email.
+
+Happy spinning,
+The Creami Cravings Team
+https://creamicravings.com
+"""
+
+        html_content = f"""<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0f172a; color: #f8fafc; margin: 0; padding: 24px; }}
+    .container {{ max-width: 540px; margin: 0 auto; background: #1e293b; border: 1px solid #334155; border-radius: 16px; overflow: hidden; }}
+    .header {{ background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%); padding: 28px 24px; text-align: center; }}
+    .header h1 {{ margin: 0; font-size: 24px; color: #ffffff; }}
+    .content {{ padding: 32px 28px; line-height: 1.6; color: #cbd5e1; font-size: 15px; }}
+    .code-box {{ background: #0f172a; border: 2px dashed #ec4899; border-radius: 12px; padding: 18px; text-align: center; margin: 24px 0; }}
+    .code {{ font-family: ui-monospace, Menlo, Monaco, Consolas, monospace; font-size: 32px; font-weight: 800; letter-spacing: 6px; color: #f472b6; }}
+    .btn {{ display: inline-block; background: linear-gradient(135deg, #ec4899 0%, #db2777 100%); color: #ffffff !important; text-decoration: none; padding: 12px 24px; border-radius: 999px; font-weight: 700; font-size: 14px; margin-top: 12px; text-align: center; }}
+    .footer {{ padding: 20px 28px; border-top: 1px solid #334155; font-size: 12px; color: #64748b; text-align: center; }}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🍨 Creami Cravings</h1>
+    </div>
+    <div class="content">
+      <p>Hi <strong>{to_name or 'there'}</strong>,</p>
+      <p>We received a request to reset the password for your account associated with <strong>{to_email}</strong>.</p>
+      <p>Enter the 6-digit code below in the Creami Cravings sign-in modal:</p>
+      
+      <div class="code-box">
+        <div class="code">{code}</div>
+      </div>
+
+      <p style="text-align: center;">Or click the button below to reset it directly in your browser:</p>
+      <p style="text-align: center;">
+        <a href="{reset_link}" class="btn">Reset Password Directly ➔</a>
+      </p>
+
+      <p style="font-size: 13px; color: #94a3b8; margin-top: 24px;">This code and link will expire in 30 minutes. If you did not make this request, you can safely ignore this email.</p>
+    </div>
+    <div class="footer">
+      <p>Creami Cravings &bull; The Ultimate Ninja Creami Companion<br>
+      <a href="https://creamicravings.com" style="color: #94a3b8; text-decoration: underline;">creamicravings.com</a></p>
+    </div>
+  </div>
+</body>
+</html>
+"""
+
+        msg.attach(MIMEText(text_content, 'plain'))
+        msg.attach(MIMEText(html_content, 'html'))
+
+        if smtp['port'] == 465:
+            server = smtplib.SMTP_SSL(smtp['host'], smtp['port'], timeout=10)
+        else:
+            server = smtplib.SMTP(smtp['host'], smtp['port'], timeout=10)
+            if smtp['use_tls']:
+                server.starttls()
+        server.login(smtp['user'], smtp['password'])
+        server.sendmail(smtp['sender'], [to_email], msg.as_string())
+        server.quit()
+        return True, "Email sent successfully"
+    except Exception as e:
+        print(f"[AUTH EMAIL ERROR] Could not send reset email to {to_email}: {e}")
+        return False, str(e)
 
 def format_user_payload(user):
     is_admin = user.get('email', '').lower() in ADMIN_EMAILS or user.get('role') == 'admin'
@@ -1749,6 +1874,137 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
             })
             return
 
+        # 5b. Password Reset: Request 6-Digit Code / Reset Token
+        elif self.path == '/api/auth/forgot-password':
+            email = data.get('email', '').strip().lower()
+            if not email or '@' not in email or '.' not in email.split('@')[-1]:
+                self._send_json({'error': 'Please provide a valid email address.'}, 400)
+                return
+
+            target_user = None
+            for u in users_db.values():
+                if u.get('email', '').lower() == email:
+                    target_user = u
+                    break
+
+            if not target_user:
+                # Privacy best practice: acknowledge receipt without leaking whether email exists
+                self._send_json({
+                    'status': 'ok',
+                    'success': True,
+                    'message': 'If an account exists with this email, a reset code has been sent.',
+                    'email': email,
+                    'smtpConfigured': bool(get_smtp_config())
+                })
+                return
+
+            if not target_user.get('password'):
+                self._send_json({
+                    'error': 'This account was registered with Google Sign-In. You can sign in directly using Google without a password.',
+                    'isGoogleAccount': True
+                }, 400)
+                return
+
+            code = f"{secrets.randbelow(900000) + 100000}"
+            token = secrets.token_urlsafe(32)
+            expires_at = (datetime.utcnow() + timedelta(minutes=30)).isoformat()
+
+            target_user['passwordReset'] = {
+                'code': code,
+                'token': token,
+                'expires_at': expires_at,
+                'requested_at': datetime.utcnow().isoformat()
+            }
+            save_json_file(USERS_DB_FILE, users_db)
+
+            sent, reason = send_password_reset_email(email, target_user.get('name') or target_user.get('username'), code, token)
+
+            resp_data = {
+                'status': 'ok',
+                'success': True,
+                'message': 'A 6-digit password reset code has been generated and sent to your email.',
+                'email': email,
+                'smtpConfigured': bool(get_smtp_config()),
+                'emailSent': sent
+            }
+            if not get_smtp_config():
+                resp_data['devCode'] = code
+                resp_data['message'] = f"SMTP is not yet configured on this server. For verification, your reset code is: {code}"
+
+            self._send_json(resp_data)
+            return
+
+        # 5c. Password Reset: Verify Code/Token & Set New Password
+        elif self.path == '/api/auth/reset-password':
+            email = data.get('email', '').strip().lower()
+            code = str(data.get('code', '')).strip()
+            token = str(data.get('token', '')).strip()
+            new_password = data.get('newPassword', '').strip()
+
+            if not email:
+                self._send_json({'error': 'Email address is required.'}, 400)
+                return
+
+            if not new_password or len(new_password) < 6:
+                self._send_json({'error': 'New password must be at least 6 characters long.'}, 400)
+                return
+
+            if not code and not token:
+                self._send_json({'error': 'Verification code or reset token is required.'}, 400)
+                return
+
+            target_user = None
+            for u in users_db.values():
+                if u.get('email', '').lower() == email:
+                    target_user = u
+                    break
+
+            if not target_user:
+                self._send_json({'error': 'No account found with this email.'}, 404)
+                return
+
+            reset_info = target_user.get('passwordReset')
+            if not reset_info:
+                self._send_json({'error': 'No active password reset request found. Please request a new code.'}, 400)
+                return
+
+            expires_at_str = reset_info.get('expires_at')
+            if expires_at_str:
+                try:
+                    exp_dt = datetime.fromisoformat(expires_at_str)
+                    if datetime.utcnow() > exp_dt:
+                        self._send_json({'error': 'Reset code has expired. Please request a new one.'}, 400)
+                        return
+                except Exception:
+                    pass
+
+            expected_code = str(reset_info.get('code', '')).strip()
+            expected_token = str(reset_info.get('token', '')).strip()
+
+            code_match = bool(code and expected_code and hmac.compare_digest(code, expected_code))
+            token_match = bool(token and expected_token and hmac.compare_digest(token, expected_token))
+
+            if not (code_match or token_match):
+                self._send_json({'error': 'Invalid verification code or token. Please check and try again.'}, 400)
+                return
+
+            target_user['password'] = hash_password(new_password)
+            target_user.pop('passwordReset', None)
+
+            new_token = 'token_em_' + str(uuid.uuid4())
+            target_user['token'] = new_token
+            target_user['last_active'] = datetime.utcnow().isoformat()
+            save_json_file(USERS_DB_FILE, users_db)
+
+            self._send_json({
+                'status': 'ok',
+                'success': True,
+                'token': new_token,
+                'user': format_user_payload(target_user),
+                'message': 'Password successfully reset! You are now signed in.'
+            })
+            return
+
         elif self.path == '/api/user/pantry':
             user = self._get_user_from_token()
             if not user:
@@ -1847,6 +2103,42 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
             del users_db[key_to_delete]
             save_json_file(USERS_DB_FILE, users_db)
             self._send_json({'status': 'ok', 'success': True})
+
+        # Admin: Set / Reset Any User's Password Directly
+        elif self.path == '/api/admin/user/reset-password':
+            admin_user = self._get_user_from_token(data)
+            if not admin_user or admin_user.get('role') != 'admin':
+                self._send_json({'error': 'Unauthorized admin access'}, 403)
+                return
+
+            target_id = data.get('userId')
+            target_email = data.get('email', '').strip().lower()
+            new_password = data.get('newPassword', '').strip()
+
+            if not new_password or len(new_password) < 6:
+                self._send_json({'error': 'Password must be at least 6 characters'}, 400)
+                return
+
+            target_user = None
+            for u in users_db.values():
+                if (target_id and u.get('id') == target_id) or (target_email and u.get('email', '').lower() == target_email):
+                    target_user = u
+                    break
+
+            if not target_user:
+                self._send_json({'error': 'Target user not found'}, 404)
+                return
+
+            target_user['password'] = hash_password(new_password)
+            target_user.pop('passwordReset', None)
+            target_user['last_active'] = datetime.utcnow().isoformat()
+            save_json_file(USERS_DB_FILE, users_db)
+
+            self._send_json({
+                'status': 'ok',
+                'success': True,
+                'message': f"Password for {target_user.get('email')} has been successfully updated."
+            })
 
         # Admin: Create New User Account
         elif self.path == '/api/admin/user/create':

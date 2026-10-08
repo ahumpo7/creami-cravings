@@ -3293,6 +3293,60 @@ body.modal-open .cookie-consent-banner {
   color: #f472b6;
 }
 
+.auth-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.auth-label-row label {
+  margin-bottom: 0;
+}
+
+.auth-link-forgot {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.auth-link-forgot:hover {
+  color: #f472b6;
+}
+
+.auth-step-desc {
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+  margin-bottom: 14px;
+  text-align: left;
+}
+
+.auth-reset-notice {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #34d399;
+  border-radius: var(--radius-sm);
+  padding: 9px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-bottom: 14px;
+  text-align: left;
+}
+
+.auth-code-input {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 1.25rem !important;
+  letter-spacing: 0.28em;
+  text-align: center;
+  font-weight: 800;
+}
+
 .auth-error-banner {
   background: rgba(239, 68, 68, 0.12);
   border: 1px solid rgba(239, 68, 68, 0.35);
@@ -7675,6 +7729,22 @@ body.modal-open .cookie-consent-banner {
   border-color: #ef4444;
 }
 
+.btn-admin-reset-pw {
+  padding: 5px 8px;
+  font-size: 0.78rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  background: rgba(245, 158, 11, 0.1);
+  color: #fbbf24;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-admin-reset-pw:hover {
+  background: rgba(245, 158, 11, 0.25);
+  border-color: #f59e0b;
+}
+
 /* ==========================================================================
    Admin Portal Responsive & Mobile Touch Scrolling Optimization
    ========================================================================== */
@@ -7811,7 +7881,8 @@ body.modal-open .cookie-consent-banner {
     min-height: 38px;
   }
 
-  .admin-user-actions .btn-admin-del-user {
+  .admin-user-actions .btn-admin-del-user,
+  .admin-user-actions .btn-admin-reset-pw {
     padding: 8px 12px;
     min-height: 38px;
   }

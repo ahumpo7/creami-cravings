@@ -1402,7 +1402,10 @@
           <input type="text" id="authLoginUsername" required placeholder="e.g. name@example.com" autocomplete="username">
         </div>
         <div class="form-group">
-          <label for="authLoginPassword">Password</label>
+          <div class="auth-label-row">
+            <label for="authLoginPassword">Password</label>
+            <button type="button" class="auth-link-forgot" id="btnForgotPassLink">Forgot password?</button>
+          </div>
           <input type="password" id="authLoginPassword" required placeholder="Enter your password" autocomplete="current-password">
         </div>
         <button type="submit" class="btn-primary btn-block" id="btnPasswordLogin">
@@ -1433,6 +1436,51 @@
         <p class="auth-switch-prompt">
           Already have an account? <button type="button" class="auth-switch-link" id="linkSwitchToSignIn">Sign in</button>
         </p>
+      </form>
+
+      <!-- 3. Password Reset Form (Self-Service) -->
+      <form id="resetAuthForm" class="quick-auth-form" style="display: none;">
+        <input type="hidden" id="authResetToken" value="">
+
+        <!-- Step A: Enter Email to Request 6-Digit Code -->
+        <div id="resetStepRequest">
+          <p class="auth-step-desc">Enter your account email to receive a 6-digit password reset code.</p>
+          <div class="form-group">
+            <label for="authResetEmail">Email Address</label>
+            <input type="email" id="authResetEmail" required placeholder="e.g. name@example.com" autocomplete="email">
+          </div>
+          <button type="button" class="btn-primary btn-block" id="btnSendResetCode">
+            <span>Send Reset Code ➔</span>
+          </button>
+          <p class="auth-switch-prompt">
+            Remembered your password? <button type="button" class="auth-switch-link" id="linkBackToSignIn">Sign In</button>
+          </p>
+        </div>
+
+        <!-- Step B: Verify Code & Set New Password -->
+        <div id="resetStepVerify" style="display: none;">
+          <div class="auth-reset-notice">
+            <span>✉️ Code sent to <strong id="resetEmailSentDisplay"></strong></span>
+          </div>
+          <div class="form-group">
+            <label for="authResetCode">6-Digit Verification Code</label>
+            <input type="text" id="authResetCode" placeholder="123456" maxlength="6" pattern="[0-9]{6}" autocomplete="one-time-code" class="auth-code-input">
+          </div>
+          <div class="form-group">
+            <label for="authResetNewPassword">New Password (6+ characters)</label>
+            <input type="password" id="authResetNewPassword" required placeholder="Create a new password (min 6 characters)" minlength="6" autocomplete="new-password">
+          </div>
+          <div class="form-group">
+            <label for="authResetConfirmPassword">Confirm New Password</label>
+            <input type="password" id="authResetConfirmPassword" required placeholder="Re-enter your new password" minlength="6" autocomplete="new-password">
+          </div>
+          <button type="button" class="btn-primary btn-block" id="btnSubmitResetPassword">
+            <span>Reset Password &amp; Sign In ➔</span>
+          </button>
+          <p class="auth-switch-prompt">
+            Didn't receive code? <button type="button" class="auth-switch-link" id="linkResendResetCode">Resend</button> &bull; <button type="button" class="auth-switch-link" id="linkChangeResetEmail">Change email</button>
+          </p>
+        </div>
       </form>
 
       <!-- Quick Google Fallback Collapsible -->
