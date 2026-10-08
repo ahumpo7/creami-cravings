@@ -164,6 +164,11 @@
             <span class="btn-install-text-mobile">📲</span>
           </button>
 
+          <!-- Feedback Button -->
+          <button id="openFeedbackBtn" class="btn-secondary-action header-desktop-only" title="Share Feedback or Feature Requests">
+            💬 Feedback
+          </button>
+
           <!-- Admin Portal Header Button (Roadmap Item 15) -->
           <button id="openAdminPortalBtn" class="btn-secondary-action btn-admin-header hidden" style="display: none !important;" title="Open Admin Portal (User Management & Tiered Access)">
             <span class="admin-text-desktop">👑 Admin Portal</span>
@@ -492,6 +497,18 @@
           </div>
         </div>
 
+        <!-- Curated SEO Collection Active Banner (Long-Tail Landing) -->
+        <div class="seo-category-banner" id="seoCategoryBanner" style="display: none;">
+          <div class="seo-banner-content">
+            <span class="seo-banner-icon">🎯</span>
+            <div class="seo-banner-text">
+              <strong id="seoBannerTitle">Curated Collection: Ninja Creami Without Protein Powder</strong>
+              <p id="seoBannerDesc">Showing all recipes made with real whole foods, fruit sorbets, and gelato bases without protein powder.</p>
+            </div>
+          </div>
+          <button type="button" class="btn-xs btn-outline seo-clear-btn" id="btnClearSeoFilterBtn">View All Recipes ✕</button>
+        </div>
+
         <!-- Recipe Results Header -->
         <div class="results-header">
           <div class="results-summary-group">
@@ -576,6 +593,8 @@
           <a href="/privacy.html" class="footer-link">Privacy Policy</a>
           <span class="footer-dot">•</span>
           <a href="/terms.html" class="footer-link">Terms of Service</a>
+          <span class="footer-dot">•</span>
+          <button type="button" class="footer-action-btn" id="footerFeedbackBtn">💬 Share Feedback</button>
           <span class="footer-dot">•</span>
           <button type="button" class="footer-action-btn" id="footerCookieBtn">🍪 Cookie Preferences</button>
           <span class="footer-dot">•</span>
@@ -1550,9 +1569,14 @@
       <div class="modal-header admin-modal-header">
         <div class="admin-title-row">
           <div class="admin-icon-badge">👑</div>
-          <div>
+          <div style="flex: 1;">
             <h2 class="modal-title">Admin Portal: Users &amp; Tiered Access</h2>
             <p class="modal-subtitle">Manage registered users, assign roles, and grant or revoke recipe pack permissions in real time.</p>
+          </div>
+          <div class="admin-header-actions">
+            <button type="button" class="btn-secondary" id="btnAdminDownloadBackup" title="Download production database snapshot (.zip)" style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; padding: 7px 14px; white-space: nowrap;">
+              <span>📥 Backup DB (.zip)</span>
+            </button>
           </div>
         </div>
       </div>
@@ -1566,6 +1590,10 @@
         <button type="button" class="admin-tab-btn" id="tabBtnAdminClaims">
           <span>📬 Access Claims &amp; Inquiries</span>
           <span class="admin-tab-count" id="adminTabClaimsBadge">0</span>
+        </button>
+        <button type="button" class="admin-tab-btn" id="tabBtnAdminFeedback">
+          <span>💬 User Feedback</span>
+          <span class="admin-tab-count" id="adminTabFeedbackBadge">0</span>
         </button>
       </div>
 
@@ -1590,6 +1618,10 @@
         <div class="admin-stat-card alert">
           <span class="admin-stat-num" id="adminTotalClaims">0</span>
           <span class="admin-stat-label">Pending Claims</span>
+        </div>
+        <div class="admin-stat-card">
+          <span class="admin-stat-num" id="adminTotalFeedback">0</span>
+          <span class="admin-stat-label">Feedback</span>
         </div>
       </div>
 
@@ -1649,6 +1681,23 @@
         </div>
 
         <div class="admin-claims-list" id="adminClaimsList">
+          <!-- Rendered dynamically by app.js -->
+        </div>
+      </div>
+
+      <!-- PANEL 3: USER FEEDBACK & SUGGESTIONS -->
+      <div id="adminPanelFeedback" class="admin-tab-panel" style="display: none;">
+        <div class="admin-toolbar">
+          <div class="admin-filter-pills" id="adminFeedbackFilterPills">
+            <button type="button" class="btn-time-preset active" data-feedback-status="all">All Feedback</button>
+            <button type="button" class="btn-time-preset" data-feedback-status="pending">⏳ Needs Review</button>
+            <button type="button" class="btn-time-preset" data-feedback-status="reviewed">✅ Reviewed</button>
+            <button type="button" class="btn-time-preset" data-feedback-status="dismissed">✕ Dismissed</button>
+          </div>
+          <button type="button" class="btn-secondary" id="adminRefreshFeedbackBtn" title="Refresh feedback list">🔄 Refresh</button>
+        </div>
+
+        <div class="admin-feedback-list" id="adminFeedbackList">
           <!-- Rendered dynamically by app.js -->
         </div>
       </div>
@@ -1730,6 +1779,64 @@
           <button type="button" class="btn-secondary" id="btnAdminCancelCreateUser">Cancel</button>
           <button type="submit" class="btn-primary" id="btnAdminSubmitCreateUser">
             <span>➕ Create User Account</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: User Feedback & Feature Requests (Roadmap Item 21) -->
+  <div class="modal-overlay" id="feedbackModalOverlay" aria-hidden="true" role="dialog" aria-modal="true" style="z-index: 10100;">
+    <div class="modal-dialog feedback-modal-dialog" role="document">
+      <div class="modal-header">
+        <div class="modal-header-text">
+          <h2 class="modal-title">💬 Share Feedback &amp; Suggestions</h2>
+          <p class="modal-subtitle">Help shape Creami Cravings! Request new features, suggest delicious recipe ideas, or report any issues.</p>
+        </div>
+        <button class="modal-close" id="btnCloseFeedbackModal" aria-label="Close modal">&times;</button>
+      </div>
+      <form id="feedbackForm" class="feedback-form">
+        <div class="feedback-form-group">
+          <label class="admin-form-label">Feedback Type</label>
+          <div class="feedback-category-pills" id="feedbackCategoryPills">
+            <button type="button" class="btn-time-preset active" data-category="feature">💡 Feature Request</button>
+            <button type="button" class="btn-time-preset" data-category="recipe_idea">🍨 Recipe Idea</button>
+            <button type="button" class="btn-time-preset" data-category="bug">🐞 Bug / Issue</button>
+            <button type="button" class="btn-time-preset" data-category="general">⭐ General Thoughts</button>
+          </div>
+        </div>
+
+        <div class="feedback-form-group" style="margin-top: 14px;">
+          <label class="admin-form-label">How's your experience so far? (Optional)</label>
+          <div class="feedback-stars-row" id="feedbackStarsRow">
+            <button type="button" class="feedback-star-btn active" data-star="1" aria-label="1 star">★</button>
+            <button type="button" class="feedback-star-btn active" data-star="2" aria-label="2 stars">★</button>
+            <button type="button" class="feedback-star-btn active" data-star="3" aria-label="3 stars">★</button>
+            <button type="button" class="feedback-star-btn active" data-star="4" aria-label="4 stars">★</button>
+            <button type="button" class="feedback-star-btn active" data-star="5" aria-label="5 stars">★</button>
+          </div>
+        </div>
+
+        <div class="feedback-form-group" style="margin-top: 14px;">
+          <label for="feedbackMessageInput" class="admin-form-label">Your Message <span style="color: #ef4444;">*</span></label>
+          <textarea id="feedbackMessageInput" class="admin-form-input" rows="4" style="height: auto; min-height: 100px; resize: vertical;" placeholder="Tell us what you'd love to see in Creami Cravings, or describe any issue..." required></textarea>
+        </div>
+
+        <div class="admin-form-row" style="margin-top: 14px;">
+          <div class="admin-form-group">
+            <label for="feedbackEmailInput" class="admin-form-label">Email (Optional, for follow-up)</label>
+            <input type="email" id="feedbackEmailInput" class="admin-form-input" placeholder="you@example.com">
+          </div>
+          <div class="admin-form-group">
+            <label for="feedbackNameInput" class="admin-form-label">Name (Optional)</label>
+            <input type="text" id="feedbackNameInput" class="admin-form-input" placeholder="e.g. Alex">
+          </div>
+        </div>
+
+        <div class="modal-actions" style="margin-top: 24px; display: flex; justify-content: flex-end; gap: 12px;">
+          <button type="button" class="btn-secondary" id="btnCancelFeedback">Cancel</button>
+          <button type="submit" class="btn-primary" id="btnSubmitFeedback">
+            <span>🚀 Send Feedback</span>
           </button>
         </div>
       </form>

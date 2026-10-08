@@ -24,3 +24,8 @@ scratch*
 .env
 .env.*
 !.env.example
+
+# Backup archives
+backups/
+*.tar.gz
+*.zip

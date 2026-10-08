@@ -358,6 +358,7 @@
   // Active Filters
   let activeCategory = 'all';
   let activeQuickFilter = 'all';
+  let activeSeoLanding = null;
   let readyOnlyFilter = false;
   let baseOnlyFilter = false;
   let sortBy = 'match_desc';
@@ -593,6 +594,7 @@
     initFreezeNotifications();
     initPwaInstall();
     initCookieConsent();
+    initFeedbackSystem();
 
     // If user is already logged in, immediately fetch latest synchronized cloud data
     if (currentUser && (currentUser.token || currentUser.email)) {
@@ -654,6 +656,8 @@
           openRecipeModal(targetRecipe, false, false);
         }, 120);
       }
+    } else {
+      initSeoCategoryLanding();
     }
 
     // Handle browser back / forward buttons
@@ -3032,6 +3036,15 @@
       if (macroFilters.maxFat < 20) {
         const fat = parseInt(recipe.macros.fat) || 0;
         if (fat > macroFilters.maxFat) return false;
+      }
+
+      // Curated SEO Landing Page Collections
+      if (activeSeoLanding === 'under-300-cal') {
+        const cal = parseInt(recipe.macros.calories) || 999;
+        if (cal > 300) return false;
+      } else if (activeSeoLanding === 'high-protein') {
+        const pro = parseInt(recipe.macros.protein) || 0;
+        if (pro < 25) return false;
       }
 
       // Quick Filter Chips
@@ -9592,7 +9605,7 @@
   const ALL_CATEGORY_SUBSCRIPTIONS = ['All-Access', 'Base Flavors', 'Community Legends', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free'];
 
   function openAdminPortal() {
-    if (!currentUser || currentUser.role !== 'admin') {
+    if (!currentUser || (currentUser.role !== 'admin' && currentUser.email !== 'ahumpo7@gmail.com')) {
       showToast('⚠️ Admin privileges required to access the Admin Portal.');
       return;
     }
@@ -9603,6 +9616,7 @@
       switchAdminTab('users');
       fetchAdminUsers();
       fetchAdminClaims();
+      fetchAdminFeedback();
     }
   }
 
@@ -9618,21 +9632,26 @@
     adminActiveTab = tab;
     const btnUsers = document.getElementById('tabBtnAdminUsers');
     const btnClaims = document.getElementById('tabBtnAdminClaims');
+    const btnFeedback = document.getElementById('tabBtnAdminFeedback');
     const panelUsers = document.getElementById('adminPanelUsers');
     const panelClaims = document.getElementById('adminPanelClaims');
+    const panelFeedback = document.getElementById('adminPanelFeedback');
+
+    [btnUsers, btnClaims, btnFeedback].forEach(b => b && b.classList.remove('active'));
+    [panelUsers, panelClaims, panelFeedback].forEach(p => p && (p.style.display = 'none'));
 
     if (tab === 'users') {
       if (btnUsers) btnUsers.classList.add('active');
-      if (btnClaims) btnClaims.classList.remove('active');
       if (panelUsers) panelUsers.style.display = 'block';
-      if (panelClaims) panelClaims.style.display = 'none';
       renderAdminUsers();
-    } else {
-      if (btnUsers) btnUsers.classList.remove('active');
+    } else if (tab === 'claims') {
       if (btnClaims) btnClaims.classList.add('active');
-      if (panelUsers) panelUsers.style.display = 'none';
       if (panelClaims) panelClaims.style.display = 'block';
       renderAdminClaims();
+    } else if (tab === 'feedback') {
+      if (btnFeedback) btnFeedback.classList.add('active');
+      if (panelFeedback) panelFeedback.style.display = 'block';
+      renderAdminFeedback();
     }
   }
 
@@ -9711,6 +9730,12 @@
     if (tabUsersBadge) tabUsersBadge.textContent = adminUsersState.length;
     const tabClaimsBadge = document.getElementById('adminTabClaimsBadge');
     if (tabClaimsBadge) tabClaimsBadge.textContent = pendingClaimsCount;
+
+    const pendingFeedbackCount = adminFeedbackState.filter(f => !f.status || f.status === 'pending').length;
+    const adminTotalFeedback = document.getElementById('adminTotalFeedback');
+    if (adminTotalFeedback) adminTotalFeedback.textContent = adminFeedbackState.length;
+    const tabFeedbackBadge = document.getElementById('adminTabFeedbackBadge');
+    if (tabFeedbackBadge) tabFeedbackBadge.textContent = pendingFeedbackCount;
   }
 
   function renderAdminUsers() {
@@ -10057,6 +10082,208 @@
     } catch (err) {
       console.error('Resolve claim error:', err);
       showToast('Connection error while updating claim.');
+    }
+  }
+
+  // --- Admin Portal Feedback Management (Roadmap Item 21) ---
+  let adminFeedbackState = [];
+  let adminFilterFeedbackStatus = 'all';
+
+  async function fetchAdminFeedback() {
+    if (!currentUser || (currentUser.role !== 'admin' && currentUser.email !== 'ahumpo7@gmail.com')) return;
+    const listEl = document.getElementById('adminFeedbackList');
+    if (listEl) {
+      listEl.innerHTML = `<div style="text-align: center; padding: 36px 20px; color: var(--text-dim);">Loading feedback...</div>`;
+    }
+
+    try {
+      const res = await fetch('/api/admin/feedback', {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': currentUser.token ? `Bearer ${currentUser.token}` : '',
+          'X-User-Email': currentUser.email || ''
+        }
+      });
+      const data = await res.json();
+      if (res.ok && data.feedback) {
+        adminFeedbackState = data.feedback;
+        updateAdminStats();
+        if (adminActiveTab === 'feedback') {
+          renderAdminFeedback();
+        }
+      }
+    } catch (err) {
+      console.warn('Fetch admin feedback error:', err);
+      if (listEl) {
+        listEl.innerHTML = `<div style="text-align: center; padding: 30px; color: #f87171;">⚠️ Failed to load feedback.</div>`;
+      }
+    }
+  }
+
+  function renderAdminFeedback() {
+    const listEl = document.getElementById('adminFeedbackList');
+    if (!listEl) return;
+
+    const filterStatus = adminFilterFeedbackStatus || 'all';
+    const filtered = adminFeedbackState.filter(f => {
+      const st = f.status || 'pending';
+      if (filterStatus !== 'all' && st !== filterStatus) return false;
+      return true;
+    });
+
+    if (filtered.length === 0) {
+      listEl.innerHTML = `
+        <div style="text-align: center; padding: 40px 20px; color: var(--text-dim);">
+          <div style="font-size: 2rem; margin-bottom: 8px;">💬</div>
+          <div>No ${filterStatus !== 'all' ? filterStatus : ''} feedback submissions found.</div>
+        </div>
+      `;
+      return;
+    }
+
+    const categoryIcons = {
+      feature: '💡 Feature Request',
+      recipe_idea: '🍨 Recipe Idea',
+      bug: '🐞 Bug Report',
+      general: '⭐ General'
+    };
+
+    listEl.innerHTML = filtered.map(f => {
+      const isPending = !f.status || f.status === 'pending';
+      const isReviewed = f.status === 'reviewed';
+      const isDismissed = f.status === 'dismissed';
+      const dateStr = f.timestamp ? new Date(f.timestamp).toLocaleString() : 'N/A';
+      const catLabel = categoryIcons[f.category] || f.category || 'Feedback';
+
+      let starsHtml = '';
+      if (f.rating) {
+        const ratingNum = Math.min(5, Math.max(1, parseInt(f.rating) || 5));
+        starsHtml = `<span style="color: #fbbf24; font-size: 0.95rem; margin-left: 6px;">${'★'.repeat(ratingNum)}${'☆'.repeat(5 - ratingNum)}</span>`;
+      }
+
+      return `
+        <div class="admin-feedback-card status-${f.status || 'pending'}" data-feedback-id="${f.id}">
+          <div class="feedback-card-top">
+            <div class="feedback-submitter-info">
+              <span class="feedback-user-name">${escapeHtml(f.name || 'Anonymous')}</span>
+              ${f.email ? `<span class="feedback-user-email">&lt;${escapeHtml(f.email)}&gt;</span>` : ''}
+              ${starsHtml}
+            </div>
+            <div class="feedback-meta-badges">
+              <span class="badge-feedback-cat">${catLabel}</span>
+              <span class="badge-feedback-status ${f.status || 'pending'}">${f.status || 'pending'}</span>
+            </div>
+          </div>
+          <div class="feedback-card-body">
+            ${escapeHtml(f.message || '')}
+          </div>
+          <div class="feedback-card-footer">
+            <span>📅 Submitted ${dateStr}</span>
+            <div class="feedback-actions-row">
+              ${isPending ? `
+                <button type="button" class="btn-xs btn-claim-approve btn-feedback-review" data-feedback-id="${f.id}">
+                  ✓ Mark Reviewed
+                </button>
+                <button type="button" class="btn-xs btn-claim-dismiss btn-feedback-dismiss" data-feedback-id="${f.id}">
+                  ✕ Dismiss
+                </button>
+              ` : `
+                <span style="font-size: 0.8rem; color: var(--text-dim); font-style: italic;">
+                  ${isReviewed ? '✅ Reviewed' : '✕ Dismissed'}
+                </span>
+                <button type="button" class="btn-xs btn-outline btn-feedback-reopen" data-feedback-id="${f.id}" title="Reopen feedback">
+                  ↺ Reopen
+                </button>
+              `}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    bindAdminFeedbackEvents();
+  }
+
+  function bindAdminFeedbackEvents() {
+    const listEl = document.getElementById('adminFeedbackList');
+    if (!listEl) return;
+
+    listEl.querySelectorAll('.btn-feedback-review').forEach(btn => {
+      btn.addEventListener('click', () => updateAdminFeedbackStatus(btn.dataset.feedbackId, 'reviewed'));
+    });
+    listEl.querySelectorAll('.btn-feedback-dismiss').forEach(btn => {
+      btn.addEventListener('click', () => updateAdminFeedbackStatus(btn.dataset.feedbackId, 'dismissed'));
+    });
+    listEl.querySelectorAll('.btn-feedback-reopen').forEach(btn => {
+      btn.addEventListener('click', () => updateAdminFeedbackStatus(btn.dataset.feedbackId, 'pending'));
+    });
+  }
+
+  async function updateAdminFeedbackStatus(feedbackId, newStatus) {
+    try {
+      const res = await fetch('/api/admin/feedback/status', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': currentUser.token ? `Bearer ${currentUser.token}` : '',
+          'X-User-Email': currentUser.email || ''
+        },
+        body: JSON.stringify({ id: feedbackId, status: newStatus })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        const item = adminFeedbackState.find(f => f.id === feedbackId);
+        if (item) item.status = newStatus;
+        updateAdminStats();
+        renderAdminFeedback();
+        showToast(`Feedback status updated to "${newStatus}".`);
+      } else {
+        showToast('Error: ' + (data.error || 'Failed to update feedback.'));
+      }
+    } catch (err) {
+      console.error('Update feedback error:', err);
+      showToast('Network error while updating feedback.');
+    }
+  }
+
+  async function downloadAdminDatabaseBackup() {
+    const btn = document.getElementById('btnAdminDownloadBackup');
+    if (!currentUser || (currentUser.role !== 'admin' && currentUser.email !== 'ahumpo7@gmail.com')) return;
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<span>⏳ Preparing .zip...</span>';
+    }
+
+    try {
+      const res = await fetch('/api/admin/backup/download', {
+        headers: {
+          'Authorization': currentUser.token ? `Bearer ${currentUser.token}` : '',
+          'X-User-Email': currentUser.email || ''
+        }
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `HTTP ${res.status}`);
+      }
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const nowStr = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+      a.download = `creami_db_backup_${nowStr}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+      showToast('📦 Production database snapshot (.zip) downloaded!');
+    } catch (err) {
+      console.error('Backup download failed:', err);
+      showToast('❌ Backup download failed: ' + err.message);
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<span>📥 Backup DB (.zip)</span>';
+      }
     }
   }
 
@@ -10850,6 +11077,33 @@
     const adminRefreshClaimsBtn = document.getElementById('adminRefreshClaimsBtn');
     if (adminRefreshClaimsBtn) {
       adminRefreshClaimsBtn.addEventListener('click', fetchAdminClaims);
+    }
+
+    const tabBtnAdminFeedback = document.getElementById('tabBtnAdminFeedback');
+    if (tabBtnAdminFeedback) {
+      tabBtnAdminFeedback.addEventListener('click', () => switchAdminTab('feedback'));
+    }
+
+    const adminFeedbackFilterPills = document.getElementById('adminFeedbackFilterPills');
+    if (adminFeedbackFilterPills) {
+      adminFeedbackFilterPills.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-feedback-status]');
+        if (!btn) return;
+        adminFeedbackFilterPills.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        adminFilterFeedbackStatus = btn.dataset.feedbackStatus;
+        renderAdminFeedback();
+      });
+    }
+
+    const adminRefreshFeedbackBtn = document.getElementById('adminRefreshFeedbackBtn');
+    if (adminRefreshFeedbackBtn) {
+      adminRefreshFeedbackBtn.addEventListener('click', fetchAdminFeedback);
+    }
+
+    const btnAdminDownloadBackup = document.getElementById('btnAdminDownloadBackup');
+    if (btnAdminDownloadBackup) {
+      btnAdminDownloadBackup.addEventListener('click', downloadAdminDatabaseBackup);
     }
 
     if (btnAvailablePacksBadge) {
@@ -11703,6 +11957,243 @@
         const marketing = Boolean(prefMarketingToggle && prefMarketingToggle.checked);
         applyCookieConsent({ essential: true, analytics, marketing, timestamp: new Date().toISOString() });
         showToast('🍪 Custom preferences saved.');
+      });
+    }
+  }
+
+  // --- Long-Tail SEO Category Landing Collections ---
+  function initSeoCategoryLanding() {
+    const path = window.location.pathname.toLowerCase().replace(/\/+$/, '');
+    const banner = document.getElementById('seoCategoryBanner');
+    const bannerTitle = document.getElementById('seoBannerTitle');
+    const bannerDesc = document.getElementById('seoBannerDesc');
+    const clearBtn = document.getElementById('btnClearSeoFilterBtn');
+
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        activeSeoLanding = null;
+        if (banner) banner.style.display = 'none';
+        activeCategory = 'all';
+        activeQuickFilter = 'all';
+        if (categoryTabs) {
+          categoryTabs.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+          const allTab = categoryTabs.querySelector('[data-category="all"]');
+          if (allTab) allTab.classList.add('active');
+        }
+        window.history.pushState({}, document.title, '/');
+        renderRecipes();
+      });
+    }
+
+    if (path === '/category/without-protein-powder' || path === '/category/no-protein') {
+      activeSeoLanding = 'without-protein-powder';
+      activeCategory = 'No Protein';
+      if (banner && bannerTitle && bannerDesc) {
+        bannerTitle.textContent = '🎯 Curated Collection: Ninja Creami Without Protein Powder';
+        bannerDesc.textContent = 'Showing 49+ tested recipes crafted with real fruit, gelato bases, and dairy without protein powder or chalkiness.';
+        banner.style.display = 'flex';
+      }
+      if (categoryTabs) {
+        categoryTabs.querySelectorAll('.tab-btn').forEach(b => {
+          b.classList.toggle('active', b.dataset.category === 'No Protein');
+        });
+      }
+      renderRecipes();
+    } else if (path === '/category/keto-low-carb' || path === '/category/keto') {
+      activeSeoLanding = 'keto';
+      activeCategory = 'Keto';
+      if (banner && bannerTitle && bannerDesc) {
+        bannerTitle.textContent = '🥑 Curated Collection: Keto & Low Carb Ninja Creami Recipes';
+        bannerDesc.textContent = 'Ultra-creamy high-fat pints under 5g net carbs per pint made with heavy cream, almond milk, and allulose.';
+        banner.style.display = 'flex';
+      }
+      if (categoryTabs) {
+        categoryTabs.querySelectorAll('.tab-btn').forEach(b => {
+          b.classList.toggle('active', b.dataset.category === 'Keto');
+        });
+      }
+      renderRecipes();
+    } else if (path === '/category/under-300-cal' || path === '/category/under-300-calories' || path === '/category/low-calorie') {
+      activeSeoLanding = 'under-300-cal';
+      if (banner && bannerTitle && bannerDesc) {
+        bannerTitle.textContent = '🔥 Curated Collection: Low-Calorie Ninja Creami (Under 300 kcal)';
+        bannerDesc.textContent = '160+ macro-friendly pints designed for cutting, fat loss, and guilt-free daily snacking under 300 calories.';
+        banner.style.display = 'flex';
+      }
+      renderRecipes();
+    } else if (path === '/category/high-protein' || path === '/category/protein') {
+      activeSeoLanding = 'high-protein';
+      if (banner && bannerTitle && bannerDesc) {
+        bannerTitle.textContent = '💪 Curated Collection: High-Protein Ninja Creami (25g - 50g+ Protein)';
+        bannerDesc.textContent = '120+ anabolic recipe pints with tested macro ratios, silky smooth texture, and optimal spin settings.';
+        banner.style.display = 'flex';
+      }
+      renderRecipes();
+    } else if (path === '/freeze-guide' || path === '/guide/freeze-time' || path === '/guide/ninja-creami-freeze-time') {
+      setTimeout(() => {
+        openFreezerModal();
+        showToast('❄️ Welcome to the Ninja Creami Freeze Time Guide! Log pints and set push alerts below.');
+      }, 300);
+    }
+  }
+
+  // --- User Feedback & Ideas (Roadmap Item 21) ---
+  let userFeedbackCategory = 'feature';
+  let userFeedbackRating = 5;
+
+  function openFeedbackModal(defaultCategory = 'feature', defaultMessage = '') {
+    const modal = document.getElementById('feedbackModalOverlay');
+    if (!modal) return;
+
+    userFeedbackCategory = defaultCategory;
+    userFeedbackRating = 5;
+
+    // Reset pills
+    const pills = document.getElementById('feedbackCategoryPills');
+    if (pills) {
+      pills.querySelectorAll('.btn-time-preset').forEach(b => {
+        b.classList.toggle('active', b.dataset.category === defaultCategory);
+      });
+    }
+
+    // Reset stars
+    updateFeedbackStarsUI(userFeedbackRating);
+
+    // Prefill fields
+    const msgInput = document.getElementById('feedbackMessageInput');
+    if (msgInput) msgInput.value = defaultMessage || '';
+
+    const emailInput = document.getElementById('feedbackEmailInput');
+    if (emailInput) {
+      emailInput.value = currentUser ? (currentUser.email || '') : '';
+    }
+
+    const nameInput = document.getElementById('feedbackNameInput');
+    if (nameInput) {
+      nameInput.value = currentUser ? (currentUser.name || currentUser.username || '') : '';
+    }
+
+    modal.classList.add('active');
+    modal.setAttribute('aria-hidden', 'false');
+    lockBackgroundScroll();
+    if (msgInput) setTimeout(() => msgInput.focus(), 100);
+  }
+
+  function closeFeedbackModal() {
+    const modal = document.getElementById('feedbackModalOverlay');
+    if (modal) {
+      modal.classList.remove('active');
+      modal.setAttribute('aria-hidden', 'true');
+    }
+    unlockBackgroundScroll();
+  }
+
+  function updateFeedbackStarsUI(rating) {
+    const starsRow = document.getElementById('feedbackStarsRow');
+    if (!starsRow) return;
+    starsRow.querySelectorAll('.feedback-star-btn').forEach(btn => {
+      const starVal = parseInt(btn.dataset.star) || 0;
+      btn.classList.toggle('active', starVal <= rating);
+    });
+  }
+
+  function initFeedbackSystem() {
+    const openBtn = document.getElementById('openFeedbackBtn');
+    if (openBtn) openBtn.addEventListener('click', () => openFeedbackModal('feature'));
+
+    const footerBtn = document.getElementById('footerFeedbackBtn');
+    if (footerBtn) footerBtn.addEventListener('click', () => openFeedbackModal('general'));
+
+    const closeBtn = document.getElementById('btnCloseFeedbackModal');
+    if (closeBtn) closeBtn.addEventListener('click', closeFeedbackModal);
+
+    const cancelBtn = document.getElementById('btnCancelFeedback');
+    if (cancelBtn) cancelBtn.addEventListener('click', closeFeedbackModal);
+
+    const overlay = document.getElementById('feedbackModalOverlay');
+    if (overlay) {
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) closeFeedbackModal();
+      });
+    }
+
+    // Category pills click
+    const pills = document.getElementById('feedbackCategoryPills');
+    if (pills) {
+      pills.addEventListener('click', (e) => {
+        const btn = e.target.closest('.btn-time-preset');
+        if (!btn) return;
+        userFeedbackCategory = btn.dataset.category || 'general';
+        pills.querySelectorAll('.btn-time-preset').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    }
+
+    // Stars click
+    const starsRow = document.getElementById('feedbackStarsRow');
+    if (starsRow) {
+      starsRow.addEventListener('click', (e) => {
+        const starBtn = e.target.closest('.feedback-star-btn');
+        if (!starBtn) return;
+        userFeedbackRating = parseInt(starBtn.dataset.star) || 5;
+        updateFeedbackStarsUI(userFeedbackRating);
+      });
+    }
+
+    // Form submit
+    const form = document.getElementById('feedbackForm');
+    if (form) {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const msgInput = document.getElementById('feedbackMessageInput');
+        const emailInput = document.getElementById('feedbackEmailInput');
+        const nameInput = document.getElementById('feedbackNameInput');
+        const submitBtn = document.getElementById('btnSubmitFeedback');
+
+        const message = (msgInput ? msgInput.value : '').trim();
+        if (!message || message.length < 3) {
+          showToast('⚠️ Please write a message (at least 3 characters).');
+          return;
+        }
+
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<span>⏳ Sending...</span>';
+        }
+
+        try {
+          const res = await fetch('/api/feedback', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': currentUser?.token ? `Bearer ${currentUser.token}` : '',
+              'X-User-Email': currentUser?.email || ''
+            },
+            body: JSON.stringify({
+              category: userFeedbackCategory,
+              rating: userFeedbackRating,
+              message: message,
+              email: (emailInput ? emailInput.value : '').trim(),
+              name: (nameInput ? nameInput.value : '').trim()
+            })
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            closeFeedbackModal();
+            showToast('🎉 Thank you! Your feedback has been received.');
+            if (form) form.reset();
+          } else {
+            showToast('⚠️ Error: ' + (data.error || 'Failed to submit feedback.'));
+          }
+        } catch (err) {
+          console.error('Feedback submission error:', err);
+          showToast('Network error submitting feedback.');
+        } finally {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<span>🚀 Send Feedback</span>';
+          }
+        }
       });
     }
   }

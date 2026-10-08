@@ -9,6 +9,7 @@ import urllib.parse
 import base64
 import re
 from datetime import datetime
+import time
 
 DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 
@@ -422,6 +423,47 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
             inquiries = stats_db.get('purchase_inquiries', [])
             self._send_json({'status': 'ok', 'inquiries': inquiries})
 
+        elif self.path == '/api/admin/feedback':
+            user = self._get_user_from_token()
+            if not user or (user.get('role') != 'admin' and user.get('email', '').lower() != 'ahumpo7@gmail.com'):
+                self._send_json({'error': 'Unauthorized admin access'}, 403)
+                return
+            feedback_list = stats_db.get('user_feedback', [])
+            self._send_json({'status': 'ok', 'feedback': feedback_list})
+
+        # Admin: Download Complete Production Database Snapshot (.zip)
+        elif self.path.split('?')[0] == '/api/admin/backup/download':
+            user = self._get_user_from_token()
+            if not user or (user.get('role') != 'admin' and user.get('email', '').lower() != 'ahumpo7@gmail.com'):
+                self._send_json({'error': 'Unauthorized admin access'}, 403)
+                return
+
+            import zipfile
+            import io
+
+            now_str = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+            zip_buffer = io.BytesIO()
+            with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+                for db_name, data_dict in [('db_users.json', users_db), ('db_recipe_stats.json', stats_db), ('db_ratings.json', ratings_db)]:
+                    db_disk_path = os.path.join(DIRECTORY, db_name)
+                    if os.path.exists(db_disk_path):
+                        with open(db_disk_path, 'rb') as f:
+                            zip_file.writestr(db_name, f.read())
+                    else:
+                        json_bytes = json.dumps(data_dict, indent=2, ensure_ascii=False).encode('utf-8')
+                        zip_file.writestr(db_name, json_bytes)
+
+            zip_buffer.seek(0)
+            zip_data = zip_buffer.getvalue()
+
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/zip')
+            self.send_header('Content-Disposition', f'attachment; filename="creami_db_backup_{now_str}.zip"')
+            self.send_header('Content-Length', str(len(zip_data)))
+            self.end_headers()
+            self.wfile.write(zip_data)
+            return
+
         elif self.path == '/service-worker.js':
             sw_path = os.path.join(DIRECTORY, 'service-worker.js')
             if os.path.exists(sw_path):
@@ -571,6 +613,179 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(html.encode('utf-8'))
             return
 
+        elif self.path.startswith('/category/') or self.path in ['/freeze-guide', '/guide/freeze-time', '/guide/ninja-creami-freeze-time']:
+            clean_url = self.path.split('?')[0].rstrip('/')
+            if re.search(r'\.(css|js|png|jpg|jpeg|svg|ico|json|woff2?|ttf|webp|map)$', clean_url, re.I):
+                self.path = '/' + clean_url.split('/')[-1]
+                return super().do_GET()
+
+            index_path = os.path.join(DIRECTORY, 'index.html')
+            if not os.path.exists(index_path):
+                self.send_error(404, "Page not found")
+                return
+
+            with open(index_path, 'r', encoding='utf-8') as f:
+                html = f.read()
+
+            seo_meta = None
+            if clean_url in ['/category/without-protein-powder', '/category/no-protein']:
+                matching_recipes = [r for r in RECIPES_MASTER if r.get('category') == 'No Protein']
+                seo_meta = {
+                    'title': "Ninja Creami Recipes Without Protein Powder — Real Fruit & Gelato Pints | Creami Cravings",
+                    'desc': "Discover 49+ tested Ninja Creami recipes without protein powder! Indulgent fruit sorbets, velvety gelato, and whole-milk ice creams without chalky aftertaste.",
+                    'url': "https://creamicravings.com/category/without-protein-powder",
+                    'heading': "Ninja Creami Recipes Without Protein Powder",
+                    'recipes': matching_recipes[:25]
+                }
+            elif clean_url in ['/category/keto-low-carb', '/category/keto']:
+                matching_recipes = [r for r in RECIPES_MASTER if r.get('category') == 'Keto']
+                seo_meta = {
+                    'title': "Keto Ninja Creami Recipes — Under 5g Net Carbs | Creami Cravings",
+                    'desc': "Best keto Ninja Creami recipes and low-carb ice cream pints. Ultra-creamy textures made with almond milk, heavy cream, and allulose under 5g net carbs per pint.",
+                    'url': "https://creamicravings.com/category/keto-low-carb",
+                    'heading': "Keto & Low Carb Ninja Creami Recipes",
+                    'recipes': matching_recipes
+                }
+            elif clean_url in ['/category/under-300-cal', '/category/under-300-calories', '/category/low-calorie']:
+                def is_under_300(r):
+                    try:
+                        return int(r.get('macros', {}).get('calories', '999').replace('kcal','').strip()) <= 300
+                    except:
+                        return False
+                matching_recipes = [r for r in RECIPES_MASTER if is_under_300(r)]
+                seo_meta = {
+                    'title': "Ninja Creami Recipes Under 300 Calories — Guilt-Free Pints | Creami Cravings",
+                    'desc': "Explore 160+ macro-friendly Ninja Creami recipes under 300 calories per pint. Creamy, high-volume ice cream perfect for weight loss, cutting, and guilt-free snacking.",
+                    'url': "https://creamicravings.com/category/under-300-cal",
+                    'heading': "Low Calorie Ninja Creami Recipes Under 300 kcal",
+                    'recipes': matching_recipes[:25]
+                }
+            elif clean_url in ['/category/high-protein', '/category/protein']:
+                def is_high_pro(r):
+                    try:
+                        return int(r.get('macros', {}).get('protein', '0g').replace('g','').strip()) >= 25
+                    except:
+                        return False
+                matching_recipes = [r for r in RECIPES_MASTER if is_high_pro(r)]
+                seo_meta = {
+                    'title': "High Protein Ninja Creami Recipes — 30g to 50g+ Protein Pints | Creami Cravings",
+                    'desc': "Master collection of high protein Ninja Creami recipes with 30g to 50g+ protein per pint. Tested macro ratios, silky smooth textures, and perfect spin settings.",
+                    'url': "https://creamicravings.com/category/high-protein",
+                    'heading': "High-Protein Ninja Creami Recipes",
+                    'recipes': matching_recipes[:25]
+                }
+            elif clean_url in ['/freeze-guide', '/guide/freeze-time', '/guide/ninja-creami-freeze-time']:
+                seo_meta = {
+                    'title': "Ninja Creami Freeze Time Guide: How Long to Freeze Pints (16 vs 24 Hours) | Creami Cravings",
+                    'desc': "How long do you need to freeze Ninja Creami pints? Complete freeze time guide covering standard 16h vs 24h freeze rules, deluxe pints, freezer temperatures, and interactive freeze timer.",
+                    'url': "https://creamicravings.com/freeze-guide",
+                    'heading': "Ninja Creami Freeze Time Guide",
+                    'is_faq': True
+                }
+
+            if seo_meta:
+                meta_title = seo_meta['title']
+                meta_desc = seo_meta['desc']
+                page_url = seo_meta['url']
+                image_url = "https://creamicravings.com/icon-512.png"
+
+                if seo_meta.get('is_faq'):
+                    json_ld = {
+                        "@context": "https://schema.org",
+                        "@type": "FAQPage",
+                        "mainEntity": [
+                            {
+                                "@type": "Question",
+                                "name": "How long do you need to freeze a Ninja Creami pint?",
+                                "acceptedAnswer": {
+                                    "@type": "Answer",
+                                    "text": "For the best creamy texture, freeze your Ninja Creami base for at least 16 to 24 hours. The mixture needs to reach between -7°F and 9°F (-22°C to -13°C) so the dual-drive blade can shave the ice crystal micro-structure into a creamy texture without powdering or blade drag."
+                                }
+                            },
+                            {
+                                "@type": "Question",
+                                "name": "Can you spin a Ninja Creami pint early after 8 to 12 hours?",
+                                "acceptedAnswer": {
+                                    "@type": "Answer",
+                                    "text": "Spinning before 16 hours is not recommended. If the core of the pint is still liquid or soft while the perimeter is frozen, the high-speed blade will push liquid upwards, creating an uneven icy slump or stressing the motor. Always freeze solid for 16-24 hours."
+                                }
+                            },
+                            {
+                                "@type": "Question",
+                                "name": "Do 24 oz Ninja Creami Deluxe pints take longer to freeze than standard 16 oz pints?",
+                                "acceptedAnswer": {
+                                    "@type": "Answer",
+                                    "text": "Yes. 24 oz Deluxe pints contain 50% more liquid and typically require a full 18 to 24 hours to freeze completely solid through to the center."
+                                }
+                            },
+                            {
+                                "@type": "Question",
+                                "name": "What temperature should your freezer be set to for Ninja Creami?",
+                                "acceptedAnswer": {
+                                    "@type": "Answer",
+                                    "text": "Your freezer should be set between -7°F and 9°F (-22°C and -13°C). If your freezer is too warm (above 10°F), the ice cream will turn out like soft soup. If your freezer is ultra-cold (-15°F or colder), let the pint sit on the counter for 5-10 minutes or use the Re-Spin cycle."
+                                }
+                            }
+                        ]
+                    }
+                else:
+                    item_list = []
+                    for idx, rec in enumerate(seo_meta.get('recipes', []), 1):
+                        r_slug = rec.get('id', '')
+                        item_list.append({
+                            "@type": "ListItem",
+                            "position": idx,
+                            "name": rec.get('name', 'Creami Recipe'),
+                            "url": f"https://creamicravings.com/recipe/{urllib.parse.quote(r_slug)}"
+                        })
+                    json_ld = {
+                        "@context": "https://schema.org",
+                        "@type": "CollectionPage",
+                        "name": seo_meta['heading'],
+                        "description": meta_desc,
+                        "url": page_url,
+                        "mainEntity": {
+                            "@type": "ItemList",
+                            "itemListElement": item_list
+                        }
+                    }
+
+                json_ld_str = json.dumps(json_ld, ensure_ascii=False, indent=2)
+
+                seo_head_block = f'''  <title>{meta_title}</title>
+  <meta name="description" content="{meta_desc}">
+  <link rel="canonical" href="{page_url}">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{page_url}">
+  <meta property="og:title" content="{meta_title}">
+  <meta property="og:description" content="{meta_desc}">
+  <meta property="og:image" content="{image_url}">
+  <meta property="og:site_name" content="Creami Cravings">
+  
+  <!-- Twitter Cards -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:url" content="{page_url}">
+  <meta name="twitter:title" content="{meta_title}">
+  <meta name="twitter:description" content="{meta_desc}">
+  <meta name="twitter:image" content="{image_url}">
+
+  <!-- Schema.org Structured Data for Google Rich Snippets -->
+  <script type="application/ld+json">
+{json_ld_str}
+  </script>'''
+
+                html = re.sub(r'<title>.*?</title>', f'<title>{meta_title}</title>', html, count=1)
+                html = re.sub(r'<meta name="description" content=".*?">', f'<meta name="description" content="{meta_desc}">', html, count=1)
+                html = html.replace('</head>', f'{seo_head_block}\n</head>', 1)
+
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/html; charset=utf-8')
+            self.end_headers()
+            self.wfile.write(html.encode('utf-8'))
+            return
+
         elif self.path == '/sitemap.xml':
             xml_lines = [
                 '<?xml version="1.0" encoding="UTF-8"?>',
@@ -579,6 +794,31 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 '    <loc>https://creamicravings.com/</loc>',
                 '    <changefreq>daily</changefreq>',
                 '    <priority>1.0</priority>',
+                '  </url>',
+                '  <url>',
+                '    <loc>https://creamicravings.com/category/without-protein-powder</loc>',
+                '    <changefreq>weekly</changefreq>',
+                '    <priority>0.9</priority>',
+                '  </url>',
+                '  <url>',
+                '    <loc>https://creamicravings.com/category/keto-low-carb</loc>',
+                '    <changefreq>weekly</changefreq>',
+                '    <priority>0.9</priority>',
+                '  </url>',
+                '  <url>',
+                '    <loc>https://creamicravings.com/category/under-300-cal</loc>',
+                '    <changefreq>weekly</changefreq>',
+                '    <priority>0.9</priority>',
+                '  </url>',
+                '  <url>',
+                '    <loc>https://creamicravings.com/category/high-protein</loc>',
+                '    <changefreq>weekly</changefreq>',
+                '    <priority>0.9</priority>',
+                '  </url>',
+                '  <url>',
+                '    <loc>https://creamicravings.com/freeze-guide</loc>',
+                '    <changefreq>monthly</changefreq>',
+                '    <priority>0.8</priority>',
                 '  </url>',
                 '  <url>',
                 '    <loc>https://creamicravings.com/privacy.html</loc>',
@@ -1295,6 +1535,81 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                     'message': f'Access claim for "{pack}" submitted for verification.',
                     'inquiry': inquiry
                 })
+
+        # User Feedback & Feature Requests (Roadmap Item 21)
+        elif self.path == '/api/feedback':
+            data = self._read_json_body()
+            if not data:
+                self._send_json({'error': 'Invalid JSON body'}, 400)
+                return
+
+            category = data.get('category', 'general').strip()
+            message = data.get('message', '').strip()
+            if not message or len(message) < 3:
+                self._send_json({'error': 'Please provide a valid feedback message (at least 3 characters).'}, 400)
+                return
+
+            user = self._get_user_from_token(data)
+            user_email = (user.get('email') if user else data.get('email', '')).strip().lower()
+            user_name = (user.get('name') if user else data.get('name', 'Anonymous')).strip()
+
+            if 'user_feedback' not in stats_db:
+                stats_db['user_feedback'] = []
+
+            feedback_item = {
+                'id': f"fb_{int(time.time())}_{uuid.uuid4().hex[:6]}",
+                'userId': user.get('id') if user else None,
+                'email': user_email,
+                'name': user_name or 'Anonymous',
+                'category': category,
+                'rating': data.get('rating'),
+                'recipeId': data.get('recipeId'),
+                'message': message,
+                'status': 'pending',
+                'timestamp': datetime.utcnow().isoformat() + 'Z'
+            }
+
+            stats_db['user_feedback'].append(feedback_item)
+            save_json_file(STATS_DB_FILE, stats_db)
+
+            self._send_json({
+                'status': 'ok',
+                'success': True,
+                'message': 'Thank you! Your feedback has been received.',
+                'feedbackId': feedback_item['id']
+            })
+
+        # Admin: Update Feedback Status (Reviewed, Implemented, Dismissed)
+        elif self.path == '/api/admin/feedback/status':
+            user = self._get_user_from_token()
+            if not user or (user.get('role') != 'admin' and user.get('email', '').lower() != 'ahumpo7@gmail.com'):
+                self._send_json({'error': 'Unauthorized admin access'}, 403)
+                return
+
+            data = self._read_json_body()
+            if not data:
+                self._send_json({'error': 'Invalid JSON'}, 400)
+                return
+
+            fb_id = data.get('id')
+            new_status = data.get('status', 'reviewed')
+            if not fb_id:
+                self._send_json({'error': 'Feedback ID is required'}, 400)
+                return
+
+            found = False
+            for item in stats_db.get('user_feedback', []):
+                if item.get('id') == fb_id:
+                    item['status'] = new_status
+                    item['updatedAt'] = datetime.utcnow().isoformat() + 'Z'
+                    found = True
+                    break
+
+            if found:
+                save_json_file(STATS_DB_FILE, stats_db)
+                self._send_json({'status': 'ok', 'success': True})
+            else:
+                self._send_json({'error': 'Feedback item not found'}, 404)
 
         else:
             self._send_json({'error': 'Endpoint not found'}, 404)

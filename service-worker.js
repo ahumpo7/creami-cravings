@@ -1,5 +1,5 @@
 // Creami Cravings Service Worker (Roadmap Items 11 & 17 & 19)
-const CACHE_NAME = 'creami-cravings-v2.17';
+const CACHE_NAME = 'creami-cravings-v2.18';
 
 const PRECACHE_ASSETS = [
   '/',
@@ -136,6 +136,45 @@ self.addEventListener('fetch', (event) => {
     );
     return;
   }
+});
+
+// Push Event Handler: Native Web Push notifications when app is closed or backgrounded
+self.addEventListener('push', (event) => {
+  let data = {};
+  if (event.data) {
+    try {
+      data = event.data.json();
+    } catch (e) {
+      data = { title: 'Creami Cravings', body: event.data.text() };
+    }
+  }
+
+  const title = data.title || '🍨 Pint Ready to Spin!';
+  const pintId = data.pintId || (data.data && data.data.pintId);
+  const recipeId = data.recipeId || (data.data && data.data.recipeId);
+  const body = data.body || 'Your Creami pint has chilled for 16 hours and is frozen solid! Tap to spin.';
+
+  const options = {
+    body: body,
+    icon: '/icon-192.png',
+    badge: '/icon-192.png',
+    tag: pintId ? `freeze-ready-${pintId}` : 'freeze-ready-generic',
+    renotify: true,
+    vibrate: [250, 100, 250, 100, 250],
+    data: {
+      url: `/?action=freeze-ready${pintId ? '&pintId=' + encodeURIComponent(pintId) : ''}${recipeId ? '&recipeId=' + encodeURIComponent(recipeId) : ''}`,
+      pintId: pintId,
+      recipeId: recipeId,
+      recipeName: data.recipeName || 'Creami Pint',
+      scale: data.scale || 1.0
+    },
+    actions: [
+      { action: 'spin', title: '🍨 Spin & Enjoy' },
+      { action: 'recipe', title: '📖 View Recipe' }
+    ]
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
 });
 
 // Notification Click Handler (Roadmap Item 17: Native Push Notifications for Freeze Timer)
