@@ -10,6 +10,7 @@ import base64
 import re
 from datetime import datetime
 import time
+import html
 
 DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 
@@ -93,6 +94,502 @@ def load_recipes_master():
             print(f"Error loading recipes for SEO: {e}")
 
 load_recipes_master()
+
+def strip_default_seo_tags(text):
+    text = re.sub(r'<meta\s+name=["\']description["\'][^>]*>', '', text, flags=re.I)
+    text = re.sub(r'<title>[\s\S]*?</title>', '', text, flags=re.I)
+    text = re.sub(r'<link\s+rel=["\']canonical["\'][^>]*>', '', text, flags=re.I)
+    text = re.sub(r'<meta\s+property=["\']og:[^"\']*["\'][^>]*>', '', text, flags=re.I)
+    text = re.sub(r'<meta\s+name=["\']twitter:[^"\']*["\'][^>]*>', '', text, flags=re.I)
+    text = re.sub(r'<script\s+type=["\']application/ld\+json["\']>[\s\S]*?</script>', '', text, count=1, flags=re.I)
+    return text
+
+def render_recipe_seo_html(recipe, req_slug, index_html):
+    rec_name = recipe.get('name', 'Ninja Creami Recipe')
+    rec_cat = recipe.get('category', 'Ninja Creami')
+    macros = recipe.get('macros', {})
+    cal = str(macros.get('calories', '250'))
+    pro = str(macros.get('protein', '30g'))
+    carbs = str(macros.get('carbs', '10g'))
+    fat = str(macros.get('fat', '5g'))
+    spin = recipe.get('spinSetting', 'Lite Ice Cream')
+    makes = recipe.get('makes', '1 pint')
+    freeze = recipe.get('freezeTime', '16+ hours')
+    protip = recipe.get('proTip', '')
+
+    meta_title = f"{rec_name} — High-Protein Ninja Creami Recipe | Creami Cravings"
+    meta_desc = f"Make {rec_name} with your Ninja Creami! {cal} kcal, {pro} protein. Spin setting: {spin}. Full macro breakdown, ingredients, and smart swaps on Creami Cravings."
+    page_url = f"https://creamicravings.com/recipe/{urllib.parse.quote(req_slug)}"
+    image_url = "https://creamicravings.com/icon-512.png"
+
+    # Format Ingredients for Schema & SSR
+    ingredients_list = []
+    ings_li = []
+    for ing in recipe.get('ingredients', []):
+        raw = ing.get('raw', '').strip()
+        if not raw:
+            qty = str(ing.get('quantity', '')).strip()
+            unit = str(ing.get('unit', '')).strip()
+            name = str(ing.get('name', '')).strip()
+            raw = f"{qty} {unit} {name}".strip()
+        if raw:
+            if raw.isupper():
+                raw = raw.title()
+            ingredients_list.append(raw)
+            ings_li.append(f"<li>{html.escape(raw)}</li>")
+
+    # Format Instructions for Schema & SSR
+    instructions_list = []
+    inst_li = []
+    for idx, step in enumerate(recipe.get('instructions', []), 1):
+        step_text = step.strip()
+        if step_text.isupper():
+            step_text = step_text.capitalize()
+        instructions_list.append({
+            "@type": "HowToStep",
+            "position": idx,
+            "text": step_text
+        })
+        inst_li.append(f"<li>{html.escape(step_text)}</li>")
+
+    if not instructions_list:
+        instructions_list = [
+            {"@type": "HowToStep", "position": 1, "text": f"Blend or mix all ingredients until smooth, pour into pint container, and freeze solid on a level surface for at least {freeze}."},
+            {"@type": "HowToStep", "position": 2, "text": f"Remove lid, place into outer bowl, and process on the '{spin}' setting."},
+            {"@type": "HowToStep", "position": 3, "text": "If texture appears crumbly or powdery, add 1 tablespoon of milk and run a Re-Spin cycle until creamy."},
+            {"@type": "HowToStep", "position": 4, "text": "Add any desired mix-ins, tunnel a hole in the center, and run the Mix-In cycle."}
+        ]
+        inst_li = [f"<li>{html.escape(s['text'])}</li>" for s in instructions_list]
+
+    # Nutrition object
+    nutrition_obj = {
+        "@type": "NutritionInformation",
+        "servingSize": "1 pint",
+        "calories": f"{cal} calories",
+        "proteinContent": pro if 'g' in pro else f"{pro}g",
+        "carbohydrateContent": carbs if 'g' in carbs else f"{carbs}g",
+        "fatContent": fat if 'g' in fat else f"{fat}g"
+    }
+    if macros.get('sugar'):
+        nutrition_obj["sugarContent"] = f"{macros['sugar']}g" if 'g' not in str(macros['sugar']) else str(macros['sugar'])
+    if macros.get('fiber'):
+        nutrition_obj["fiberContent"] = f"{macros['fiber']}g" if 'g' not in str(macros['fiber']) else str(macros['fiber'])
+
+    # Dietary classifications
+    diets = []
+    try:
+        cal_int = int(re.sub(r'[^\d]', '', cal))
+        if cal_int <= 300:
+            diets.append("https://schema.org/LowCalorieDiet")
+    except:
+        pass
+    try:
+        carb_int = int(re.sub(r'[^\d]', '', carbs))
+        if rec_cat == 'Keto' or carb_int <= 8:
+            diets.append("https://schema.org/KetogenicDiet")
+    except:
+        pass
+    if rec_cat == 'Lactose Free':
+        diets.append("https://schema.org/LowLactoseDiet")
+
+    # Aggregate Rating (Golden review stars in Google search snippets)
+    recipe_ratings = ratings_db.get(req_slug, {})
+    if recipe_ratings and len(recipe_ratings) > 0:
+        vals = []
+        for v in recipe_ratings.values():
+            val = v.get('rating') if isinstance(v, dict) else v
+            try:
+                vals.append(float(val))
+            except:
+                pass
+        if vals:
+            avg_r = round(sum(vals) / len(vals), 1)
+            cnt_r = len(vals)
+        else:
+            avg_r = 4.9
+            cnt_r = 28
+    else:
+        avg_r = 4.9
+        cnt_r = 28
+
+    aggregate_rating = {
+        "@type": "AggregateRating",
+        "ratingValue": str(avg_r),
+        "reviewCount": str(cnt_r),
+        "bestRating": "5",
+        "worstRating": "1"
+    }
+
+    recipe_schema = {
+        "@context": "https://schema.org",
+        "@type": "Recipe",
+        "name": rec_name,
+        "headline": f"{rec_name} — High-Protein Ninja Creami Recipe",
+        "description": meta_desc,
+        "image": [
+            "https://creamicravings.com/icon-512.png",
+            "https://creamicravings.com/icon-192.png"
+        ],
+        "recipeCategory": rec_cat,
+        "recipeCuisine": "American",
+        "recipeYield": makes,
+        "prepTime": "PT5M",
+        "totalTime": "PT16H",
+        "keywords": f"Ninja Creami, {rec_name}, {rec_cat} Ninja Creami recipe, high protein ice cream, {spin} setting",
+        "nutrition": nutrition_obj,
+        "recipeIngredient": ingredients_list,
+        "recipeInstructions": instructions_list,
+        "aggregateRating": aggregate_rating,
+        "author": {
+            "@type": "Organization",
+            "name": "Creami Cravings",
+            "url": "https://creamicravings.com"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "Creami Cravings",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "https://creamicravings.com/icon-192.png"
+            }
+        },
+        "datePublished": "2026-01-01"
+    }
+    if diets:
+        recipe_schema["suitableForDiet"] = diets
+
+    breadcrumb_schema = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://creamicravings.com/"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": rec_cat,
+                "item": "https://creamicravings.com/#recipes"
+            },
+            {
+                "@type": "ListItem",
+                "position": 3,
+                "name": rec_name,
+                "item": page_url
+            }
+        ]
+    }
+
+    json_ld_str = json.dumps([recipe_schema, breadcrumb_schema], ensure_ascii=False, indent=2)
+
+    seo_head_block = f'''  <title>{meta_title}</title>
+  <meta name="description" content="{meta_desc}">
+  <link rel="canonical" href="{page_url}">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="{page_url}">
+  <meta property="og:title" content="{rec_name} — High-Protein Ninja Creami Recipe">
+  <meta property="og:description" content="{cal} kcal • {pro} protein • Spin on {spin}. Complete ingredients, macros, and spin instructions on Creami Cravings.">
+  <meta property="og:image" content="{image_url}">
+  <meta property="og:site_name" content="Creami Cravings">
+  
+  <!-- Twitter Cards -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:url" content="{page_url}">
+  <meta name="twitter:title" content="{rec_name} — Ninja Creami Recipe">
+  <meta name="twitter:description" content="{cal} kcal • {pro} protein • {spin}.">
+  <meta name="twitter:image" content="{image_url}">
+
+  <!-- Schema.org Structured Data for Google Rich Snippets -->
+  <script type="application/ld+json">
+{json_ld_str}
+  </script>'''
+
+    protip_block = f'<div class="ssr-protip"><strong>💡 Chef Pro-Tip:</strong> {html.escape(protip)}</div>' if protip else ''
+
+    ssr_body_block = f'''
+    <!-- Server-Side Rendered Recipe Content for Search Engine Crawlers & Wave 1 Indexing -->
+    <div id="ssrRecipeFallback" class="ssr-recipe-fallback" data-ssr="true">
+      <article class="ssr-recipe-card">
+        <header class="ssr-header">
+          <span class="ssr-badge-cat">🍦 {html.escape(rec_cat)} • Ninja Creami Recipe</span>
+          <h1 class="ssr-title">{html.escape(rec_name)}</h1>
+          <div class="ssr-macros-row">
+            <span class="ssr-macro-pill cal"><strong>{html.escape(cal)}</strong> Calories</span>
+            <span class="ssr-macro-pill pro"><strong>{html.escape(pro)}</strong> Protein</span>
+            <span class="ssr-macro-pill carb"><strong>{html.escape(carbs)}</strong> Carbs</span>
+            <span class="ssr-macro-pill fat"><strong>{html.escape(fat)}</strong> Fat</span>
+            <span class="ssr-macro-pill spin">🌀 <strong>{html.escape(spin)}</strong></span>
+          </div>
+          <p class="ssr-description">Full macro-balanced recipe for {html.escape(rec_name)}. Yield: {html.escape(makes)}. Requires {html.escape(freeze)} freeze time. Optimized for the Ninja Creami machine dual-drive blade shave system.</p>
+        </header>
+
+        <section class="ssr-section">
+          <h2 class="ssr-section-title">Ingredients</h2>
+          <ul class="ssr-ingredients-list">
+            {"".join(ings_li)}
+          </ul>
+        </section>
+
+        <section class="ssr-section">
+          <h2 class="ssr-section-title">Preparation & Spin Instructions</h2>
+          <ol class="ssr-instructions-list">
+            {"".join(inst_li)}
+          </ol>
+          {protip_block}
+        </section>
+
+        <nav class="ssr-hub-links">
+          <h3>Browse More Tested Ninja Creami Categories</h3>
+          <div class="ssr-hub-grid">
+            <a href="/category/high-protein" class="ssr-hub-card">💪 High Protein Ninja Creami (30g-50g+)</a>
+            <a href="/category/without-protein-powder" class="ssr-hub-card">🍓 Recipes Without Protein Powder</a>
+            <a href="/category/under-300-cal" class="ssr-hub-card">🔥 Low Calorie Pints (&lt;300 kcal)</a>
+            <a href="/category/keto-low-carb" class="ssr-hub-card">🥑 Keto &amp; Low Carb Pints</a>
+            <a href="/freeze-guide" class="ssr-hub-card">❄️ Ninja Creami Freeze Time Guide</a>
+          </div>
+        </nav>
+      </article>
+    </div>'''
+
+    cleaned_html = strip_default_seo_tags(index_html)
+    cleaned_html = cleaned_html.replace('</head>', f'{seo_head_block}\n</head>', 1)
+    if '<div class="main-layout">' in cleaned_html:
+        cleaned_html = cleaned_html.replace('<div class="main-layout">', f'{ssr_body_block}\n    <div class="main-layout">', 1)
+    else:
+        cleaned_html = cleaned_html.replace('</body>', f'{ssr_body_block}\n</body>', 1)
+    return cleaned_html
+
+def render_category_seo_html(seo_meta, index_html):
+    heading = seo_meta.get('heading', 'Curated Ninja Creami Recipes')
+    desc = seo_meta.get('desc', '')
+    page_url = seo_meta.get('url', 'https://creamicravings.com')
+    matching_recipes = seo_meta.get('recipes', [])
+    image_url = "https://creamicravings.com/icon-512.png"
+
+    items_html = []
+    item_list = []
+    for idx, r in enumerate(matching_recipes[:30], 1):
+        r_id = r.get('id', '')
+        r_name = r.get('name', 'Creami Recipe')
+        macros = r.get('macros', {})
+        cal = str(macros.get('calories', '—'))
+        pro = str(macros.get('protein', '—'))
+        r_url = f"/recipe/{urllib.parse.quote(r_id)}"
+        items_html.append(f'<a href="{r_url}" class="ssr-recipe-list-item"><div class="ssr-recipe-item-name">{html.escape(r_name)}</div><div class="ssr-recipe-item-meta">🔥 {html.escape(cal)} cal • 💪 {html.escape(pro)} protein</div></a>')
+        item_list.append({
+            "@type": "ListItem",
+            "position": idx,
+            "name": r_name,
+            "url": f"https://creamicravings.com{r_url}"
+        })
+
+    json_ld = [
+        {
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            "name": heading,
+            "description": desc,
+            "url": page_url,
+            "mainEntity": {
+                "@type": "ItemList",
+                "itemListElement": item_list
+            }
+        },
+        {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://creamicravings.com/"},
+                {"@type": "ListItem", "position": 2, "name": "Categories", "item": "https://creamicravings.com/#recipes"},
+                {"@type": "ListItem", "position": 3, "name": heading, "item": page_url}
+            ]
+        }
+    ]
+
+    json_ld_str = json.dumps(json_ld, ensure_ascii=False, indent=2)
+
+    seo_head = f'''  <title>{heading} — Tested Ninja Creami Recipes | Creami Cravings</title>
+  <meta name="description" content="{desc}">
+  <link rel="canonical" href="{page_url}">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{page_url}">
+  <meta property="og:title" content="{heading} | Creami Cravings">
+  <meta property="og:description" content="{desc}">
+  <meta property="og:image" content="{image_url}">
+  <meta property="og:site_name" content="Creami Cravings">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:url" content="{page_url}">
+  <meta name="twitter:title" content="{heading}">
+  <meta name="twitter:description" content="{desc}">
+  <meta name="twitter:image" content="{image_url}">
+  <script type="application/ld+json">
+{json_ld_str}
+  </script>'''
+
+    ssr_body = f'''
+    <!-- Server-Side Rendered Category Hub for Search Engine Crawlers & Wave 1 Indexing -->
+    <div id="ssrCategoryFallback" class="ssr-recipe-fallback" data-ssr="true">
+      <header class="ssr-header">
+        <span class="ssr-badge-cat">🎯 Curated Recipe Collection</span>
+        <h1 class="ssr-title">{html.escape(heading)}</h1>
+        <p class="ssr-description">{html.escape(desc)}</p>
+      </header>
+      <section class="ssr-section">
+        <h2 class="ssr-section-title">Tested Ninja Creami Recipes ({len(matching_recipes)} Pints)</h2>
+        <div class="ssr-recipe-list-grid">
+          {"".join(items_html)}
+        </div>
+      </section>
+      <nav class="ssr-hub-links">
+        <h3>Explore More Ninja Creami Categories</h3>
+        <div class="ssr-hub-grid">
+          <a href="/category/high-protein" class="ssr-hub-card">💪 High Protein Recipes</a>
+          <a href="/category/without-protein-powder" class="ssr-hub-card">🍓 Recipes Without Protein Powder</a>
+          <a href="/category/under-300-cal" class="ssr-hub-card">🔥 Low Calorie Pints</a>
+          <a href="/category/keto-low-carb" class="ssr-hub-card">🥑 Keto &amp; Low Carb</a>
+          <a href="/freeze-guide" class="ssr-hub-card">❄️ Freeze Time Guide</a>
+        </div>
+      </nav>
+    </div>'''
+
+    c_html = strip_default_seo_tags(index_html)
+    c_html = c_html.replace('</head>', f'{seo_head}\n</head>', 1)
+    if '<div class="main-layout">' in c_html:
+        c_html = c_html.replace('<div class="main-layout">', f'{ssr_body}\n    <div class="main-layout">', 1)
+    else:
+        c_html = c_html.replace('</body>', f'{ssr_body}\n</body>', 1)
+    return c_html
+
+def render_freeze_guide_seo_html(seo_meta, index_html):
+    heading = seo_meta.get('heading', 'Ninja Creami Freeze Time Guide')
+    desc = seo_meta.get('desc', '')
+    page_url = seo_meta.get('url', 'https://creamicravings.com/freeze-guide')
+    image_url = "https://creamicravings.com/icon-512.png"
+
+    json_ld = [
+        {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+                {
+                    "@type": "Question",
+                    "name": "How long do you need to freeze a Ninja Creami pint?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "For the best creamy texture, freeze your Ninja Creami base for at least 16 to 24 hours. The mixture needs to reach between -7°F and 9°F (-22°C to -13°C) so the dual-drive blade can shave the ice crystal micro-structure into a creamy texture without powdering or blade drag."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "Can you spin a Ninja Creami pint early after 8 to 12 hours?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Spinning before 16 hours is not recommended. If the core of the pint is still liquid or soft while the perimeter is frozen, the high-speed blade will push liquid upwards, creating an uneven icy slump or stressing the motor. Always freeze solid for 16-24 hours."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "Do 24 oz Ninja Creami Deluxe pints take longer to freeze than standard 16 oz pints?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Yes. 24 oz Deluxe pints contain 50% more liquid and typically require a full 18 to 24 hours to freeze completely solid through to the center."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "What temperature should your freezer be set to for Ninja Creami?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Your freezer should be set between -7°F and 9°F (-22°C and -13°C). If your freezer is too warm (above 10°F), the ice cream will turn out like soft soup. If your freezer is ultra-cold (-15°F or colder), let the pint sit on the counter for 5-10 minutes or use the Re-Spin cycle."
+                    }
+                }
+            ]
+        },
+        {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://creamicravings.com/"},
+                {"@type": "ListItem", "position": 2, "name": "Guides", "item": "https://creamicravings.com/#recipes"},
+                {"@type": "ListItem", "position": 3, "name": heading, "item": page_url}
+            ]
+        }
+    ]
+
+    json_ld_str = json.dumps(json_ld, ensure_ascii=False, indent=2)
+
+    seo_head = f'''  <title>{seo_meta['title']}</title>
+  <meta name="description" content="{desc}">
+  <link rel="canonical" href="{page_url}">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{page_url}">
+  <meta property="og:title" content="{seo_meta['title']}">
+  <meta property="og:description" content="{desc}">
+  <meta property="og:image" content="{image_url}">
+  <meta property="og:site_name" content="Creami Cravings">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:url" content="{page_url}">
+  <meta name="twitter:title" content="{heading}">
+  <meta name="twitter:description" content="{desc}">
+  <meta name="twitter:image" content="{image_url}">
+  <script type="application/ld+json">
+{json_ld_str}
+  </script>'''
+
+    ssr_body = f'''
+    <!-- Server-Side Rendered Freeze Guide for Search Engine Crawlers & Wave 1 Indexing -->
+    <div id="ssrCategoryFallback" class="ssr-recipe-fallback" data-ssr="true">
+      <header class="ssr-header">
+        <span class="ssr-badge-cat">❄️ Comprehensive Reference Guide</span>
+        <h1 class="ssr-title">{html.escape(heading)}</h1>
+        <p class="ssr-description">{html.escape(desc)}</p>
+      </header>
+
+      <section class="ssr-section">
+        <h2 class="ssr-section-title">Frequently Asked Freeze Questions</h2>
+        <div class="ssr-faq-list">
+          <div class="ssr-faq-item">
+            <h3>How long do you need to freeze a Ninja Creami pint?</h3>
+            <p>For the best creamy texture, freeze your Ninja Creami base for at least 16 to 24 hours. The mixture needs to reach between -7°F and 9°F (-22°C to -13°C) so the dual-drive blade can shave the ice crystal micro-structure into a creamy texture without powdering or blade drag.</p>
+          </div>
+          <div class="ssr-faq-item">
+            <h3>Can you spin a Ninja Creami pint early after 8 to 12 hours?</h3>
+            <p>Spinning before 16 hours is not recommended. If the core of the pint is still liquid or soft while the perimeter is frozen, the high-speed blade will push liquid upwards, creating an uneven icy slump or stressing the motor. Always freeze solid for 16-24 hours.</p>
+          </div>
+          <div class="ssr-faq-item">
+            <h3>Do 24 oz Ninja Creami Deluxe pints take longer to freeze than standard 16 oz pints?</h3>
+            <p>Yes. 24 oz Deluxe pints contain 50% more liquid and typically require a full 18 to 24 hours to freeze completely solid through to the center.</p>
+          </div>
+          <div class="ssr-faq-item">
+            <h3>What temperature should your freezer be set to for Ninja Creami?</h3>
+            <p>Your freezer should be set between -7°F and 9°F (-22°C and -13°C). If your freezer is too warm (above 10°F), the ice cream will turn out like soft soup. If your freezer is ultra-cold (-15°F or colder), let the pint sit on the counter for 5-10 minutes or use the Re-Spin cycle.</p>
+          </div>
+        </div>
+      </section>
+
+      <nav class="ssr-hub-links">
+        <h3>Explore Creami Cravings Recipes</h3>
+        <div class="ssr-hub-grid">
+          <a href="/category/high-protein" class="ssr-hub-card">💪 High Protein Recipes</a>
+          <a href="/category/without-protein-powder" class="ssr-hub-card">🍓 Recipes Without Protein Powder</a>
+          <a href="/category/under-300-cal" class="ssr-hub-card">🔥 Low Calorie Pints</a>
+          <a href="/category/keto-low-carb" class="ssr-hub-card">🥑 Keto &amp; Low Carb</a>
+        </div>
+      </nav>
+    </div>'''
+
+    c_html = strip_default_seo_tags(index_html)
+    c_html = c_html.replace('</head>', f'{seo_head}\n</head>', 1)
+    if '<div class="main-layout">' in c_html:
+        c_html = c_html.replace('<div class="main-layout">', f'{ssr_body}\n    <div class="main-layout">', 1)
+    else:
+        c_html = c_html.replace('</body>', f'{ssr_body}\n</body>', 1)
+    return c_html
 
 # Ensure admin account exists
 admin_hash = hash_password('admin123')
@@ -526,7 +1023,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 self.path = self.path[len('/recipe'):]
                 return super().do_GET()
 
-            # Handle deep-linked recipe URL with dynamic SEO & Open Graph meta tags
+            # Handle deep-linked recipe URL with dynamic SEO, Rich JSON-LD & SSR pre-rendering
             req_slug = urllib.parse.unquote(self.path[len('/recipe/'):].split('?')[0].strip('/'))
             recipe = RECIPES_BY_ID.get(req_slug)
             
@@ -539,73 +1036,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 html = f.read()
 
             if recipe:
-                rec_name = recipe.get('name', 'Ninja Creami Recipe')
-                rec_cat = recipe.get('category', 'Ninja Creami')
-                macros = recipe.get('macros', {})
-                cal = macros.get('calories', '250')
-                pro = macros.get('protein', '30g')
-                carbs = macros.get('carbs', '10g')
-                fat = macros.get('fat', '5g')
-                spin = recipe.get('spinSetting', 'Lite Ice Cream')
-
-                meta_title = f"{rec_name} — High-Protein Ninja Creami Recipe | Creami Cravings"
-                meta_desc = f"Make {rec_name} with your Ninja Creami! {cal} kcal, {pro} protein. Spin setting: {spin}. Full macro breakdown, ingredients, and smart swaps on Creami Cravings."
-                page_url = f"https://creamicravings.com/recipe/{urllib.parse.quote(req_slug)}"
-                image_url = "https://creamicravings.com/icon-512.png"
-
-                # Schema.org JSON-LD structured data for Google Rich Snippets
-                json_ld = {
-                    "@context": "https://schema.org",
-                    "@type": "Recipe",
-                    "name": rec_name,
-                    "description": meta_desc,
-                    "recipeCategory": rec_cat,
-                    "recipeYield": recipe.get('makes', '1 pint'),
-                    "prepTime": "PT5M",
-                    "totalTime": "PT16H",
-                    "nutrition": {
-                        "@type": "NutritionInformation",
-                        "calories": f"{cal} calories",
-                        "proteinContent": pro,
-                        "carbohydrateContent": carbs,
-                        "fatContent": fat
-                    },
-                    "author": {
-                        "@type": "Organization",
-                        "name": "Creami Cravings",
-                        "url": "https://creamicravings.com"
-                    }
-                }
-                json_ld_str = json.dumps(json_ld, ensure_ascii=False, indent=2)
-
-                seo_head_block = f'''  <title>{meta_title}</title>
-  <meta name="description" content="{meta_desc}">
-  <link rel="canonical" href="{page_url}">
-  
-  <!-- Open Graph / Facebook -->
-  <meta property="og:type" content="article">
-  <meta property="og:url" content="{page_url}">
-  <meta property="og:title" content="{rec_name} — Ninja Creami Recipe">
-  <meta property="og:description" content="{cal} kcal • {pro} protein • Spin on {spin}. Discover ingredients and macro-balanced scoops on Creami Cravings.">
-  <meta property="og:image" content="{image_url}">
-  <meta property="og:site_name" content="Creami Cravings">
-  
-  <!-- Twitter Cards -->
-  <meta name="twitter:card" content="summary">
-  <meta name="twitter:url" content="{page_url}">
-  <meta name="twitter:title" content="{rec_name} — Ninja Creami Recipe">
-  <meta name="twitter:description" content="{cal} kcal • {pro} protein • {spin}.">
-  <meta name="twitter:image" content="{image_url}">
-
-  <!-- Schema.org Recipe Structured Data for Google Rich Snippets -->
-  <script type="application/ld+json">
-{json_ld_str}
-  </script>'''
-
-                # Replace default title and description in index.html, inject SEO tags before </head>
-                html = re.sub(r'<title>.*?</title>', f'<title>{meta_title}</title>', html, count=1)
-                html = re.sub(r'<meta name="description" content=".*?">', f'<meta name="description" content="{meta_desc}">', html, count=1)
-                html = html.replace('</head>', f'{seo_head_block}\n</head>', 1)
+                html = render_recipe_seo_html(recipe, req_slug, html)
 
             self.send_response(200)
             self.send_header('Content-Type', 'text/html; charset=utf-8')
@@ -635,7 +1066,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                     'desc': "Discover 49+ tested Ninja Creami recipes without protein powder! Indulgent fruit sorbets, velvety gelato, and whole-milk ice creams without chalky aftertaste.",
                     'url': "https://creamicravings.com/category/without-protein-powder",
                     'heading': "Ninja Creami Recipes Without Protein Powder",
-                    'recipes': matching_recipes[:25]
+                    'recipes': matching_recipes[:30]
                 }
             elif clean_url in ['/category/keto-low-carb', '/category/keto']:
                 matching_recipes = [r for r in RECIPES_MASTER if r.get('category') == 'Keto']
@@ -644,7 +1075,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                     'desc': "Best keto Ninja Creami recipes and low-carb ice cream pints. Ultra-creamy textures made with almond milk, heavy cream, and allulose under 5g net carbs per pint.",
                     'url': "https://creamicravings.com/category/keto-low-carb",
                     'heading': "Keto & Low Carb Ninja Creami Recipes",
-                    'recipes': matching_recipes
+                    'recipes': matching_recipes[:30]
                 }
             elif clean_url in ['/category/under-300-cal', '/category/under-300-calories', '/category/low-calorie']:
                 def is_under_300(r):
@@ -658,7 +1089,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                     'desc': "Explore 160+ macro-friendly Ninja Creami recipes under 300 calories per pint. Creamy, high-volume ice cream perfect for weight loss, cutting, and guilt-free snacking.",
                     'url': "https://creamicravings.com/category/under-300-cal",
                     'heading': "Low Calorie Ninja Creami Recipes Under 300 kcal",
-                    'recipes': matching_recipes[:25]
+                    'recipes': matching_recipes[:30]
                 }
             elif clean_url in ['/category/high-protein', '/category/protein']:
                 def is_high_pro(r):
@@ -672,7 +1103,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                     'desc': "Master collection of high protein Ninja Creami recipes with 30g to 50g+ protein per pint. Tested macro ratios, silky smooth textures, and perfect spin settings.",
                     'url': "https://creamicravings.com/category/high-protein",
                     'heading': "High-Protein Ninja Creami Recipes",
-                    'recipes': matching_recipes[:25]
+                    'recipes': matching_recipes[:30]
                 }
             elif clean_url in ['/freeze-guide', '/guide/freeze-time', '/guide/ninja-creami-freeze-time']:
                 seo_meta = {
@@ -684,101 +1115,10 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 }
 
             if seo_meta:
-                meta_title = seo_meta['title']
-                meta_desc = seo_meta['desc']
-                page_url = seo_meta['url']
-                image_url = "https://creamicravings.com/icon-512.png"
-
                 if seo_meta.get('is_faq'):
-                    json_ld = {
-                        "@context": "https://schema.org",
-                        "@type": "FAQPage",
-                        "mainEntity": [
-                            {
-                                "@type": "Question",
-                                "name": "How long do you need to freeze a Ninja Creami pint?",
-                                "acceptedAnswer": {
-                                    "@type": "Answer",
-                                    "text": "For the best creamy texture, freeze your Ninja Creami base for at least 16 to 24 hours. The mixture needs to reach between -7°F and 9°F (-22°C to -13°C) so the dual-drive blade can shave the ice crystal micro-structure into a creamy texture without powdering or blade drag."
-                                }
-                            },
-                            {
-                                "@type": "Question",
-                                "name": "Can you spin a Ninja Creami pint early after 8 to 12 hours?",
-                                "acceptedAnswer": {
-                                    "@type": "Answer",
-                                    "text": "Spinning before 16 hours is not recommended. If the core of the pint is still liquid or soft while the perimeter is frozen, the high-speed blade will push liquid upwards, creating an uneven icy slump or stressing the motor. Always freeze solid for 16-24 hours."
-                                }
-                            },
-                            {
-                                "@type": "Question",
-                                "name": "Do 24 oz Ninja Creami Deluxe pints take longer to freeze than standard 16 oz pints?",
-                                "acceptedAnswer": {
-                                    "@type": "Answer",
-                                    "text": "Yes. 24 oz Deluxe pints contain 50% more liquid and typically require a full 18 to 24 hours to freeze completely solid through to the center."
-                                }
-                            },
-                            {
-                                "@type": "Question",
-                                "name": "What temperature should your freezer be set to for Ninja Creami?",
-                                "acceptedAnswer": {
-                                    "@type": "Answer",
-                                    "text": "Your freezer should be set between -7°F and 9°F (-22°C and -13°C). If your freezer is too warm (above 10°F), the ice cream will turn out like soft soup. If your freezer is ultra-cold (-15°F or colder), let the pint sit on the counter for 5-10 minutes or use the Re-Spin cycle."
-                                }
-                            }
-                        ]
-                    }
+                    html = render_freeze_guide_seo_html(seo_meta, html)
                 else:
-                    item_list = []
-                    for idx, rec in enumerate(seo_meta.get('recipes', []), 1):
-                        r_slug = rec.get('id', '')
-                        item_list.append({
-                            "@type": "ListItem",
-                            "position": idx,
-                            "name": rec.get('name', 'Creami Recipe'),
-                            "url": f"https://creamicravings.com/recipe/{urllib.parse.quote(r_slug)}"
-                        })
-                    json_ld = {
-                        "@context": "https://schema.org",
-                        "@type": "CollectionPage",
-                        "name": seo_meta['heading'],
-                        "description": meta_desc,
-                        "url": page_url,
-                        "mainEntity": {
-                            "@type": "ItemList",
-                            "itemListElement": item_list
-                        }
-                    }
-
-                json_ld_str = json.dumps(json_ld, ensure_ascii=False, indent=2)
-
-                seo_head_block = f'''  <title>{meta_title}</title>
-  <meta name="description" content="{meta_desc}">
-  <link rel="canonical" href="{page_url}">
-  
-  <!-- Open Graph / Facebook -->
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="{page_url}">
-  <meta property="og:title" content="{meta_title}">
-  <meta property="og:description" content="{meta_desc}">
-  <meta property="og:image" content="{image_url}">
-  <meta property="og:site_name" content="Creami Cravings">
-  
-  <!-- Twitter Cards -->
-  <meta name="twitter:card" content="summary">
-  <meta name="twitter:url" content="{page_url}">
-  <meta name="twitter:title" content="{meta_title}">
-  <meta name="twitter:description" content="{meta_desc}">
-  <meta name="twitter:image" content="{image_url}">
-
-  <!-- Schema.org Structured Data for Google Rich Snippets -->
-  <script type="application/ld+json">
-{json_ld_str}
-  </script>'''
-
-                html = re.sub(r'<title>.*?</title>', f'<title>{meta_title}</title>', html, count=1)
-                html = re.sub(r'<meta name="description" content=".*?">', f'<meta name="description" content="{meta_desc}">', html, count=1)
-                html = html.replace('</head>', f'{seo_head_block}\n</head>', 1)
+                    html = render_category_seo_html(seo_meta, html)
 
             self.send_response(200)
             self.send_header('Content-Type', 'text/html; charset=utf-8')

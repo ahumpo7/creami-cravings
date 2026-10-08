@@ -1381,7 +1381,21 @@ body::before {
   white-space: nowrap;
 }
 
+.recipe-title-link {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.recipe-title-link:hover {
+  color: var(--primary, #ec4899);
+}
+
 .btn-view-recipe {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
   padding: 8px 14px;
   background: var(--bg-glass);
   border: 1px solid var(--border-glass);
@@ -1400,6 +1414,200 @@ body::before {
   background: var(--primary);
   border-color: var(--primary);
   color: #ffffff;
+  text-decoration: none;
+}
+
+/* Server-Side Rendered (SSR) Pre-Rendered Content for SEO & Crawlers */
+.ssr-recipe-fallback {
+  max-width: 860px;
+  margin: 20px auto 30px auto;
+  padding: 28px 24px;
+  background: var(--bg-card, #1e293b);
+  border: 1px solid var(--border-glass, rgba(255, 255, 255, 0.1));
+  border-radius: var(--radius-lg, 16px);
+  color: var(--text-main, #f8fafc);
+  box-shadow: var(--shadow-glass, 0 8px 32px rgba(0, 0, 0, 0.2));
+}
+
+.ssr-recipe-fallback .ssr-title {
+  font-size: 1.85rem;
+  font-weight: 800;
+  margin: 6px 0 12px 0;
+  color: var(--text-main, #ffffff);
+  line-height: 1.25;
+}
+
+.ssr-recipe-fallback .ssr-badge-cat {
+  display: inline-block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--primary, #ec4899);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+
+.ssr-recipe-fallback .ssr-macros-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 14px 0 18px 0;
+}
+
+.ssr-recipe-fallback .ssr-macro-pill {
+  padding: 6px 14px;
+  background: var(--bg-glass, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--border-glass, rgba(255, 255, 255, 0.1));
+  border-radius: 9999px;
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+.ssr-recipe-fallback .ssr-macro-pill.cal strong { color: #f97316; }
+.ssr-recipe-fallback .ssr-macro-pill.pro strong { color: #10b981; }
+.ssr-recipe-fallback .ssr-macro-pill.carb strong { color: #3b82f6; }
+.ssr-recipe-fallback .ssr-macro-pill.fat strong { color: #a855f7; }
+
+.ssr-recipe-fallback .ssr-description {
+  font-size: 0.98rem;
+  line-height: 1.6;
+  color: var(--text-secondary, #94a3b8);
+  margin-bottom: 20px;
+}
+
+.ssr-recipe-fallback .ssr-section {
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border-glass, rgba(255, 255, 255, 0.1));
+}
+
+.ssr-recipe-fallback .ssr-section-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: var(--text-main, #ffffff);
+}
+
+.ssr-recipe-fallback .ssr-ingredients-list,
+.ssr-recipe-fallback .ssr-instructions-list {
+  padding-left: 22px;
+  margin-bottom: 16px;
+  line-height: 1.7;
+}
+
+.ssr-recipe-fallback .ssr-ingredients-list li,
+.ssr-recipe-fallback .ssr-instructions-list li {
+  margin-bottom: 8px;
+  color: var(--text-main, #f1f5f9);
+}
+
+.ssr-recipe-fallback .ssr-protip {
+  background: rgba(236, 72, 153, 0.08);
+  border-left: 4px solid var(--primary, #ec4899);
+  padding: 14px 18px;
+  border-radius: 0 var(--radius-sm, 8px) var(--radius-sm, 8px) 0;
+  margin-top: 16px;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.ssr-recipe-fallback .ssr-hub-links {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-glass, rgba(255, 255, 255, 0.1));
+}
+
+.ssr-recipe-fallback .ssr-hub-links h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.ssr-recipe-fallback .ssr-hub-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.ssr-recipe-fallback .ssr-hub-card {
+  display: block;
+  padding: 12px 14px;
+  background: var(--bg-glass, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--border-glass, rgba(255, 255, 255, 0.08));
+  border-radius: var(--radius-sm, 8px);
+  color: var(--text-main, #ffffff);
+  text-decoration: none;
+  font-size: 0.88rem;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+
+.ssr-recipe-fallback .ssr-hub-card:hover {
+  background: var(--primary, #ec4899);
+  border-color: var(--primary, #ec4899);
+  color: #ffffff;
+}
+
+.ssr-recipe-fallback .ssr-recipe-list-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.ssr-recipe-fallback .ssr-recipe-list-item {
+  padding: 12px 14px;
+  background: var(--bg-glass, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--border-glass, rgba(255, 255, 255, 0.08));
+  border-radius: var(--radius-sm, 8px);
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  transition: all 0.15s ease;
+}
+
+.ssr-recipe-fallback .ssr-recipe-list-item:hover {
+  border-color: var(--primary, #ec4899);
+  background: rgba(236, 72, 153, 0.05);
+}
+
+.ssr-recipe-fallback .ssr-recipe-item-name {
+  font-weight: 700;
+  color: var(--text-main, #ffffff);
+  margin-bottom: 4px;
+  font-size: 0.95rem;
+}
+
+.ssr-recipe-fallback .ssr-recipe-item-meta {
+  font-size: 0.82rem;
+  color: var(--text-secondary, #94a3b8);
+}
+
+.ssr-recipe-fallback .ssr-faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.ssr-recipe-fallback .ssr-faq-item {
+  padding: 16px;
+  background: var(--bg-glass, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--border-glass, rgba(255, 255, 255, 0.08));
+  border-radius: var(--radius-sm, 8px);
+}
+
+.ssr-recipe-fallback .ssr-faq-item h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-main, #ffffff);
+  margin-bottom: 8px;
+}
+
+.ssr-recipe-fallback .ssr-faq-item p {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--text-secondary, #94a3b8);
 }
 
 /* Empty State */

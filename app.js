@@ -637,6 +637,12 @@
       setMobileView('recipes');
     }
 
+    // Hide server-side pre-rendered SSR fallback containers upon SPA hydration
+    const ssrFallback = document.getElementById('ssrRecipeFallback');
+    if (ssrFallback) ssrFallback.style.display = 'none';
+    const ssrCatFallback = document.getElementById('ssrCategoryFallback');
+    if (ssrCatFallback) ssrCatFallback.style.display = 'none';
+
     // Deep-linked recipe navigation & SEO routing (Roadmap Item 22)
     let initialRecipeId = null;
     const pathMatch = window.location.pathname.match(/^\/recipe\/([a-zA-Z0-9_\-]+)/);
@@ -3445,7 +3451,7 @@
           </div>
         </div>
 
-        <h3 class="recipe-card-title">${recipe.name}</h3>
+        <h3 class="recipe-card-title"><a href="/recipe/${encodeURIComponent(recipe.id)}" class="recipe-title-link">${recipe.name}</a></h3>
 
         <div class="match-status-bar">
           <div class="match-status-row">
@@ -3498,7 +3504,7 @@
 
       <div class="recipe-card-bottom">
         <span class="spin-tag" title="Recommended spin cycle">🌀 ${recipe.spinSetting || 'Lite Ice Cream'}</span>
-        <button class="btn-view-recipe">${isAccessible ? 'View Recipe' : (isClaimPending ? '⏳ Pending Verification' : '🔒 Locked Preview')}</button>
+        <a href="/recipe/${encodeURIComponent(recipe.id)}" class="btn-view-recipe">${isAccessible ? 'View Recipe' : (isClaimPending ? '⏳ Pending Verification' : '🔒 Locked Preview')}</a>
       </div>
     `;
 
@@ -3546,12 +3552,28 @@
       });
     }
 
-    // View button click & card click
+    // View button click & card click with crawlable anchor support
     const viewBtn = card.querySelector('.btn-view-recipe');
-    viewBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      openRecipeModal(recipe);
-    });
+    if (viewBtn) {
+      viewBtn.addEventListener('click', (e) => {
+        if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
+          e.preventDefault();
+        }
+        e.stopPropagation();
+        openRecipeModal(recipe);
+      });
+    }
+
+    const titleLink = card.querySelector('.recipe-title-link');
+    if (titleLink) {
+      titleLink.addEventListener('click', (e) => {
+        if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
+          e.preventDefault();
+        }
+        e.stopPropagation();
+        openRecipeModal(recipe);
+      });
+    }
 
     card.addEventListener('click', () => {
       openRecipeModal(recipe);
