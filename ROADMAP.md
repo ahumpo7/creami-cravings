@@ -262,9 +262,9 @@ A prioritized checklist of fixes, features, and refinements for the Creami Cravi
 - [x] **Server-Side Rendered (SSR) Previews & Schema.org Markup:**
   - Full Schema.org `CollectionPage`, `ItemList`, and `BreadcrumbList` JSON-LD generated for each hub.
   - Server-side rendered HTML `#ssrCategoryFallback` grid with recipe titles, macros, and links.
-- [x] **Dynamic Sitemap & Internal Linking:**
-  - All hubs added to `sitemap.xml` with priority 0.9 and weekly crawl frequency.
-  - Internal link cards added to recipe detail footers, category footers, and homepage SEO FAQ bar.
+- [x] **Live Google Search Console Verification & Sitemap Indexing:**
+  - Verified property ownership via Google Analytics 4 (`G-VQRZ2XGM03`).
+  - Successfully submitted `sitemap.xml` in Google Search Console with "Success" crawl status.
 
 ---
 
@@ -274,12 +274,13 @@ A prioritized checklist of fixes, features, and refinements for the Creami Cravi
 | :---: | :--- | :--- | :--- | :--- |
 | **Step 5** | **Item 19: 🛡️ Store Compliance & 1-Tap PWA Install** | Compliance `/privacy.html` (mandatory for Play Store), `/terms.html`, trademark disclaimers, and 1-tap `📲 Install App` prompt. | 🟢 ~15–20 mins | ✅ **Done** |
 | **Step 6** | **Item 20: 🔊 Audio, Haptics & Local Data Backup** | Web Audio slot sounds/timer chimes, mobile haptics, and JSON export/import for disaster recovery. | 🟢 ~20–25 mins | ✅ **Done** |
-| **Step 7** | **Item 1: 🔑 Finish Google Sign-In** | Production Google Cloud Console OAuth 2.0 Client ID configured in `.env` and `app.js` with One-Tap and theme matching. | ⚪ Completed | ✅ **Done** |
-| **Step 8** | **Item 22: 🔍 SEO, Deep Links & Recipe Sharing** | Schema.org JSON-LD recipes for Google rich snippets, sitemap.xml, robots.txt, Open Graph preview cards, and 1-tap share engine. | 🟢 ~25–30 mins | ✅ **Done** |
+| **Step 7** | **Item 1: 🔑 Finish Google Sign-In & Auth** | Google OAuth + Email/Password registration + self-service 6-digit password reset flow & admin reset. | ⚪ Completed | ✅ **Done** |
+| **Step 8** | **Item 22: 🔍 SEO, Deep Links & Recipe Sharing** | Schema.org JSON-LD recipes, sitemap.xml, robots.txt, Open Graph preview cards, and portable URL custom recipe sharing. | 🟢 ~25–30 mins | ✅ **Done** |
 | **Step 9** | **Item 23: 🗄️ Automated Offsite Database Backups** | JSON pre-check, S3/R2/B2 cloud upload, local pull script `pull_offsite_backup.py`, and webhook alerting. | 🟢 ~25–30 mins | ✅ **Done** |
-| **Step 10** | **Item 24: 🎯 Long-Tail Search Landing Hubs** | Dedicated SEO hubs for protein, low cal, sorbet, dairy-free, keto, deluxe, and gelato with SSR & ItemList schemas. | 🟢 ~30–40 mins | ✅ **Done** |
+| **Step 10** | **Item 24: 🎯 Long-Tail Search Landing Hubs** | Dedicated SEO hubs for protein, low cal, sorbet, dairy-free, keto, deluxe, and gelato with SSR & ItemList schemas. GSC status: Success. | 🟢 ~30–40 mins | ✅ **Done** |
 | **Step 11** | **Item 14: 🤖 Google Play Store Android App (Bubblewrap)** | Generate signed `.aab` bundle, deploy `assetlinks.json`, generate $1024\times500$ banner and $512\times512$ store icon. | 🟠 ~30–45 mins | ⏳ **Next** |
-| **Step 12** | **Item 21: ✉️ Admin Email Setup & Notifications** | Domain inbox (`admin@creamicravings.com`), transactional SMTP (Resend/SendGrid), SPF/DKIM/DMARC DNS, and admin alert triggers. | 🟡 ~25–35 mins | 📋 **Planned** |
+| **Step 12** | **Item 21: ✉️ Domain Email & Additional Auth Options** | Namecheap email forward for `admin@creamicravings.com`, Sign in with Apple, or passwordless magic links. | 🟡 ~20–30 mins | 📋 **Planned** |
+
 
 
 
