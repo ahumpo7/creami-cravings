@@ -1254,6 +1254,21 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
 
             if recipe:
                 html = render_recipe_seo_html(recipe, req_slug, html)
+            elif req_slug in ['share', 'shared']:
+                try:
+                    qs = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+                    r_param = qs.get('r', [None])[0] or qs.get('share', [None])[0]
+                    if r_param:
+                        b64 = r_param + '=' * ((4 - len(r_param) % 4) % 4)
+                        b64 = b64.replace('-', '+').replace('_', '/')
+                        data = json.loads(base64.b64decode(b64.encode('utf-8')).decode('utf-8'))
+                        title = data.get('n', 'Shared Creami Recipe')
+                        author = data.get('by', 'A Creami Chef')
+                        html = html.replace('<title>Creami Cravings', f'<title>{title} by {author} — Creami Cravings')
+                        og_tags = f'<meta property="og:title" content="{title} by {author} — Creami Cravings">\n<meta property="og:description" content="Custom Ninja Creami recipe shared by {author} on Creami Cravings. Click to view ingredients and spin settings!">'
+                        html = html.replace('</head>', f'{og_tags}\n</head>')
+                except Exception:
+                    pass
 
             self.send_response(200)
             self.send_header('Content-Type', 'text/html; charset=utf-8')

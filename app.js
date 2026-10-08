@@ -657,25 +657,43 @@
 
     // Deep-linked recipe navigation & SEO routing (Roadmap Item 22)
     let initialRecipeId = null;
-    const pathMatch = window.location.pathname.match(/^\/recipe\/([a-zA-Z0-9_\-]+)/);
-    if (pathMatch) {
-      initialRecipeId = decodeURIComponent(pathMatch[1]);
+    const urlParams = new URLSearchParams(window.location.search);
+    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+    const sharedEncoded = urlParams.get('share') || urlParams.get('r') || hashParams.get('share') || hashParams.get('r');
+
+    if (sharedEncoded) {
+      const decodedShared = decodePortableCustomRecipe(sharedEncoded);
+      if (decodedShared) {
+        const existing = (customRecipesState || []).find(cr => cr.name.toLowerCase() === decodedShared.name.toLowerCase());
+        const toOpen = existing || decodedShared;
+        if (!existing) {
+          allRecipes.unshift(decodedShared);
+        }
+        setTimeout(() => {
+          openRecipeModal(toOpen, false, false);
+          if (!existing) {
+            showToast(`🍧 Opened shared recipe from ${decodedShared.sharedAuthor || 'a friend'}!`, 4000);
+          }
+        }, 150);
+      }
     } else {
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.has('recipe')) {
+      const pathMatch = window.location.pathname.match(/^\/recipe\/([a-zA-Z0-9_\-]+)/);
+      if (pathMatch) {
+        initialRecipeId = decodeURIComponent(pathMatch[1]);
+      } else if (urlParams.has('recipe')) {
         initialRecipeId = urlParams.get('recipe');
       }
-    }
 
-    if (initialRecipeId) {
-      const targetRecipe = allRecipes.find(r => r.id === initialRecipeId || (r.name && r.name.toLowerCase() === initialRecipeId.toLowerCase()));
-      if (targetRecipe) {
-        setTimeout(() => {
-          openRecipeModal(targetRecipe, false, false);
-        }, 120);
+      if (initialRecipeId && initialRecipeId !== 'share' && initialRecipeId !== 'shared') {
+        const targetRecipe = allRecipes.find(r => r.id === initialRecipeId || (r.name && r.name.toLowerCase() === initialRecipeId.toLowerCase()));
+        if (targetRecipe) {
+          setTimeout(() => {
+            openRecipeModal(targetRecipe, false, false);
+          }, 120);
+        }
+      } else {
+        initSeoCategoryLanding();
       }
-    } else {
-      initSeoCategoryLanding();
     }
 
     // Handle browser back / forward buttons
@@ -4712,29 +4730,127 @@
     }
   }
 
+  // --- Portable Custom Recipe URL Encoding & Decoding ---
+  function encodePortableCustomRecipe(recipe) {
+    try {
+      const compact = {
+        n: recipe.name || 'Custom Creami Creation',
+        c: recipe.category || 'Custom',
+        s: recipe.spinSetting || 'Lite Ice Cream',
+        ft: recipe.freezeTime || '16+ HOURS',
+        pt: recipe.prepTime || '2 MIN',
+        m: recipe.makes || '1 PINT (16 oz)',
+        cs: recipe.creaminessScore || null,
+        cg: recipe.creaminessGrade || null,
+        mc: recipe.macros || {},
+        ins: (recipe.instructions && Array.isArray(recipe.instructions)) ? recipe.instructions : [],
+        by: (currentUser && (currentUser.name || currentUser.username)) || 'A Creami Chef',
+        ing: (recipe.ingredients || []).map(ing => ({
+          n: ing.name,
+          q: ing.quantity || '',
+          u: ing.unit || '',
+          r: ing.raw || '',
+          s: ing.section || '',
+          m: ing.isMixin ? 1 : 0,
+          c: ing.category || ''
+        }))
+      };
+      const jsonStr = JSON.stringify(compact);
+      // UTF-8 safe base64url encoding
+      const b64 = btoa(encodeURIComponent(jsonStr).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1)));
+      return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    } catch (e) {
+      console.error('Failed to encode custom recipe for sharing:', e);
+      return null;
+    }
+  }
+
+  function decodePortableCustomRecipe(encodedStr) {
+    try {
+      if (!encodedStr) return null;
+      let b64 = encodedStr.replace(/-/g, '+').replace(/_/g, '/');
+      while (b64.length % 4) b64 += '=';
+      const jsonStr = decodeURIComponent(Array.prototype.map.call(atob(b64), (c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+      const compact = JSON.parse(jsonStr);
+      if (!compact || !compact.n) return null;
+
+      const instructions = Array.isArray(compact.ins) && compact.ins.length > 0
+        ? compact.ins
+        : [
+            `Add all base ingredients to your ${compact.m || 'Ninja Creami'} pint container.`,
+            `Smooth the top surface flat, freeze on a level shelf for ${compact.ft || '16+ hours'}.`,
+            `Spin on the "${compact.s || 'Lite Ice Cream'}" program.`,
+            ...(compact.ing && compact.ing.some(i => i.m) ? ['Make a 1.5-inch core down the center, add mix-ins, and press Mix-In program.'] : ['Respin if needed with 1 tbsp liquid. Enjoy!'])
+          ];
+
+      const recipe = {
+        id: `shared_cr_${Date.now()}`,
+        name: compact.n,
+        category: 'Custom',
+        categories: ['Custom'],
+        isPersonal: true,
+        isSharedPortable: true,
+        sharedAuthor: compact.by || 'A Creami Chef',
+        sourceFile: `Shared by ${compact.by || 'A Creami Chef'}`,
+        spinSetting: compact.s || 'Lite Ice Cream',
+        freezeTime: compact.ft || '16+ HOURS',
+        prepTime: compact.pt || '2 MIN',
+        makes: compact.m || '1 PINT (16 oz)',
+        creaminessScore: compact.cs,
+        creaminessGrade: compact.cg,
+        macros: compact.mc || { calories: '0', protein: '0g', carbs: '0g', fat: '0g', sugar: '0g', fiber: '0g' },
+        instructions: instructions,
+        ingredients: (compact.ing || []).map(ing => ({
+          name: ing.n,
+          quantity: ing.q || '',
+          unit: ing.u || '',
+          raw: ing.r || (ing.q ? `${ing.q} ${ing.n}` : ing.n),
+          section: ing.s || (ing.m ? 'Mix-in' : 'Base'),
+          isMixin: Boolean(ing.m),
+          category: ing.c || (ing.m ? 'mixin' : 'liquid')
+        }))
+      };
+      return recipe;
+    } catch (e) {
+      console.error('Failed to decode portable custom recipe:', e);
+      return null;
+    }
+  }
+
   // 1-Tap Recipe Sharing & Deep Linking (Roadmap Item 22)
   function shareRecipe(recipe, buttonEl) {
     if (!recipe) return;
-    const shareUrl = `${window.location.origin}/recipe/${encodeURIComponent(recipe.id)}`;
+    const isCustom = Boolean(recipe.category === 'Custom' || recipe.isPersonal || (recipe.id && recipe.id.startsWith('custom_')));
+    let shareUrl = `${window.location.origin}/recipe/${encodeURIComponent(recipe.id)}`;
+
+    if (isCustom) {
+      const portableCode = encodePortableCustomRecipe(recipe);
+      if (portableCode) {
+        shareUrl = `${window.location.origin}/recipe/share?r=${portableCode}`;
+      }
+    }
+
     const macroStr = recipe.macros ? ` (${recipe.macros.protein || ''} protein, ${recipe.macros.calories || ''} cal)` : '';
     const shareData = {
       title: `${recipe.name} — Creami Cravings`,
-      text: `Check out ${recipe.name} on Creami Cravings!${macroStr}`,
+      text: isCustom
+        ? `Check out my custom Creami creation: ${recipe.name}!${macroStr}`
+        : `Check out ${recipe.name} on Creami Cravings!${macroStr}`,
       url: shareUrl
     };
 
     if (navigator.share && /mobile|android|iphone|ipad/i.test(navigator.userAgent)) {
       navigator.share(shareData).catch((err) => {
         if (err.name !== 'AbortError') {
-          copyRecipeLinkFallback(shareUrl, recipe.name, buttonEl);
+          copyRecipeLinkFallback(shareUrl, recipe.name, buttonEl, isCustom);
         }
       });
     } else {
-      copyRecipeLinkFallback(shareUrl, recipe.name, buttonEl);
+      copyRecipeLinkFallback(shareUrl, recipe.name, buttonEl, isCustom);
     }
   }
 
-  function copyRecipeLinkFallback(url, recipeName, buttonEl) {
+  function copyRecipeLinkFallback(url, recipeName, buttonEl, isCustom = false) {
     copyTextToClipboard(url).then(() => {
       if (buttonEl) {
         const origHtml = buttonEl.innerHTML;
@@ -4745,7 +4861,10 @@
           buttonEl.classList.remove('copied');
         }, 2500);
       }
-      showToast(`🔗 Share link for "${recipeName}" copied to clipboard!`);
+      showToast(isCustom 
+        ? `🔗 Portable share link for "${recipeName}" copied! Anyone can open and save it.`
+        : `🔗 Share link for "${recipeName}" copied to clipboard!`
+      );
     }).catch(() => {
       showToast('Failed to copy link to clipboard');
     });
@@ -6296,7 +6415,7 @@
     lockBackgroundScroll();
 
     // Sync browser URL with recipe deep-link
-    if (updateHistory && recipe && recipe.id) {
+    if (updateHistory && recipe && recipe.id && !recipe.isSharedPortable) {
       const targetPath = `/recipe/${encodeURIComponent(recipe.id)}`;
       if (window.location.pathname !== targetPath) {
         try {
@@ -6356,11 +6475,27 @@
         </div>
       ` : ''}
 
+      ${recipe.isSharedPortable ? `
+        <div class="shared-recipe-portable-banner">
+          <div>
+            <div class="shared-banner-title">
+              <span>🍧</span> <span>Shared Custom Creation</span>
+            </div>
+            <div class="shared-banner-byline">
+              Crafted by <strong>${escapeHtml(recipe.sharedAuthor || 'A Creami Chef')}</strong> with Build-A-Pint.
+            </div>
+          </div>
+          <button type="button" class="btn-save-shared-recipe" id="btnTopSaveSharedRecipe">
+            <span>📥 Save to My Recipes</span>
+          </button>
+        </div>
+      ` : ''}
+
       <div class="modal-header">
         <div class="modal-meta-row">
-          ${isPersonal ? `<span class="book-tag custom">🔒 Personal Recipe</span>` : accessibleCategories.map(cat => {
+          ${recipe.isSharedPortable ? `<span class="book-tag" style="background: rgba(139, 92, 246, 0.2); color: #c084fc; border-color: rgba(139, 92, 246, 0.4);">🍧 Shared by ${escapeHtml(recipe.sharedAuthor || 'A Friend')}</span>` : (isPersonal ? `<span class="book-tag custom">🔒 Personal Recipe</span>` : accessibleCategories.map(cat => {
             return `<span class="book-tag ${getCategoryClass(cat)}">${cat}</span>`;
-          }).join('')}
+          }).join(''))}
           ${!isAccessible ? `<span class="locked-badge" title="Exclusive ${requiredTier} tier recipe pack">🔒 ${requiredTier} Pack</span>` : ''}
           ${recipe.creaminessScore ? `<span class="book-tag" style="background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.4); color: #34d399;">🧪 Creaminess: ${recipe.creaminessScore}/10 (${recipe.creaminessGrade || 'Balanced'})</span>` : ''}
           <span class="book-tag">🌀 ${recipe.spinSetting || 'Lite Ice Cream'}</span>
@@ -6371,7 +6506,7 @@
           </button>
         </div>
         <h2 class="modal-title">${recipe.name}</h2>
-        <p class="modal-subtitle">${isPersonal ? '🔒 Private personal recipe tied only to your Google account.' : 'Official Creami Cravings recipe for Ninja Creami ice cream maker.'}</p>
+        <p class="modal-subtitle">${recipe.isSharedPortable ? `Custom formulation shared by ${escapeHtml(recipe.sharedAuthor || 'a fellow Creami creator')}.` : (isPersonal ? '🔒 Private personal recipe tied only to your account.' : 'Official Creami Cravings recipe for Ninja Creami ice cream maker.')}</p>
         ${(recipe.sources && recipe.sources.length > 1 && accessibleCategories.length > 1) ? `
           <div class="multi-book-banner">
             <span>📚</span>
@@ -6773,6 +6908,11 @@
 
       <div class="modal-footer" style="margin-top: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
         <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+          ${recipe.isSharedPortable ? `
+            <button class="btn-primary btn-save-shared-recipe" id="modalSaveSharedRecipeBtn">
+              <span>📥 Save to My Recipes</span>
+            </button>
+          ` : ''}
           ${isAccessible ? `
             <button class="btn-freeze-pint-action" id="modalFreezeThisPintBtn" title="Log this recipe in your freezer and start the 16-hour countdown timer">
               🧊 Freeze This Pint
@@ -6784,7 +6924,7 @@
           <button class="btn-secondary" id="modalFavBtn">
             ${isFav ? '💖 Favorited' : '🤍 Add to Favorites'}
           </button>
-          ${isPersonal ? `
+          ${isPersonal && !recipe.isSharedPortable ? `
             <button class="btn-danger" id="modalDeleteRecipeBtn" style="padding: 8px 14px; border-radius: var(--radius-sm); background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.35); color: #f87171; font-weight: 600; cursor: pointer;">
               🗑️ Delete Recipe
             </button>
@@ -7180,6 +7320,63 @@
         modalFavBtn.innerHTML = nowFav ? '💖 Favorited' : '🤍 Add to Favorites';
       });
     }
+
+    // Save Shared Recipe to Personal Custom Library
+    function handleSaveSharedToMyRecipes(triggerBtn) {
+      const alreadyHas = (customRecipesState || []).some(r => r.name.toLowerCase() === recipe.name.toLowerCase());
+      if (alreadyHas) {
+        showToast(`"${recipe.name}" is already in your Custom Recipes!`);
+        recipeModalBody.querySelectorAll('.btn-save-shared-recipe').forEach(b => {
+          b.innerHTML = '<span>✓ Already in Library</span>';
+          b.disabled = true;
+          b.style.opacity = '0.7';
+        });
+        return;
+      }
+
+      const myId = currentUser && currentUser.id ? currentUser.id : 'local';
+      const savedRecipe = {
+        ...recipe,
+        id: `custom_${myId}_${Date.now()}`,
+        isSharedPortable: false,
+        isPersonal: true,
+        category: 'Custom',
+        categories: ['Custom'],
+        sourceFile: `Shared by ${recipe.sharedAuthor || 'A Creami Chef'}`
+      };
+
+      customRecipesState.push(savedRecipe);
+
+      // Auto-add missing ingredients to pantry
+      let addedPantry = 0;
+      (savedRecipe.ingredients || []).forEach(ing => {
+        const ingId = ing.id || sanitizeShoppingItemName(ing.name).toLowerCase().replace(/[^a-z0-9]+/g, '_').trim();
+        if (ingId && !pantryState.has(ingId)) {
+          pantryState.add(ingId);
+          addedPantry++;
+        }
+      });
+      if (addedPantry > 0) {
+        savePantry();
+        updatePantryCheckboxVisuals();
+      }
+
+      saveCustomRecipes();
+      renderRecipes();
+      playAudioSuccess();
+      showToast(`✅ Saved "${savedRecipe.name}" to your Custom Recipes & pantry!`);
+
+      recipeModalBody.querySelectorAll('.btn-save-shared-recipe').forEach(b => {
+        b.innerHTML = '<span>✓ Saved in Library</span>';
+        b.disabled = true;
+        b.style.opacity = '0.7';
+      });
+    }
+
+    const saveSharedBtn1 = recipeModalBody.querySelector('#modalSaveSharedRecipeBtn');
+    const saveSharedBtn2 = recipeModalBody.querySelector('#btnTopSaveSharedRecipe');
+    if (saveSharedBtn1) saveSharedBtn1.addEventListener('click', () => handleSaveSharedToMyRecipes(saveSharedBtn1));
+    if (saveSharedBtn2) saveSharedBtn2.addEventListener('click', () => handleSaveSharedToMyRecipes(saveSharedBtn2));
 
     // Delete Personal Recipe Button (with in-modal 2-step confirmation)
     const modalDeleteBtn = recipeModalBody.querySelector('#modalDeleteRecipeBtn');
