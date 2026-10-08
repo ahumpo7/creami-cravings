@@ -1483,9 +1483,12 @@
         if (data.devCode) {
           const codeInput = document.getElementById('authResetCode');
           if (codeInput) codeInput.value = data.devCode;
-          showToast(`✉️ Code generated: ${data.devCode}`);
+          showToast(`⚙️ Server SMTP not configured. Test code: ${data.devCode}`, 6000);
+        } else if (data.smtpConfigured === false) {
+          showAuthError('⚠️ Outgoing email service (SMTP) is not yet configured on the server. If this is your account, please reach out to admin@creamicravings.com or configure SMTP.');
+          showToast('⚠️ Email delivery (SMTP) is not yet configured on the server.', 6000);
         } else {
-          showToast('✉️ 6-digit code sent to your email!');
+          showToast('📬 6-digit code sent to your email!');
         }
 
         const codeField = document.getElementById('authResetCode');
