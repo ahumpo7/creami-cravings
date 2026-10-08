@@ -5971,14 +5971,9 @@
                   <span>✅ Active in Library</span>
                 </span>
               ` : `
-                <a href="${book.url}" target="_blank" rel="noopener noreferrer" class="btn-creator-buy">
-                  <span>Buy E-Book (${book.price})</span>
-                  <span style="font-size: 0.9em;">↗</span>
-                </a>
-                <a href="https://fitnessproductfinder.com/products/complete-4-book-bundle" target="_blank" rel="noopener noreferrer" class="btn-creator-bundle">
-                  <span>4-Book Bundle ($49.99)</span>
-                  <span style="font-size: 0.9em;">↗</span>
-                </a>
+                <span class="creator-book-locked-pill" title="Exclusive ${book.shortTitle || book.title} Pack">
+                  <span>🔒 ${book.shortTitle || book.title}</span>
+                </span>
               `}
             </div>
           </div>
