@@ -328,14 +328,21 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
         return user
 
     def do_HEAD(self):
-        if self.path.startswith('/recipe/') or self.path in ['/sitemap.xml', '/robots.txt']:
+        if self.path.startswith('/recipe/'):
+            clean_url = self.path.split('?')[0]
+            if re.search(r'\.(css|js|png|jpg|jpeg|svg|ico|json|woff2?|ttf|webp|map)$', clean_url, re.I):
+                self.path = self.path[len('/recipe'):]
+                return super().do_HEAD()
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/html; charset=utf-8')
+            self.end_headers()
+            return
+        elif self.path in ['/sitemap.xml', '/robots.txt']:
             self.send_response(200)
             if self.path == '/sitemap.xml':
                 self.send_header('Content-Type', 'application/xml; charset=utf-8')
             elif self.path == '/robots.txt':
                 self.send_header('Content-Type', 'text/plain; charset=utf-8')
-            else:
-                self.send_header('Content-Type', 'text/html; charset=utf-8')
             self.end_headers()
             return
         super().do_HEAD()
@@ -471,6 +478,12 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 return
 
         elif self.path.startswith('/recipe/'):
+            # If a static asset is inadvertently requested under /recipe/, serve it from root
+            clean_url = self.path.split('?')[0]
+            if re.search(r'\.(css|js|png|jpg|jpeg|svg|ico|json|woff2?|ttf|webp|map)$', clean_url, re.I):
+                self.path = self.path[len('/recipe'):]
+                return super().do_GET()
+
             # Handle deep-linked recipe URL with dynamic SEO & Open Graph meta tags
             req_slug = urllib.parse.unquote(self.path[len('/recipe/'):].split('?')[0].strip('/'))
             recipe = RECIPES_BY_ID.get(req_slug)
