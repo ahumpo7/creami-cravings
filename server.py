@@ -922,7 +922,13 @@ def compute_community_stats():
     for r_id, stat in stats_db.items():
         if r_id.startswith('custom_'):
             continue  # Strictly exclude private custom recipes
-        m_count = stat.get('totalMade', 0) if isinstance(stat, dict) else int(stat)
+        m_count = 0
+        if isinstance(stat, dict):
+            m_count = int(stat.get('totalMade', 0) or 0)
+        elif isinstance(stat, (int, float)):
+            m_count = int(stat)
+        elif isinstance(stat, str) and stat.isdigit():
+            m_count = int(stat)
         made_summary[r_id] = m_count
         total_community_batches += m_count
 
