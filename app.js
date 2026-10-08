@@ -3051,6 +3051,20 @@
       } else if (activeSeoLanding === 'high-protein') {
         const pro = parseInt(recipe.macros.protein) || 0;
         if (pro < 25) return false;
+      } else if (activeSeoLanding === 'sorbet') {
+        const spin = (recipe.spinSetting || '').toLowerCase();
+        const text = (recipe.name + ' ' + (recipe.ingredients || []).map(i => i.name || '').join(' ')).toLowerCase();
+        const hasFruit = ['peach', 'mango', 'strawberr', 'blueberr', 'raspberr', 'banana', 'acai', 'pineapple', 'apple', 'fruit', 'lemon', 'lime', 'sorbet', 'cherry', 'watermelon'].some(w => text.includes(w));
+        if (spin !== 'sorbet' && !hasFruit) return false;
+      } else if (activeSeoLanding === 'dairy-free') {
+        const isLactoseFree = recipe.category === 'Lactose Free';
+        const text = (recipe.name + ' ' + (recipe.ingredients || []).map(i => i.name || '').join(' ')).toLowerCase();
+        const hasPlantMilk = ['almond milk', 'oat milk', 'coconut milk', 'dairy-free', 'dairy free', 'vegan', 'soy milk', 'cashew milk', 'juice', 'water'].some(w => text.includes(w));
+        if (!isLactoseFree && !hasPlantMilk) return false;
+      } else if (activeSeoLanding === 'gelato') {
+        const spin = (recipe.spinSetting || '').toLowerCase();
+        const text = (recipe.name + ' ' + (recipe.ingredients || []).map(i => i.name || '').join(' ')).toLowerCase();
+        if (spin !== 'gelato' && !text.includes('gelato') && !text.includes('custard')) return false;
       }
 
       // Quick Filter Chips
@@ -12007,7 +12021,7 @@
       });
     }
 
-    if (path === '/category/without-protein-powder' || path === '/category/no-protein') {
+    if (path === '/category/without-protein-powder' || path === '/category/no-protein' || path === '/ninja-creami-recipes-without-protein-powder' || path === '/ninja-creami-no-protein-powder') {
       activeSeoLanding = 'without-protein-powder';
       activeCategory = 'No Protein';
       if (banner && bannerTitle && bannerDesc) {
@@ -12021,7 +12035,7 @@
         });
       }
       renderRecipes();
-    } else if (path === '/category/keto-low-carb' || path === '/category/keto') {
+    } else if (path === '/category/keto-low-carb' || path === '/category/keto' || path === '/category/low-carb' || path === '/ninja-creami-keto-recipes' || path === '/ninja-creami-low-carb-recipes') {
       activeSeoLanding = 'keto';
       activeCategory = 'Keto';
       if (banner && bannerTitle && bannerDesc) {
@@ -12035,7 +12049,7 @@
         });
       }
       renderRecipes();
-    } else if (path === '/category/under-300-cal' || path === '/category/under-300-calories' || path === '/category/low-calorie') {
+    } else if (path === '/category/under-300-cal' || path === '/category/under-300-calories' || path === '/category/low-calorie' || path === '/ninja-creami-low-calorie-recipes' || path === '/ninja-creami-low-calorie') {
       activeSeoLanding = 'under-300-cal';
       if (banner && bannerTitle && bannerDesc) {
         bannerTitle.textContent = '🔥 Curated Collection: Low-Calorie Ninja Creami (Under 300 kcal)';
@@ -12043,11 +12057,43 @@
         banner.style.display = 'flex';
       }
       renderRecipes();
-    } else if (path === '/category/high-protein' || path === '/category/protein') {
+    } else if (path === '/category/high-protein' || path === '/category/protein' || path === '/ninja-creami-protein-ice-cream' || path === '/ninja-creami-protein-recipes') {
       activeSeoLanding = 'high-protein';
       if (banner && bannerTitle && bannerDesc) {
         bannerTitle.textContent = '💪 Curated Collection: High-Protein Ninja Creami (25g - 50g+ Protein)';
         bannerDesc.textContent = '120+ anabolic recipe pints with tested macro ratios, silky smooth texture, and optimal spin settings.';
+        banner.style.display = 'flex';
+      }
+      renderRecipes();
+    } else if (path === '/category/sorbet' || path === '/category/fruit-sorbet' || path === '/ninja-creami-sorbet-recipes' || path === '/ninja-creami-fruit-sorbet') {
+      activeSeoLanding = 'sorbet';
+      if (banner && bannerTitle && bannerDesc) {
+        bannerTitle.textContent = '🍧 Curated Collection: Ninja Creami Fruit Sorbets';
+        bannerDesc.textContent = '40+ silky dairy-free fruit sorbet recipes made with fresh and canned fruit spun on the Sorbet cycle.';
+        banner.style.display = 'flex';
+      }
+      renderRecipes();
+    } else if (path === '/category/dairy-free' || path === '/category/vegan' || path === '/category/lactose-free' || path === '/ninja-creami-dairy-free-recipes' || path === '/ninja-creami-vegan-recipes') {
+      activeSeoLanding = 'dairy-free';
+      if (banner && bannerTitle && bannerDesc) {
+        bannerTitle.textContent = '🌱 Curated Collection: Dairy-Free & Vegan Ninja Creami';
+        bannerDesc.textContent = 'Plant-based pints crafted with almond milk, oat milk, and coconut cream that never turn icy.';
+        banner.style.display = 'flex';
+      }
+      renderRecipes();
+    } else if (path === '/category/deluxe' || path === '/category/deluxe-24oz' || path === '/ninja-creami-deluxe-recipes') {
+      activeSeoLanding = 'deluxe';
+      if (banner && bannerTitle && bannerDesc) {
+        bannerTitle.textContent = '🥣 Curated Collection: Ninja Creami Deluxe (24 oz NC500 Series)';
+        bannerDesc.textContent = 'All 212 tested recipes scaled for 24 oz Deluxe containers with 1.5x formulas and MAX FILL indicators.';
+        banner.style.display = 'flex';
+      }
+      renderRecipes();
+    } else if (path === '/category/gelato' || path === '/ninja-creami-gelato-recipes') {
+      activeSeoLanding = 'gelato';
+      if (banner && bannerTitle && bannerDesc) {
+        bannerTitle.textContent = '🇮🇹 Curated Collection: Artisanal Ninja Creami Gelato';
+        bannerDesc.textContent = 'Dense, velvety, and authentic Italian-style gelato and custard pints spun on the Gelato cycle.';
         banner.style.display = 'flex';
       }
       renderRecipes();

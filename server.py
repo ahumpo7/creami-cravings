@@ -95,6 +95,38 @@ def load_recipes_master():
 
 load_recipes_master()
 
+def is_high_pro(r):
+    try:
+        return int(r.get('macros', {}).get('protein', '0g').replace('g','').strip()) >= 25
+    except Exception:
+        return False
+
+def is_low_cal(r):
+    try:
+        return int(r.get('macros', {}).get('calories', '999').replace('kcal','').strip()) <= 300
+    except Exception:
+        return False
+
+def is_sorbet_fruit(r):
+    spin = (r.get('spinSetting') or '').lower()
+    if 'sorbet' in spin:
+        return True
+    text = (r.get('name', '') + ' ' + ' '.join(ing.get('name', '') for ing in r.get('ingredients', []))).lower()
+    return any(w in text for w in ['peach', 'mango', 'strawberr', 'blueberr', 'raspberr', 'banana', 'acai', 'pineapple', 'apple', 'fruit', 'lemon', 'lime', 'sorbet', 'cherry', 'watermelon'])
+
+def is_dairy_free_recipe(r):
+    if r.get('category') in ['Lactose Free', 'Dairy Free', 'Vegan']:
+        return True
+    text = (r.get('name', '') + ' ' + ' '.join(ing.get('name', '') for ing in r.get('ingredients', []))).lower()
+    return any(w in text for w in ['almond milk', 'oat milk', 'coconut milk', 'dairy-free', 'dairy free', 'vegan', 'soy milk', 'cashew milk', 'juice', 'water'])
+
+def is_gelato_recipe(r):
+    spin = (r.get('spinSetting') or '').lower()
+    if 'gelato' in spin:
+        return True
+    text = (r.get('name', '') + ' ' + ' '.join(ing.get('name', '') for ing in r.get('ingredients', []))).lower()
+    return 'gelato' in text or 'custard' in text
+
 def strip_default_seo_tags(text):
     text = re.sub(r'<meta\s+name=["\']description["\'][^>]*>', '', text, flags=re.I)
     text = re.sub(r'<title>[\s\S]*?</title>', '', text, flags=re.I)
@@ -346,10 +378,14 @@ def render_recipe_seo_html(recipe, req_slug, index_html):
         <nav class="ssr-hub-links">
           <h3>Browse More Tested Ninja Creami Categories</h3>
           <div class="ssr-hub-grid">
-            <a href="/category/high-protein" class="ssr-hub-card">💪 High Protein Ninja Creami (30g-50g+)</a>
-            <a href="/category/without-protein-powder" class="ssr-hub-card">🍓 Recipes Without Protein Powder</a>
+            <a href="/category/high-protein" class="ssr-hub-card">💪 High Protein (30g-50g+)</a>
             <a href="/category/under-300-cal" class="ssr-hub-card">🔥 Low Calorie Pints (&lt;300 kcal)</a>
+            <a href="/category/without-protein-powder" class="ssr-hub-card">🍓 Without Protein Powder</a>
+            <a href="/category/sorbet" class="ssr-hub-card">🍧 Real Fruit &amp; Sorbets</a>
+            <a href="/category/dairy-free" class="ssr-hub-card">🌱 Dairy-Free &amp; Vegan Pints</a>
             <a href="/category/keto-low-carb" class="ssr-hub-card">🥑 Keto &amp; Low Carb Pints</a>
+            <a href="/category/deluxe" class="ssr-hub-card">🥣 Deluxe (24 oz NC500)</a>
+            <a href="/category/gelato" class="ssr-hub-card">🇮🇹 Artisanal Gelato Recipes</a>
             <a href="/freeze-guide" class="ssr-hub-card">❄️ Ninja Creami Freeze Time Guide</a>
           </div>
         </nav>
@@ -413,18 +449,20 @@ def render_category_seo_html(seo_meta, index_html):
 
     json_ld_str = json.dumps(json_ld, ensure_ascii=False, indent=2)
 
-    seo_head = f'''  <title>{heading} — Tested Ninja Creami Recipes | Creami Cravings</title>
+    meta_title = seo_meta.get('title') or f"{heading} — Tested Ninja Creami Recipes | Creami Cravings"
+
+    seo_head = f'''  <title>{meta_title}</title>
   <meta name="description" content="{desc}">
   <link rel="canonical" href="{page_url}">
   <meta property="og:type" content="website">
   <meta property="og:url" content="{page_url}">
-  <meta property="og:title" content="{heading} | Creami Cravings">
+  <meta property="og:title" content="{meta_title}">
   <meta property="og:description" content="{desc}">
   <meta property="og:image" content="{image_url}">
   <meta property="og:site_name" content="Creami Cravings">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:url" content="{page_url}">
-  <meta name="twitter:title" content="{heading}">
+  <meta name="twitter:title" content="{meta_title}">
   <meta name="twitter:description" content="{desc}">
   <meta name="twitter:image" content="{image_url}">
   <script type="application/ld+json">
@@ -448,10 +486,14 @@ def render_category_seo_html(seo_meta, index_html):
       <nav class="ssr-hub-links">
         <h3>Explore More Ninja Creami Categories</h3>
         <div class="ssr-hub-grid">
-          <a href="/category/high-protein" class="ssr-hub-card">💪 High Protein Recipes</a>
+          <a href="/category/high-protein" class="ssr-hub-card">💪 High Protein (30g-50g+)</a>
+          <a href="/category/under-300-cal" class="ssr-hub-card">🔥 Low Calorie Pints (&lt;300 kcal)</a>
           <a href="/category/without-protein-powder" class="ssr-hub-card">🍓 Recipes Without Protein Powder</a>
-          <a href="/category/under-300-cal" class="ssr-hub-card">🔥 Low Calorie Pints</a>
+          <a href="/category/sorbet" class="ssr-hub-card">🍧 Real Fruit &amp; Sorbets</a>
+          <a href="/category/dairy-free" class="ssr-hub-card">🌱 Dairy-Free &amp; Vegan Pints</a>
           <a href="/category/keto-low-carb" class="ssr-hub-card">🥑 Keto &amp; Low Carb</a>
+          <a href="/category/deluxe" class="ssr-hub-card">🥣 Deluxe (24 oz NC500)</a>
+          <a href="/category/gelato" class="ssr-hub-card">🇮🇹 Artisanal Gelato Recipes</a>
           <a href="/freeze-guide" class="ssr-hub-card">❄️ Freeze Time Guide</a>
         </div>
       </nav>
@@ -826,7 +868,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
         return user
 
     def do_HEAD(self):
-        if self.path.startswith('/recipe/') or self.path.startswith('/category/') or self.path in ['/freeze-guide', '/guide/freeze-time', '/guide/ninja-creami-freeze-time']:
+        if self.path.startswith('/recipe/') or self.path.startswith('/category/') or self.path.startswith('/ninja-creami-') or self.path in ['/freeze-guide', '/guide/freeze-time', '/guide/ninja-creami-freeze-time']:
             clean_url = self.path.split('?')[0]
             if re.search(r'\.(css|js|png|jpg|jpeg|svg|ico|json|woff2?|ttf|webp|map)$', clean_url, re.I):
                 self.path = '/' + clean_url.split('/')[-1]
@@ -1044,7 +1086,9 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(html.encode('utf-8'))
             return
 
-        elif self.path.startswith('/category/') or self.path in ['/freeze-guide', '/guide/freeze-time', '/guide/ninja-creami-freeze-time']:
+        elif (self.path.startswith('/category/') or 
+              self.path.startswith('/ninja-creami-') or 
+              self.path in ['/freeze-guide', '/guide/freeze-time', '/guide/ninja-creami-freeze-time']):
             clean_url = self.path.split('?')[0].rstrip('/')
             if re.search(r'\.(css|js|png|jpg|jpeg|svg|ico|json|woff2?|ttf|webp|map)$', clean_url, re.I):
                 self.path = '/' + clean_url.split('/')[-1]
@@ -1059,16 +1103,52 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 html = f.read()
 
             seo_meta = None
-            if clean_url in ['/category/without-protein-powder', '/category/no-protein']:
+            if clean_url in ['/category/high-protein', '/category/protein', '/ninja-creami-protein-ice-cream', '/ninja-creami-protein-recipes']:
+                matching_recipes = [r for r in RECIPES_MASTER if is_high_pro(r)]
+                seo_meta = {
+                    'title': "Ninja Creami Protein Ice Cream Recipes (30g to 50g+ Protein) | Creami Cravings",
+                    'desc': "Master collection of high protein Ninja Creami recipes with 30g to 50g+ protein per pint. Tested macro ratios, silky smooth textures, and perfect spin settings.",
+                    'url': "https://creamicravings.com/category/high-protein",
+                    'heading': "High-Protein Ninja Creami Recipes (30g–50g+ Protein)",
+                    'recipes': matching_recipes[:30]
+                }
+            elif clean_url in ['/category/under-300-cal', '/category/under-300-calories', '/category/low-calorie', '/ninja-creami-low-calorie-recipes', '/ninja-creami-low-calorie']:
+                matching_recipes = [r for r in RECIPES_MASTER if is_low_cal(r)]
+                seo_meta = {
+                    'title': "Ninja Creami Low Calorie Recipes (Under 300 Calories) | Creami Cravings",
+                    'desc': "Explore 160+ macro-friendly Ninja Creami recipes under 300 calories per pint. Creamy, high-volume ice cream perfect for weight loss, cutting, and guilt-free snacking.",
+                    'url': "https://creamicravings.com/category/under-300-cal",
+                    'heading': "Low Calorie Ninja Creami Recipes Under 300 kcal",
+                    'recipes': matching_recipes[:30]
+                }
+            elif clean_url in ['/category/without-protein-powder', '/category/no-protein', '/ninja-creami-recipes-without-protein-powder', '/ninja-creami-no-protein-powder']:
                 matching_recipes = [r for r in RECIPES_MASTER if r.get('category') == 'No Protein']
                 seo_meta = {
-                    'title': "Ninja Creami Recipes Without Protein Powder — Real Fruit & Gelato Pints | Creami Cravings",
+                    'title': "Ninja Creami Recipes Without Protein Powder — Real Fruit & Gelato | Creami Cravings",
                     'desc': "Discover 49+ tested Ninja Creami recipes without protein powder! Indulgent fruit sorbets, velvety gelato, and whole-milk ice creams without chalky aftertaste.",
                     'url': "https://creamicravings.com/category/without-protein-powder",
                     'heading': "Ninja Creami Recipes Without Protein Powder",
                     'recipes': matching_recipes[:30]
                 }
-            elif clean_url in ['/category/keto-low-carb', '/category/keto']:
+            elif clean_url in ['/category/sorbet', '/category/fruit-sorbet', '/ninja-creami-sorbet-recipes', '/ninja-creami-fruit-sorbet']:
+                matching_recipes = [r for r in RECIPES_MASTER if is_sorbet_fruit(r)]
+                seo_meta = {
+                    'title': "Ninja Creami Sorbet Recipes — Fresh & Canned Fruit Pints | Creami Cravings",
+                    'desc': "Tested Ninja Creami fruit sorbet recipes made with canned peaches, mango chunks, berries, and bananas. 100% dairy-free, silky soft-serve textures on the Sorbet cycle.",
+                    'url': "https://creamicravings.com/category/sorbet",
+                    'heading': "Ninja Creami Fruit Sorbet Recipes",
+                    'recipes': matching_recipes[:30]
+                }
+            elif clean_url in ['/category/dairy-free', '/category/vegan', '/category/lactose-free', '/ninja-creami-dairy-free-recipes', '/ninja-creami-vegan-recipes']:
+                matching_recipes = [r for r in RECIPES_MASTER if is_dairy_free_recipe(r)]
+                seo_meta = {
+                    'title': "Dairy-Free & Vegan Ninja Creami Recipes — Plant-Based Pints | Creami Cravings",
+                    'desc': "Explore delicious dairy-free and vegan Ninja Creami recipes crafted with almond milk, oat milk, and coconut cream. Tested stabilizer formulas that never turn icy.",
+                    'url': "https://creamicravings.com/category/dairy-free",
+                    'heading': "Dairy-Free & Vegan Ninja Creami Recipes",
+                    'recipes': matching_recipes[:30]
+                }
+            elif clean_url in ['/category/keto-low-carb', '/category/keto', '/category/low-carb', '/ninja-creami-keto-recipes', '/ninja-creami-low-carb-recipes']:
                 matching_recipes = [r for r in RECIPES_MASTER if r.get('category') == 'Keto']
                 seo_meta = {
                     'title': "Keto Ninja Creami Recipes — Under 5g Net Carbs | Creami Cravings",
@@ -1077,32 +1157,22 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                     'heading': "Keto & Low Carb Ninja Creami Recipes",
                     'recipes': matching_recipes[:30]
                 }
-            elif clean_url in ['/category/under-300-cal', '/category/under-300-calories', '/category/low-calorie']:
-                def is_under_300(r):
-                    try:
-                        return int(r.get('macros', {}).get('calories', '999').replace('kcal','').strip()) <= 300
-                    except:
-                        return False
-                matching_recipes = [r for r in RECIPES_MASTER if is_under_300(r)]
+            elif clean_url in ['/category/deluxe', '/category/deluxe-24oz', '/ninja-creami-deluxe-recipes']:
+                matching_recipes = RECIPES_MASTER
                 seo_meta = {
-                    'title': "Ninja Creami Recipes Under 300 Calories — Guilt-Free Pints | Creami Cravings",
-                    'desc': "Explore 160+ macro-friendly Ninja Creami recipes under 300 calories per pint. Creamy, high-volume ice cream perfect for weight loss, cutting, and guilt-free snacking.",
-                    'url': "https://creamicravings.com/category/under-300-cal",
-                    'heading': "Low Calorie Ninja Creami Recipes Under 300 kcal",
+                    'title': "Ninja Creami Deluxe Recipes (24 oz NC500 Series Scaling) | Creami Cravings",
+                    'desc': "Complete recipe guide for the Ninja Creami Deluxe (NC500 series). 1.5x scaling formulas for 24 oz containers with exact ingredient weights and MAX FILL lines.",
+                    'url': "https://creamicravings.com/category/deluxe",
+                    'heading': "Ninja Creami Deluxe Recipes (24 oz NC500 Series)",
                     'recipes': matching_recipes[:30]
                 }
-            elif clean_url in ['/category/high-protein', '/category/protein']:
-                def is_high_pro(r):
-                    try:
-                        return int(r.get('macros', {}).get('protein', '0g').replace('g','').strip()) >= 25
-                    except:
-                        return False
-                matching_recipes = [r for r in RECIPES_MASTER if is_high_pro(r)]
+            elif clean_url in ['/category/gelato', '/ninja-creami-gelato-recipes']:
+                matching_recipes = [r for r in RECIPES_MASTER if is_gelato_recipe(r)]
                 seo_meta = {
-                    'title': "High Protein Ninja Creami Recipes — 30g to 50g+ Protein Pints | Creami Cravings",
-                    'desc': "Master collection of high protein Ninja Creami recipes with 30g to 50g+ protein per pint. Tested macro ratios, silky smooth textures, and perfect spin settings.",
-                    'url': "https://creamicravings.com/category/high-protein",
-                    'heading': "High-Protein Ninja Creami Recipes",
+                    'title': "Ninja Creami Gelato Recipes — Dense & Silky Italian Style | Creami Cravings",
+                    'desc': "Dense, velvety, and authentic Ninja Creami gelato recipes. Rich whole-milk, egg custard, and chocolate gelato bases spun to perfection on the Gelato cycle.",
+                    'url': "https://creamicravings.com/category/gelato",
+                    'heading': "Ninja Creami Gelato Recipes",
                     'recipes': matching_recipes[:30]
                 }
             elif clean_url in ['/freeze-guide', '/guide/freeze-time', '/guide/ninja-creami-freeze-time']:
@@ -1136,12 +1206,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 '    <priority>1.0</priority>',
                 '  </url>',
                 '  <url>',
-                '    <loc>https://creamicravings.com/category/without-protein-powder</loc>',
-                '    <changefreq>weekly</changefreq>',
-                '    <priority>0.9</priority>',
-                '  </url>',
-                '  <url>',
-                '    <loc>https://creamicravings.com/category/keto-low-carb</loc>',
+                '    <loc>https://creamicravings.com/category/high-protein</loc>',
                 '    <changefreq>weekly</changefreq>',
                 '    <priority>0.9</priority>',
                 '  </url>',
@@ -1151,7 +1216,32 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 '    <priority>0.9</priority>',
                 '  </url>',
                 '  <url>',
-                '    <loc>https://creamicravings.com/category/high-protein</loc>',
+                '    <loc>https://creamicravings.com/category/without-protein-powder</loc>',
+                '    <changefreq>weekly</changefreq>',
+                '    <priority>0.9</priority>',
+                '  </url>',
+                '  <url>',
+                '    <loc>https://creamicravings.com/category/sorbet</loc>',
+                '    <changefreq>weekly</changefreq>',
+                '    <priority>0.9</priority>',
+                '  </url>',
+                '  <url>',
+                '    <loc>https://creamicravings.com/category/dairy-free</loc>',
+                '    <changefreq>weekly</changefreq>',
+                '    <priority>0.9</priority>',
+                '  </url>',
+                '  <url>',
+                '    <loc>https://creamicravings.com/category/keto-low-carb</loc>',
+                '    <changefreq>weekly</changefreq>',
+                '    <priority>0.9</priority>',
+                '  </url>',
+                '  <url>',
+                '    <loc>https://creamicravings.com/category/deluxe</loc>',
+                '    <changefreq>weekly</changefreq>',
+                '    <priority>0.9</priority>',
+                '  </url>',
+                '  <url>',
+                '    <loc>https://creamicravings.com/category/gelato</loc>',
                 '    <changefreq>weekly</changefreq>',
                 '    <priority>0.9</priority>',
                 '  </url>',

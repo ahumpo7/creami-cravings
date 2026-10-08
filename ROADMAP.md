@@ -236,6 +236,36 @@ A prioritized checklist of fixes, features, and refinements for the Creami Cravi
 - [x] **Core Web Vitals & Target Keyword Strategy:**
   - Added canonical tags (`<link rel="canonical">`) and metadata targeting high-intent search terms (*"Ninja Creami protein ice cream recipes"*, *"low calorie ninja creami"*, *"keto creami recipes"*).
 
+### 23. 🗄️ Automated Offsite Database Backups (Completed ✅)
+- [x] **Pre-Flight JSON Integrity Verification:**
+  - `scripts/backup_database.py` validates `db_users.json`, `db_recipe_stats.json`, and `db_ratings.json` with `json.load()` before archiving to prevent backing up corrupted or empty state.
+- [x] **Production Cloud Object Storage Sync (S3 / R2 / B2):**
+  - Integrated zero-dependency `boto3` support for pushing daily timestamped tar archives off the VPS into AWS S3, Cloudflare R2, Backblaze B2, or GCS.
+- [x] **Webhook Status Alerts:**
+  - Automated Discord/Slack/Healthchecks.io webhook notifications with archive size, account count, and execution status.
+- [x] **Automated Local Pull & Archival Tool (`scripts/pull_offsite_backup.py`):**
+  - Automated SSH/SCP pull tool to download and verify production database backups onto the developer's local machine with 30-day rotation.
+- [x] **Automated Server Cron Integration:**
+  - Configured daily execution at 03:00 UTC with `/var/log/creami-backup.log` logging.
+
+### 24. 🎯 High-Volume Long-Tail SEO Landing Hubs (Completed ✅)
+- [x] **Target Exact-Match Long-Tail Queries:**
+  - `/category/high-protein` & `/ninja-creami-protein-ice-cream` (30g to 50g+ Protein, 124 recipes)
+  - `/category/under-300-cal` & `/ninja-creami-low-calorie-recipes` (Under 300 kcal, 164 recipes)
+  - `/category/without-protein-powder` & `/ninja-creami-recipes-without-protein-powder` (Real Fruit & Gelato, 49 recipes)
+  - `/category/sorbet` & `/ninja-creami-sorbet-recipes` (Fresh & Canned Fruit Sorbets, 40 recipes)
+  - `/category/dairy-free` & `/ninja-creami-dairy-free-recipes` (Plant-Based & Vegan, 22 recipes)
+  - `/category/keto-low-carb` & `/ninja-creami-keto-recipes` (Under 5g Net Carbs, 17 recipes)
+  - `/category/deluxe` & `/ninja-creami-deluxe-recipes` (24 oz NC500 Scaling, 212 recipes)
+  - `/category/gelato` & `/ninja-creami-gelato-recipes` (Artisanal Gelato & Custard)
+  - `/freeze-guide` & `/guide/freeze-time` (16h vs 24h Freeze Time Guide)
+- [x] **Server-Side Rendered (SSR) Previews & Schema.org Markup:**
+  - Full Schema.org `CollectionPage`, `ItemList`, and `BreadcrumbList` JSON-LD generated for each hub.
+  - Server-side rendered HTML `#ssrCategoryFallback` grid with recipe titles, macros, and links.
+- [x] **Dynamic Sitemap & Internal Linking:**
+  - All hubs added to `sitemap.xml` with priority 0.9 and weekly crawl frequency.
+  - Internal link cards added to recipe detail footers, category footers, and homepage SEO FAQ bar.
+
 ---
 
 ## 🏆 Remaining Items Ranked by Logical Order
@@ -246,8 +276,11 @@ A prioritized checklist of fixes, features, and refinements for the Creami Cravi
 | **Step 6** | **Item 20: 🔊 Audio, Haptics & Local Data Backup** | Web Audio slot sounds/timer chimes, mobile haptics, and JSON export/import for disaster recovery. | 🟢 ~20–25 mins | ✅ **Done** |
 | **Step 7** | **Item 1: 🔑 Finish Google Sign-In** | Production Google Cloud Console OAuth 2.0 Client ID configured in `.env` and `app.js` with One-Tap and theme matching. | ⚪ Completed | ✅ **Done** |
 | **Step 8** | **Item 22: 🔍 SEO, Deep Links & Recipe Sharing** | Schema.org JSON-LD recipes for Google rich snippets, sitemap.xml, robots.txt, Open Graph preview cards, and 1-tap share engine. | 🟢 ~25–30 mins | ✅ **Done** |
-| **Step 9** | **Item 14: 🤖 Google Play Store Android App (Bubblewrap)** | Generate signed `.aab` bundle, deploy `assetlinks.json`, generate $1024\times500$ banner and $512\times512$ store icon. | 🟠 ~30–45 mins | ⏳ **Next** |
-| **Step 10** | **Item 21: ✉️ Admin Email Setup & Notifications** | Domain inbox (`admin@creamicravings.com`), transactional SMTP (Resend/SendGrid), SPF/DKIM/DMARC DNS, and admin alert triggers. | 🟡 ~25–35 mins | 📋 **Planned** |
+| **Step 9** | **Item 23: 🗄️ Automated Offsite Database Backups** | JSON pre-check, S3/R2/B2 cloud upload, local pull script `pull_offsite_backup.py`, and webhook alerting. | 🟢 ~25–30 mins | ✅ **Done** |
+| **Step 10** | **Item 24: 🎯 Long-Tail Search Landing Hubs** | Dedicated SEO hubs for protein, low cal, sorbet, dairy-free, keto, deluxe, and gelato with SSR & ItemList schemas. | 🟢 ~30–40 mins | ✅ **Done** |
+| **Step 11** | **Item 14: 🤖 Google Play Store Android App (Bubblewrap)** | Generate signed `.aab` bundle, deploy `assetlinks.json`, generate $1024\times500$ banner and $512\times512$ store icon. | 🟠 ~30–45 mins | ⏳ **Next** |
+| **Step 12** | **Item 21: ✉️ Admin Email Setup & Notifications** | Domain inbox (`admin@creamicravings.com`), transactional SMTP (Resend/SendGrid), SPF/DKIM/DMARC DNS, and admin alert triggers. | 🟡 ~25–35 mins | 📋 **Planned** |
+
 
 
 
