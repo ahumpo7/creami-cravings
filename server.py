@@ -1264,7 +1264,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                         data = json.loads(base64.b64decode(b64.encode('utf-8')).decode('utf-8'))
                         title = data.get('n', 'Shared Creami Recipe')
                         author = data.get('by', 'A Creami Chef')
-                        html = html.replace('<title>Creami Cravings', f'<title>{title} by {author} — Creami Cravings')
+                        html = re.sub(r'<title>.*?</title>', f'<title>{title} by {author} — Creami Cravings</title>', html, count=1)
                         og_tags = f'<meta property="og:title" content="{title} by {author} — Creami Cravings">\n<meta property="og:description" content="Custom Ninja Creami recipe shared by {author} on Creami Cravings. Click to view ingredients and spin settings!">'
                         html = html.replace('</head>', f'{og_tags}\n</head>')
                 except Exception:
