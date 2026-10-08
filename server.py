@@ -3,6 +3,7 @@ import socketserver
 import json
 import os
 import hashlib
+import hmac
 import uuid
 import urllib.request
 import urllib.parse
@@ -67,8 +68,48 @@ def save_json_file(filepath, data):
     except Exception as e:
         print(f"Error saving {filepath}: {e}")
 
-def hash_password(password):
-    return hashlib.sha256(password.encode('utf-8')).hexdigest()
+def hash_password(password, salt=None):
+    if not salt:
+        salt = os.urandom(16).hex()
+    hashed = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt.encode('utf-8'), 100000).hex()
+    return f"pbkdf2:sha256:100000${salt}${hashed}"
+
+def verify_password(stored_hash, password):
+    if not stored_hash or not password:
+        return False
+    if stored_hash.startswith('pbkdf2:sha256:'):
+        try:
+            parts = stored_hash.split('$')
+            salt = parts[1]
+            expected_hash = parts[2]
+            computed = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt.encode('utf-8'), 100000).hex()
+            return hmac.compare_digest(computed, expected_hash)
+        except Exception:
+            return False
+    # Fallback to legacy sha256
+    legacy = hashlib.sha256(password.encode('utf-8')).hexdigest()
+    return hmac.compare_digest(stored_hash, legacy)
+
+def format_user_payload(user):
+    is_admin = user.get('email', '').lower() in ADMIN_EMAILS or user.get('role') == 'admin'
+    fallback_subs = list(ALL_SUBSCRIPTIONS) if is_admin else list(DEFAULT_SUBSCRIPTIONS)
+    return {
+        'id': user.get('id'),
+        'username': user.get('username') or user.get('name') or user.get('email', '').split('@')[0],
+        'name': user.get('name') or user.get('username') or user.get('email', '').split('@')[0],
+        'email': user.get('email', ''),
+        'picture': user.get('picture', ''),
+        'role': 'admin' if is_admin else (user.get('role') or 'user'),
+        'creatorId': user.get('creatorId', ''),
+        'pantry': user.get('pantry') if user.get('pantry') is not None else list(DEFAULT_STAPLES),
+        'favorites': user.get('favorites', []),
+        'madeCounts': user.get('madeCounts', {}),
+        'ratings': user.get('ratings', {}),
+        'customRecipes': user.get('customRecipes', []),
+        'shoppingList': user.get('shoppingList', []),
+        'freezerPints': user.get('freezerPints', []),
+        'subscriptions': user.get('subscriptions', fallback_subs)
+    }
 
 # Load DBs
 users_db = load_json_file(USERS_DB_FILE, {})
@@ -1404,23 +1445,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 'status': 'ok',
                 'success': True,
                 'token': new_token,
-                'user': {
-                    'id': user.get('id'),
-                    'username': user.get('username'),
-                    'name': user.get('name'),
-                    'email': user.get('email'),
-                    'picture': user.get('picture', ''),
-                    'role': user.get('role', 'user'),
-                    'creatorId': user.get('creatorId', ''),
-                    'pantry': user.get('pantry') if user.get('pantry') is not None else list(DEFAULT_STAPLES),
-                    'favorites': user.get('favorites', []),
-                    'madeCounts': user.get('madeCounts', {}),
-                    'ratings': user.get('ratings', {}),
-                    'customRecipes': user.get('customRecipes', []),
-                    'shoppingList': user.get('shoppingList', []),
-                    'freezerPints': user.get('freezerPints', []),
-                    'subscriptions': user.get('subscriptions', list(ALL_SUBSCRIPTIONS))
-                }
+                'user': format_user_payload(user)
             })
 
         # 2. Sync Full User Cloud Data
@@ -1615,29 +1640,103 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 'distribution': dist
             })
 
-        # 5. Legacy Auth & User routes
+        # 5. Email & Password Auth (Universal Registration & Login)
+        elif self.path == '/api/auth/register':
+            email = data.get('email', '').strip().lower()
+            password = data.get('password', '').strip()
+            name = data.get('name', '').strip()
+
+            if not email or '@' not in email or '.' not in email.split('@')[-1]:
+                self._send_json({'error': 'Please provide a valid email address.'}, 400)
+                return
+
+            if not password or len(password) < 6:
+                self._send_json({'error': 'Password must be at least 6 characters long.'}, 400)
+                return
+
+            # Check if user already exists
+            existing_user = None
+            for u in users_db.values():
+                if u.get('email', '').lower() == email:
+                    existing_user = u
+                    break
+
+            if existing_user:
+                if existing_user.get('password'):
+                    self._send_json({'error': 'An account with this email already exists. Please sign in.'}, 409)
+                else:
+                    self._send_json({'error': 'This email was registered with Google Sign-In. Please sign in using Google.'}, 409)
+                return
+
+            user_id = 'user_em_' + str(uuid.uuid4())[:8]
+            display_name = name if name else email.split('@')[0].capitalize()
+            is_admin_email = email in ADMIN_EMAILS
+            assigned_role = 'admin' if is_admin_email else 'user'
+            initial_subs = list(ALL_SUBSCRIPTIONS) if is_admin_email else list(DEFAULT_SUBSCRIPTIONS)
+            token = 'token_em_' + str(uuid.uuid4())
+            now_iso = datetime.utcnow().isoformat()
+
+            new_user = {
+                'id': user_id,
+                'username': display_name,
+                'name': display_name,
+                'email': email,
+                'password': hash_password(password),
+                'picture': '',
+                'authProvider': 'email',
+                'role': assigned_role,
+                'creatorId': '',
+                'pantry': list(DEFAULT_STAPLES),
+                'favorites': [],
+                'madeCounts': {},
+                'ratings': {},
+                'customRecipes': [],
+                'shoppingList': [],
+                'freezerPints': [],
+                'subscriptions': initial_subs,
+                'created_at': now_iso,
+                'last_active': now_iso,
+                'token': token
+            }
+            users_db[email] = new_user
+            save_json_file(USERS_DB_FILE, users_db)
+
+            self._send_json({
+                'status': 'ok',
+                'success': True,
+                'token': token,
+                'user': format_user_payload(new_user)
+            })
+            return
+
         elif self.path == '/api/auth/login':
-            username = data.get('username', '').strip().lower()
+            login_id = (data.get('email') or data.get('username') or '').strip().lower()
             password = data.get('password', '').strip()
 
+            if not login_id or not password:
+                self._send_json({'error': 'Email and password are required.'}, 400)
+                return
+
             target_user = None
-            if username in users_db:
-                target_user = users_db[username]
-            else:
-                for k, u in users_db.items():
-                    if u.get('email', '').lower() == username or u.get('username', '').lower() == username:
-                        target_user = u
-                        break
+            for u in users_db.values():
+                if u.get('email', '').lower() == login_id or u.get('username', '').lower() == login_id:
+                    target_user = u
+                    break
 
             if not target_user:
-                self._send_json({'error': 'Invalid username or password'}, 401)
+                self._send_json({'error': 'No account found with this email. Please check your spelling or create an account.'}, 404)
                 return
 
-            if target_user.get('password') != hash_password(password):
-                self._send_json({'error': 'Invalid username or password'}, 401)
+            stored_pass = target_user.get('password')
+            if not stored_pass:
+                self._send_json({'error': 'This account was created with Google Sign-In. Please sign in using Google.'}, 400)
                 return
 
-            token = 'token_' + str(uuid.uuid4())
+            if not verify_password(stored_pass, password):
+                self._send_json({'error': 'Incorrect password. Please try again.'}, 401)
+                return
+
+            token = 'token_em_' + str(uuid.uuid4())
             target_user['token'] = token
             target_user['last_active'] = datetime.utcnow().isoformat()
             save_json_file(USERS_DB_FILE, users_db)
@@ -1646,23 +1745,9 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 'status': 'ok',
                 'success': True,
                 'token': token,
-                'user': {
-                    'id': target_user.get('id'),
-                    'username': target_user.get('username'),
-                    'name': target_user.get('name') or target_user.get('username'),
-                    'email': target_user.get('email', ''),
-                    'role': target_user.get('role', 'user'),
-                    'creatorId': target_user.get('creatorId', ''),
-                    'subscriptions': target_user.get('subscriptions', list(DEFAULT_SUBSCRIPTIONS)),
-                    'pantry': target_user.get('pantry') if target_user.get('pantry') is not None else list(DEFAULT_STAPLES),
-                    'favorites': target_user.get('favorites', []),
-                    'madeCounts': target_user.get('madeCounts', {}),
-                    'ratings': target_user.get('ratings', {}),
-                    'customRecipes': target_user.get('customRecipes', []),
-                    'shoppingList': target_user.get('shoppingList', []),
-                    'freezerPints': target_user.get('freezerPints', [])
-                }
+                'user': format_user_payload(target_user)
             })
+            return
 
         elif self.path == '/api/user/pantry':
             user = self._get_user_from_token()

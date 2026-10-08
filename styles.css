@@ -3242,6 +3242,95 @@ body.modal-open .cookie-consent-banner {
   text-align: left;
 }
 
+.auth-mode-tabs {
+  display: flex;
+  background: var(--bg-item);
+  border: 1px solid var(--border-item);
+  border-radius: var(--radius-md);
+  padding: 3px;
+  margin: 14px 0 16px;
+  gap: 4px;
+}
+
+.auth-tab-btn {
+  flex: 1;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  border-radius: calc(var(--radius-md) - 2px);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.auth-tab-btn.active {
+  background: var(--primary);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(236, 72, 153, 0.3);
+}
+
+.auth-switch-prompt {
+  margin-top: 14px;
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.auth-switch-link {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0 4px;
+  font-size: 0.82rem;
+}
+
+.auth-switch-link:hover {
+  color: #f472b6;
+}
+
+.auth-error-banner {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #f87171;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  display: none;
+  text-align: left;
+}
+
+.auth-error-banner.visible {
+  display: block;
+}
+
+.quick-google-fallback-wrap {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border-item);
+  text-align: center;
+}
+
+.quick-google-toggle {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.quick-google-toggle:hover {
+  color: var(--text-muted);
+}
+
 /* ==========================================================================
    Recipe Card Community Badges & Made Counters
    ========================================================================== */

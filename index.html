@@ -1345,15 +1345,10 @@
       
       <div class="modal-header auth-modal-header">
         <div class="auth-icon-circle">
-          <svg class="google-svg" viewBox="0 0 24 24" width="32" height="32">
-            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-          </svg>
+          <span style="font-size: 1.8rem;">🍨</span>
         </div>
-        <h2 class="modal-title">Sign in with Google</h2>
-        <p class="modal-subtitle">Sync your kitchen pantry, track how many times you've made each recipe, and rate recipes across all your devices.</p>
+        <h2 class="modal-title" id="authModalTitle">Sign In or Create Account</h2>
+        <p class="modal-subtitle">Sync your kitchen pantry, track your spins, and rate recipes across all your devices.</p>
       </div>
 
       <div class="auth-sync-perks">
@@ -1361,7 +1356,7 @@
           <span class="perk-icon">🥫</span>
           <div class="perk-text">
             <strong>Pantry Sync</strong>
-            <span>All in-stock milk, powders & mix-ins saved to your account</span>
+            <span>All in-stock milk, powders &amp; mix-ins saved to your account</span>
           </div>
         </div>
         <div class="perk-item">
@@ -1384,44 +1379,77 @@
       <div id="gsiButtonContainer" class="gsi-container"></div>
 
       <div class="auth-divider">
-        <span>OR QUICK SIGN-IN</span>
+        <span>OR CONTINUE WITH EMAIL</span>
       </div>
 
-      <!-- Quick Google Account Input for instant connection -->
-      <form id="quickGoogleAuthForm" class="quick-auth-form">
-        <div class="form-group">
-          <label for="googleAuthEmail">Google Account Email</label>
-          <input type="email" id="googleAuthEmail" required placeholder="e.g. name@gmail.com">
-        </div>
-        <div class="form-group">
-          <label for="googleAuthName">Display Name (Optional)</label>
-          <input type="text" id="googleAuthName" placeholder="e.g. Alex">
-        </div>
-        <button type="submit" class="btn-primary btn-block" id="btnConnectGoogle">
-          <span>Connect Google Account</span>
-        </button>
-      </form>
-
-      <!-- Password Login Toggle & Form -->
-      <div style="margin-top: 14px; text-align: center;">
-        <button type="button" id="btnTogglePasswordAuth" style="background: none; border: none; color: #34d399; font-size: 0.82rem; font-weight: 600; cursor: pointer; text-decoration: underline;">
-          🔑 Sign in with Email / Username &amp; Password
-        </button>
+      <!-- Segmented Mode Tabs: Sign In vs Create Account -->
+      <div class="auth-mode-tabs" role="tablist">
+        <button type="button" class="auth-tab-btn active" id="tabAuthSignIn" role="tab" aria-selected="true">Sign In</button>
+        <button type="button" class="auth-tab-btn" id="tabAuthRegister" role="tab" aria-selected="false">Create Account</button>
       </div>
 
-      <form id="passwordAuthForm" class="quick-auth-form" style="display: none; margin-top: 12px;">
+      <!-- Inline Error Banner -->
+      <div class="auth-error-banner" id="authErrorBanner"></div>
+
+      <!-- 1. Email & Password Sign-In Form -->
+      <form id="passwordAuthForm" class="quick-auth-form">
         <div class="form-group">
-          <label for="authLoginUsername">Username or Email</label>
-          <input type="text" id="authLoginUsername" required placeholder="e.g. eli or name@example.com" autocomplete="username">
+          <label for="authLoginUsername">Email or Username</label>
+          <input type="text" id="authLoginUsername" required placeholder="e.g. name@example.com" autocomplete="username">
         </div>
         <div class="form-group">
           <label for="authLoginPassword">Password</label>
-          <input type="password" id="authLoginPassword" required placeholder="Enter password" autocomplete="current-password">
+          <input type="password" id="authLoginPassword" required placeholder="Enter your password" autocomplete="current-password">
         </div>
         <button type="submit" class="btn-primary btn-block" id="btnPasswordLogin">
-          <span>Sign In</span>
+          <span>Sign In ➔</span>
         </button>
+        <p class="auth-switch-prompt">
+          Don't have an account? <button type="button" class="auth-switch-link" id="linkSwitchToRegister">Create one now</button>
+        </p>
       </form>
+
+      <!-- 2. Email & Password Account Registration Form -->
+      <form id="registerAuthForm" class="quick-auth-form" style="display: none;">
+        <div class="form-group">
+          <label for="authRegisterEmail">Email Address</label>
+          <input type="email" id="authRegisterEmail" required placeholder="e.g. name@example.com" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label for="authRegisterName">Display Name (Optional)</label>
+          <input type="text" id="authRegisterName" placeholder="e.g. Alex" autocomplete="name">
+        </div>
+        <div class="form-group">
+          <label for="authRegisterPassword">Password (6+ characters)</label>
+          <input type="password" id="authRegisterPassword" required placeholder="Create a password (min 6 characters)" minlength="6" autocomplete="new-password">
+        </div>
+        <button type="submit" class="btn-primary btn-block" id="btnRegisterSubmit">
+          <span>Create Account &amp; Sync ➔</span>
+        </button>
+        <p class="auth-switch-prompt">
+          Already have an account? <button type="button" class="auth-switch-link" id="linkSwitchToSignIn">Sign in</button>
+        </p>
+      </form>
+
+      <!-- Quick Google Fallback Collapsible -->
+      <div class="quick-google-fallback-wrap">
+        <button type="button" class="quick-google-toggle" id="btnToggleQuickGoogle">
+          Having trouble with the Google button? Quick Gmail connect ▾
+        </button>
+        <form id="quickGoogleAuthForm" class="quick-auth-form" style="display: none; margin-top: 10px;">
+          <div class="form-group">
+            <label for="googleAuthEmail">Google Account Email</label>
+            <input type="email" id="googleAuthEmail" placeholder="e.g. name@gmail.com">
+          </div>
+          <div class="form-group">
+            <label for="googleAuthName">Display Name (Optional)</label>
+            <input type="text" id="googleAuthName" placeholder="e.g. Alex">
+          </div>
+          <button type="submit" class="btn-secondary btn-block" id="btnConnectGoogle">
+            <span>Connect Google Account</span>
+          </button>
+        </form>
+      </div>
     </div>
   </div>
 

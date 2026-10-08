@@ -1275,33 +1275,147 @@
     }
   }
 
+  function showAuthError(message) {
+    const banner = document.getElementById('authErrorBanner');
+    if (!banner) return;
+    if (message) {
+      banner.textContent = message;
+      banner.classList.add('visible');
+      banner.style.display = 'block';
+    } else {
+      banner.textContent = '';
+      banner.classList.remove('visible');
+      banner.style.display = 'none';
+    }
+  }
+
+  function clearAuthError() {
+    showAuthError('');
+  }
+
+  function switchAuthTab(mode) {
+    const tabSignIn = document.getElementById('tabAuthSignIn');
+    const tabRegister = document.getElementById('tabAuthRegister');
+    const formSignIn = document.getElementById('passwordAuthForm');
+    const formRegister = document.getElementById('registerAuthForm');
+    clearAuthError();
+
+    if (mode === 'register') {
+      if (tabSignIn) {
+        tabSignIn.classList.remove('active');
+        tabSignIn.setAttribute('aria-selected', 'false');
+      }
+      if (tabRegister) {
+        tabRegister.classList.add('active');
+        tabRegister.setAttribute('aria-selected', 'true');
+      }
+      if (formSignIn) formSignIn.style.display = 'none';
+      if (formRegister) {
+        formRegister.style.display = 'block';
+        const emailInput = document.getElementById('authRegisterEmail');
+        if (emailInput) setTimeout(() => emailInput.focus(), 60);
+      }
+    } else {
+      if (tabSignIn) {
+        tabSignIn.classList.add('active');
+        tabSignIn.setAttribute('aria-selected', 'true');
+      }
+      if (tabRegister) {
+        tabRegister.classList.remove('active');
+        tabRegister.setAttribute('aria-selected', 'false');
+      }
+      if (formSignIn) {
+        formSignIn.style.display = 'block';
+        const userInput = document.getElementById('authLoginUsername');
+        if (userInput) setTimeout(() => userInput.focus(), 60);
+      }
+      if (formRegister) formRegister.style.display = 'none';
+    }
+  }
+
   async function handlePasswordLogin(usernameOrEmail, password) {
-    if (!usernameOrEmail || !password) return;
+    if (!usernameOrEmail || !password) {
+      showAuthError('Please enter your email and password.');
+      return;
+    }
+    clearAuthError();
+    const btn = document.getElementById('btnPasswordLogin');
+    if (btn) btn.disabled = true;
+
     try {
       showToast('Signing in...');
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          email: usernameOrEmail.trim(),
           username: usernameOrEmail.trim(),
           password: password.trim()
         })
       });
       const data = await res.json();
       if (res.ok && (data.status === 'ok' || data.success)) {
-        applyUserSession(data);
+        applyUserSession(data, 'email_password');
         closeGoogleAuthModal();
         showToast(`👋 Welcome back, ${data.user.name || data.user.username}!`);
       } else {
-        showToast('Login failed: ' + (data.error || data.message || 'Invalid username or password'));
+        const errorMsg = data.error || data.message || 'Invalid username or password';
+        showAuthError(errorMsg);
+        showToast(`Sign-in failed: ${errorMsg}`);
       }
     } catch (err) {
       console.error('Password login error:', err);
+      showAuthError('Connection error during sign-in.');
       showToast('Connection error during sign-in.');
+    } finally {
+      if (btn) btn.disabled = false;
     }
   }
 
-  function applyUserSession(data) {
+  async function handleEmailRegister(email, password, name) {
+    if (!email || !password) {
+      showAuthError('Please provide an email and password.');
+      return;
+    }
+    if (password.length < 6) {
+      showAuthError('Password must be at least 6 characters long.');
+      return;
+    }
+    clearAuthError();
+    const btn = document.getElementById('btnRegisterSubmit');
+    if (btn) btn.disabled = true;
+
+    try {
+      showToast('Creating account...');
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: email.trim(),
+          password: password.trim(),
+          name: name ? name.trim() : ''
+        })
+      });
+      const data = await res.json();
+      if (res.ok && (data.status === 'ok' || data.success)) {
+        applyUserSession(data, 'email_register');
+        closeGoogleAuthModal();
+        showToast(`🎉 Welcome to Creami Cravings, ${data.user.name || data.user.email}!`);
+      } else {
+        const errorMsg = data.error || data.message || 'Registration failed.';
+        showAuthError(errorMsg);
+        showToast(`Registration failed: ${errorMsg}`);
+      }
+    } catch (err) {
+      console.error('Email registration error:', err);
+      showAuthError('Connection error during account creation.');
+      showToast('Connection error during account creation.');
+    } finally {
+      if (btn) btn.disabled = false;
+    }
+  }
+
+  function applyUserSession(data, method = 'google') {
     const ADMIN_EMAILS = ['admin@creamicravings.com', 'ahumpo7@gmail.com', 'ahumpo@gmail.com', 'andrew@gmail.com'];
     const email = (data.user.email || '').toLowerCase();
     const isAdmin = data.user.role === 'admin' || ADMIN_EMAILS.includes(email);
@@ -1319,7 +1433,7 @@
     };
     saveUserAuth();
     trackAnalyticsEvent('login', {
-      method: 'google'
+      method: method
     });
 
     // 1. Restore & switch to authenticated user's pantry (STRICT ISOLATION - do not merge with guest session!)
@@ -2132,13 +2246,14 @@
   }
 
 
-  function openGoogleAuthModal() {
+  function openGoogleAuthModal(initialTab = 'signin') {
     const modal = document.getElementById('googleAuthModalOverlay');
     if (modal) {
       modal.classList.add('active');
       modal.setAttribute('aria-hidden', 'false');
       lockBackgroundScroll();
       initGoogleAuth();
+      switchAuthTab(initialTab);
     }
   }
 
@@ -2154,7 +2269,7 @@
   function bindAuthEvents() {
     const signInBtn = document.getElementById('headerSignInBtn');
     if (signInBtn) {
-      signInBtn.addEventListener('click', openGoogleAuthModal);
+      signInBtn.addEventListener('click', () => openGoogleAuthModal('signin'));
     }
 
     const signOutBtn = document.getElementById('headerSignOutBtn');
@@ -2174,33 +2289,28 @@
       });
     }
 
-    const quickForm = document.getElementById('quickGoogleAuthForm');
-    if (quickForm) {
-      quickForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const emailInput = document.getElementById('googleAuthEmail');
-        const nameInput = document.getElementById('googleAuthName');
-        const email = emailInput ? emailInput.value : '';
-        const name = nameInput ? nameInput.value : '';
-        if (email) {
-          handleManualGoogleAuth(email, name);
-        }
-      });
+    // Mode Tabs: Sign In vs Create Account
+    const tabSignIn = document.getElementById('tabAuthSignIn');
+    if (tabSignIn) {
+      tabSignIn.addEventListener('click', () => switchAuthTab('signin'));
+    }
+    const tabRegister = document.getElementById('tabAuthRegister');
+    if (tabRegister) {
+      tabRegister.addEventListener('click', () => switchAuthTab('register'));
     }
 
-    const togglePasswordBtn = document.getElementById('btnTogglePasswordAuth');
+    // Mode Switch Links inside form footers
+    const linkSwitchRegister = document.getElementById('linkSwitchToRegister');
+    if (linkSwitchRegister) {
+      linkSwitchRegister.addEventListener('click', () => switchAuthTab('register'));
+    }
+    const linkSwitchSignIn = document.getElementById('linkSwitchToSignIn');
+    if (linkSwitchSignIn) {
+      linkSwitchSignIn.addEventListener('click', () => switchAuthTab('signin'));
+    }
+
+    // Password Sign-In Form
     const passwordForm = document.getElementById('passwordAuthForm');
-    if (togglePasswordBtn && passwordForm) {
-      togglePasswordBtn.addEventListener('click', () => {
-        const isHidden = passwordForm.style.display === 'none' || !passwordForm.style.display;
-        passwordForm.style.display = isHidden ? 'block' : 'none';
-        if (isHidden) {
-          const userField = document.getElementById('authLoginUsername');
-          if (userField) setTimeout(() => userField.focus(), 50);
-        }
-      });
-    }
-
     if (passwordForm) {
       passwordForm.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -2210,6 +2320,53 @@
         const passVal = passInput ? passInput.value : '';
         if (userVal && passVal) {
           handlePasswordLogin(userVal, passVal);
+        } else {
+          showAuthError('Please enter both email/username and password.');
+        }
+      });
+    }
+
+    // Email & Password Registration Form
+    const registerForm = document.getElementById('registerAuthForm');
+    if (registerForm) {
+      registerForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const emailInput = document.getElementById('authRegisterEmail');
+        const nameInput = document.getElementById('authRegisterName');
+        const passInput = document.getElementById('authRegisterPassword');
+        const emailVal = emailInput ? emailInput.value : '';
+        const nameVal = nameInput ? nameInput.value : '';
+        const passVal = passInput ? passInput.value : '';
+        if (emailVal && passVal) {
+          handleEmailRegister(emailVal, passVal, nameVal);
+        } else {
+          showAuthError('Please enter email and password.');
+        }
+      });
+    }
+
+    // Collapsible Quick Google Fallback
+    const toggleQuickGoogle = document.getElementById('btnToggleQuickGoogle');
+    const quickForm = document.getElementById('quickGoogleAuthForm');
+    if (toggleQuickGoogle && quickForm) {
+      toggleQuickGoogle.addEventListener('click', () => {
+        const isHidden = quickForm.style.display === 'none' || !quickForm.style.display;
+        quickForm.style.display = isHidden ? 'block' : 'none';
+        toggleQuickGoogle.textContent = isHidden 
+          ? 'Having trouble with the Google button? Quick Gmail connect ▴'
+          : 'Having trouble with the Google button? Quick Gmail connect ▾';
+      });
+    }
+
+    if (quickForm) {
+      quickForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const emailInput = document.getElementById('googleAuthEmail');
+        const nameInput = document.getElementById('googleAuthName');
+        const email = emailInput ? emailInput.value : '';
+        const name = nameInput ? nameInput.value : '';
+        if (email) {
+          handleManualGoogleAuth(email, name);
         }
       });
     }
