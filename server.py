@@ -371,7 +371,14 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 'customRecipes': user.get('customRecipes', []),
                 'shoppingList': user.get('shoppingList', []),
                 'freezerPints': user.get('freezerPints', []),
-                'subscriptions': user.get('subscriptions', list(DEFAULT_SUBSCRIPTIONS))
+                'subscriptions': user.get('subscriptions', list(DEFAULT_SUBSCRIPTIONS)),
+                'pendingClaims': [
+                    inq.get('pack') for inq in stats_db.get('purchase_inquiries', [])
+                    if inq.get('status') == 'pending' and (
+                        inq.get('email', '').lower() == user.get('email', '').lower() or
+                        (inq.get('userId') and inq.get('userId') == user.get('id'))
+                    )
+                ]
             })
 
         elif self.path == '/api/admin/users':
@@ -1211,7 +1218,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
             save_json_file(STATS_DB_FILE, stats_db)
             self._send_json({'status': 'ok', 'success': True, 'inquiry': target})
 
-        # 8. Purchase Inquiry / Access Claim (Store available pack requests)
+        # 8. Purchase Inquiry / Access Claim (Store available pack requests with deduplication)
         elif self.path == '/api/purchase-inquiry':
             email = data.get('email', '').strip()
             pack = data.get('pack', '').strip()
@@ -1222,18 +1229,59 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
             if 'purchase_inquiries' not in stats_db:
                 stats_db['purchase_inquiries'] = []
 
-            inquiry = {
-                'id': str(uuid.uuid4()),
-                'email': email,
-                'userId': data.get('userId'),
-                'pack': pack,
-                'action': data.get('action', 'purchase_interest'),
-                'status': 'pending',
-                'timestamp': datetime.utcnow().isoformat()
-            }
-            stats_db['purchase_inquiries'].append(inquiry)
-            save_json_file(STATS_DB_FILE, stats_db)
-            self._send_json({'status': 'ok', 'success': True, 'message': 'Inquiry received', 'inquiry': inquiry})
+            user_id = data.get('userId')
+            order_id = data.get('orderId', '').strip()
+            checkout_email = data.get('checkoutEmail', '').strip()
+            notes = data.get('notes', '').strip()
+            action = data.get('action', 'claim_existing')
+
+            # Deduplication: Check if a pending claim already exists for this user and pack
+            existing = None
+            for inq in stats_db['purchase_inquiries']:
+                if inq.get('status') == 'pending' and inq.get('pack') == pack:
+                    if (inq.get('email', '').lower() == email.lower()) or (user_id and inq.get('userId') == user_id):
+                        existing = inq
+                        break
+
+            if existing:
+                # Update existing pending claim with newly provided verification details
+                if order_id:
+                    existing['orderId'] = order_id
+                if checkout_email:
+                    existing['checkoutEmail'] = checkout_email
+                if notes:
+                    existing['notes'] = notes
+                existing['updatedAt'] = datetime.utcnow().isoformat()
+                save_json_file(STATS_DB_FILE, stats_db)
+                self._send_json({
+                    'status': 'ok',
+                    'success': True,
+                    'already_pending': True,
+                    'message': f'Access claim for "{pack}" is already pending verification.',
+                    'inquiry': existing
+                })
+            else:
+                inquiry = {
+                    'id': str(uuid.uuid4()),
+                    'email': email,
+                    'userId': user_id,
+                    'pack': pack,
+                    'action': action,
+                    'orderId': order_id,
+                    'checkoutEmail': checkout_email,
+                    'notes': notes,
+                    'status': 'pending',
+                    'timestamp': datetime.utcnow().isoformat()
+                }
+                stats_db['purchase_inquiries'].append(inquiry)
+                save_json_file(STATS_DB_FILE, stats_db)
+                self._send_json({
+                    'status': 'ok',
+                    'success': True,
+                    'already_pending': False,
+                    'message': f'Access claim for "{pack}" submitted for verification.',
+                    'inquiry': inquiry
+                })
 
         else:
             self._send_json({'error': 'Endpoint not found'}, 404)

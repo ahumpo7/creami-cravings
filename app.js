@@ -534,6 +534,7 @@
   const closeRecipePacksModalBtn = document.getElementById('closeRecipePacksModalBtn');
   let adminUsersState = [];
   let adminClaimsState = [];
+  let userPendingClaimsState = new Set();
   let adminActiveTab = 'users';
   let adminFilterRole = 'all';
   let adminFilterClaimStatus = 'all';
@@ -959,6 +960,16 @@
     // 11. Super Admin Role Mimicry Initialization
     if (realAdminUser && currentMimicRole && currentMimicRole !== 'admin') {
       applyMimicRole(currentMimicRole, false);
+    }
+
+    // 12. Active User Pending Access Claims
+    const savedPendingClaims = localStorage.getItem('creami_pending_claims_v1');
+    if (savedPendingClaims) {
+      try {
+        userPendingClaimsState = new Set(JSON.parse(savedPendingClaims));
+      } catch (e) {
+        userPendingClaimsState = new Set();
+      }
     }
   }
 
@@ -1395,6 +1406,12 @@
       freezerPintsState = [];
     }
 
+    // 8. Restore pending access claims from server
+    if (data.user && Array.isArray(data.user.pendingClaims)) {
+      userPendingClaimsState = new Set(data.user.pendingClaims);
+      localStorage.setItem('creami_pending_claims_v1', JSON.stringify(Array.from(userPendingClaimsState)));
+    }
+
     updateAuthUI();
     updateFreezerBadges();
     recipeCardCache.clear();
@@ -1442,6 +1459,8 @@
     customRecipesState = [];
     favoritesState = new Set();
     freezerPintsState = [];
+    userPendingClaimsState = new Set();
+    localStorage.removeItem('creami_pending_claims_v1');
     updateFreezerBadges();
     localStorage.removeItem(CUSTOM_RECIPES_STORAGE_KEY);
     localStorage.removeItem(FREEZER_STORAGE_KEY);
@@ -2239,6 +2258,30 @@
         }
       });
     });
+
+    // E-Book Claim & Verification Modal Events (Roadmap Item 15)
+    const claimModalCloseBtn = document.getElementById('claimModalCloseBtn');
+    if (claimModalCloseBtn) {
+      claimModalCloseBtn.addEventListener('click', closeClaimAccessModal);
+    }
+    const btnCancelClaimModal = document.getElementById('btnCancelClaimModal');
+    if (btnCancelClaimModal) {
+      btnCancelClaimModal.addEventListener('click', closeClaimAccessModal);
+    }
+    const btnCloseClaimSuccessModal = document.getElementById('btnCloseClaimSuccessModal');
+    if (btnCloseClaimSuccessModal) {
+      btnCloseClaimSuccessModal.addEventListener('click', closeClaimAccessModal);
+    }
+    const claimAccessModalOverlay = document.getElementById('claimAccessModalOverlay');
+    if (claimAccessModalOverlay) {
+      claimAccessModalOverlay.addEventListener('click', (e) => {
+        if (e.target === claimAccessModalOverlay) closeClaimAccessModal();
+      });
+    }
+    const claimAccessForm = document.getElementById('claimAccessForm');
+    if (claimAccessForm) {
+      claimAccessForm.addEventListener('submit', handleClaimAccessSubmit);
+    }
   }
 
   // --- Recipe Batch Counter API & Helper ---
@@ -3176,9 +3219,12 @@
     const isAccessible = isRecipeAccessible(recipe);
     card.className = `recipe-card ${match.isReady ? 'ready-to-make' : ''} ${!isAccessible ? 'locked' : ''}`;
 
+    const requiredTier = getRecipeRequiredTier(recipe);
+    const isClaimPending = !isAccessible && (userPendingClaimsState.has(requiredTier) || userPendingClaimsState.has('All-Access'));
+
     const viewBtn = card.querySelector('.btn-view-recipe');
     if (viewBtn) {
-      viewBtn.textContent = isAccessible ? 'View Recipe' : '🔒 Locked Preview';
+      viewBtn.textContent = isAccessible ? 'View Recipe' : (isClaimPending ? '⏳ Pending Verification' : '🔒 Locked Preview');
     }
 
     // Update Locked Badge and Book Tags
@@ -3186,7 +3232,6 @@
     if (bookTags) {
       const isPersonal = Boolean(recipe.category === 'Custom' || recipe.isPersonal);
       const accessibleCategories = getAccessibleRecipeCategories(recipe);
-      const requiredTier = getRecipeRequiredTier(recipe);
       const creator = getRecipeCreator(recipe);
 
       let tagsHtml = '';
@@ -3199,7 +3244,11 @@
         tagsHtml += `<span class="creator-badge-tag" title="Recipe by ${creator.name} (${creator.brandName})">📖 ${creator.name} (FPF)</span>`;
       }
       if (!isAccessible) {
-        tagsHtml += `<span class="locked-badge" title="Exclusive ${requiredTier} pack">🔒 ${requiredTier} Pack</span>`;
+        if (isClaimPending) {
+          tagsHtml += `<span class="badge-claim-pending" title="Your access request is currently pending verification">⏳ ${requiredTier} Pending</span>`;
+        } else {
+          tagsHtml += `<span class="locked-badge" title="Exclusive ${requiredTier} pack">🔒 ${requiredTier} Pack</span>`;
+        }
       }
       if (recipe.creaminessScore) {
         tagsHtml += `<span class="recipe-creaminess-badge" title="Build-A-Pint Creaminess Score">🧪 ${recipe.creaminessScore}/10</span>`;
@@ -3349,13 +3398,19 @@
     const commMade = communityStats.madeCounts[recipe.id] || 0;
     const creator = getRecipeCreator(recipe);
 
+    const isClaimPending = !isAccessible && (userPendingClaimsState.has(requiredTier) || userPendingClaimsState.has('All-Access'));
+
     card.innerHTML = `
       <div class="recipe-card-body">
         <div class="recipe-card-top">
           <div class="card-book-tags">
             ${isPersonal ? `<span class="book-tag custom" title="Personal custom recipe saved to your Google account">🔒 Personal Recipe</span>` : accessibleCategories.map(c => `<span class="book-tag ${getCategoryClass(c)}">${c}</span>`).join('')}
             ${creator ? `<span class="creator-badge-tag" title="Recipe by ${creator.name} (${creator.brandName})">📖 ${creator.name} (FPF)</span>` : ''}
-            ${!isAccessible ? `<span class="locked-badge" title="Exclusive ${requiredTier} pack">🔒 ${requiredTier} Pack</span>` : ''}
+            ${!isAccessible ? (
+              isClaimPending 
+                ? `<span class="badge-claim-pending" title="Your access request is currently pending verification">⏳ ${requiredTier} Pending</span>`
+                : `<span class="locked-badge" title="Exclusive ${requiredTier} pack">🔒 ${requiredTier} Pack</span>`
+            ) : ''}
             ${recipe.creaminessScore ? `<span class="recipe-creaminess-badge" title="Build-A-Pint Creaminess Score">🧪 ${recipe.creaminessScore}/10</span>` : ''}
           </div>
           <div class="card-actions-top">
@@ -3430,7 +3485,7 @@
 
       <div class="recipe-card-bottom">
         <span class="spin-tag" title="Recommended spin cycle">🌀 ${recipe.spinSetting || 'Lite Ice Cream'}</span>
-        <button class="btn-view-recipe">${isAccessible ? 'View Recipe' : '🔒 Locked Preview'}</button>
+        <button class="btn-view-recipe">${isAccessible ? 'View Recipe' : (isClaimPending ? '⏳ Pending Verification' : '🔒 Locked Preview')}</button>
       </div>
     `;
 
@@ -3746,8 +3801,10 @@
     packs.forEach(p => {
       const el = document.getElementById(p.statusEl);
       const isUnlocked = isCategoryUnlocked(p.id);
+      const isPending = userPendingClaimsState.has(p.id) || userPendingClaimsState.has('All-Access');
       const card = recipePacksModalOverlay.querySelector(`.recipe-pack-card[data-pack="${p.id}"]`);
       const btn = card ? card.querySelector('.btn-action-pack') : null;
+      const ownLink = card ? card.querySelector('.btn-pack-own-link') : null;
       const book = (typeof BOOKS_MASTER !== 'undefined')
         ? BOOKS_MASTER.find(b => b.bookKey === p.id || b.categoryKey === p.id || b.id === p.id)
         : null;
@@ -3756,6 +3813,8 @@
       if (el) {
         if (isUnlocked) {
           el.innerHTML = '<span class="pack-status-active">✅ In Your Library</span>';
+        } else if (isPending) {
+          el.innerHTML = '<span class="badge-claim-pending">⏳ Verification Pending</span>';
         } else {
           el.innerHTML = `<span class="pack-status-available">🛍️ Available on Fitness Product Finder (${price})</span>`;
         }
@@ -3773,6 +3832,23 @@
           btn.innerHTML = p.id === 'All-Access' 
             ? `<span>👑 Buy 4-Book Bundle (${price}) ↗</span>` 
             : `<span>🛒 Buy E-Book (${price}) ↗</span>`;
+        }
+      }
+      if (ownLink) {
+        if (isUnlocked) {
+          ownLink.style.display = 'none';
+        } else if (isPending) {
+          ownLink.style.display = 'inline-block';
+          ownLink.textContent = '⏳ Verification Pending (Details Submitted)';
+          ownLink.style.color = '#fbbf24';
+          ownLink.style.pointerEvents = 'none';
+        } else {
+          ownLink.style.display = 'inline-block';
+          ownLink.style.pointerEvents = 'auto';
+          ownLink.textContent = p.id === 'All-Access' 
+            ? 'Already own the bundle from Eli? Claim access →' 
+            : 'Already own this book from Eli? Claim access →';
+          ownLink.style.color = '';
         }
       }
     });
@@ -3808,6 +3884,132 @@
     }
   }
 
+  let activeClaimPackName = null;
+
+  function openClaimAccessModal(packName = 'All-Access') {
+    if (!currentUser) {
+      if (recipePacksModalOverlay) closeRecipePacksModal();
+      openGoogleAuthModal();
+      showToast('🔑 Please sign in with Google first so we can attach your cookbook access to your account!');
+      return;
+    }
+
+    activeClaimPackName = packName;
+    const modal = document.getElementById('claimAccessModalOverlay');
+    if (!modal) return;
+
+    const packNameEl = document.getElementById('claimModalPackName');
+    if (packNameEl) packNameEl.textContent = `${packName} E-Book`;
+
+    const accountEmailInput = document.getElementById('claimAccountEmail');
+    if (accountEmailInput) accountEmailInput.value = currentUser.email || '';
+
+    const checkoutEmailInput = document.getElementById('claimCheckoutEmail');
+    if (checkoutEmailInput) {
+      checkoutEmailInput.value = currentUser.email || '';
+    }
+
+    const orderIdInput = document.getElementById('claimOrderId');
+    if (orderIdInput) orderIdInput.value = '';
+
+    const notesInput = document.getElementById('claimNotes');
+    if (notesInput) notesInput.value = '';
+
+    const formView = document.getElementById('claimModalFormView');
+    const successView = document.getElementById('claimModalSuccessView');
+    if (formView) formView.style.display = 'block';
+    if (successView) successView.style.display = 'none';
+
+    const submitBtn = document.getElementById('btnSubmitClaimModal');
+    if (submitBtn) submitBtn.disabled = false;
+    const submitText = document.getElementById('btnSubmitClaimText');
+    if (submitText) submitText.textContent = '🚀 Submit Verification Claim';
+
+    modal.style.display = 'flex';
+    modal.classList.add('active');
+    modal.setAttribute('aria-hidden', 'false');
+    lockBackgroundScroll();
+  }
+
+  function closeClaimAccessModal() {
+    const modal = document.getElementById('claimAccessModalOverlay');
+    if (!modal) return;
+    modal.style.display = 'none';
+    modal.classList.remove('active');
+    modal.setAttribute('aria-hidden', 'true');
+    unlockBackgroundScroll();
+    activeClaimPackName = null;
+  }
+
+  async function handleClaimAccessSubmit(e) {
+    e.preventDefault();
+    if (!currentUser) {
+      closeClaimAccessModal();
+      openGoogleAuthModal();
+      return;
+    }
+
+    const packName = activeClaimPackName || 'All-Access';
+    const checkoutEmail = (document.getElementById('claimCheckoutEmail')?.value || '').trim();
+    const orderId = (document.getElementById('claimOrderId')?.value || '').trim();
+    const notes = (document.getElementById('claimNotes')?.value || '').trim();
+
+    if (!orderId) {
+      showToast('⚠️ Please enter your Payhip or Shopify Order ID / Receipt number.');
+      return;
+    }
+
+    const submitBtn = document.getElementById('btnSubmitClaimModal');
+    const submitText = document.getElementById('btnSubmitClaimText');
+    if (submitBtn) submitBtn.disabled = true;
+    if (submitText) submitText.textContent = '⏳ Submitting claim...';
+
+    try {
+      const res = await fetch('/api/purchase-inquiry', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: currentUser.email,
+          userId: currentUser.id,
+          action: 'claim_existing',
+          pack: packName,
+          orderId: orderId,
+          checkoutEmail: checkoutEmail,
+          notes: notes,
+          timestamp: new Date().toISOString()
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        userPendingClaimsState.add(packName);
+        localStorage.setItem('creami_pending_claims_v1', JSON.stringify(Array.from(userPendingClaimsState)));
+
+        updatePacksModalStatuses();
+        recipeCardCache.clear();
+        renderRecipes();
+
+        const formView = document.getElementById('claimModalFormView');
+        const successView = document.getElementById('claimModalSuccessView');
+        const successPackEl = document.getElementById('claimSuccessPackName');
+        if (successPackEl) successPackEl.textContent = `${packName} E-Book`;
+        if (formView) formView.style.display = 'none';
+        if (successView) successView.style.display = 'block';
+
+        showToast(`🎉 Access claim for "${packName}" submitted successfully!`);
+      } else {
+        showToast(`⚠️ ${data.message || 'Failed to submit claim. Please try again.'}`);
+        if (submitBtn) submitBtn.disabled = false;
+        if (submitText) submitText.textContent = '🚀 Submit Verification Claim';
+      }
+    } catch (err) {
+      console.error('Submit claim error:', err);
+      showToast('Connection error while submitting claim. Please try again.');
+      if (submitBtn) submitBtn.disabled = false;
+      if (submitText) submitText.textContent = '🚀 Submit Verification Claim';
+    }
+  }
+
   function handleClaimPackAccess(packName) {
     if (!currentUser) {
       closeRecipePacksModal();
@@ -3815,18 +4017,7 @@
       showToast('🔑 Please sign in with Google to claim access to your purchased e-book!');
       return;
     }
-    showToast(`✉️ Access claim for "${packName} E-Book" submitted for ${currentUser.email}! Verification in progress.`);
-    fetch('/api/purchase-inquiry', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: currentUser.email,
-        userId: currentUser.id,
-        action: 'claim_existing',
-        pack: packName,
-        timestamp: new Date().toISOString()
-      })
-    }).catch(e => console.warn('Claim inquiry send error:', e));
+    openClaimAccessModal(packName);
   }
 
   function updateCategoryCounts() {
@@ -5895,6 +6086,7 @@
               const bookUrl = book ? book.url : 'https://fitnessproductfinder.com/collections/creami-cravings-recipe-books';
               const bookTitle = book ? (book.shortTitle || book.title) : `${requiredTier} E-Book`;
               const bookPrice = book ? book.price : '$27.99';
+              const isClaimPending = userPendingClaimsState.has(requiredTier) || userPendingClaimsState.has('All-Access');
               return `
                 <div class="locked-creator-store-box">
                   <a href="${bookUrl}" target="_blank" rel="noopener noreferrer" class="btn-creator-store-direct">
@@ -5903,9 +6095,19 @@
                   <a href="https://fitnessproductfinder.com/products/complete-4-book-bundle" target="_blank" rel="noopener noreferrer" class="btn-creator-bundle-direct">
                     <span>✨ Get All 4 E-Books for $49.99 ($112 Value) ↗</span>
                   </a>
-                  <a href="#" class="btn-pack-own-link" id="btnLockedAlreadyOwn">
-                    Already own this book from ${creator ? creator.name : 'Eli'}? Claim access here &rarr;
-                  </a>
+                  ${isClaimPending ? `
+                    <div class="claim-pending-indicator-card">
+                      <span class="claim-pending-icon">⏳</span>
+                      <div class="claim-pending-text-wrap">
+                        <strong>Access Request Under Review</strong>
+                        <p>Your purchase verification claim for the <strong>${requiredTier}</strong> e-book is pending admin approval. You will receive access once verified!</p>
+                      </div>
+                    </div>
+                  ` : `
+                    <a href="#" class="btn-pack-own-link" id="btnLockedAlreadyOwn">
+                      Already own this book from ${creator ? creator.name : 'Eli'}? Claim access here &rarr;
+                    </a>
+                  `}
                 </div>
               `;
             })()}
@@ -6205,19 +6407,7 @@
           closeRecipeModal();
           openGoogleAuthModal();
         } else {
-          showToast(`✉️ Access claim for "${requiredTier} E-Book" submitted for ${currentUser.email}! Verification in progress.`);
-          fetch('/api/purchase-inquiry', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              email: currentUser.email,
-              userId: currentUser.id,
-              action: 'claim_existing',
-              pack: requiredTier,
-              recipeId: recipe.id,
-              timestamp: new Date().toISOString()
-            })
-          }).catch(err => console.warn('Claim inquiry send error:', err));
+          openClaimAccessModal(requiredTier);
         }
       });
     }
@@ -9740,6 +9930,16 @@
     });
   }
 
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
   function renderAdminClaims() {
     const listEl = document.getElementById('adminClaimsList');
     if (!listEl) return;
@@ -9780,6 +9980,13 @@
               <span>• Type: <strong>${actionType}</strong></span>
               <span>• ${dateStr}</span>
             </div>
+            ${(c.orderId || c.checkoutEmail || c.notes) ? `
+              <div class="claim-verification-details">
+                ${c.orderId ? `<div><strong>🧾 Order / Receipt #:</strong> <code>${escapeHtml(c.orderId)}</code></div>` : ''}
+                ${c.checkoutEmail ? `<div><strong>📧 Checkout Email:</strong> <span>${escapeHtml(c.checkoutEmail)}</span></div>` : ''}
+                ${c.notes ? `<div><strong>📝 Note:</strong> <span style="color: var(--text-secondary); font-style: italic;">"${escapeHtml(c.notes)}"</span></div>` : ''}
+              </div>
+            ` : ''}
           </div>
           <div class="claim-actions">
             ${isPending ? `
@@ -10482,6 +10689,7 @@
         closeFreezerModal();
         closeCustomRecipeModal();
         closeGoogleAuthModal();
+        closeClaimAccessModal();
         return;
       }
 

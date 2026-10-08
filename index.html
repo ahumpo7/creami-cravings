@@ -2032,6 +2032,83 @@
     </div>
   </div>
 
+  <!-- Claim E-Book Access & Verification Modal (Roadmap Item 15) -->
+  <div class="modal-overlay" id="claimAccessModalOverlay" role="dialog" aria-modal="true" aria-hidden="true" style="display: none;">
+    <div class="modal-content claim-modal-content">
+      <button class="modal-close" id="claimModalCloseBtn" aria-label="Close modal">&times;</button>
+      <div class="modal-header">
+        <div class="claim-modal-title-row">
+          <div class="admin-icon-badge" style="background: rgba(245, 158, 11, 0.2); border-color: rgba(245, 158, 11, 0.4); color: #fbbf24;">📖</div>
+          <div>
+            <h2 class="modal-title">Claim Purchased E-Book Access</h2>
+            <p class="modal-subtitle">Already bought this cookbook from Eli / Fitness Product Finder? Provide your order details below to verify and unlock all recipes.</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="claimModalFormView">
+        <form id="claimAccessForm" class="claim-access-form">
+          <div class="claim-pack-banner">
+            <span class="claim-pack-icon">📦</span>
+            <div class="claim-pack-info">
+              <span class="claim-pack-label">Cookbook Pack:</span>
+              <strong id="claimModalPackName" class="claim-pack-name">All-Access Bundle</strong>
+            </div>
+          </div>
+
+          <div class="admin-form-group">
+            <label class="admin-form-label" for="claimAccountEmail">Your Signed-In Account:</label>
+            <input type="text" id="claimAccountEmail" class="admin-form-input" readonly disabled>
+          </div>
+
+          <div class="admin-form-group">
+            <label class="admin-form-label" for="claimCheckoutEmail">
+              Purchase / Checkout Email:
+              <span class="claim-field-hint">(If different from Google email, e.g. PayPal)</span>
+            </label>
+            <input type="email" id="claimCheckoutEmail" class="admin-form-input" placeholder="e.g. yourname@paypal.com" required>
+          </div>
+
+          <div class="admin-form-group">
+            <label class="admin-form-label" for="claimOrderId">
+              Payhip Invoice / Order ID / Receipt #:
+              <span class="claim-field-hint">(From your Payhip or Shopify receipt email)</span>
+            </label>
+            <input type="text" id="claimOrderId" class="admin-form-input" placeholder="e.g. PAYHIP-1234 or #1052" required>
+          </div>
+
+          <div class="admin-form-group">
+            <label class="admin-form-label" for="claimNotes">
+              Additional Notes (Optional):
+            </label>
+            <input type="text" id="claimNotes" class="admin-form-input" placeholder="e.g. Purchased complete bundle in August">
+          </div>
+
+          <div class="claim-form-actions">
+            <button type="button" class="btn-secondary" id="btnCancelClaimModal">Cancel</button>
+            <button type="submit" class="btn-primary" id="btnSubmitClaimModal">
+              <span id="btnSubmitClaimText">🚀 Submit Verification Claim</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div id="claimModalSuccessView" style="display: none; text-align: center; padding: 20px 10px;">
+        <div style="font-size: 3rem; margin-bottom: 12px;">🎉</div>
+        <h3 style="font-size: 1.25rem; font-weight: 800; color: #34d399; margin-bottom: 8px;">Claim Submitted Successfully!</h3>
+        <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5; max-width: 420px; margin: 0 auto 20px;">
+          We've received your verification details for <strong id="claimSuccessPackName" style="color: var(--text-main);"></strong>. The administrator will review your Order ID and unlock full access to your account shortly.
+        </p>
+        <div class="claim-status-pill-wrap">
+          <span class="claim-badge-status pending" style="font-size: 0.9rem; padding: 6px 16px;">⏳ Verification In Progress</span>
+        </div>
+        <div style="margin-top: 24px;">
+          <button type="button" class="btn-primary" id="btnCloseClaimSuccessModal">Got It</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification Container -->
   <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 

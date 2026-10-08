@@ -9894,3 +9894,152 @@ body.modal-open .cookie-consent-banner {
   font-weight: 800 !important;
 }
 
+/* ==========================================================================
+   CLAIM E-BOOK ACCESS & VERIFICATION SYSTEM (Roadmap Item 15)
+   ========================================================================== */
+
+.claim-modal-content {
+  max-width: 520px !important;
+  padding: 24px !important;
+}
+
+.claim-modal-title-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.claim-pack-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(30, 41, 59, 0.8) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: var(--radius-md, 12px);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+}
+
+.claim-pack-icon {
+  font-size: 1.6rem;
+}
+
+.claim-pack-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.claim-pack-label {
+  font-size: 0.76rem;
+  color: var(--text-secondary, #94a3b8);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.claim-pack-name {
+  font-size: 1rem;
+  color: #fbbf24;
+  font-weight: 800;
+}
+
+.claim-field-hint {
+  font-size: 0.74rem;
+  font-weight: normal;
+  color: var(--text-secondary, #94a3b8);
+  margin-left: 4px;
+}
+
+.claim-access-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.claim-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-item, rgba(255, 255, 255, 0.08));
+}
+
+/* Pending Indicator Card inside Locked Recipe Teaser */
+.claim-pending-indicator-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  border-radius: var(--radius-md, 12px);
+  padding: 12px 16px;
+  margin-top: 14px;
+  text-align: left;
+}
+
+.claim-pending-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  animation: pendingSpin 3s infinite ease-in-out;
+}
+
+@keyframes pendingSpin {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15) rotate(15deg); }
+}
+
+.claim-pending-text-wrap {
+  flex: 1;
+}
+
+.claim-pending-text-wrap strong {
+  display: block;
+  font-size: 0.88rem;
+  color: #fbbf24;
+  margin-bottom: 2px;
+}
+
+.claim-pending-text-wrap p {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--text-secondary, #94a3b8);
+  line-height: 1.35;
+}
+
+/* Badge in Packs Modal */
+.badge-claim-pending {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #fbbf24;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+/* Admin Portal Claim Card Verification Details */
+.claim-verification-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-top: 8px;
+  font-size: 0.82rem;
+  border-left: 3px solid #f59e0b;
+}
+
+.claim-verification-details code {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fef08a;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 700;
+}
+
+
