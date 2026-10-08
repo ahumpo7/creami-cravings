@@ -329,10 +329,10 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
         return user
 
     def do_HEAD(self):
-        if self.path.startswith('/recipe/'):
+        if self.path.startswith('/recipe/') or self.path.startswith('/category/') or self.path in ['/freeze-guide', '/guide/freeze-time', '/guide/ninja-creami-freeze-time']:
             clean_url = self.path.split('?')[0]
             if re.search(r'\.(css|js|png|jpg|jpeg|svg|ico|json|woff2?|ttf|webp|map)$', clean_url, re.I):
-                self.path = self.path[len('/recipe'):]
+                self.path = '/' + clean_url.split('/')[-1]
                 return super().do_HEAD()
             self.send_response(200)
             self.send_header('Content-Type', 'text/html; charset=utf-8')
