@@ -240,8 +240,11 @@ def generate_all():
         f.write(ico_bytes)
     print(f"Saved favicon.ico ({len(ico_bytes)} bytes)")
 
-    # Standard PWA and Touch Icons
+    # Standard PWA, Google Search, and Touch Icons
     sizes = [
+        ('icon-48.png', 48, False),
+        ('icon-96.png', 96, False),
+        ('icon-144.png', 144, False),
         ('icon-192.png', 192, False),
         ('icon-512.png', 512, False),
         ('icon-maskable-192.png', 192, True),
