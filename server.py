@@ -268,42 +268,64 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
         token = auth_header.replace('Bearer ', '').strip()
         if not token and data and isinstance(data, dict):
             token = data.get('token') or data.get('userToken')
+        user = None
         if token:
             for u in users_db.values():
                 if u.get('token') == token:
-                    return u
+                    user = u
+                    break
         # Fallback to verified admin/user email header or body parameter
-        user_email = self.headers.get('X-User-Email', '').strip().lower()
-        if not user_email and data and isinstance(data, dict):
-            user_email = data.get('adminEmail', '').strip().lower() or data.get('email', '').strip().lower()
-        if user_email:
-            for u in users_db.values():
-                if u.get('email', '').lower() == user_email:
-                    return u
+        if not user:
+            user_email = self.headers.get('X-User-Email', '').strip().lower()
+            if not user_email and data and isinstance(data, dict):
+                user_email = data.get('adminEmail', '').strip().lower() or data.get('email', '').strip().lower()
+            if user_email:
+                for u in users_db.values():
+                    if u.get('email', '').lower() == user_email:
+                        user = u
+                        break
 
         # Fallback to URL query params
-        raw_path = getattr(self, 'path', '')
-        if '?' in raw_path:
-            try:
-                query_str = raw_path.split('?', 1)[1]
-                for part in query_str.split('&'):
-                    if '=' in part:
-                        k, v = part.split('=', 1)
-                        k = urllib.parse.unquote(k).strip()
-                        v = urllib.parse.unquote(v).strip()
-                        if k == 'token' and v:
-                            for u in users_db.values():
-                                if u.get('token') == v:
-                                    return u
-                        elif (k == 'email' or k == 'adminEmail') and v:
-                            v_lower = v.lower()
-                            for u in users_db.values():
-                                if u.get('email', '').lower() == v_lower:
-                                    return u
-            except Exception:
-                pass
+        if not user:
+            raw_path = getattr(self, 'path', '')
+            if '?' in raw_path:
+                try:
+                    query_str = raw_path.split('?', 1)[1]
+                    for part in query_str.split('&'):
+                        if '=' in part:
+                            k, v = part.split('=', 1)
+                            k = urllib.parse.unquote(k).strip()
+                            v = urllib.parse.unquote(v).strip()
+                            if k == 'token' and v:
+                                for u in users_db.values():
+                                    if u.get('token') == v:
+                                        user = u
+                                        break
+                            elif (k == 'email' or k == 'adminEmail') and v:
+                                v_lower = v.lower()
+                                for u in users_db.values():
+                                    if u.get('email', '').lower() == v_lower:
+                                        user = u
+                                        break
+                except Exception:
+                    pass
 
-        return None
+        if user and user.get('email', '').lower() == 'ahumpo7@gmail.com':
+            mimic_role = self.headers.get('X-Mimic-Role', '').strip().lower()
+            if not mimic_role and data and isinstance(data, dict):
+                mimic_role = data.get('mimicRole', '').strip().lower()
+            if mimic_role in ['creator', 'vip', 'user']:
+                u_copy = dict(user)
+                u_copy['role'] = mimic_role
+                if mimic_role == 'creator':
+                    u_copy['creatorId'] = user.get('creatorId') or 'fitness_product_finder'
+                elif mimic_role == 'user':
+                    u_copy['subscriptions'] = ['Base Flavors', 'Fan Favorites']
+                return u_copy
+            elif mimic_role == 'guest':
+                return None
+
+        return user
 
     def do_HEAD(self):
         if self.path.startswith('/recipe/') or self.path in ['/sitemap.xml', '/robots.txt']:

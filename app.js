@@ -16,6 +16,8 @@
   const RECIPE_MADE_STORAGE_KEY = 'creami_recipe_made_v2';
   const COMMUNITY_STATS_CACHE_KEY = 'creami_community_stats_v2';
   const FREEZER_STORAGE_KEY = 'creami_freezer_pints_v2';
+  const MIMIC_ROLE_STORAGE_KEY = 'creami_mimic_role_v1';
+  const REAL_ADMIN_STORAGE_KEY = 'creami_real_admin_user_v1';
 
   // Default Staples Checked for New Users
   const DEFAULT_STAPLES = [];
@@ -342,6 +344,8 @@
   let manualShoppingList = new Set();
   let userRecipeData = {};
   let currentUser = null; // { id, email, name, picture, token }
+  let realAdminUser = null; // Preserved root administrator credentials for ahumpo7@gmail.com
+  let currentMimicRole = localStorage.getItem(MIMIC_ROLE_STORAGE_KEY) || 'admin';
   let recipeMadeCounts = {}; // { [recipeId]: number }
   let communityStats = {
     ratings: {},
@@ -826,9 +830,26 @@
           } else if (isAdmin && !currentUser.subscriptions.includes('All-Access')) {
             currentUser.subscriptions = ['All-Access', 'Base Flavors', 'Community Legends', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free'];
           }
+          if (userEmail === 'ahumpo7@gmail.com' || userEmail === 'ahumpo@gmail.com') {
+            realAdminUser = JSON.parse(JSON.stringify(currentUser));
+            try { localStorage.setItem(REAL_ADMIN_STORAGE_KEY, JSON.stringify(realAdminUser)); } catch (e) {}
+          }
         }
       } catch (e) {
         currentUser = null;
+      }
+    }
+
+    // Check for stored real super admin credentials if currentUser was not loaded or is mimicked
+    if (!realAdminUser) {
+      const savedReal = localStorage.getItem(REAL_ADMIN_STORAGE_KEY);
+      if (savedReal) {
+        try {
+          const parsedReal = JSON.parse(savedReal);
+          if (parsedReal && parsedReal.email && (parsedReal.email.toLowerCase() === 'ahumpo7@gmail.com' || parsedReal.email.toLowerCase() === 'ahumpo@gmail.com')) {
+            realAdminUser = parsedReal;
+          }
+        } catch (e) {}
       }
     }
 
@@ -934,6 +955,11 @@
         activeRecipeSwaps = {};
       }
     }
+
+    // 11. Super Admin Role Mimicry Initialization
+    if (realAdminUser && currentMimicRole && currentMimicRole !== 'admin') {
+      applyMimicRole(currentMimicRole, false);
+    }
   }
 
   function saveActiveSwaps() {
@@ -982,8 +1008,9 @@
   }
 
   function saveUserAuth() {
-    if (currentUser) {
-      localStorage.setItem(USER_AUTH_STORAGE_KEY, JSON.stringify(currentUser));
+    const userToSave = realAdminUser || currentUser;
+    if (userToSave) {
+      localStorage.setItem(USER_AUTH_STORAGE_KEY, JSON.stringify(userToSave));
     } else {
       localStorage.removeItem(USER_AUTH_STORAGE_KEY);
     }
@@ -1378,6 +1405,19 @@
       showToast(`✨ Welcome back, ${currentUser.name || 'Ice Cream Craver'}! All data synced.`);
       triggerCloudSync(true);
     }
+
+    if (isSuperAdminAccount(currentUser)) {
+      realAdminUser = JSON.parse(JSON.stringify(currentUser));
+      try { localStorage.setItem(REAL_ADMIN_STORAGE_KEY, JSON.stringify(realAdminUser)); } catch (e) {}
+      if (currentMimicRole && currentMimicRole !== 'admin') {
+        applyMimicRole(currentMimicRole, false);
+      } else {
+        renderMimicUI();
+      }
+    } else {
+      realAdminUser = null;
+      renderMimicUI();
+    }
   }
 
 
@@ -1388,8 +1428,15 @@
       saveUserRecipeData();
       saveRecipeMadeCounts();
     }
+    realAdminUser = null;
+    currentMimicRole = 'admin';
+    try {
+      localStorage.removeItem(MIMIC_ROLE_STORAGE_KEY);
+      localStorage.removeItem(REAL_ADMIN_STORAGE_KEY);
+    } catch (e) {}
     currentUser = null;
     saveUserAuth();
+    renderMimicUI();
 
     // Reset personal custom recipes and clear favorites upon sign-out
     customRecipesState = [];
@@ -1481,6 +1528,187 @@
         openAdminPortalBtn.style.setProperty('display', 'none', 'important');
         openAdminPortalBtn.classList.add('hidden');
       }
+    }
+    renderMimicUI();
+  }
+
+  // --- Super Admin Role Impersonation Engine (ahumpo7@gmail.com) ---
+  function isSuperAdminAccount(userObj = (realAdminUser || currentUser)) {
+    if (!userObj || !userObj.email) return false;
+    const em = userObj.email.trim().toLowerCase();
+    return em === 'ahumpo7@gmail.com' || em === 'ahumpo@gmail.com';
+  }
+
+  function applyMimicRole(targetRole, showToastNotice = true) {
+    if (!realAdminUser && !isSuperAdminAccount(currentUser)) return;
+    if (!realAdminUser && currentUser) {
+      realAdminUser = JSON.parse(JSON.stringify(currentUser));
+      try { localStorage.setItem(REAL_ADMIN_STORAGE_KEY, JSON.stringify(realAdminUser)); } catch (e) {}
+    }
+
+    currentMimicRole = targetRole || 'admin';
+    try { localStorage.setItem(MIMIC_ROLE_STORAGE_KEY, currentMimicRole); } catch (e) {}
+
+    if (currentMimicRole === 'guest') {
+      currentUser = null;
+    } else if (currentMimicRole === 'creator') {
+      currentUser = {
+        ...realAdminUser,
+        role: 'creator',
+        creatorId: 'fitness_product_finder',
+        subscriptions: ['All-Access', 'Base Flavors', 'Community Legends', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free']
+      };
+    } else if (currentMimicRole === 'vip') {
+      currentUser = {
+        ...realAdminUser,
+        role: 'vip',
+        subscriptions: ['All-Access', 'Base Flavors', 'Community Legends', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free']
+      };
+    } else if (currentMimicRole === 'user') {
+      currentUser = {
+        ...realAdminUser,
+        role: 'user',
+        subscriptions: ['Base Flavors', 'Fan Favorites']
+      };
+    } else {
+      // 'admin' (Real)
+      currentMimicRole = 'admin';
+      currentUser = JSON.parse(JSON.stringify(realAdminUser));
+      try { localStorage.setItem(MIMIC_ROLE_STORAGE_KEY, 'admin'); } catch (e) {}
+    }
+
+    // Always preserve realAdminUser in USER_AUTH_STORAGE_KEY so refresh never drops session
+    if (realAdminUser) {
+      try { localStorage.setItem(USER_AUTH_STORAGE_KEY, JSON.stringify(realAdminUser)); } catch (e) {}
+    }
+
+    renderMimicUI();
+    updateAuthUI();
+    if (recipeCardCache && typeof recipeCardCache.clear === 'function') {
+      recipeCardCache.clear();
+    }
+    renderRecipes();
+    calculateIngredientUsage();
+    renderPantryList();
+
+    if (showToastNotice) {
+      const roleLabels = {
+        admin: '👑 Administrator (Real)',
+        creator: '🎨 Content Creator (Eli Mode)',
+        vip: '⭐ VIP Member (All-Access Pass)',
+        user: '👤 Standard User (Free Tier)',
+        guest: '👁️ Guest Visitor (Logged Out)'
+      };
+      showToast(`🎭 Active View: ${roleLabels[currentMimicRole] || currentMimicRole}`);
+    }
+  }
+
+  function renderMimicUI() {
+    const isSuperAdmin = Boolean(realAdminUser || isSuperAdminAccount(currentUser));
+    const pill = document.getElementById('mimicRoleTriggerPill');
+    const banner = document.getElementById('mimicActiveBanner');
+    const adminMimicSec = document.getElementById('adminPortalMimicSection');
+    const pillText = document.getElementById('mimicPillText');
+    const activeLabel = document.getElementById('mimicActiveRoleLabel');
+
+    if (!isSuperAdmin) {
+      if (pill) pill.style.display = 'none';
+      if (banner) banner.style.display = 'none';
+      if (adminMimicSec) adminMimicSec.style.display = 'none';
+      return;
+    }
+
+    const roleNameMap = {
+      admin: 'Admin',
+      creator: 'Creator',
+      vip: 'VIP',
+      user: 'User',
+      guest: 'Guest'
+    };
+
+    const roleFullMap = {
+      admin: 'Administrator (Real)',
+      creator: 'Content Creator (Eli Mode)',
+      vip: 'VIP Member (All-Access)',
+      user: 'Standard User (Free Tier)',
+      guest: 'Guest (Logged Out)'
+    };
+
+    // 1. Floating Pill
+    if (pill) {
+      pill.style.display = 'inline-flex';
+      if (pillText) {
+        pillText.textContent = `View As: ${roleNameMap[currentMimicRole] || currentMimicRole}`;
+      }
+      if (currentMimicRole !== 'admin') {
+        pill.classList.add('mimic-active');
+      } else {
+        pill.classList.remove('mimic-active');
+      }
+    }
+
+    // 2. Active Impersonation Top Banner
+    if (banner) {
+      if (currentMimicRole !== 'admin') {
+        banner.style.display = 'block';
+        if (activeLabel) {
+          activeLabel.textContent = roleFullMap[currentMimicRole] || currentMimicRole;
+        }
+      } else {
+        banner.style.display = 'none';
+      }
+    }
+
+    // 3. Admin Portal Mimic Card
+    if (adminMimicSec) {
+      adminMimicSec.style.display = 'flex';
+      adminMimicSec.querySelectorAll('.btn-mimic-select').forEach(btn => {
+        if (btn.dataset.role === currentMimicRole) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+    }
+
+    // 4. Modal Cards active states
+    const cards = [
+      { id: 'cardMimicAdmin', role: 'admin' },
+      { id: 'cardMimicCreator', role: 'creator' },
+      { id: 'cardMimicVip', role: 'vip' },
+      { id: 'cardMimicUser', role: 'user' },
+      { id: 'cardMimicGuest', role: 'guest' }
+    ];
+    cards.forEach(c => {
+      const el = document.getElementById(c.id);
+      if (el) {
+        if (c.role === currentMimicRole) {
+          el.classList.add('active');
+        } else {
+          el.classList.remove('active');
+        }
+      }
+    });
+  }
+
+  function openMimicModal() {
+    const modal = document.getElementById('mimicRoleModalOverlay');
+    if (modal) {
+      modal.style.display = 'flex';
+      modal.classList.add('active');
+      modal.setAttribute('aria-hidden', 'false');
+      lockBackgroundScroll();
+      renderMimicUI();
+    }
+  }
+
+  function closeMimicModal() {
+    const modal = document.getElementById('mimicRoleModalOverlay');
+    if (modal) {
+      modal.style.display = 'none';
+      modal.classList.remove('active');
+      modal.setAttribute('aria-hidden', 'true');
+      unlockBackgroundScroll();
     }
   }
 
@@ -1956,6 +2184,61 @@
         }
       });
     }
+
+    // Super Admin Role Mimicry Event Listeners (ahumpo7@gmail.com)
+    const mimicPill = document.getElementById('mimicRoleTriggerPill');
+    if (mimicPill) {
+      mimicPill.addEventListener('click', openMimicModal);
+    }
+
+    const btnMimicBannerChange = document.getElementById('btnMimicChangeRoleBanner');
+    if (btnMimicBannerChange) {
+      btnMimicBannerChange.addEventListener('click', openMimicModal);
+    }
+
+    const btnMimicBannerRevert = document.getElementById('btnMimicRevertAdminBanner');
+    if (btnMimicBannerRevert) {
+      btnMimicBannerRevert.addEventListener('click', () => applyMimicRole('admin'));
+    }
+
+    const btnMimicDirectRevert = document.getElementById('btnMimicRevertDirect');
+    if (btnMimicDirectRevert) {
+      btnMimicDirectRevert.addEventListener('click', () => {
+        applyMimicRole('admin');
+        closeMimicModal();
+      });
+    }
+
+    const mimicModalClose = document.getElementById('mimicModalCloseBtn');
+    if (mimicModalClose) {
+      mimicModalClose.addEventListener('click', closeMimicModal);
+    }
+
+    const mimicModalOverlay = document.getElementById('mimicRoleModalOverlay');
+    if (mimicModalOverlay) {
+      mimicModalOverlay.addEventListener('click', (e) => {
+        if (e.target === mimicModalOverlay) closeMimicModal();
+      });
+    }
+
+    document.querySelectorAll('.mimic-role-card').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const role = btn.dataset.role;
+        if (role) {
+          applyMimicRole(role);
+          closeMimicModal();
+        }
+      });
+    });
+
+    document.querySelectorAll('.btn-mimic-select').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const role = btn.dataset.role;
+        if (role) {
+          applyMimicRole(role);
+        }
+      });
+    });
   }
 
   // --- Recipe Batch Counter API & Helper ---

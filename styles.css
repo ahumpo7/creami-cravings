@@ -9584,3 +9584,313 @@ body.modal-open .cookie-consent-banner {
   background: #1e293b;
   color: #fff;
 }
+
+/* ==========================================================================
+   SUPER ADMIN ROLE MIMIC & VIEW-AS MODE (ahumpo7@gmail.com)
+   ========================================================================== */
+
+/* Top Active Impersonation Alert Banner */
+.mimic-active-banner {
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10001;
+  background: linear-gradient(90deg, #92400e 0%, #b45309 30%, #d97706 70%, #92400e 100%);
+  color: #fff;
+  padding: 8px 16px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  border-bottom: 1px solid rgba(254, 240, 138, 0.35);
+  animation: mimicBannerSlideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes mimicBannerSlideDown {
+  from { transform: translateY(-100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.mimic-banner-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.mimic-banner-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mimic-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 8px #22c55e;
+  display: inline-block;
+  animation: mimicPulse 1.8s infinite;
+}
+
+@keyframes mimicPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+.mimic-current-pill {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(254, 240, 138, 0.4);
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-weight: 800;
+  color: #fef08a;
+}
+
+.mimic-banner-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-mimic-action {
+  padding: 4px 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(0, 0, 0, 0.3);
+  color: #fff;
+}
+
+.btn-mimic-action:hover {
+  background: rgba(0, 0, 0, 0.55);
+  transform: translateY(-1px);
+}
+
+.btn-mimic-action.revert {
+  background: #fff;
+  color: #92400e;
+  border-color: #fff;
+  font-weight: 800;
+}
+
+.btn-mimic-action.revert:hover {
+  background: #fef3c7;
+  color: #78350f;
+}
+
+/* Floating Mimic Trigger Pill */
+.mimic-trigger-pill {
+  position: fixed;
+  bottom: 22px;
+  left: 20px;
+  z-index: 9998;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 0 12px rgba(245, 158, 11, 0.2);
+  border-radius: 999px;
+  color: #fbbf24;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mimic-trigger-pill:hover {
+  background: rgba(30, 41, 59, 0.95);
+  border-color: #f59e0b;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5), 0 0 18px rgba(245, 158, 11, 0.35);
+  transform: translateY(-2px);
+}
+
+.mimic-trigger-pill.mimic-active {
+  background: linear-gradient(135deg, rgba(180, 83, 9, 0.95) 0%, rgba(120, 53, 15, 0.95) 100%);
+  border-color: #fbbf24;
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4);
+  animation: mimicPulseBorder 2.5s infinite;
+}
+
+@keyframes mimicPulseBorder {
+  0%, 100% { box-shadow: 0 4px 20px rgba(245, 158, 11, 0.3); }
+  50% { box-shadow: 0 4px 25px rgba(245, 158, 11, 0.65), 0 0 14px rgba(251, 191, 36, 0.6); }
+}
+
+@media (max-width: 768px) {
+  .mimic-trigger-pill {
+    bottom: 74px; /* Positioned just above the mobile bottom nav bar */
+    left: 14px;
+    padding: 6px 12px;
+    font-size: 0.75rem;
+  }
+}
+
+/* Mimic Role Selection Modal */
+.mimic-modal-content {
+  max-width: 540px !important;
+  padding: 24px !important;
+}
+
+.mimic-modal-title-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.mimic-roles-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 18px 0;
+}
+
+.mimic-role-card {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 16px;
+  border-radius: var(--radius-md, 12px);
+  background: var(--bg-surface, #1e293b);
+  border: 1px solid var(--border-item, rgba(255, 255, 255, 0.08));
+  color: var(--text-main, #f8fafc);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mimic-role-card:hover {
+  border-color: #f59e0b;
+  background: rgba(245, 158, 11, 0.08);
+  transform: translateY(-2px);
+}
+
+.mimic-role-card.active {
+  border-color: #f59e0b;
+  background: rgba(245, 158, 11, 0.14);
+  box-shadow: 0 0 0 1px #f59e0b;
+}
+
+.mimic-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.mimic-role-emoji {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.mimic-role-info {
+  flex: 1;
+}
+
+.mimic-role-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-main, #f8fafc);
+  margin-bottom: 2px;
+}
+
+.mimic-role-desc {
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: var(--text-secondary, #94a3b8);
+}
+
+.mimic-check-indicator {
+  display: none;
+  color: #f59e0b;
+  font-weight: 900;
+  font-size: 1.1rem;
+}
+
+.mimic-role-card.active .mimic-check-indicator {
+  display: inline;
+}
+
+.mimic-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  border-top: 1px solid var(--border-item, rgba(255, 255, 255, 0.08));
+  padding-top: 14px;
+}
+
+/* Admin Portal Mimic Card */
+.admin-portal-mimic-card {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(30, 41, 59, 0.7) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: var(--radius-md, 12px);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.admin-mimic-card-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-mimic-icon {
+  font-size: 1.4rem;
+}
+
+.admin-mimic-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #fbbf24;
+}
+
+.admin-mimic-subtitle {
+  font-size: 0.76rem;
+  color: var(--text-secondary, #94a3b8);
+}
+
+.admin-mimic-buttons-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.admin-mimic-buttons-row .btn-mimic-select {
+  padding: 5px 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border-radius: 999px;
+  border: 1px solid var(--border-item, rgba(255, 255, 255, 0.1));
+  background: var(--bg-surface, #1e293b);
+  color: var(--text-main, #f8fafc);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-mimic-buttons-row .btn-mimic-select:hover {
+  border-color: #f59e0b;
+  color: #fbbf24;
+}
+
+.admin-mimic-buttons-row .btn-mimic-select.active {
+  background: #f59e0b !important;
+  color: #1e1e24 !important;
+  border-color: #f59e0b !important;
+  font-weight: 800 !important;
+}
+

@@ -99,6 +99,20 @@
   </script>
 </head>
 <body>
+  <!-- Super Admin Active Role Impersonation Banner (ahumpo7@gmail.com) -->
+  <div id="mimicActiveBanner" class="mimic-active-banner" style="display: none;">
+    <div class="mimic-banner-inner">
+      <span class="mimic-banner-text">
+        <span class="mimic-pulse-dot"></span>
+        🎭 <strong>Testing Mode:</strong> Viewing as <span id="mimicActiveRoleLabel" class="mimic-current-pill">Content Creator</span>
+      </span>
+      <div class="mimic-banner-actions">
+        <button type="button" id="btnMimicChangeRoleBanner" class="btn-mimic-action">Change Role ▾</button>
+        <button type="button" id="btnMimicRevertAdminBanner" class="btn-mimic-action revert" title="Revert to Administrator">Revert to Admin ↺</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Offline Grocery Banner (Roadmap Item 11) -->
   <div id="offlineIndicatorBanner" class="offline-banner" style="display: none;" role="status">
     <span>⚡ Offline Mode Active — 100% of recipes & pantry items are available offline.</span>
@@ -1576,6 +1590,24 @@
 
       <!-- PANEL 1: USER DIRECTORY -->
       <div id="adminPanelUsers" class="admin-tab-panel">
+        <!-- Super Admin View-As Bar inside Admin Portal -->
+        <div id="adminPortalMimicSection" class="admin-portal-mimic-card" style="display: none;">
+          <div class="admin-mimic-card-left">
+            <span class="admin-mimic-icon">🎭</span>
+            <div>
+              <div class="admin-mimic-title">Role Impersonation (View-As Mode)</div>
+              <div class="admin-mimic-subtitle">Preview the site as any user role. Does not alter your database credentials.</div>
+            </div>
+          </div>
+          <div class="admin-mimic-buttons-row">
+            <button type="button" class="btn-mimic-select" data-role="admin">👑 Admin</button>
+            <button type="button" class="btn-mimic-select" data-role="creator">🎨 Creator</button>
+            <button type="button" class="btn-mimic-select" data-role="vip">⭐ VIP</button>
+            <button type="button" class="btn-mimic-select" data-role="user">👤 User</button>
+            <button type="button" class="btn-mimic-select" data-role="guest">👁️ Guest</button>
+          </div>
+        </div>
+
         <div class="admin-toolbar">
           <div class="admin-search-wrap">
             <input type="text" id="adminUserSearchInput" placeholder="Search by name, email, or role..." class="admin-search-input">
@@ -1916,6 +1948,89 @@
       <span class="bottom-nav-label">Macros</span>
     </button>
   </nav>
+
+  <!-- Super Admin Quick Mimic Trigger Pill (ahumpo7@gmail.com) -->
+  <button type="button" id="mimicRoleTriggerPill" class="mimic-trigger-pill" style="display: none;" title="Role Testing Mode (Super Admin: ahumpo7@gmail.com)">
+    <span class="mimic-pill-icon">🎭</span>
+    <span class="mimic-pill-text" id="mimicPillText">View As: Admin</span>
+    <span class="mimic-pill-arrow">▾</span>
+  </button>
+
+  <!-- Super Admin Role Switcher Modal -->
+  <div class="modal-overlay" id="mimicRoleModalOverlay" role="dialog" aria-modal="true" aria-hidden="true" style="display: none;">
+    <div class="modal-content mimic-modal-content">
+      <button class="modal-close" id="mimicModalCloseBtn" aria-label="Close modal">&times;</button>
+      <div class="modal-header">
+        <div class="mimic-modal-title-row">
+          <div class="admin-icon-badge">🎭</div>
+          <div>
+            <h2 class="modal-title">Role Mimic &amp; View-As Mode</h2>
+            <p class="modal-subtitle">Super Admin testing utility for <code>ahumpo7@gmail.com</code>. Experience Creami Cravings through any user tier in real time without altering your root credentials.</p>
+          </div>
+        </div>
+      </div>
+      <div class="mimic-roles-grid">
+        <button type="button" class="mimic-role-card active" data-role="admin" id="cardMimicAdmin">
+          <div class="mimic-card-header">
+            <span class="mimic-role-emoji">👑</span>
+            <div class="mimic-role-info">
+              <div class="mimic-role-title">Administrator (Real)</div>
+              <div class="mimic-role-desc">Full system controls, Admin Portal, user directory, recipe publishing to all cookbooks.</div>
+            </div>
+            <span class="mimic-check-indicator" id="checkMimicAdmin">✓</span>
+          </div>
+        </button>
+
+        <button type="button" class="mimic-role-card" data-role="creator" id="cardMimicCreator">
+          <div class="mimic-card-header">
+            <span class="mimic-role-emoji">🎨</span>
+            <div class="mimic-role-info">
+              <div class="mimic-role-title">Content Creator (Eli / Creator Mode)</div>
+              <div class="mimic-role-desc">Creator badge, "+ Add Recipe" to Eli's cookbooks &amp; Community Legends, creator permissions, no Admin Portal button.</div>
+            </div>
+            <span class="mimic-check-indicator" id="checkMimicCreator">✓</span>
+          </div>
+        </button>
+
+        <button type="button" class="mimic-role-card" data-role="vip" id="cardMimicVip">
+          <div class="mimic-card-header">
+            <span class="mimic-role-emoji">⭐</span>
+            <div class="mimic-role-info">
+              <div class="mimic-role-title">VIP Member (All-Access Pass)</div>
+              <div class="mimic-role-desc">All 212 recipes unlocked with 0 locks. Standard custom recipe interface, no admin privileges.</div>
+            </div>
+            <span class="mimic-check-indicator" id="checkMimicVip">✓</span>
+          </div>
+        </button>
+
+        <button type="button" class="mimic-role-card" data-role="user" id="cardMimicUser">
+          <div class="mimic-card-header">
+            <span class="mimic-role-emoji">👤</span>
+            <div class="mimic-role-info">
+              <div class="mimic-role-title">Standard User (Free Tier)</div>
+              <div class="mimic-role-desc">Default free user experience: "Base Flavors" &amp; "Fan Favorites" unlocked. Keto, No Protein &amp; Lactose Free locked with teaser cards and upgrade banners.</div>
+            </div>
+            <span class="mimic-check-indicator" id="checkMimicUser">✓</span>
+          </div>
+        </button>
+
+        <button type="button" class="mimic-role-card" data-role="guest" id="cardMimicGuest">
+          <div class="mimic-card-header">
+            <span class="mimic-role-emoji">👁️</span>
+            <div class="mimic-role-info">
+              <div class="mimic-role-title">Guest Visitor (Logged Out)</div>
+              <div class="mimic-role-desc">Simulate an unauthenticated visitor: Favorites heart prompts to sign in, custom recipes hidden, locked recipe teasers prompt to sign in.</div>
+            </div>
+            <span class="mimic-check-indicator" id="checkMimicGuest">✓</span>
+          </div>
+        </button>
+      </div>
+
+      <div class="mimic-modal-footer">
+        <button type="button" class="btn-secondary-action" id="btnMimicRevertDirect">Revert to Admin (Default)</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Toast Notification Container -->
   <div class="toast-container" id="toastContainer" aria-live="polite"></div>
