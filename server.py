@@ -1043,6 +1043,21 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
         return user
 
     def do_HEAD(self):
+        clean_path = urllib.parse.unquote(self.path.split('?')[0]).lower()
+        is_well_known = clean_path.startswith('/.well-known/')
+        if (
+            (clean_path.startswith('/.') and not is_well_known) or
+            '/.git' in clean_path or
+            '/.env' in clean_path or
+            clean_path.endswith('.env') or
+            clean_path.endswith('.py') or
+            clean_path.endswith('.sh') or
+            clean_path.endswith('.md') or
+            (clean_path.endswith('.json') and clean_path != '/manifest.json' and not is_well_known)
+        ):
+            self.send_error(404, "File not found")
+            return
+
         if self.path.startswith('/recipe/') or self.path.startswith('/category/') or self.path.startswith('/ninja-creami-') or self.path in ['/freeze-guide', '/guide/freeze-time', '/guide/ninja-creami-freeze-time']:
             clean_url = self.path.split('?')[0]
             if re.search(r'\.(css|js|png|jpg|jpeg|svg|ico|json|woff2?|ttf|webp|map)$', clean_url, re.I):
@@ -1063,6 +1078,21 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
         super().do_HEAD()
 
     def do_GET(self):
+        clean_path = urllib.parse.unquote(self.path.split('?')[0]).lower()
+        is_well_known = clean_path.startswith('/.well-known/')
+        if (
+            (clean_path.startswith('/.') and not is_well_known) or
+            '/.git' in clean_path or
+            '/.env' in clean_path or
+            clean_path.endswith('.env') or
+            clean_path.endswith('.py') or
+            clean_path.endswith('.sh') or
+            clean_path.endswith('.md') or
+            (clean_path.endswith('.json') and clean_path != '/manifest.json' and not is_well_known)
+        ):
+            self.send_error(404, "File not found")
+            return
+
         if self.path == '/api/config':
             self._send_json({
                 'status': 'ok',
