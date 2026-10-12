@@ -108,7 +108,7 @@
   <link rel="icon" type="image/png" sizes="144x144" href="icon-144.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=beta4">
+  <link rel="stylesheet" href="styles.css?v=beta5">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -220,6 +220,9 @@
 
         <!-- Right: Action Controls Group -->
         <div class="header-actions">
+          <button id="openBatchPrepHeaderBtn" class="btn-secondary-action header-desktop-only" title="Sunday Batch Prep Planner & Consolidated Grocery List">
+            🍱 Sunday Prep <span class="badge-count" id="batchPrepHeaderBadge" style="display: none;">0</span>
+          </button>
           <button id="openFreezerTrackerBtn" class="btn-secondary-action header-desktop-only" title="View Pints in the Freezer & 16-Hour Timer">
             🧊 Freezer <span class="badge-count" id="freezerBadge">0</span>
           </button>
@@ -399,6 +402,9 @@
               </div>
             </div>
             <div class="shelf-actions">
+              <button type="button" class="btn-shelf-batch-prep" id="btnShelfOpenBatchPrep" title="Open Sunday Batch Prep Planner & Consolidated Grocery List">
+                🍱 Sunday Batch Prep
+              </button>
               <div class="shelf-slots-toggle" title="How many Creami containers do you own?">
                 <span class="shelf-slots-label">Containers:</span>
                 <button type="button" class="btn-slot-cap active" data-slots="4">4</button>
@@ -873,6 +879,18 @@
         </div>
       </div>
 
+      <!-- Sunday Batch Prep Quick Link Banner inside Freezer Modal -->
+      <div class="freezer-batch-prep-banner">
+        <div class="freezer-batch-prep-banner-info">
+          <span class="freezer-batch-prep-banner-icon">🍱</span>
+          <div>
+            <strong>Sunday Batch Prep &amp; Unified Grocery List</strong>
+            <p>Plan multiple pints at once and generate an aggregated shopping list.</p>
+          </div>
+        </div>
+        <button type="button" class="btn-primary btn-batch-banner-action" id="btnFreezerModalOpenBatchPrep">Open Batch Planner →</button>
+      </div>
+
       <!-- Quick Add / Log a Chilling Pint Card -->
       <div class="freezer-add-section">
         <button class="freezer-toggle-add-btn" id="freezerToggleAddBtn" type="button">
@@ -1022,6 +1040,13 @@
           </div>
           <div class="batch-prep-pints-strip" id="batchPrepPintsStrip">
             <!-- Rendered dynamically -->
+          </div>
+          <div class="batch-quick-add-controls" id="batchQuickAddControls">
+            <select id="batchPrepQuickAddSelect" class="batch-quick-add-select" aria-label="Select recipe to add to batch">
+              <option value="">+ Add a Recipe to this Batch...</option>
+            </select>
+            <button type="button" class="btn-secondary" id="btnBatchPrepQuickAdd" style="padding: 7px 12px; font-size: 0.85rem;">+ Add Pint</button>
+            <button type="button" class="btn-batch-sampler-quick" id="btnBatchPrepLoadSampler" title="Load 4 top-rated high-protein pints into your batch queue">⚡ 4-Pint Sampler</button>
           </div>
         </div>
 
@@ -2902,7 +2927,7 @@
   <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
   <!-- Scripts -->
-  <script src="recipes-data.js?v=beta4"></script>
-  <script src="app.js?v=beta4"></script>
+  <script src="recipes-data.js?v=beta5"></script>
+  <script src="app.js?v=beta5"></script>
 </body>
 </html>

@@ -11992,6 +11992,116 @@ body.modal-open .cookie-consent-banner {
   background: rgba(248, 113, 113, 0.15);
 }
 
+/* Shelf & Freezer Modal Batch Prep Buttons & Banner */
+.btn-shelf-batch-prep {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(168, 85, 247, 0.25) 100%);
+  border: 1px solid rgba(99, 102, 241, 0.5);
+  color: #e0e7ff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-shelf-batch-prep:hover {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.45) 0%, rgba(168, 85, 247, 0.45) 100%);
+  border-color: rgba(99, 102, 241, 0.8);
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.freezer-batch-prep-banner {
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(168, 85, 247, 0.08) 100%);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.freezer-batch-prep-banner-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.freezer-batch-prep-banner-icon {
+  font-size: 1.6rem;
+}
+
+.freezer-batch-prep-banner-info strong {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #c7d2fe;
+}
+
+.freezer-batch-prep-banner-info p {
+  margin: 2px 0 0;
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+.btn-batch-banner-action {
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.batch-quick-add-controls {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.batch-quick-add-select {
+  flex: 1;
+  min-width: 220px;
+  padding: 8px 12px;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: #f8fafc;
+  font-size: 0.85rem;
+  outline: none;
+}
+
+.batch-quick-add-select:focus {
+  border-color: #6366f1;
+}
+
+.btn-batch-sampler-quick {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #fbbf24;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-batch-sampler-quick:hover {
+  background: rgba(245, 158, 11, 0.3);
+  border-color: rgba(245, 158, 11, 0.7);
+  color: #ffffff;
+}
+
 /* Grocery Groups */
 .batch-prep-grocery-groups {
   display: flex;

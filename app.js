@@ -7146,6 +7146,17 @@
       dock.style.display = 'none';
     }
 
+    // Update Header Badge
+    const headerBadge = document.getElementById('batchPrepHeaderBadge');
+    if (headerBadge) {
+      if (count > 0) {
+        headerBadge.style.display = 'inline-block';
+        headerBadge.textContent = count;
+      } else {
+        headerBadge.style.display = 'none';
+      }
+    }
+
     // Update buttons on visible recipe cards
     document.querySelectorAll('.btn-card-batch-prep').forEach(btn => {
       const rId = btn.dataset.recipeId;
@@ -7218,6 +7229,45 @@
           saveBatchPrepQueue();
           renderBatchPrepModal();
         });
+      });
+    }
+
+    // Populate Quick Add Select & Bind In-Modal Prep Controls
+    const quickSelect = document.getElementById('batchPrepQuickAddSelect');
+    if (quickSelect) {
+      const unqueued = allRecipes.filter(r => !isRecipeInBatchPrep(r.id)).slice(0, 80);
+      quickSelect.innerHTML = '<option value="">+ Add a Recipe to this Batch...</option>' + 
+        unqueued.map(r => `<option value="${r.id}">${escapeHtml(r.name)} (${escapeHtml(r.category || 'High Protein')})</option>`).join('');
+    }
+
+    const quickAddBtn = document.getElementById('btnBatchPrepQuickAdd');
+    if (quickAddBtn && !quickAddBtn._bound) {
+      quickAddBtn._bound = true;
+      quickAddBtn.addEventListener('click', () => {
+        const select = document.getElementById('batchPrepQuickAddSelect');
+        if (select && select.value) {
+          toggleBatchPrepRecipe(select.value, 1.0);
+          renderBatchPrepModal();
+        } else {
+          showToast('Please select a recipe from the dropdown first!');
+        }
+      });
+    }
+
+    const samplerBtn = document.getElementById('btnBatchPrepLoadSampler');
+    if (samplerBtn && !samplerBtn._bound) {
+      samplerBtn._bound = true;
+      samplerBtn.addEventListener('click', () => {
+        const sampleIds = ['fairlife_chocolate', 'cookies_and_cream_fan_favorite', 'vanilla_protein_shake', 'peanut_butter_chocolate_banana'];
+        sampleIds.forEach(id => {
+          const rec = allRecipes.find(r => r.id === id);
+          if (rec && !isRecipeInBatchPrep(rec.id) && batchPrepQueueState.length < 4) {
+            batchPrepQueueState.push({ recipeId: rec.id, recipeName: rec.name, scale: 1.0 });
+          }
+        });
+        saveBatchPrepQueue();
+        renderBatchPrepModal();
+        showToast('🍱 Loaded 4 Signature Pints into Sunday Batch Prep!');
       });
     }
 
@@ -14370,6 +14420,24 @@
     const btnBatchPrepOpen = document.getElementById('btnBatchPrepOpenModal');
     if (btnBatchPrepOpen) {
       btnBatchPrepOpen.addEventListener('click', openBatchPrepModal);
+    }
+
+    const openBatchPrepHeaderBtn = document.getElementById('openBatchPrepHeaderBtn');
+    if (openBatchPrepHeaderBtn) {
+      openBatchPrepHeaderBtn.addEventListener('click', openBatchPrepModal);
+    }
+
+    const btnShelfOpenBatchPrep = document.getElementById('btnShelfOpenBatchPrep');
+    if (btnShelfOpenBatchPrep) {
+      btnShelfOpenBatchPrep.addEventListener('click', openBatchPrepModal);
+    }
+
+    const btnFreezerModalOpenBatchPrep = document.getElementById('btnFreezerModalOpenBatchPrep');
+    if (btnFreezerModalOpenBatchPrep) {
+      btnFreezerModalOpenBatchPrep.addEventListener('click', () => {
+        closeFreezerModal();
+        openBatchPrepModal();
+      });
     }
 
     const batchPrepCloseBtn = document.getElementById('batchPrepModalCloseBtn');
