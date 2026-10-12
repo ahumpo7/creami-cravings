@@ -122,5 +122,42 @@
     "created_at": "2026-10-07T17:45:10.671690",
     "last_active": "2026-10-07T17:45:10.671690",
     "token": "token_creator_eli_001"
+  },
+  "testcontent@creamicravings.com": {
+    "id": "user_creator_testcontent",
+    "username": "testcontent",
+    "name": "TestContent (Test Creator)",
+    "email": "testcontent@creamicravings.com",
+    "password": "f3c13397f8e1ec4a028a44af2cbd5075820b184faa1fa5f9659cb60ee5970ad1",
+    "role": "creator",
+    "creatorId": "test_content",
+    "pantry": [
+      "fat_free_ultra_filtered_milk",
+      "sweetener",
+      "xanthan_gum",
+      "salt",
+      "vanilla_bean_paste",
+      "cocoa_powder"
+    ],
+    "favorites": [],
+    "madeCounts": {},
+    "ratings": {},
+    "customRecipes": [],
+    "shoppingList": [],
+    "freezerPints": [],
+    "subscriptions": [
+      "All-Access",
+      "Base Flavors",
+      "Community Legends",
+      "Fan Favorites",
+      "No Protein",
+      "Keto",
+      "Lactose Free",
+      "TestContent Sampler",
+      "Volume Pints"
+    ],
+    "created_at": "2026-10-12T14:40:00.000000",
+    "last_active": "2026-10-12T14:40:00.000000",
+    "token": "token_creator_testcontent_001"
   }
 }

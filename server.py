@@ -947,6 +947,37 @@ elif eli_user.get('role') != 'creator' or 'All-Access' not in eli_user.get('subs
     eli_user['creatorId'] = 'fitness_product_finder'
     eli_user['subscriptions'] = list(ALL_SUBSCRIPTIONS)
 
+# Ensure official Content Creator account for TestContent exists
+tc_email = 'testcontent@creamicravings.com'
+tc_user = next((u for u in users_db.values() if u.get('email', '').lower() == tc_email or u.get('username', '').lower() == 'testcontent'), None)
+if not tc_user:
+    tc_hash = hash_password('creami2026!')
+    users_db[tc_email] = {
+        'id': 'user_creator_testcontent',
+        'username': 'testcontent',
+        'name': 'TestContent (Test Creator)',
+        'email': tc_email,
+        'password': tc_hash,
+        'role': 'creator',
+        'creatorId': 'test_content',
+        'pantry': list(DEFAULT_STAPLES),
+        'favorites': [],
+        'madeCounts': {},
+        'ratings': {},
+        'customRecipes': [],
+        'shoppingList': [],
+        'freezerPints': [],
+        'subscriptions': list(ALL_SUBSCRIPTIONS) + ['TestContent Sampler', 'Volume Pints'],
+        'created_at': datetime.utcnow().isoformat(),
+        'last_active': datetime.utcnow().isoformat(),
+        'token': 'token_creator_testcontent_001'
+    }
+elif tc_user.get('role') != 'creator' or not tc_user.get('creatorId'):
+    tc_user['role'] = 'creator'
+    tc_user['creatorId'] = 'test_content'
+    if 'All-Access' not in tc_user.get('subscriptions', []):
+        tc_user['subscriptions'] = list(ALL_SUBSCRIPTIONS) + ['TestContent Sampler', 'Volume Pints']
+
 save_json_file(USERS_DB_FILE, users_db)
 
 def verify_google_token(credential):

@@ -4776,6 +4776,11 @@
   // Hybrid Feature: 1-Click Creator Pack Unlock into Freezer Queue (Path B)
   // ==========================================================================
   function batchPrepCreatorPack(packId) {
+    if (!currentUser) {
+      showToast('🔒 Please sign in to use Sunday Batch Prep & Grocery List.');
+      openGoogleAuthModal();
+      return;
+    }
     let targetRecipes = [];
 
     // Filter recipes that belong to this pack/category
@@ -7209,6 +7214,11 @@
   }
 
   function toggleBatchPrepRecipe(recipeId, scale = 1.0) {
+    if (!currentUser) {
+      showToast('🔒 Please sign in to use Sunday Batch Prep & Grocery List.');
+      openGoogleAuthModal();
+      return;
+    }
     const existingIndex = batchPrepQueueState.findIndex(p => p.recipeId === recipeId);
     const rec = allRecipes.find(r => r.id === recipeId);
     if (!rec) return;
@@ -7240,6 +7250,13 @@
     const dock = document.getElementById('batchPrepBar');
     const countEl = document.getElementById('batchPrepCountText');
     if (!dock) return;
+
+    if (!currentUser) {
+      dock.style.display = 'none';
+      const headerBadge = document.getElementById('batchPrepHeaderBadge');
+      if (headerBadge) headerBadge.style.display = 'none';
+      return;
+    }
 
     const count = batchPrepQueueState.length;
     if (count > 0) {
@@ -7279,6 +7296,11 @@
   }
 
   function openBatchPrepModal() {
+    if (!currentUser) {
+      showToast('🔒 Please sign in to use Sunday Batch Prep & Grocery List.');
+      openGoogleAuthModal();
+      return;
+    }
     const modal = document.getElementById('batchPrepModalOverlay');
     if (!modal) return;
     renderBatchPrepModal();
@@ -7767,6 +7789,11 @@
   }
 
   function openBatchAssemblyModal() {
+    if (!currentUser) {
+      showToast('🔒 Please sign in to use Kitchen Assembly Prep Mode.');
+      openGoogleAuthModal();
+      return;
+    }
     if (batchPrepQueueState.length === 0) {
       showToast('Add pints to Sunday Batch Prep first (+Prep on any recipe card)');
       return;
@@ -9649,6 +9676,11 @@
           const addAllBtn = callout.querySelector('#btnAddAllMissingBtn');
           if (addAllBtn) {
             addAllBtn.addEventListener('click', () => {
+              if (!currentUser) {
+                showToast('🔒 Please sign in to manage your Grocery Shopping List.');
+                openGoogleAuthModal();
+                return;
+              }
               const cleanMissing = newMatch.missing.filter(m => !isShoppingExcluded(m));
               if (cleanMissing.length === 0) {
                 showToast('✅ All needed grocery items are already in stock!');
@@ -9668,6 +9700,11 @@
     recipeModalBody.querySelectorAll('.modal-ing-shop-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
+        if (!currentUser) {
+          showToast('🔒 Please sign in to manage your Grocery Shopping List.');
+          openGoogleAuthModal();
+          return;
+        }
         const rawName = btn.dataset.name;
         const cleanName = sanitizeShoppingItemName(rawName);
         if (manualShoppingList.has(cleanName) || manualShoppingList.has(rawName)) {
@@ -9690,6 +9727,11 @@
     const addAllBtn = recipeModalBody.querySelector('#btnAddAllMissingBtn');
     if (addAllBtn) {
       addAllBtn.addEventListener('click', () => {
+        if (!currentUser) {
+          showToast('🔒 Please sign in to manage your Grocery Shopping List.');
+          openGoogleAuthModal();
+          return;
+        }
         const match = computeRecipeMatch(recipe);
         const cleanMissing = match.missing.filter(m => !isShoppingExcluded(m));
         if (cleanMissing.length === 0) {
@@ -10203,6 +10245,11 @@
 
   // --- Shopping List Modal ---
   function openShoppingListModal() {
+    if (!currentUser) {
+      showToast('🔒 Please sign in to access your Grocery Shopping List.');
+      openGoogleAuthModal();
+      return;
+    }
     // 1. Sanitize any legacy manual items first
     let manualChanged = false;
     const cleanManual = new Set();
@@ -13002,9 +13049,17 @@
       const createdDate = u.created_at ? new Date(u.created_at).toLocaleDateString() : 'N/A';
       const lastActiveDate = u.last_active ? new Date(u.last_active).toLocaleDateString() : 'Active';
 
-      const roleBadge = u.role === 'admin' 
-        ? '👑 Admin' 
-        : (u.role === 'creator' ? '🧑‍🍳 Creator' : (u.role === 'vip' ? '⭐ VIP' : '👤 Standard'));
+      let roleBadge = '👤 Standard';
+      if (u.role === 'admin') {
+        roleBadge = '👑 Admin';
+      } else if (u.role === 'creator') {
+        const creatorObj = (u.creatorId && typeof CREATORS_MASTER !== 'undefined')
+          ? CREATORS_MASTER.find(c => c.id === u.creatorId)
+          : null;
+        roleBadge = creatorObj ? `🧑‍🍳 Creator (${creatorObj.name})` : '🧑‍🍳 Creator';
+      } else if (u.role === 'vip') {
+        roleBadge = '⭐ VIP';
+      }
 
       return `
         <div class="admin-user-card" data-user-id="${u.id}" data-user-email="${u.email}">
@@ -13017,7 +13072,7 @@
                   <span class="admin-user-badge ${u.role || 'user'}">${roleBadge}</span>
                   ${isCurrentAdmin ? `<span class="badge" style="font-size: 0.68rem; background: rgba(5, 150, 105, 0.2); color: #34d399; padding: 2px 6px; border-radius: 4px; font-weight: 700;">You</span>` : ''}
                 </div>
-                <div class="admin-user-email">${u.email || 'No email attached'}</div>
+                <div class="admin-user-email">${escapeHtml(u.email || 'No email attached')}${u.creatorId ? ` • <span style="color: #38bdf8; font-size: 0.76rem; font-weight: 600;">Creator ID: ${escapeHtml(u.creatorId)}</span>` : ''}</div>
               </div>
             </div>
 
