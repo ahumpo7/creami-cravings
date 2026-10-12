@@ -1149,7 +1149,11 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
             self.send_error(404, "File not found")
             return
 
-        if self.path.startswith('/recipe/') or self.path.startswith('/category/') or self.path.startswith('/ninja-creami-') or self.path in ['/freeze-guide', '/guide/freeze-time', '/guide/ninja-creami-freeze-time']:
+        if (self.path.startswith('/recipe/') or 
+            self.path.startswith('/category/') or 
+            self.path.startswith('/ninja-creami-') or 
+            self.path in ['/freeze-guide', '/guide/freeze-time', '/guide/ninja-creami-freeze-time'] or
+            re.match(r'^/(?:@|creator/)[a-zA-Z0-9_\-]+/?$', self.path.split('?')[0])):
             clean_url = self.path.split('?')[0]
             if re.search(r'\.(css|js|png|jpg|jpeg|svg|ico|json|woff2?|ttf|webp|map)$', clean_url, re.I):
                 self.path = '/' + clean_url.split('/')[-1]
@@ -1224,13 +1228,22 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 ]
             })
 
-        elif self.path == '/api/creator/analytics':
+        elif clean_path == '/api/creator/analytics':
+            qs = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+            req_creator = qs.get('creator', [None])[0]
+
             user = self._get_user_from_token()
-            if not user or (user.get('role') not in ['creator', 'admin'] and user.get('email', '').lower() != 'ahumpo7@gmail.com'):
+            is_creator_or_admin = user and (user.get('role') in ['creator', 'admin'] or user.get('email', '').lower() == 'ahumpo7@gmail.com')
+
+            # Allow public storefront aggregate views if creator query param is present
+            if not is_creator_or_admin and not req_creator:
                 self._send_json({'error': 'Unauthorized creator access'}, 403)
                 return
 
-            creator_id = user.get('creatorId') or 'fitness_product_finder'
+            creator_id = (req_creator.replace('@', '').lower() if req_creator else (user.get('creatorId') if user else 'fitness_product_finder')) or 'fitness_product_finder'
+            if creator_id in ['eli', 'fitnessproductfinder', 'fitness_product_finder']:
+                creator_id = 'fitness_product_finder'
+
             made_counts = stats_db.get('madeCounts', {})
 
             total_spins = 0
