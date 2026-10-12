@@ -108,7 +108,7 @@
   <link rel="icon" type="image/png" sizes="144x144" href="icon-144.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=beta2">
+  <link rel="stylesheet" href="styles.css?v=beta3">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -1051,9 +1051,134 @@
         <div class="batch-prep-footer-left">
           <button type="button" class="btn-secondary" id="btnBatchCopyList">📋 Copy Formatted List</button>
         </div>
-        <div class="batch-prep-footer-right">
-          <button type="button" class="btn-primary" id="btnBatchFillFreezerSlots">❄️ Fill All Freezer Slots Now</button>
+        <div class="batch-prep-footer-right" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+          <button type="button" class="btn-secondary" id="btnBatchFillFreezerSlots">❄️ Quick Freeze Slots</button>
+          <button type="button" class="btn-primary" id="btnStartBatchAssembly">👩‍🍳 Kitchen Assembly Mode →</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sunday Batch Prep Kitchen Assembly Mode Modal (Beta Staging) -->
+  <div class="modal-overlay" id="batchAssemblyModalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-content assembly-modal-content">
+      <button class="modal-close" id="batchAssemblyModalCloseBtn" aria-label="Close assembly mode">&times;</button>
+      <div class="modal-header assembly-header">
+        <div class="assembly-header-left">
+          <div class="assembly-icon-badge">👩‍🍳</div>
+          <div>
+            <h2 class="modal-title">Kitchen Assembly Mode</h2>
+            <div class="assembly-meta-row">
+              <span class="assembly-screen-pill" id="assemblyWakeLockPill" title="Keeps phone screen on while prepping">⚡ Screen Awake</span>
+              <span class="assembly-pints-pill" id="assemblyPintsPill">0 Pints Queued</span>
+            </div>
+          </div>
+        </div>
+        <div class="assembly-step-bar" id="assemblyStepBar">
+          <button type="button" class="assembly-step-btn active" data-step="1">
+            <span class="step-num">1</span>
+            <span class="step-txt">Liquids</span>
+          </button>
+          <button type="button" class="assembly-step-btn" data-step="2">
+            <span class="step-num">2</span>
+            <span class="step-txt">Powders</span>
+          </button>
+          <button type="button" class="assembly-step-btn" data-step="3">
+            <span class="step-num">3</span>
+            <span class="step-txt">Froth</span>
+          </button>
+          <button type="button" class="assembly-step-btn" data-step="4">
+            <span class="step-num">4</span>
+            <span class="step-txt">Freeze</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="assembly-body" id="assemblyBody">
+        <!-- Rendered dynamically by step in app.js -->
+      </div>
+
+      <div class="modal-footer assembly-footer">
+        <button type="button" class="btn-secondary" id="btnAssemblyPrevStep" style="display: none;">← Previous Step</button>
+        <button type="button" class="btn-primary" id="btnAssemblyNextStep">Next: Add Powders →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive Spin Log & Habit Streak Modal (Beta Staging) -->
+  <div class="modal-overlay" id="spinLogModalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-content spin-log-modal-content">
+      <button class="modal-close" id="spinLogModalCloseBtn" aria-label="Close modal">&times;</button>
+      
+      <div class="modal-header">
+        <div class="spin-log-title-row">
+          <div class="spin-log-icon-badge">🍨</div>
+          <div>
+            <h2 class="modal-title" id="spinLogModalTitle">Log Spun Pint</h2>
+            <p class="modal-subtitle" id="spinLogModalSubtitle">Record your texture, ratings, and maintain your weekly streak!</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="spin-log-body">
+        <!-- Pint Info Summary Card -->
+        <div class="spin-log-summary-card" id="spinLogSummaryCard"></div>
+
+        <!-- Spin Setting Used -->
+        <div class="spin-log-field-group">
+          <label class="spin-log-label">Ninja Creami Machine Cycle Used</label>
+          <div class="spin-cycles-selector" id="spinCycleButtons">
+            <button type="button" class="cycle-pill active" data-cycle="Lite Ice Cream">Lite Ice Cream</button>
+            <button type="button" class="cycle-pill" data-cycle="Ice Cream">Ice Cream</button>
+            <button type="button" class="cycle-pill" data-cycle="Sorbet">Sorbet</button>
+            <button type="button" class="cycle-pill" data-cycle="Gelato">Gelato</button>
+            <button type="button" class="cycle-pill" data-cycle="Milkshake">Milkshake</button>
+            <button type="button" class="cycle-pill" data-cycle="Bottom / Top">Top / Bottom</button>
+          </div>
+        </div>
+
+        <!-- Re-Spin Experience -->
+        <div class="spin-log-field-group">
+          <label class="spin-log-label">Re-Spins Needed</label>
+          <div class="spin-respin-options" id="spinRespinOptions">
+            <button type="button" class="respin-pill active" data-respins="0">✨ Perfect (0 re-spins)</button>
+            <button type="button" class="respin-pill" data-respins="1">🔄 1x Re-spin</button>
+            <button type="button" class="respin-pill" data-respins="2">🔄 2x Re-spins</button>
+            <button type="button" class="respin-pill" data-respins="liquid">🥛 Added splash of liquid</button>
+          </div>
+        </div>
+
+        <!-- Mix-Ins Added -->
+        <div class="spin-log-field-group">
+          <label class="spin-log-label">Mix-Ins Added (Optional)</label>
+          <input type="text" class="spin-log-input" id="spinMixInsInput" placeholder="e.g. 1 Crushed Oreo, 15g Peanut Butter, berries...">
+        </div>
+
+        <!-- Star Rating -->
+        <div class="spin-log-field-group">
+          <label class="spin-log-label">Texture &amp; Taste Rating</label>
+          <div class="spin-star-rating" id="spinStarRating">
+            <button type="button" class="star-btn active" data-star="1">⭐</button>
+            <button type="button" class="star-btn active" data-star="2">⭐</button>
+            <button type="button" class="star-btn active" data-star="3">⭐</button>
+            <button type="button" class="star-btn active" data-star="4">⭐</button>
+            <button type="button" class="star-btn active" data-star="5">⭐</button>
+          </div>
+        </div>
+
+        <!-- Streak Preview Banner -->
+        <div class="spin-streak-banner" id="spinStreakBanner">
+          <span class="streak-flame">🔥</span>
+          <div class="streak-text-group">
+            <strong id="spinStreakTitle">Week 1 Habit Streak Active!</strong>
+            <span id="spinStreakSub">Logging spins builds your habit momentum. Prepping weekly keeps dessert goals effortless.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer spin-log-footer">
+        <button type="button" class="btn-secondary" id="btnShareStoryCardFromLog">📸 Share Story Card</button>
+        <button type="button" class="btn-primary" id="btnConfirmLogSpin">🎉 Finish &amp; Log Batch (+1)</button>
       </div>
     </div>
   </div>
@@ -2426,8 +2551,9 @@
       </div>
       <div class="batch-prep-dock-actions">
         <button type="button" class="btn-batch-dock-clear" id="btnBatchPrepClear" title="Clear all queued recipes">✕ Clear</button>
+        <button type="button" class="btn-batch-dock-prep" id="btnBatchDockAssembly" title="Start step-by-step kitchen prep">👩‍🍳 Prep Mode</button>
         <button type="button" class="btn-batch-dock-open" id="btnBatchPrepOpenModal">
-          <span>🛒 View Consolidated Grocery List</span>
+          <span>🛒 Grocery List</span>
           <span class="batch-prep-arrow">→</span>
         </button>
       </div>
@@ -2669,7 +2795,7 @@
   <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
   <!-- Scripts -->
-  <script src="recipes-data.js?v=beta2"></script>
-  <script src="app.js?v=beta2"></script>
+  <script src="recipes-data.js?v=beta3"></script>
+  <script src="app.js?v=beta3"></script>
 </body>
 </html>

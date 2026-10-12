@@ -41,6 +41,7 @@
   const MIMIC_ROLE_STORAGE_KEY = STORAGE_PREFIX + 'creami_mimic_role_v1';
   const REAL_ADMIN_STORAGE_KEY = STORAGE_PREFIX + 'creami_real_admin_user_v1';
   const BATCH_PREP_STORAGE_KEY = STORAGE_PREFIX + 'creami_batch_prep_queue_v1';
+  const HABIT_STREAK_STORAGE_KEY = STORAGE_PREFIX + 'creami_habit_streaks_v1';
 
   // Default Staples Checked for New Users
   const DEFAULT_STAPLES = [];
@@ -430,6 +431,25 @@
   } catch (e) {
     batchPrepQueueState = [];
   }
+
+  // Habit Streaks & Spin History State (Path A Item 4)
+  let habitStreakState = {
+    currentStreak: 0,
+    totalSpins: 0,
+    lastSpinWeek: null,
+    history: []
+  };
+  try {
+    const rawStreak = localStorage.getItem(HABIT_STREAK_STORAGE_KEY);
+    if (rawStreak) habitStreakState = Object.assign(habitStreakState, JSON.parse(rawStreak));
+  } catch (e) {
+    console.error('Error loading habit streaks:', e);
+  }
+
+  // Kitchen Assembly Mode State (Path A Item 3)
+  let assemblyCurrentStep = 1;
+  let assemblyWakeLock = null;
+  let assemblyCheckedItems = new Set();
 
   // 1-Tap Smart Ingredient Substitutions State (Roadmap Item 16)
   let activeRecipeSwaps = {}; // { [recipeId]: { [originalIngName]: swapObj } }
@@ -5312,6 +5332,18 @@
     ctx.fillStyle = '#cbd5e1';
     ctx.fillText('✦ THE ULTIMATE NINJA CREAMI® COMPANION ✦', width / 2, curY);
 
+    // Habit Streak Badge Banner on Story Card (Path A Item 4)
+    if (habitStreakState && habitStreakState.currentStreak > 0) {
+      curY += ratio === 'story' ? 58 : 42;
+      const streakText = `🔥 ${habitStreakState.currentStreak} WEEK HABIT STREAK • ${habitStreakState.totalSpins || 1} SPINS`;
+      ctx.font = ratio === 'story' ? '800 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' : '800 20px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      const streakW = ctx.measureText(streakText).width + (ratio === 'story' ? 48 : 36);
+      const streakH = ratio === 'story' ? 44 : 36;
+      drawRoundedRect(ctx, (width - streakW) / 2, curY - (streakH / 2), streakW, streakH, streakH / 2, 'rgba(234, 88, 12, 0.35)', 'rgba(251, 146, 60, 0.85)', 1.5);
+      ctx.fillStyle = '#fed7aa';
+      ctx.fillText(streakText, width / 2, curY + (ratio === 'story' ? 8 : 6));
+    }
+
     curY += ratio === 'story' ? 70 : 48;
 
     // 4. Category Tag Pill
@@ -6079,7 +6111,7 @@
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         const pintId = btn.dataset.pintId;
-        spinAndEnjoyFreezerPint(pintId);
+        openSpinLogModal(pintId);
       });
     });
 
@@ -6503,7 +6535,7 @@
     if (action === 'spin' && pintId) {
       const pint = freezerPintsState.find(p => p.id === pintId);
       if (pint) {
-        spinAndEnjoyFreezerPint(pintId);
+        openSpinLogModal(pintId);
       } else if (recipeId) {
         logRecipeBatch(recipeId, 1);
         showToast(`🍨 Spun & Enjoyed! +1 Batch logged 🎉`);
@@ -6670,7 +6702,7 @@
     }
   }
 
-  function spinAndEnjoyFreezerPint(pintId) {
+  function spinAndEnjoyFreezerPint(pintId, skipToast = false) {
     const pint = freezerPintsState.find(p => p.id === pintId);
     if (!pint) return;
 
@@ -6684,12 +6716,24 @@
       logRecipeBatch(pint.recipeId, 1);
     }
 
+    // Record streak if not already recorded by modal
+    if (!skipToast) {
+      recordHabitStreakSpin({
+        recipeId: pint.recipeId,
+        recipeName: pint.recipeName,
+        rating: 5
+      });
+    }
+
     // Remove from freezer
     freezerPintsState = freezerPintsState.filter(p => p.id !== pintId);
     saveFreezerPints();
+    renderFreezerShelfWidget();
     renderFreezerModal();
 
-    showToast(`🍨 Spun & Enjoyed "${pint.recipeName}"! +1 Batch logged 🎉`);
+    if (!skipToast) {
+      showToast(`🍨 Spun & Enjoyed "${pint.recipeName}"! 🔥 Week ${habitStreakState.currentStreak} Streak Active 🎉`);
+    }
   }
 
   function renderFreezerModal() {
@@ -6794,7 +6838,7 @@
 
       const spinBtn = card.querySelector('[data-action="spin"]');
       if (spinBtn) {
-        spinBtn.addEventListener('click', () => spinAndEnjoyFreezerPint(pintId));
+        spinBtn.addEventListener('click', () => openSpinLogModal(pintId));
       }
 
       const viewBtn = card.querySelector('[data-action="view-recipe"]');
@@ -7170,8 +7214,560 @@
 
     saveFreezerPints();
     renderFreezerShelfWidget();
+    scheduleAllPendingPintAlerts();
     closeBatchPrepModal();
     showToast(`❄️ Filled ${filledCount} container slots! 16-hour freeze timers running 🎉`);
+  }
+
+  // ==========================================================================
+  // Habit Streaks & Weekly Momentum Engine (Path A Item 4)
+  // ==========================================================================
+  function getISOWeekString(d = new Date()) {
+    const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    const dayNum = date.getUTCDay() || 7;
+    date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+    const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+    const weekNo = Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+    return `${date.getUTCFullYear()}-W${String(weekNo).padStart(2, '0')}`;
+  }
+
+  function getPreviousISOWeekString(d = new Date()) {
+    const prev = new Date(d.getTime() - 7 * 24 * 60 * 60 * 1000);
+    return getISOWeekString(prev);
+  }
+
+  function saveHabitStreakState() {
+    try {
+      localStorage.setItem(HABIT_STREAK_STORAGE_KEY, JSON.stringify(habitStreakState));
+    } catch (e) {
+      console.error('Error saving habit streak:', e);
+    }
+  }
+
+  function recordHabitStreakSpin(pintData = {}) {
+    const currentWeek = getISOWeekString();
+    const prevWeek = getPreviousISOWeekString();
+
+    if (!habitStreakState.lastSpinWeek) {
+      habitStreakState.currentStreak = 1;
+    } else if (habitStreakState.lastSpinWeek === currentWeek) {
+      if (!habitStreakState.currentStreak || habitStreakState.currentStreak < 1) {
+        habitStreakState.currentStreak = 1;
+      }
+    } else if (habitStreakState.lastSpinWeek === prevWeek) {
+      habitStreakState.currentStreak = (habitStreakState.currentStreak || 0) + 1;
+    } else {
+      habitStreakState.currentStreak = 1;
+    }
+
+    habitStreakState.lastSpinWeek = currentWeek;
+    habitStreakState.totalSpins = (habitStreakState.totalSpins || 0) + 1;
+
+    if (!Array.isArray(habitStreakState.history)) habitStreakState.history = [];
+    habitStreakState.history.unshift({
+      timestamp: Date.now(),
+      date: new Date().toISOString().split('T')[0],
+      recipeId: pintData.recipeId || null,
+      recipeName: pintData.recipeName || 'Creami Pint',
+      cycle: pintData.cycle || 'Lite Ice Cream',
+      respins: pintData.respins || '0',
+      mixins: pintData.mixins || '',
+      rating: pintData.rating || 5
+    });
+    if (habitStreakState.history.length > 50) {
+      habitStreakState.history = habitStreakState.history.slice(0, 50);
+    }
+
+    saveHabitStreakState();
+    return habitStreakState;
+  }
+
+  // ==========================================================================
+  // Kitchen Assembly Mode Engine (Sunday Batch Prep Step-by-Step)
+  // Distraction-free kitchen UI with Screen Wake Lock API (Path A Item 3)
+  // ==========================================================================
+  async function requestAssemblyWakeLock() {
+    try {
+      if ('wakeLock' in navigator) {
+        assemblyWakeLock = await navigator.wakeLock.request('screen');
+        updateAssemblyWakeLockUI(true);
+        assemblyWakeLock.addEventListener('release', () => {
+          updateAssemblyWakeLockUI(false);
+        });
+      } else {
+        updateAssemblyWakeLockUI(false);
+      }
+    } catch (err) {
+      console.warn('Wake Lock request failed:', err);
+      updateAssemblyWakeLockUI(false);
+    }
+  }
+
+  function releaseAssemblyWakeLock() {
+    if (assemblyWakeLock) {
+      assemblyWakeLock.release().catch(() => {});
+      assemblyWakeLock = null;
+    }
+    updateAssemblyWakeLockUI(false);
+  }
+
+  function updateAssemblyWakeLockUI(isActive) {
+    const pill = document.getElementById('assemblyWakeLockPill');
+    if (!pill) return;
+    if (isActive) {
+      pill.innerHTML = '⚡ Screen Awake';
+      pill.style.background = 'rgba(16, 185, 129, 0.2)';
+      pill.style.borderColor = 'rgba(16, 185, 129, 0.45)';
+      pill.style.color = '#34d399';
+    } else {
+      pill.innerHTML = '💤 Screen Normal';
+      pill.style.background = 'rgba(255, 255, 255, 0.05)';
+      pill.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+      pill.style.color = '#94a3b8';
+    }
+  }
+
+  function openBatchAssemblyModal() {
+    if (batchPrepQueueState.length === 0) {
+      showToast('Add pints to Sunday Batch Prep first (+Prep on any recipe card)');
+      return;
+    }
+    closeBatchPrepModal();
+
+    const modal = document.getElementById('batchAssemblyModalOverlay');
+    if (!modal) return;
+
+    assemblyCurrentStep = 1;
+    assemblyCheckedItems.clear();
+    goToAssemblyStep(1);
+    requestAssemblyWakeLock();
+
+    modal.classList.add('active');
+    modal.setAttribute('aria-hidden', 'false');
+    lockBackgroundScroll();
+  }
+
+  function closeBatchAssemblyModal() {
+    const modal = document.getElementById('batchAssemblyModalOverlay');
+    if (!modal) return;
+    releaseAssemblyWakeLock();
+    modal.classList.remove('active');
+    modal.setAttribute('aria-hidden', 'true');
+    unlockBackgroundScroll();
+  }
+
+  function isLiquidIngredient(ing) {
+    const name = (ing.name || ing.raw || '').toLowerCase();
+    const unit = (ing.unit || '').toLowerCase();
+    if (/(powder|pudding|mix\b|gum|flour|sugar|sweetener|splenda|stevia|monk|erythritol|allulose|salt|cinnamon|cocoa|cacao|chips|oreo|cookie)/i.test(name)) {
+      return false;
+    }
+    if (/(milk|water|shake|juice|cream|syrup|puree|coffee|espresso|extract|paste|yogurt|applesauce|liquid)/i.test(name)) {
+      return true;
+    }
+    if (['cup', 'cups', 'ml', 'fl oz', 'oz'].includes(unit)) {
+      return true;
+    }
+    return Boolean(ing.isBase);
+  }
+
+  function isDryIngredient(ing) {
+    return !isLiquidIngredient(ing) && !ing.isMixIn;
+  }
+
+  function goToAssemblyStep(step) {
+    assemblyCurrentStep = Math.max(1, Math.min(4, step));
+
+    // Update Step Bar Buttons
+    const stepBar = document.getElementById('assemblyStepBar');
+    if (stepBar) {
+      stepBar.querySelectorAll('.assembly-step-btn').forEach(btn => {
+        const s = parseInt(btn.dataset.step, 10);
+        btn.classList.toggle('active', s === assemblyCurrentStep);
+        btn.classList.toggle('completed', s < assemblyCurrentStep);
+      });
+    }
+
+    // Update Header Pill
+    const pintsPill = document.getElementById('assemblyPintsPill');
+    if (pintsPill) {
+      pintsPill.textContent = `${batchPrepQueueState.length} Pint${batchPrepQueueState.length === 1 ? '' : 's'} Queued`;
+    }
+
+    // Update Footer Navigation
+    const prevBtn = document.getElementById('btnAssemblyPrevStep');
+    const nextBtn = document.getElementById('btnAssemblyNextStep');
+    if (prevBtn) {
+      prevBtn.style.display = assemblyCurrentStep > 1 ? 'inline-flex' : 'none';
+      if (assemblyCurrentStep === 2) prevBtn.textContent = '← Step 1: Liquids';
+      else if (assemblyCurrentStep === 3) prevBtn.textContent = '← Step 2: Powders';
+      else if (assemblyCurrentStep === 4) prevBtn.textContent = '← Step 3: Froth';
+    }
+    if (nextBtn) {
+      if (assemblyCurrentStep === 1) nextBtn.textContent = 'Next: Add Powders →';
+      else if (assemblyCurrentStep === 2) nextBtn.textContent = 'Next: Froth & Whisk →';
+      else if (assemblyCurrentStep === 3) nextBtn.textContent = 'Next: Lid & Freeze →';
+      else if (assemblyCurrentStep === 4) nextBtn.textContent = '❄️ Move Pints to Freezer Shelf (Start Timers)';
+    }
+
+    renderAssemblyStepBody(assemblyCurrentStep);
+  }
+
+  function renderAssemblyStepBody(step) {
+    const body = document.getElementById('assemblyBody');
+    if (!body) return;
+
+    if (step === 1) {
+      // Step 1: Liquids
+      let html = `
+        <div style="margin-bottom: 16px;">
+          <h3 style="font-size: 1.15rem; color: #f8fafc; margin-bottom: 4px;">🥛 Stage 1: Line Up Pints &amp; Pour Liquids</h3>
+          <p style="font-size: 0.88rem; color: #94a3b8; margin: 0;">Line up your clean containers on the counter. Pour liquid bases into each pint:</p>
+        </div>
+        <div class="assembly-pints-grid">
+      `;
+
+      batchPrepQueueState.forEach((queued, idx) => {
+        const rec = allRecipes.find(r => r.id === queued.recipeId);
+        const scale = queued.scale || 1.0;
+        const sizeBadge = scale === 1.5 ? '24 oz Deluxe' : '16 oz Standard';
+        const ings = rec ? (rec.ingredients || []).filter(isLiquidIngredient) : [];
+
+        html += `
+          <div class="assembly-pint-card" data-pint-idx="${idx}">
+            <div class="assembly-pint-card-header">
+              <span class="assembly-pint-title">#${idx + 1} ${escapeHtml(queued.recipeName)}</span>
+              <span class="assembly-pint-badge">${sizeBadge}</span>
+            </div>
+            <div class="assembly-items-list">
+        `;
+
+        if (ings.length === 0) {
+          html += `<div style="color: #94a3b8; font-size: 0.8rem; padding: 6px;">Follow standard milk fill line for this recipe.</div>`;
+        } else {
+          ings.forEach((ing, iIdx) => {
+            const key = `step1_${idx}_${iIdx}`;
+            const isChecked = assemblyCheckedItems.has(key);
+            const formattedQty = formatIngredientAmount(ing, scale, 'metric');
+            const cleanName = sanitizeShoppingItemName(ing.name);
+            html += `
+              <div class="assembly-item-row ${isChecked ? 'checked' : ''}" data-item-key="${key}">
+                <span class="assembly-item-name">${escapeHtml(cleanName)}</span>
+                <span class="assembly-item-qty">${escapeHtml(formattedQty || 'Fill line')}</span>
+              </div>
+            `;
+          });
+        }
+
+        html += `
+            </div>
+          </div>
+        `;
+      });
+
+      html += `</div>`;
+      body.innerHTML = html;
+
+    } else if (step === 2) {
+      // Step 2: Powders & Dry Mixes
+      let html = `
+        <div style="margin-bottom: 16px;">
+          <h3 style="font-size: 1.15rem; color: #f8fafc; margin-bottom: 4px;">🥄 Stage 2: Measure &amp; Add Powders</h3>
+          <p style="font-size: 0.88rem; color: #94a3b8; margin: 0;">Add protein powders, pudding mixes, sweeteners, and stabilizers directly into each pint:</p>
+        </div>
+        <div class="assembly-pints-grid">
+      `;
+
+      batchPrepQueueState.forEach((queued, idx) => {
+        const rec = allRecipes.find(r => r.id === queued.recipeId);
+        const scale = queued.scale || 1.0;
+        const sizeBadge = scale === 1.5 ? '24 oz Deluxe' : '16 oz Standard';
+        const ings = rec ? (rec.ingredients || []).filter(isDryIngredient) : [];
+
+        html += `
+          <div class="assembly-pint-card" data-pint-idx="${idx}">
+            <div class="assembly-pint-card-header">
+              <span class="assembly-pint-title">#${idx + 1} ${escapeHtml(queued.recipeName)}</span>
+              <span class="assembly-pint-badge">${sizeBadge}</span>
+            </div>
+            <div class="assembly-items-list">
+        `;
+
+        if (ings.length === 0) {
+          html += `<div style="color: #94a3b8; font-size: 0.8rem; padding: 6px;">No dry powders required for this pint.</div>`;
+        } else {
+          ings.forEach((ing, iIdx) => {
+            const key = `step2_${idx}_${iIdx}`;
+            const isChecked = assemblyCheckedItems.has(key);
+            const formattedQty = formatIngredientAmount(ing, scale, 'metric');
+            const cleanName = sanitizeShoppingItemName(ing.name);
+            html += `
+              <div class="assembly-item-row ${isChecked ? 'checked' : ''}" data-item-key="${key}">
+                <span class="assembly-item-name">${escapeHtml(cleanName)}</span>
+                <span class="assembly-item-qty">${escapeHtml(formattedQty || 'As needed')}</span>
+              </div>
+            `;
+          });
+        }
+
+        html += `
+            </div>
+          </div>
+        `;
+      });
+
+      html += `</div>`;
+      body.innerHTML = html;
+
+    } else if (step === 3) {
+      // Step 3: Froth / Whisk
+      let html = `
+        <div style="margin-bottom: 18px;">
+          <h3 style="font-size: 1.15rem; color: #f8fafc; margin-bottom: 4px;">🌀 Stage 3: The Essential 30-Second Froth</h3>
+          <p style="font-size: 0.88rem; color: #94a3b8; margin: 0;">Do NOT freeze without frothing! An immersion milk frother ensures stabilizers dissolve completely so solids don't settle at the bottom during freezing.</p>
+        </div>
+        <div class="assembly-technique-card">
+          <div class="assembly-tech-step">
+            <div class="assembly-tech-step-icon">⚡</div>
+            <div class="assembly-tech-step-text">
+              <strong>1. Submerge Frother to Bottom</strong>
+              <p>Place your handheld milk frother or mini immersion whisk all the way to the bottom before turning it on to avoid splashing.</p>
+            </div>
+          </div>
+          <div class="assembly-tech-step">
+            <div class="assembly-tech-step-icon">🌪️</div>
+            <div class="assembly-tech-step-text">
+              <strong>2. Whisk for 25–30 Seconds</strong>
+              <p>Move slowly in small circles until completely smooth with zero dry powder clumps on the walls.</p>
+            </div>
+          </div>
+          <div class="assembly-tech-step">
+            <div class="assembly-tech-step-icon">✨</div>
+            <div class="assembly-tech-step-text">
+              <strong>3. Tap Container on Counter</strong>
+              <p>Gently tap the pint base on your counter twice to release large air bubbles before lidding.</p>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 20px;">
+          <h4 style="font-size: 0.95rem; color: #cbd5e1; margin-bottom: 10px;">Check off each pint as you froth it:</h4>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+      `;
+
+      batchPrepQueueState.forEach((queued, idx) => {
+        const key = `step3_froth_${idx}`;
+        const isChecked = assemblyCheckedItems.has(key);
+        html += `
+          <div class="assembly-item-row ${isChecked ? 'checked' : ''}" data-item-key="${key}" style="padding: 12px 14px; font-size: 0.92rem;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span>${isChecked ? '✅' : '⏳'}</span>
+              <span class="assembly-item-name">#${idx + 1} ${escapeHtml(queued.recipeName)}</span>
+            </div>
+            <span class="assembly-item-qty">${isChecked ? 'Frothed ✓' : 'Froth 30s'}</span>
+          </div>
+        `;
+      });
+
+      html += `
+          </div>
+        </div>
+      `;
+      body.innerHTML = html;
+
+    } else if (step === 4) {
+      // Step 4: Lid & Freeze
+      let html = `
+        <div class="assembly-freeze-stage-card">
+          <div class="assembly-freeze-icon">❄️</div>
+          <h3 style="font-size: 1.3rem; color: #f8fafc; margin: 0;">Lid Securely &amp; Freeze Flat</h3>
+          <p style="font-size: 0.92rem; color: #cbd5e1; max-width: 540px; margin: 0; line-height: 1.5;">
+            Snap all ${batchPrepQueueState.length} container lids on tightly. Place containers on a <strong>completely flat surface</strong> in the coldest part of your freezer. Slanted pints freeze unevenly and can cause machine blade strain!
+          </p>
+          <div style="display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 6px;">
+            <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; padding: 10px 16px; text-align: center;">
+              <span style="font-size: 1.2rem; display: block;">⏱️</span>
+              <strong style="color: #38bdf8; font-size: 0.88rem;">16-Hour Calibrated Freeze</strong>
+            </div>
+            <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; padding: 10px 16px; text-align: center;">
+              <span style="font-size: 1.2rem; display: block;">🔔</span>
+              <strong style="color: #34d399; font-size: 0.88rem;">Automated Readiness Push Alerts</strong>
+            </div>
+            <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; padding: 10px 16px; text-align: center;">
+              <span style="font-size: 1.2rem; display: block;">🔥</span>
+              <strong style="color: #fb923c; font-size: 0.88rem;">Weekly Habit Streak Active</strong>
+            </div>
+          </div>
+        </div>
+      `;
+      body.innerHTML = html;
+    }
+
+    // Attach click listeners to checkable items in the rendered step
+    body.querySelectorAll('.assembly-item-row[data-item-key]').forEach(row => {
+      row.addEventListener('click', () => {
+        const key = row.dataset.itemKey;
+        if (assemblyCheckedItems.has(key)) {
+          assemblyCheckedItems.delete(key);
+          row.classList.remove('checked');
+          if (step === 3) {
+            const icon = row.querySelector('span:first-child');
+            if (icon) icon.textContent = '⏳';
+            const qty = row.querySelector('.assembly-item-qty');
+            if (qty) qty.textContent = 'Froth 30s';
+          }
+        } else {
+          assemblyCheckedItems.add(key);
+          row.classList.add('checked');
+          if (step === 3) {
+            const icon = row.querySelector('span:first-child');
+            if (icon) icon.textContent = '✅';
+            const qty = row.querySelector('.assembly-item-qty');
+            if (qty) qty.textContent = 'Frothed ✓';
+          }
+        }
+      });
+    });
+  }
+
+  // ==========================================================================
+  // Interactive Spin Log Engine (Path A Item 4)
+  // ==========================================================================
+  let spinLogActivePint = null;
+  let spinLogSelectedCycle = 'Lite Ice Cream';
+  let spinLogSelectedRespins = '0';
+  let spinLogSelectedRating = 5;
+
+  function openSpinLogModal(pintId) {
+    const pint = freezerPintsState.find(p => p.id === pintId);
+    if (!pint) {
+      showToast('Pint container not found in freezer.');
+      return;
+    }
+
+    spinLogActivePint = pint;
+    spinLogSelectedCycle = 'Lite Ice Cream';
+    spinLogSelectedRespins = '0';
+    spinLogSelectedRating = 5;
+
+    const rec = allRecipes.find(r => r.id === pint.recipeId);
+    if (rec) {
+      const cat = (rec.category || '').toLowerCase();
+      if (cat.includes('sorbet') || cat.includes('fruit')) spinLogSelectedCycle = 'Sorbet';
+      else if (cat.includes('gelato')) spinLogSelectedCycle = 'Gelato';
+      else if (cat.includes('milkshake')) spinLogSelectedCycle = 'Milkshake';
+    }
+
+    // Render Summary Card
+    const summaryCard = document.getElementById('spinLogSummaryCard');
+    if (summaryCard) {
+      const ageHours = Math.round((Date.now() - pint.frozenAt) / (1000 * 60 * 60));
+      summaryCard.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <span style="font-size: 2rem;">🍨</span>
+          <div>
+            <h3 style="margin: 0; font-size: 1.05rem; color: #f8fafc;">${escapeHtml(pint.recipeName)}</h3>
+            <span style="font-size: 0.78rem; color: #cbd5e1;">${escapeHtml(pint.sizeLabel || '16 oz Standard')} • Frozen ~${ageHours}h</span>
+          </div>
+        </div>
+        <span style="font-size: 0.74rem; font-weight: 700; padding: 4px 10px; border-radius: 8px; background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4);">Ready to Spin!</span>
+      `;
+    }
+
+    // Update cycle pill active state
+    document.querySelectorAll('#spinCycleButtons .cycle-pill').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.cycle === spinLogSelectedCycle);
+    });
+
+    // Update respin pill active state
+    document.querySelectorAll('#spinRespinOptions .respin-pill').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.respins === spinLogSelectedRespins);
+    });
+
+    // Update star ratings
+    updateSpinStarRatingUI(spinLogSelectedRating);
+
+    // Reset mix-ins input
+    const mixInsInput = document.getElementById('spinMixInsInput');
+    if (mixInsInput) mixInsInput.value = '';
+
+    // Update streak banner
+    const currentWeek = getISOWeekString();
+    const prevWeek = getPreviousISOWeekString();
+    let projectedStreak = 1;
+    if (!habitStreakState.lastSpinWeek) {
+      projectedStreak = 1;
+    } else if (habitStreakState.lastSpinWeek === currentWeek) {
+      projectedStreak = habitStreakState.currentStreak || 1;
+    } else if (habitStreakState.lastSpinWeek === prevWeek) {
+      projectedStreak = (habitStreakState.currentStreak || 0) + 1;
+    } else {
+      projectedStreak = 1;
+    }
+
+    const streakTitle = document.getElementById('spinStreakTitle');
+    const streakSub = document.getElementById('spinStreakSub');
+    if (streakTitle) {
+      streakTitle.textContent = `Week ${projectedStreak} Habit Streak Active!`;
+    }
+    if (streakSub) {
+      streakSub.textContent = `Logging this spin locks in week ${projectedStreak} of your Ninja Creami habit. Total spins: ${(habitStreakState.totalSpins || 0) + 1}`;
+    }
+
+    const modal = document.getElementById('spinLogModalOverlay');
+    if (!modal) return;
+    modal.classList.add('active');
+    modal.setAttribute('aria-hidden', 'false');
+    lockBackgroundScroll();
+  }
+
+  function closeSpinLogModal() {
+    const modal = document.getElementById('spinLogModalOverlay');
+    if (!modal) return;
+    modal.classList.remove('active');
+    modal.setAttribute('aria-hidden', 'true');
+    unlockBackgroundScroll();
+    spinLogActivePint = null;
+  }
+
+  function updateSpinStarRatingUI(rating) {
+    document.querySelectorAll('#spinStarRating .star-btn').forEach(btn => {
+      const star = parseInt(btn.dataset.star, 10);
+      btn.classList.toggle('active', star <= rating);
+    });
+  }
+
+  function confirmSpinLog() {
+    if (!spinLogActivePint) return;
+    const pint = spinLogActivePint;
+    const mixinsVal = (document.getElementById('spinMixInsInput')?.value || '').trim();
+
+    recordHabitStreakSpin({
+      recipeId: pint.recipeId,
+      recipeName: pint.recipeName,
+      cycle: spinLogSelectedCycle,
+      respins: spinLogSelectedRespins,
+      mixins: mixinsVal,
+      rating: spinLogSelectedRating
+    });
+
+    const pintId = pint.id;
+    closeSpinLogModal();
+
+    spinAndEnjoyFreezerPint(pintId, true);
+
+    showToast(`🍨 Spun & Enjoyed "${pint.recipeName}"! 🔥 Week ${habitStreakState.currentStreak} Streak Logged!`);
+  }
+
+  function shareStoryCardFromSpinLog() {
+    if (!spinLogActivePint) return;
+    const rId = spinLogActivePint.recipeId;
+    closeSpinLogModal();
+    if (rId) {
+      openStoryCardModal(rId);
+    } else {
+      showToast('Custom pint without recipe link. Select any recipe to create a story card!');
+    }
   }
 
   // ==========================================================================
@@ -8428,8 +9024,7 @@
       modalQuickSpinBtn.addEventListener('click', () => {
         const pId = modalQuickSpinBtn.dataset.pintId;
         if (pId) {
-          spinAndEnjoyFreezerPint(pId);
-          renderRecipeModalContent(recipe);
+          openSpinLogModal(pId);
         }
       });
     }
@@ -13122,6 +13717,8 @@
         closeFreezerModal();
         closeSlotFillModal();
         closeBatchPrepModal();
+        closeBatchAssemblyModal();
+        closeSpinLogModal();
         closeCustomRecipeModal();
         closeGoogleAuthModal();
         closeClaimAccessModal();
@@ -13507,6 +14104,114 @@
     const btnBatchFillSlots = document.getElementById('btnBatchFillFreezerSlots');
     if (btnBatchFillSlots) {
       btnBatchFillFreezerSlots.addEventListener('click', batchFillFreezerSlots);
+    }
+
+    // Kitchen Assembly Mode (Sunday Batch Prep Step-by-Step - Path A Item 3)
+    const btnStartAssembly = document.getElementById('btnStartBatchAssembly');
+    if (btnStartAssembly) {
+      btnStartAssembly.addEventListener('click', openBatchAssemblyModal);
+    }
+
+    const btnBatchDockAssembly = document.getElementById('btnBatchDockAssembly');
+    if (btnBatchDockAssembly) {
+      btnBatchDockAssembly.addEventListener('click', openBatchAssemblyModal);
+    }
+
+    const btnAssemblyClose = document.getElementById('batchAssemblyModalCloseBtn');
+    if (btnAssemblyClose) {
+      btnAssemblyClose.addEventListener('click', closeBatchAssemblyModal);
+    }
+
+    const assemblyOverlay = document.getElementById('batchAssemblyModalOverlay');
+    if (assemblyOverlay) {
+      assemblyOverlay.addEventListener('click', (e) => {
+        if (e.target === assemblyOverlay) closeBatchAssemblyModal();
+      });
+    }
+
+    const btnAssemblyPrev = document.getElementById('btnAssemblyPrevStep');
+    if (btnAssemblyPrev) {
+      btnAssemblyPrev.addEventListener('click', () => {
+        goToAssemblyStep(assemblyCurrentStep - 1);
+      });
+    }
+
+    const btnAssemblyNext = document.getElementById('btnAssemblyNextStep');
+    if (btnAssemblyNext) {
+      btnAssemblyNext.addEventListener('click', () => {
+        if (assemblyCurrentStep < 4) {
+          goToAssemblyStep(assemblyCurrentStep + 1);
+        } else {
+          batchFillFreezerSlots();
+          closeBatchAssemblyModal();
+        }
+      });
+    }
+
+    const assemblyStepBar = document.getElementById('assemblyStepBar');
+    if (assemblyStepBar) {
+      assemblyStepBar.querySelectorAll('.assembly-step-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const step = parseInt(btn.dataset.step, 10);
+          if (step) goToAssemblyStep(step);
+        });
+      });
+    }
+
+    // Interactive Spin Log Modal & Habit Streaks (Path A Item 4)
+    const spinLogCloseBtn = document.getElementById('spinLogModalCloseBtn');
+    if (spinLogCloseBtn) {
+      spinLogCloseBtn.addEventListener('click', closeSpinLogModal);
+    }
+
+    const spinLogOverlay = document.getElementById('spinLogModalOverlay');
+    if (spinLogOverlay) {
+      spinLogOverlay.addEventListener('click', (e) => {
+        if (e.target === spinLogOverlay) closeSpinLogModal();
+      });
+    }
+
+    const spinCycleButtons = document.getElementById('spinCycleButtons');
+    if (spinCycleButtons) {
+      spinCycleButtons.querySelectorAll('.cycle-pill').forEach(btn => {
+        btn.addEventListener('click', () => {
+          spinCycleButtons.querySelectorAll('.cycle-pill').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          spinLogSelectedCycle = btn.dataset.cycle || 'Lite Ice Cream';
+        });
+      });
+    }
+
+    const spinRespinOptions = document.getElementById('spinRespinOptions');
+    if (spinRespinOptions) {
+      spinRespinOptions.querySelectorAll('.respin-pill').forEach(btn => {
+        btn.addEventListener('click', () => {
+          spinRespinOptions.querySelectorAll('.respin-pill').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          spinLogSelectedRespins = btn.dataset.respins || '0';
+        });
+      });
+    }
+
+    const spinStarRating = document.getElementById('spinStarRating');
+    if (spinStarRating) {
+      spinStarRating.querySelectorAll('.star-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const rating = parseInt(btn.dataset.star, 10) || 5;
+          spinLogSelectedRating = rating;
+          updateSpinStarRatingUI(rating);
+        });
+      });
+    }
+
+    const btnConfirmLogSpin = document.getElementById('btnConfirmLogSpin');
+    if (btnConfirmLogSpin) {
+      btnConfirmLogSpin.addEventListener('click', confirmSpinLog);
+    }
+
+    const btnShareStoryFromLog = document.getElementById('btnShareStoryCardFromLog');
+    if (btnShareStoryFromLog) {
+      btnShareStoryFromLog.addEventListener('click', shareStoryCardFromSpinLog);
     }
 
     // Initialize PWA Offline Engine & Service Worker
