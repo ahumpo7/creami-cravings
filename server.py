@@ -218,6 +218,97 @@ https://creamicravings.com
         print(f"[AUTH EMAIL ERROR] Could not send reset email to {to_email}: {e}")
         return False, str(e)
 
+def send_magic_link_email(to_email, to_name, token):
+    smtp = get_smtp_config()
+    magic_link = f"https://creamicravings.com/?magic_token={token}&email={urllib.parse.quote(to_email)}"
+
+    # Always log to server journal for audit / zero-delay recovery
+    print(f"[AUTH MAGIC LINK] To: {to_email} | Link: {magic_link}")
+
+    if not smtp:
+        return False, "SMTP not configured"
+
+    try:
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = "✨ Sign in to Creami Cravings with 1 Click"
+        msg['From'] = smtp['sender']
+        msg['To'] = to_email
+
+        text_content = f"""Hi {to_name or 'there'},
+
+Click the link below to instantly sign in to your Creami Cravings account:
+{magic_link}
+
+This link will expire in 20 minutes and can only be used once.
+
+If you did not request this link, you can safely ignore this email.
+
+Happy spinning,
+The Creami Cravings Team
+https://creamicravings.com
+"""
+
+        html_content = f"""<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0f172a; color: #f8fafc; margin: 0; padding: 24px; }}
+    .container {{ max-width: 540px; margin: 0 auto; background: #1e293b; border: 1px solid #334155; border-radius: 16px; overflow: hidden; }}
+    .header {{ background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%); padding: 28px 24px; text-align: center; }}
+    .header h1 {{ margin: 0; font-size: 24px; color: #ffffff; }}
+    .content {{ padding: 32px 28px; line-height: 1.6; color: #cbd5e1; font-size: 15px; text-align: center; }}
+    .btn {{ display: inline-block; background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%); color: #ffffff !important; text-decoration: none; padding: 15px 32px; border-radius: 999px; font-weight: 700; font-size: 16px; margin: 24px 0; box-shadow: 0 4px 14px rgba(236, 72, 153, 0.4); }}
+    .footer {{ padding: 20px 28px; border-top: 1px solid #334155; font-size: 12px; color: #64748b; text-align: center; }}
+    .fallback-url {{ word-break: break-all; font-size: 12px; color: #94a3b8; margin-top: 16px; }}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🍨 Creami Cravings</h1>
+    </div>
+    <div class="content">
+      <h2 style="color: #ffffff; margin-top: 0;">✨ 1-Click Sign-In Link</h2>
+      <p>Hi <strong>{to_name or 'there'}</strong>,</p>
+      <p>Tap the button below to instantly sign in to your Creami Cravings account on this device:</p>
+      
+      <div>
+        <a href="{magic_link}" class="btn">✨ Sign In to Creami Cravings ➔</a>
+      </div>
+
+      <p style="font-size: 13px; color: #94a3b8;">This sign-in link is secure, valid for <strong>20 minutes</strong>, and can only be used once.</p>
+      <div class="fallback-url">
+        Or copy and paste this URL into your browser:<br>
+        <a href="{magic_link}" style="color: #c084fc;">{magic_link}</a>
+      </div>
+    </div>
+    <div class="footer">
+      <p>Creami Cravings &bull; The Ultimate Ninja Creami Companion<br>
+      <a href="https://creamicravings.com" style="color: #94a3b8; text-decoration: underline;">creamicravings.com</a></p>
+    </div>
+  </div>
+</body>
+</html>
+"""
+
+        msg.attach(MIMEText(text_content, 'plain'))
+        msg.attach(MIMEText(html_content, 'html'))
+
+        if smtp['port'] == 465:
+            server = smtplib.SMTP_SSL(smtp['host'], smtp['port'], timeout=10)
+        else:
+            server = smtplib.SMTP(smtp['host'], smtp['port'], timeout=10)
+            if smtp['use_tls']:
+                server.starttls()
+        server.login(smtp['user'], smtp['password'])
+        server.sendmail(smtp['sender'], [to_email], msg.as_string())
+        server.quit()
+        return True, "Magic link email sent successfully"
+    except Exception as e:
+        print(f"[AUTH MAGIC LINK ERROR] Could not send email to {to_email}: {e}")
+        return False, str(e)
+
 def format_user_payload(user):
     is_admin = user.get('email', '').lower() in ADMIN_EMAILS or user.get('role') == 'admin'
     fallback_subs = list(ALL_SUBSCRIPTIONS) if is_admin else list(DEFAULT_SUBSCRIPTIONS)
@@ -2056,6 +2147,136 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 'token': new_token,
                 'user': format_user_payload(target_user),
                 'message': 'Password successfully reset! You are now signed in.'
+            })
+            return
+
+        # 5d. Passwordless Magic Link Sign-In: Request 1-Click Link
+        elif self.path == '/api/auth/magic-link/request':
+            email = data.get('email', '').strip().lower()
+            if not email or '@' not in email or '.' not in email.split('@')[-1]:
+                self._send_json({'error': 'Please provide a valid email address.'}, 400)
+                return
+
+            target_user = None
+            for u in users_db.values():
+                if u.get('email', '').lower() == email:
+                    target_user = u
+                    break
+
+            now_iso = datetime.utcnow().isoformat()
+            token = secrets.token_urlsafe(32)
+            expires_at = (datetime.utcnow() + timedelta(minutes=20)).isoformat()
+
+            if not target_user:
+                # Seamless on-demand account creation
+                is_admin_email = email in ADMIN_EMAILS
+                user_id = 'user_em_' + uuid.uuid4().hex[:8]
+                target_user = {
+                    'id': user_id,
+                    'username': email.split('@')[0],
+                    'name': email.split('@')[0],
+                    'email': email,
+                    'role': 'admin' if is_admin_email else 'user',
+                    'pantry': list(DEFAULT_STAPLES),
+                    'favorites': [],
+                    'madeCounts': {},
+                    'ratings': {},
+                    'customRecipes': [],
+                    'shoppingList': [],
+                    'freezerPints': [],
+                    'subscriptions': list(ALL_SUBSCRIPTIONS) if is_admin_email else list(DEFAULT_SUBSCRIPTIONS),
+                    'created_at': now_iso,
+                    'last_active': now_iso,
+                    'token': 'token_temp_' + uuid.uuid4().hex[:12]
+                }
+                users_db[email] = target_user
+
+            target_user['magicLink'] = {
+                'token': token,
+                'expires_at': expires_at,
+                'requested_at': now_iso
+            }
+            save_json_file(USERS_DB_FILE, users_db)
+
+            sent, reason = send_magic_link_email(email, target_user.get('name') or target_user.get('username'), token)
+
+            resp_data = {
+                'status': 'ok',
+                'success': True,
+                'message': f'Magic sign-in link sent to {email}! Check your inbox and click the link to sign in.',
+                'email': email,
+                'emailSent': sent
+            }
+            if not get_smtp_config():
+                resp_data['devToken'] = token
+                resp_data['message'] = f'SMTP not configured. Dev magic token: {token}'
+
+            self._send_json(resp_data)
+            return
+
+        # 5e. Passwordless Magic Link Sign-In: Verify Token & Generate Session
+        elif self.path == '/api/auth/magic-link/verify':
+            token = str(data.get('token', '')).strip()
+            email = str(data.get('email', '')).strip().lower()
+
+            if not token:
+                self._send_json({'error': 'Magic sign-in token is required.'}, 400)
+                return
+
+            target_user = None
+            if email:
+                for u in users_db.values():
+                    if u.get('email', '').lower() == email:
+                        target_user = u
+                        break
+
+            if not target_user:
+                for u in users_db.values():
+                    ml = u.get('magicLink')
+                    if ml and ml.get('token') == token:
+                        target_user = u
+                        break
+
+            if not target_user:
+                self._send_json({'error': 'Invalid or expired magic link. Please request a new one.'}, 400)
+                return
+
+            magic_info = target_user.get('magicLink')
+            if not magic_info:
+                self._send_json({'error': 'No active magic link found. Please request a new one.'}, 400)
+                return
+
+            expires_at_str = magic_info.get('expires_at')
+            if expires_at_str:
+                try:
+                    exp_dt = datetime.fromisoformat(expires_at_str)
+                    if datetime.utcnow() > exp_dt:
+                        target_user.pop('magicLink', None)
+                        save_json_file(USERS_DB_FILE, users_db)
+                        self._send_json({'error': 'Magic link has expired (valid for 20 minutes). Please request a fresh link.'}, 400)
+                        return
+                except Exception:
+                    pass
+
+            expected_token = str(magic_info.get('token', '')).strip()
+            if not (expected_token and hmac.compare_digest(token, expected_token)):
+                self._send_json({'error': 'Invalid magic sign-in token. Please request a new one.'}, 400)
+                return
+
+            # Consume the single-use magic link
+            target_user.pop('magicLink', None)
+
+            new_token = 'token_em_' + str(uuid.uuid4())
+            target_user['token'] = new_token
+            target_user['last_active'] = datetime.utcnow().isoformat()
+            save_json_file(USERS_DB_FILE, users_db)
+
+            self._send_json({
+                'status': 'ok',
+                'success': True,
+                'token': new_token,
+                'user': format_user_payload(target_user),
+                'message': f"Welcome back, {target_user.get('name') or target_user.get('username')}! You are now signed in."
             })
             return
 

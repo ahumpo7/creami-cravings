@@ -1386,9 +1386,10 @@
         <span>OR CONTINUE WITH EMAIL</span>
       </div>
 
-      <!-- Segmented Mode Tabs: Sign In vs Create Account -->
+      <!-- Segmented Mode Tabs: Sign In vs Create Account vs Magic Link -->
       <div class="auth-mode-tabs" role="tablist">
         <button type="button" class="auth-tab-btn active" id="tabAuthSignIn" role="tab" aria-selected="true">Sign In</button>
+        <button type="button" class="auth-tab-btn" id="tabAuthMagic" role="tab" aria-selected="false">✨ Magic Link</button>
         <button type="button" class="auth-tab-btn" id="tabAuthRegister" role="tab" aria-selected="false">Create Account</button>
       </div>
 
@@ -1412,7 +1413,32 @@
           <span>Sign In ➔</span>
         </button>
         <p class="auth-switch-prompt">
+          Prefer passwordless? <button type="button" class="auth-switch-link" id="linkSwitchToMagic">✨ Email me a Magic Link</button>
+        </p>
+        <p class="auth-switch-prompt" style="margin-top: 6px;">
           Don't have an account? <button type="button" class="auth-switch-link" id="linkSwitchToRegister">Create one now</button>
+        </p>
+      </form>
+
+      <!-- 1b. Passwordless Magic Link Form -->
+      <form id="magicAuthForm" class="quick-auth-form" style="display: none;">
+        <p class="auth-step-desc">✨ No password needed! Enter your email and we'll send an instant 1-click sign-in link.</p>
+        <div class="form-group">
+          <label for="authMagicEmail">Email Address</label>
+          <input type="email" id="authMagicEmail" required placeholder="e.g. name@example.com" autocomplete="email">
+        </div>
+        <button type="submit" class="btn-primary btn-block" id="btnSendMagicLink">
+          <span>✨ Send Magic Sign-In Link ➔</span>
+        </button>
+        <div id="magicSuccessNotice" class="magic-success-box" style="display: none;">
+          <span class="magic-success-icon">📨</span>
+          <div>
+            <strong>Magic link sent!</strong>
+            <p>Check your email inbox and click the sign-in link to access your account instantly.</p>
+          </div>
+        </div>
+        <p class="auth-switch-prompt">
+          Prefer your password? <button type="button" class="auth-switch-link" id="linkMagicToPassword">Sign in with password</button>
         </p>
       </form>
 
@@ -2420,6 +2446,46 @@
         <div style="margin-top: 24px;">
           <button type="button" class="btn-primary" id="btnCloseClaimSuccessModal">Got It</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📸 Story & Social Card Generator Modal -->
+  <div class="modal-overlay" id="storyCardModalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-content story-card-modal-content">
+      <div class="modal-handle-bar" aria-hidden="true"></div>
+      <button class="modal-close" id="storyCardModalCloseBtn" aria-label="Close modal">&times;</button>
+      
+      <div class="modal-header story-card-modal-header">
+        <div class="auth-icon-circle" style="background: rgba(236, 72, 153, 0.15); border-color: rgba(236, 72, 153, 0.4);">
+          <span style="font-size: 1.8rem;">📸</span>
+        </div>
+        <h2 class="modal-title">Share Pint Card</h2>
+        <p class="modal-subtitle">Generate a high-res graphic formatted for Instagram Stories, TikTok, or messaging.</p>
+      </div>
+
+      <!-- Aspect Ratio Switcher -->
+      <div class="story-ratio-switcher" role="tablist">
+        <button type="button" class="ratio-btn active" id="btnRatioStory" data-ratio="story">📱 9:16 Story</button>
+        <button type="button" class="ratio-btn" id="btnRatioSquare" data-ratio="square">🟦 1:1 Square</button>
+      </div>
+
+      <!-- Live Canvas Preview Container -->
+      <div class="story-canvas-preview-wrapper" id="storyCanvasPreviewWrapper">
+        <div class="story-loading-indicator" id="storyLoadingIndicator">
+          <span>🎨 Rendering Pint Card...</span>
+        </div>
+        <img id="storyCardPreviewImg" class="story-card-preview-img" alt="Recipe Story Card Preview">
+      </div>
+
+      <!-- Story Card Action Row -->
+      <div class="story-actions-row">
+        <button type="button" class="btn-primary" id="btnShareStoryNative">
+          <span>📲 Share Image</span>
+        </button>
+        <button type="button" class="btn-secondary" id="btnDownloadStoryImage">
+          <span>⬇️ Download PNG</span>
+        </button>
       </div>
     </div>
   </div>

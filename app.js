@@ -596,12 +596,19 @@
     initCookieConsent();
     initFeedbackSystem();
 
-    // Check for password reset direct link from email (?reset_token=...&email=...)
+    // Check for password reset or magic link direct link from email
     try {
       const urlParams = new URLSearchParams(window.location.search);
       const resetToken = urlParams.get('reset_token');
       const resetEmail = urlParams.get('email');
-      if (resetToken && resetEmail) {
+      const magicToken = urlParams.get('magic_token');
+      const magicEmail = urlParams.get('email');
+
+      if (magicToken) {
+        setTimeout(() => {
+          handleVerifyMagicLink(magicToken, magicEmail);
+        }, 300);
+      } else if (resetToken && resetEmail) {
         setTimeout(() => {
           openPasswordResetDirect(resetEmail, resetToken);
         }, 400);
@@ -1326,12 +1333,38 @@
   function switchAuthTab(mode) {
     const tabSignIn = document.getElementById('tabAuthSignIn');
     const tabRegister = document.getElementById('tabAuthRegister');
+    const tabMagic = document.getElementById('tabAuthMagic');
     const formSignIn = document.getElementById('passwordAuthForm');
     const formRegister = document.getElementById('registerAuthForm');
     const formReset = document.getElementById('resetAuthForm');
+    const formMagic = document.getElementById('magicAuthForm');
     clearAuthError();
 
-    if (mode === 'register') {
+    const magicNotice = document.getElementById('magicSuccessNotice');
+    if (magicNotice) magicNotice.style.display = 'none';
+
+    if (mode === 'magic') {
+      if (tabSignIn) {
+        tabSignIn.classList.remove('active');
+        tabSignIn.setAttribute('aria-selected', 'false');
+      }
+      if (tabRegister) {
+        tabRegister.classList.remove('active');
+        tabRegister.setAttribute('aria-selected', 'false');
+      }
+      if (tabMagic) {
+        tabMagic.classList.add('active');
+        tabMagic.setAttribute('aria-selected', 'true');
+      }
+      if (formSignIn) formSignIn.style.display = 'none';
+      if (formRegister) formRegister.style.display = 'none';
+      if (formReset) formReset.style.display = 'none';
+      if (formMagic) {
+        formMagic.style.display = 'block';
+        const emailInput = document.getElementById('authMagicEmail');
+        if (emailInput) setTimeout(() => emailInput.focus(), 60);
+      }
+    } else if (mode === 'register') {
       if (tabSignIn) {
         tabSignIn.classList.remove('active');
         tabSignIn.setAttribute('aria-selected', 'false');
@@ -1340,8 +1373,13 @@
         tabRegister.classList.add('active');
         tabRegister.setAttribute('aria-selected', 'true');
       }
+      if (tabMagic) {
+        tabMagic.classList.remove('active');
+        tabMagic.setAttribute('aria-selected', 'false');
+      }
       if (formSignIn) formSignIn.style.display = 'none';
       if (formReset) formReset.style.display = 'none';
+      if (formMagic) formMagic.style.display = 'none';
       if (formRegister) {
         formRegister.style.display = 'block';
         const emailInput = document.getElementById('authRegisterEmail');
@@ -1356,8 +1394,13 @@
         tabRegister.classList.remove('active');
         tabRegister.setAttribute('aria-selected', 'false');
       }
+      if (tabMagic) {
+        tabMagic.classList.remove('active');
+        tabMagic.setAttribute('aria-selected', 'false');
+      }
       if (formSignIn) formSignIn.style.display = 'none';
       if (formRegister) formRegister.style.display = 'none';
+      if (formMagic) formMagic.style.display = 'none';
       if (formReset) {
         formReset.style.display = 'block';
         const stepReq = document.getElementById('resetStepRequest');
@@ -1381,13 +1424,92 @@
         tabRegister.classList.remove('active');
         tabRegister.setAttribute('aria-selected', 'false');
       }
+      if (tabMagic) {
+        tabMagic.classList.remove('active');
+        tabMagic.setAttribute('aria-selected', 'false');
+      }
       if (formRegister) formRegister.style.display = 'none';
       if (formReset) formReset.style.display = 'none';
+      if (formMagic) formMagic.style.display = 'none';
       if (formSignIn) {
         formSignIn.style.display = 'block';
         const userInput = document.getElementById('authLoginUsername');
         if (userInput) setTimeout(() => userInput.focus(), 60);
       }
+    }
+  }
+
+  async function handleRequestMagicLink(email) {
+    if (!email || !email.includes('@')) {
+      showAuthError('Please enter a valid email address.');
+      return;
+    }
+    clearAuthError();
+    const btn = document.getElementById('btnSendMagicLink');
+    const notice = document.getElementById('magicSuccessNotice');
+    if (notice) notice.style.display = 'none';
+
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<span>⏳ Sending Magic Link...</span>';
+    }
+
+    try {
+      const res = await fetch('/api/auth/magic-link/request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        if (notice) {
+          notice.style.display = 'flex';
+          const p = notice.querySelector('p');
+          if (p) p.textContent = `Check your inbox (${email}) and tap the 1-click sign-in link to access your account instantly!`;
+        }
+        showToast(`✨ Magic link sent to ${email}!`);
+      } else {
+        showAuthError(data.error || 'Failed to send magic link. Please try again.');
+      }
+    } catch (err) {
+      console.error('Magic link request error:', err);
+      showAuthError('Network error requesting magic link. Please try again.');
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<span>✨ Send Magic Sign-In Link ➔</span>';
+      }
+    }
+  }
+
+  async function handleVerifyMagicLink(token, email) {
+    showToast('✨ Verifying your magic sign-in link...');
+    try {
+      const res = await fetch('/api/auth/magic-link/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, email: email || '' })
+      });
+      const data = await res.json();
+      if (res.ok && data.success && data.token && data.user) {
+        localStorage.setItem(AUTH_TOKEN_KEY, data.token);
+        localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(data.user));
+        currentUser = data.user;
+        updateAuthUI();
+        closeGoogleAuthModal();
+        playDingSound();
+        showToast(`🎉 ${data.message || 'Signed in via Magic Link! Welcome.'}`, 5000);
+        try {
+          const cleanUrl = window.location.pathname;
+          window.history.replaceState({}, '', cleanUrl);
+        } catch (e) {}
+        fetchLatestUserData();
+      } else {
+        showToast(`⚠️ ${data.error || 'Magic link verification failed.'}`, 6000);
+      }
+    } catch (err) {
+      console.error('Magic link verify error:', err);
+      showToast('⚠️ Network error verifying magic sign-in link.');
     }
   }
 
@@ -2473,7 +2595,7 @@
       });
     }
 
-    // Mode Tabs: Sign In vs Create Account
+    // Mode Tabs: Sign In vs Create Account vs Magic Link
     const tabSignIn = document.getElementById('tabAuthSignIn');
     if (tabSignIn) {
       tabSignIn.addEventListener('click', () => switchAuthTab('signin'));
@@ -2481,6 +2603,10 @@
     const tabRegister = document.getElementById('tabAuthRegister');
     if (tabRegister) {
       tabRegister.addEventListener('click', () => switchAuthTab('register'));
+    }
+    const tabMagic = document.getElementById('tabAuthMagic');
+    if (tabMagic) {
+      tabMagic.addEventListener('click', () => switchAuthTab('magic'));
     }
 
     // Mode Switch Links inside form footers
@@ -2491,6 +2617,29 @@
     const linkSwitchSignIn = document.getElementById('linkSwitchToSignIn');
     if (linkSwitchSignIn) {
       linkSwitchSignIn.addEventListener('click', () => switchAuthTab('signin'));
+    }
+    const linkSwitchMagic = document.getElementById('linkSwitchToMagic');
+    if (linkSwitchMagic) {
+      linkSwitchMagic.addEventListener('click', () => switchAuthTab('magic'));
+    }
+    const linkMagicPassword = document.getElementById('linkMagicToPassword');
+    if (linkMagicPassword) {
+      linkMagicPassword.addEventListener('click', () => switchAuthTab('signin'));
+    }
+
+    // Passwordless Magic Link Form
+    const magicForm = document.getElementById('magicAuthForm');
+    if (magicForm) {
+      magicForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const emailInput = document.getElementById('authMagicEmail');
+        const emailVal = emailInput ? emailInput.value.trim() : '';
+        if (emailVal) {
+          handleRequestMagicLink(emailVal);
+        } else {
+          showAuthError('Please enter your email address.');
+        }
+      });
     }
 
     // Password Sign-In Form
@@ -4870,6 +5019,330 @@
     });
   }
 
+  // ==========================================================================
+  // 📸 Story & Social Card Generator Engine (Canvas-Based)
+  // ==========================================================================
+  let currentStoryRecipe = null;
+  let currentStoryRatio = 'story'; // 'story' (9:16) or 'square' (1:1)
+  let currentStoryBlob = null;
+
+  function openStoryCardModal(recipe) {
+    if (!recipe) return;
+    currentStoryRecipe = recipe;
+    currentStoryRatio = 'story';
+    currentStoryBlob = null;
+
+    const overlay = document.getElementById('storyCardModalOverlay');
+    if (!overlay) return;
+
+    // Reset switcher tabs
+    const btnStory = document.getElementById('btnRatioStory');
+    const btnSquare = document.getElementById('btnRatioSquare');
+    if (btnStory) btnStory.classList.add('active');
+    if (btnSquare) btnSquare.classList.remove('active');
+
+    overlay.classList.add('active');
+    overlay.setAttribute('aria-hidden', 'false');
+    lockBackgroundScroll();
+
+    renderStoryCardGraphic();
+  }
+
+  function closeStoryCardModal() {
+    const overlay = document.getElementById('storyCardModalOverlay');
+    if (overlay) {
+      overlay.classList.remove('active');
+      overlay.setAttribute('aria-hidden', 'true');
+      unlockBackgroundScroll();
+    }
+  }
+
+  function triggerStoryDownload() {
+    if (!currentStoryBlob || !currentStoryRecipe) {
+      showToast('Rendering card... please try again in a second.');
+      return;
+    }
+    const slug = (currentStoryRecipe.id || currentStoryRecipe.name || 'creami-recipe')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-');
+    const filename = `${slug}-${currentStoryRatio}-card.png`;
+
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(currentStoryBlob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    showToast(`⬇️ Downloaded ${filename}!`);
+  }
+
+  async function shareStoryCardNative() {
+    if (!currentStoryBlob || !currentStoryRecipe) {
+      showToast('Rendering card... please wait a moment.');
+      return;
+    }
+    const slug = (currentStoryRecipe.id || currentStoryRecipe.name || 'creami-recipe')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-');
+    const filename = `${slug}-${currentStoryRatio}-card.png`;
+    const file = new File([currentStoryBlob], filename, { type: 'image/png' });
+
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({
+          files: [file],
+          title: `${currentStoryRecipe.name} - Ninja Creami Recipe`,
+          text: `Check out this Ninja Creami recipe for ${currentStoryRecipe.name}! 🍨 via CreamiCravings.com`
+        });
+        showToast('Shared successfully!');
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.warn('Native share failed, downloading card instead:', err);
+          triggerStoryDownload();
+        }
+      }
+    } else {
+      triggerStoryDownload();
+    }
+  }
+
+  function renderStoryCardGraphic() {
+    if (!currentStoryRecipe) return;
+    const recipe = currentStoryRecipe;
+    const ratio = currentStoryRatio;
+    const previewImg = document.getElementById('storyCardPreviewImg');
+    const loadingInd = document.getElementById('storyLoadingIndicator');
+    if (loadingInd) loadingInd.style.display = 'block';
+
+    const width = 1080;
+    const height = ratio === 'story' ? 1920 : 1080;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+
+    // 1. Background Gradient
+    const bg = ctx.createLinearGradient(0, 0, width, height);
+    bg.addColorStop(0, '#090d16');
+    bg.addColorStop(0.5, '#0f172a');
+    bg.addColorStop(1, '#1e1b4b');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, width, height);
+
+    // 2. Cosmic Ambient Radial Glows
+    const radialPink = ctx.createRadialGradient(width * 0.85, height * 0.15, 0, width * 0.85, height * 0.15, width * 0.6);
+    radialPink.addColorStop(0, 'rgba(236, 72, 153, 0.35)');
+    radialPink.addColorStop(1, 'rgba(236, 72, 153, 0)');
+    ctx.fillStyle = radialPink;
+    ctx.fillRect(0, 0, width, height);
+
+    const radialPurple = ctx.createRadialGradient(width * 0.15, height * 0.85, 0, width * 0.15, height * 0.85, width * 0.65);
+    radialPurple.addColorStop(0, 'rgba(139, 92, 246, 0.35)');
+    radialPurple.addColorStop(1, 'rgba(139, 92, 246, 0)');
+    ctx.fillStyle = radialPurple;
+    ctx.fillRect(0, 0, width, height);
+
+    // 3. Subtle Outer Border
+    drawRoundedRect(ctx, 40, 40, width - 80, height - 80, 40, null, 'rgba(255, 255, 255, 0.12)', 3);
+
+    let curY = ratio === 'story' ? 150 : 105;
+
+    // 4. Header Brand Badge
+    ctx.textAlign = 'center';
+    ctx.font = '800 32px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillStyle = '#f472b6';
+    ctx.fillText('🍨 CREAMICRAVINGS.COM', width / 2, curY);
+
+    curY += 45;
+    ctx.font = '700 22px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillText('THE ULTIMATE NINJA CREAMI COMPANION', width / 2, curY);
+
+    curY += ratio === 'story' ? 70 : 55;
+
+    // 5. Category Tag Pill
+    const cat = (recipe.category || 'High Protein').toUpperCase();
+    ctx.font = '800 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    const tagText = `⭐ ${cat} • NINJA CREAMI`;
+    const tagWidth = ctx.measureText(tagText).width + 50;
+    drawRoundedRect(ctx, (width - tagWidth) / 2, curY - 32, tagWidth, 50, 25, 'rgba(236, 72, 153, 0.2)', 'rgba(236, 72, 153, 0.55)', 2);
+    ctx.fillStyle = '#f472b6';
+    ctx.fillText(tagText, width / 2, curY + 4);
+
+    curY += ratio === 'story' ? 95 : 75;
+
+    // 6. Recipe Title (Wrapped)
+    ctx.font = '900 64px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+    ctx.shadowBlur = 18;
+    ctx.shadowOffsetY = 4;
+    
+    const lines = wrapCanvasText(ctx, recipe.name, width - 180);
+    for (let i = 0; i < lines.length; i++) {
+      ctx.fillText(lines[i], width / 2, curY);
+      curY += 76;
+    }
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetY = 0;
+
+    curY += ratio === 'story' ? 30 : 15;
+
+    // 7. Macro 4-Grid Cards
+    const macros = recipe.macros || {};
+    const calVal = `${macros.calories || macros.cal || '240'}`.replace(/kcal|cal/i, '').trim();
+    const proVal = `${macros.protein || '30g'}`.trim();
+    const carbVal = `${macros.carbs || '15g'}`.trim();
+    const fatVal = `${macros.fat || '4g'}`.trim();
+
+    const cardW = 210;
+    const cardH = ratio === 'story' ? 140 : 115;
+    const gap = 20;
+    const startX = (width - (cardW * 4 + gap * 3)) / 2;
+
+    const macroItems = [
+      { label: 'CALORIES', val: calVal, unit: 'KCAL', color: '#f43f5e', icon: '🔥' },
+      { label: 'PROTEIN', val: proVal, unit: '', color: '#3b82f6', icon: '💪' },
+      { label: 'CARBS', val: carbVal, unit: '', color: '#10b981', icon: '🌾' },
+      { label: 'FAT', val: fatVal, unit: '', color: '#f59e0b', icon: '💧' }
+    ];
+
+    for (let i = 0; i < macroItems.length; i++) {
+      const it = macroItems[i];
+      const cx = startX + i * (cardW + gap);
+      drawRoundedRect(ctx, cx, curY, cardW, cardH, 20, 'rgba(30, 41, 59, 0.8)', 'rgba(255, 255, 255, 0.1)', 2);
+
+      // Icon + Label
+      ctx.font = '700 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillText(`${it.icon} ${it.label}`, cx + cardW / 2, curY + 34);
+
+      // Value
+      ctx.font = '900 36px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.fillStyle = it.color;
+      ctx.fillText(it.val, cx + cardW / 2, curY + (ratio === 'story' ? 88 : 78));
+
+      if (it.unit) {
+        ctx.font = '800 14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        ctx.fillStyle = '#94a3b8';
+        ctx.fillText(it.unit, cx + cardW / 2, curY + (ratio === 'story' ? 116 : 100));
+      }
+    }
+
+    curY += cardH + (ratio === 'story' ? 45 : 30);
+
+    // 8. Machine Settings Specs Row
+    const specW = (width - 180);
+    const specH = 68;
+    const specX = 90;
+    drawRoundedRect(ctx, specX, curY, specW, specH, 20, 'rgba(15, 23, 42, 0.8)', 'rgba(139, 92, 246, 0.35)', 2);
+
+    const spinText = `🌀 Spin: ${recipe.spinSetting || 'Lite Ice Cream'}`;
+    const freezeText = `❄️ Freeze: ${recipe.freezeTime || '16+ Hours'}`;
+    const sizeText = `🥣 Size: ${recipe.makes || '16 oz Pint'}`;
+
+    ctx.font = '700 22px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillStyle = '#e2e8f0';
+    ctx.fillText(`${spinText}    •    ${freezeText}    •    ${sizeText}`, width / 2, curY + 42);
+
+    curY += specH + (ratio === 'story' ? 45 : 30);
+
+    // 9. Key Ingredients Section (Vertical Story only)
+    if (ratio === 'story') {
+      const ings = (recipe.ingredients || []).slice(0, 5);
+      if (ings.length > 0) {
+        const boxW = width - 180;
+        const boxH = 430;
+        drawRoundedRect(ctx, 90, curY, boxW, boxH, 24, 'rgba(15, 23, 42, 0.85)', 'rgba(255, 255, 255, 0.1)', 2);
+
+        ctx.font = '800 22px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        ctx.fillStyle = '#c084fc';
+        ctx.fillText('🥄 KEY INGREDIENTS', width / 2, curY + 48);
+
+        let ingY = curY + 105;
+        ctx.textAlign = 'left';
+        for (let j = 0; j < ings.length; j++) {
+          const ing = ings[j];
+          const ingName = ing.name || ing.raw || '';
+          const ingQty = ing.quantity || ing.amount || '';
+          const displayText = ingQty ? `• ${ingName} (${ingQty})` : `• ${ingName}`;
+
+          ctx.font = '600 26px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+          ctx.fillStyle = '#f8fafc';
+          ctx.fillText(displayText.length > 44 ? displayText.slice(0, 42) + '...' : displayText, 130, ingY);
+          ingY += 62;
+        }
+        ctx.textAlign = 'center';
+        curY += boxH + 40;
+      }
+    }
+
+    // 10. Footer Callout & Link
+    const footerY = height - (ratio === 'story' ? 120 : 65);
+    ctx.font = '800 28px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText('Find 150+ Tested Ninja Creami Recipes 🍨', width / 2, footerY - 32);
+
+    ctx.font = '700 22px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillStyle = '#ec4899';
+    ctx.fillText('creamicravings.com', width / 2, footerY + 8);
+
+    // Export image to preview
+    canvas.toBlob((blob) => {
+      currentStoryBlob = blob;
+      if (previewImg && blob) {
+        previewImg.src = URL.createObjectURL(blob);
+      }
+      if (loadingInd) loadingInd.style.display = 'none';
+    }, 'image/png');
+  }
+
+  function drawRoundedRect(ctx, x, y, width, height, radius, fill, stroke, strokeWidth = 1) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
+    if (fill) {
+      ctx.fillStyle = fill;
+      ctx.fill();
+    }
+    if (stroke) {
+      ctx.lineWidth = strokeWidth;
+      ctx.strokeStyle = stroke;
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function wrapCanvasText(ctx, text, maxWidth) {
+    const words = (text || '').split(' ');
+    const lines = [];
+    let currentLine = words[0] || '';
+
+    for (let i = 1; i < words.length; i++) {
+      const word = words[i];
+      const width = ctx.measureText(currentLine + ' ' + word).width;
+      if (width < maxWidth) {
+        currentLine += ' ' + word;
+      } else {
+        lines.push(currentLine);
+        currentLine = word;
+      }
+    }
+    lines.push(currentLine);
+    return lines.slice(0, 3);
+  }
+
   // Craving / Mood Flavor Matching (Roadmap Item 12)
   function matchesCraving(recipe, cravingType) {
     const kws = CRAVING_KEYWORDS[cravingType];
@@ -6504,9 +6977,24 @@
           <button class="btn-modal-meta-share" id="modalMetaShareBtn" title="Share recipe link">
             <span>🔗 Share</span>
           </button>
+          <button class="btn-modal-meta-share btn-story-card-share" id="modalStoryCardBtn" title="Generate Instagram / TikTok Story Pint Card">
+            <span>🎨 Story Card</span>
+          </button>
         </div>
         <h2 class="modal-title">${recipe.name}</h2>
         <p class="modal-subtitle">${recipe.isSharedPortable ? `Custom formulation shared by ${escapeHtml(recipe.sharedAuthor || 'a fellow Creami creator')}.` : (isPersonal ? '🔒 Private personal recipe tied only to your account.' : 'Official Creami Cravings recipe for Ninja Creami ice cream maker.')}</p>
+        ${(!currentUser && !recipe.isSharedPortable) ? `
+          <div class="guest-pantry-conversion-card">
+            <div class="guest-pantry-icon">✨</div>
+            <div class="guest-pantry-content">
+              <div class="guest-pantry-title">Have these ingredients at home?</div>
+              <div class="guest-pantry-desc">Check off what's in your kitchen to discover every Ninja Creami recipe you can spin right now!</div>
+            </div>
+            <button class="btn-guest-pantry-cta" id="btnGuestOpenPantry">
+              🥫 Match My Pantry
+            </button>
+          </div>
+        ` : ''}
         ${(recipe.sources && recipe.sources.length > 1 && accessibleCategories.length > 1) ? `
           <div class="multi-book-banner">
             <span>📚</span>
@@ -7301,6 +7789,26 @@
     if (modalMetaShareBtn) {
       modalMetaShareBtn.addEventListener('click', () => {
         shareRecipe(recipe, modalMetaShareBtn);
+      });
+    }
+
+    const modalStoryCardBtn = recipeModalBody.querySelector('#modalStoryCardBtn');
+    if (modalStoryCardBtn) {
+      modalStoryCardBtn.addEventListener('click', () => {
+        openStoryCardModal(recipe);
+      });
+    }
+
+    const btnGuestOpenPantry = recipeModalBody.querySelector('#btnGuestOpenPantry');
+    if (btnGuestOpenPantry) {
+      btnGuestOpenPantry.addEventListener('click', () => {
+        closeModal();
+        setMobileView('pantry');
+        const pantryPanel = document.getElementById('pantryPanel');
+        if (pantryPanel) {
+          pantryPanel.scrollIntoView({ behavior: 'smooth' });
+        }
+        showToast('🥫 Select what ingredients you have to find instant matches!');
       });
     }
 
@@ -12894,6 +13402,49 @@
           }
         }
       });
+    }
+
+    // Story Card Generator Modal Events
+    const storyCardModalOverlay = document.getElementById('storyCardModalOverlay');
+    const storyCardModalCloseBtn = document.getElementById('storyCardModalCloseBtn');
+    const btnRatioStory = document.getElementById('btnRatioStory');
+    const btnRatioSquare = document.getElementById('btnRatioSquare');
+    const btnShareStoryNative = document.getElementById('btnShareStoryNative');
+    const btnDownloadStoryImage = document.getElementById('btnDownloadStoryImage');
+
+    if (storyCardModalCloseBtn) {
+      storyCardModalCloseBtn.addEventListener('click', closeStoryCardModal);
+    }
+    if (storyCardModalOverlay) {
+      storyCardModalOverlay.addEventListener('click', (e) => {
+        if (e.target === storyCardModalOverlay) {
+          closeStoryCardModal();
+        }
+      });
+    }
+    if (btnRatioStory) {
+      btnRatioStory.addEventListener('click', () => {
+        if (currentStoryRatio === 'story') return;
+        currentStoryRatio = 'story';
+        btnRatioStory.classList.add('active');
+        if (btnRatioSquare) btnRatioSquare.classList.remove('active');
+        renderStoryCardGraphic();
+      });
+    }
+    if (btnRatioSquare) {
+      btnRatioSquare.addEventListener('click', () => {
+        if (currentStoryRatio === 'square') return;
+        currentStoryRatio = 'square';
+        btnRatioSquare.classList.add('active');
+        if (btnRatioStory) btnRatioStory.classList.remove('active');
+        renderStoryCardGraphic();
+      });
+    }
+    if (btnShareStoryNative) {
+      btnShareStoryNative.addEventListener('click', shareStoryCardNative);
+    }
+    if (btnDownloadStoryImage) {
+      btnDownloadStoryImage.addEventListener('click', triggerStoryDownload);
     }
   }
 
