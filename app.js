@@ -1845,6 +1845,9 @@
       name: data.user.name,
       picture: data.user.picture,
       role: isAdmin ? 'admin' : (data.user.role || 'user'),
+      creatorId: data.user.creatorId || null,
+      creatorVips: Array.isArray(data.user.creatorVips) ? data.user.creatorVips : [],
+      freezerCapacity: Number(data.user.freezerCapacity) || 4,
       subscriptions: isAdmin 
         ? ['All-Access', 'Base Flavors', 'Community Legends', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free']
         : (data.user.subscriptions || ['Community Legends']),
@@ -2156,6 +2159,7 @@
         role: 'user',
         creatorId: null,
         creatorVips: [],
+        freezerCapacity: 4,
         subscriptions: ['Community Legends', 'Fan Favorites', 'TestContent Sampler']
       };
     } else if (currentMimicRole === 'user') {
@@ -2164,6 +2168,7 @@
         role: 'user',
         creatorId: null,
         creatorVips: [],
+        freezerCapacity: 4,
         subscriptions: ['Community Legends', 'Base Flavors']
       };
     } else {
@@ -2189,6 +2194,9 @@
     renderRecipes();
     calculateIngredientUsage();
     renderPantryList();
+    if (typeof renderFreezerShelfWidget === 'function') {
+      renderFreezerShelfWidget();
+    }
 
     if (showToastNotice) {
       const activeCreator = (typeof CREATORS_MASTER !== 'undefined') ? CREATORS_MASTER.find(c => c.id === currentMimicCreatorId) : null;
@@ -6518,11 +6526,233 @@
     renderFreezerShelfWidget();
   }
 
+  // --- Hybrid Freezer Shelf Capacity Expansion Engine (Model B + Model C) ---
+  function getUserMaxFreezerSlots(user = currentUser) {
+    if (!user) return 4;
+    const subs = Array.isArray(user.subscriptions) ? user.subscriptions : [];
+    const vips = Array.isArray(user.creatorVips) ? user.creatorVips : [];
+    const purchasedCap = Number(user.freezerCapacity) || 4;
+
+    // Tier 2 (12 Slots — Deep Freeze Pro):
+    // - Admin, Content Creator, or VIP Circle member
+    // - Holds any Creator All-Access Bundle ('All-Access', 'Eli All-Access', 'TestContent All-Access')
+    // - Purchased standalone 12-slot expansion
+    const hasAllAccessBundle = subs.some(s =>
+      ['All-Access', 'Eli All-Access', 'TestContent All-Access'].includes(s)
+    );
+    if (
+      user.role === 'admin' ||
+      user.role === 'creator' ||
+      user.role === 'vip' ||
+      vips.length > 0 ||
+      hasAllAccessBundle ||
+      purchasedCap >= 12
+    ) {
+      return 12;
+    }
+
+    // Tier 1 (8 Slots — Full Week Prep):
+    // - Holds any paid Creator Cookbook / Pack
+    // - Purchased standalone 8-slot expansion
+    const paidCreatorPacks = [
+      'Fan Favorites',
+      'No Protein',
+      'Keto',
+      'Lactose Free',
+      'TestContent Sampler',
+      'Volume Pints'
+    ];
+    const hasPaidCreatorPack = subs.some(s => paidCreatorPacks.includes(s));
+    if (hasPaidCreatorPack || purchasedCap >= 8) {
+      return 8;
+    }
+
+    return 4;
+  }
+
+  function getFreezerTierInfo(user = currentUser) {
+    const maxSlots = getUserMaxFreezerSlots(user);
+    const subs = (user && Array.isArray(user.subscriptions)) ? user.subscriptions : [];
+    const vips = (user && Array.isArray(user.creatorVips)) ? user.creatorVips : [];
+
+    if (maxSlots >= 12) {
+      let label = '👑 12-Slot Deep Freeze Pro';
+      if (user && (user.role === 'admin' || user.role === 'creator')) {
+        label = '👑 12-Slot Pro (Staff/Creator)';
+      } else if (user && (user.role === 'vip' || vips.length > 0)) {
+        label = '👑 12-Slot VIP Circle Perk';
+      } else if (subs.some(s => ['All-Access', 'Eli All-Access', 'TestContent All-Access'].includes(s))) {
+        label = '👑 12-Slot Bundle Bonus';
+      }
+      return {
+        maxSlots: 12,
+        label,
+        bg: 'rgba(245, 158, 11, 0.16)',
+        color: '#fbbf24',
+        border: 'rgba(245, 158, 11, 0.35)'
+      };
+    }
+
+    if (maxSlots >= 8) {
+      const paidCreatorPacks = ['Fan Favorites', 'No Protein', 'Keto', 'Lactose Free', 'TestContent Sampler', 'Volume Pints'];
+      const isPackBonus = subs.some(s => paidCreatorPacks.includes(s));
+      return {
+        maxSlots: 8,
+        label: isPackBonus ? '🎁 8-Slot Cookbook Bonus' : '🧊 8-Slot Full Week',
+        bg: 'rgba(56, 189, 248, 0.16)',
+        color: '#38bdf8',
+        border: 'rgba(56, 189, 248, 0.35)'
+      };
+    }
+
+    return {
+      maxSlots: 4,
+      label: '4 Free Slots',
+      bg: 'rgba(148, 163, 184, 0.14)',
+      color: '#cbd5e1',
+      border: 'rgba(148, 163, 184, 0.28)'
+    };
+  }
+
+  function openFreezerUpgradeModal(requestedSlots = 8, triggerReason = 'locked_tab') {
+    const overlay = document.getElementById('freezerUpgradeModalOverlay');
+    if (!overlay) return;
+
+    const tierInfo = getFreezerTierInfo(currentUser);
+    const maxSlots = tierInfo.maxSlots;
+    const reasonTextEl = document.getElementById('freezerUpgradeReasonText');
+    const currentBadgeEl = document.getElementById('freezerUpgradeCurrentBadge');
+    const btnBuy8 = document.getElementById('btnFreezerBuy8');
+    const btnBuy12 = document.getElementById('btnFreezerBuy12');
+
+    if (reasonTextEl) {
+      if (triggerReason === 'overflow') {
+        reasonTextEl.innerHTML = `🧊 Your <strong>${freezerSlotCapacity}-slot freezer shelf is 100% full!</strong> Expand your shelf capacity to log more chilling pints.`;
+      } else if (triggerReason === 'batch_overflow') {
+        reasonTextEl.innerHTML = `🗓️ Your <strong>Sunday Batch Queue</strong> has more pints than open freezer slots! Expand your shelf to chill your entire batch.`;
+      } else {
+        const tierName = requestedSlots <= 8 ? 'Full Week Prep (6 & 8 Slots)' : 'Deep Freeze Pro (12 Slots)';
+        reasonTextEl.innerHTML = `🔒 The <strong>${requestedSlots}-Container Shelf</strong> requires the <strong>${tierName}</strong> expansion or a Creator Cookbook perk.`;
+      }
+    }
+
+    if (currentBadgeEl) {
+      currentBadgeEl.textContent = `Current Max: ${maxSlots} Slots (${tierInfo.label})`;
+      currentBadgeEl.style.background = tierInfo.bg;
+      currentBadgeEl.style.color = tierInfo.color;
+      currentBadgeEl.style.borderColor = tierInfo.border;
+    }
+
+    if (btnBuy8) {
+      if (maxSlots >= 8) {
+        btnBuy8.textContent = '✓ 8 Slots Already Unlocked';
+        btnBuy8.disabled = true;
+        btnBuy8.style.opacity = '0.55';
+        btnBuy8.style.cursor = 'default';
+      } else {
+        btnBuy8.textContent = '⚡ Unlock 8-Slot Shelf — $1.99';
+        btnBuy8.disabled = false;
+        btnBuy8.style.opacity = '1';
+        btnBuy8.style.cursor = 'pointer';
+      }
+    }
+
+    if (btnBuy12) {
+      if (maxSlots >= 12) {
+        btnBuy12.textContent = '✓ 12 Slots Already Unlocked';
+        btnBuy12.disabled = true;
+        btnBuy12.style.opacity = '0.55';
+        btnBuy12.style.cursor = 'default';
+      } else {
+        btnBuy12.textContent = '👑 Unlock 12-Slot Pro Shelf — $3.99';
+        btnBuy12.disabled = false;
+        btnBuy12.style.opacity = '1';
+        btnBuy12.style.cursor = 'pointer';
+      }
+    }
+
+    overlay.classList.add('active');
+    overlay.setAttribute('aria-hidden', 'false');
+    lockBackgroundScroll();
+  }
+
+  function closeFreezerUpgradeModal() {
+    const overlay = document.getElementById('freezerUpgradeModalOverlay');
+    if (overlay) {
+      overlay.classList.remove('active');
+      overlay.setAttribute('aria-hidden', 'true');
+    }
+    unlockBackgroundScroll();
+  }
+
+  async function handleUpgradeFreezerCapacity(targetSlots) {
+    const slots = parseInt(targetSlots, 10);
+    if (slots !== 8 && slots !== 12) return;
+
+    if (!currentUser || !currentUser.token) {
+      closeFreezerUpgradeModal();
+      openGoogleAuthModal();
+      showToast('🔒 Please sign in to your free account first to unlock extra freezer shelf slots!');
+      return;
+    }
+
+    const btn = document.getElementById(slots === 8 ? 'btnFreezerBuy8' : 'btnFreezerBuy12');
+    const origText = btn ? btn.textContent : '';
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Unlocking Shelf...';
+    }
+
+    try {
+      const res = await fetch('/api/user/freezer/upgrade', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token: currentUser.token,
+          targetSlots: slots
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        showToast(data.error || 'Failed to upgrade freezer capacity.');
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = origText;
+        }
+        return;
+      }
+
+      currentUser.freezerCapacity = Math.max(Number(currentUser.freezerCapacity) || 4, slots);
+      if (realAdminUser && currentMimicRole === 'admin') {
+        realAdminUser.freezerCapacity = currentUser.freezerCapacity;
+        try { localStorage.setItem(REAL_ADMIN_STORAGE_KEY, JSON.stringify(realAdminUser)); } catch (e) {}
+      }
+      if (!realAdminUser || currentMimicRole === 'admin') {
+        try { localStorage.setItem(USER_AUTH_STORAGE_KEY, JSON.stringify(currentUser)); } catch (e) {}
+      }
+
+      freezerSlotCapacity = slots;
+      try { localStorage.setItem(FREEZER_CAPACITY_STORAGE_KEY, freezerSlotCapacity.toString()); } catch (e) {}
+
+      closeFreezerUpgradeModal();
+      renderFreezerShelfWidget();
+      showToast(`🎉 Unlocked the ${slots}-Container Freezer Shelf! Time to prep more pints! 🧊🍨`);
+    } catch (err) {
+      console.error('Freezer upgrade error:', err);
+      showToast('Network error while upgrading freezer shelf.');
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = origText;
+      }
+    }
+  }
+
   // --- Visual Freezer Shelf & Multi-Container Slots Engine ---
   function renderFreezerShelfWidget() {
     const widget = document.getElementById('freezerShelfWidget');
     const grid = document.getElementById('shelfSlotsGrid');
     const capText = document.getElementById('shelfCapacityText');
+    const tierBadge = document.getElementById('shelfTierBadge');
     const wrapper = document.getElementById('shelfSlotsWrapper');
     const collapseIcon = document.getElementById('shelfCollapseIcon');
     if (!widget || !grid) return;
@@ -6537,10 +6767,36 @@
       }
     }
 
-    // Ensure capacity toggle buttons reflect active state
+    const tierInfo = getFreezerTierInfo(currentUser);
+    const maxAllowed = tierInfo.maxSlots;
+    if (freezerSlotCapacity > maxAllowed) {
+      freezerSlotCapacity = maxAllowed;
+    }
+
+    if (tierBadge) {
+      tierBadge.textContent = tierInfo.label;
+      tierBadge.style.background = tierInfo.bg;
+      tierBadge.style.color = tierInfo.color;
+      tierBadge.style.borderColor = tierInfo.border;
+    }
+
+    // Ensure capacity toggle buttons reflect active & lock state
     widget.querySelectorAll('.btn-slot-cap').forEach(btn => {
       const cap = parseInt(btn.dataset.slots, 10);
+      const isLocked = cap > maxAllowed;
       btn.classList.toggle('active', cap === freezerSlotCapacity);
+      btn.classList.toggle('locked-cap', isLocked);
+      if (isLocked) {
+        btn.innerHTML = cap === 12 ? `12 <span style="font-size:0.75em;opacity:0.9;">👑</span>` : `${cap} <span style="font-size:0.75em;opacity:0.85;">🔒</span>`;
+        btn.style.opacity = '0.78';
+        btn.title = cap === 12
+          ? 'Locked: Unlock 12-Slot Deep Freeze Pro ($3.99) or get FREE with any Creator All-Access Bundle / VIP Circle'
+          : `Locked: Unlock ${cap}-Slot Full Week Shelf ($1.99) or get FREE with any Creator Cookbook`;
+      } else {
+        btn.textContent = `${cap}`;
+        btn.style.opacity = '1';
+        btn.title = `${cap} container slots (Unlocked)`;
+      }
     });
 
     // Make sure pints in state have valid slots 1..freezerSlotCapacity
@@ -7177,6 +7433,23 @@
 
   async function addFreezerPint({ recipeId, recipeName, scale, notes, frozenAt, requestNotification }) {
     if (!recipeName || !recipeName.trim()) return;
+
+    const maxAllowed = getUserMaxFreezerSlots(currentUser);
+    const activeCount = freezerPintsState.length;
+    if (activeCount >= freezerSlotCapacity) {
+      if (freezerSlotCapacity < maxAllowed) {
+        // Auto-expand shelf to next unlocked tier so user doesn't hit an artificial ceiling
+        freezerSlotCapacity = freezerSlotCapacity < 6 ? 6 : (freezerSlotCapacity < 8 ? 8 : 12);
+        try { localStorage.setItem(FREEZER_CAPACITY_STORAGE_KEY, freezerSlotCapacity.toString()); } catch (e) {}
+      } else if (maxAllowed < 12) {
+        openFreezerUpgradeModal(maxAllowed < 8 ? 8 : 12, 'overflow');
+        return;
+      } else {
+        showToast('⚠️ All 12 Pro freezer container slots are currently full! Spin or remove a pint first.');
+        return;
+      }
+    }
+
     const finalFrozenAt = frozenAt || Date.now();
     const finalScale = scale || 1.0;
 
@@ -7840,14 +8113,33 @@
       return;
     }
 
+    const maxAllowed = getUserMaxFreezerSlots(currentUser);
     const takenSlots = new Set(freezerPintsState.map(p => p.slot));
+
+    // If batch needs more slots than currently active toggle, auto-expand up to maxAllowed
+    const neededTotal = takenSlots.size + batchPrepQueueState.length;
+    if (neededTotal > freezerSlotCapacity && freezerSlotCapacity < maxAllowed) {
+      if (neededTotal <= 6 && maxAllowed >= 6) {
+        freezerSlotCapacity = 6;
+      } else if (neededTotal <= 8 && maxAllowed >= 8) {
+        freezerSlotCapacity = 8;
+      } else {
+        freezerSlotCapacity = maxAllowed;
+      }
+      try { localStorage.setItem(FREEZER_CAPACITY_STORAGE_KEY, freezerSlotCapacity.toString()); } catch (e) {}
+    }
+
     const emptySlots = [];
     for (let s = 1; s <= freezerSlotCapacity; s++) {
       if (!takenSlots.has(s)) emptySlots.push(s);
     }
 
     if (emptySlots.length === 0) {
-      showToast(`⚠️ All ${freezerSlotCapacity} freezer container slots are currently full! Spin or clear a container first.`);
+      if (maxAllowed < 12) {
+        openFreezerUpgradeModal(maxAllowed < 8 ? 8 : 12, 'batch_overflow');
+      } else {
+        showToast(`⚠️ All ${freezerSlotCapacity} freezer container slots are currently full! Spin or clear a container first.`);
+      }
       return;
     }
 
@@ -14518,14 +14810,59 @@
       });
     }
 
-    // Shelf Capacity Toggle buttons
+    // Shelf Capacity Toggle buttons (with Hybrid Model B + C Lock Check)
     document.querySelectorAll('.btn-slot-cap').forEach(btn => {
       btn.addEventListener('click', () => {
-        freezerSlotCapacity = parseInt(btn.dataset.slots, 10);
+        const requestedCap = parseInt(btn.dataset.slots, 10);
+        const maxAllowed = getUserMaxFreezerSlots(currentUser);
+        if (requestedCap > maxAllowed) {
+          openFreezerUpgradeModal(requestedCap, 'locked_tab');
+          return;
+        }
+        freezerSlotCapacity = requestedCap;
         localStorage.setItem(FREEZER_CAPACITY_STORAGE_KEY, freezerSlotCapacity.toString());
         renderFreezerShelfWidget();
       });
     });
+
+    // Freezer Shelf Upgrade Modal Listeners
+    const freezerUpgradeOverlay = document.getElementById('freezerUpgradeModalOverlay');
+    const freezerUpgradeCloseBtn = document.getElementById('freezerUpgradeModalCloseBtn');
+    const freezerUpgradeCloseBottom = document.getElementById('btnFreezerUpgradeCloseBottom');
+    const btnFreezerBuy8 = document.getElementById('btnFreezerBuy8');
+    const btnFreezerBuy12 = document.getElementById('btnFreezerBuy12');
+    const btnFreezerBrowseBooks8 = document.getElementById('btnFreezerBrowseBooks8');
+    const btnFreezerBrowseBundles12 = document.getElementById('btnFreezerBrowseBundles12');
+
+    if (freezerUpgradeCloseBtn) {
+      freezerUpgradeCloseBtn.addEventListener('click', closeFreezerUpgradeModal);
+    }
+    if (freezerUpgradeCloseBottom) {
+      freezerUpgradeCloseBottom.addEventListener('click', closeFreezerUpgradeModal);
+    }
+    if (freezerUpgradeOverlay) {
+      freezerUpgradeOverlay.addEventListener('click', (e) => {
+        if (e.target === freezerUpgradeOverlay) closeFreezerUpgradeModal();
+      });
+    }
+    if (btnFreezerBuy8) {
+      btnFreezerBuy8.addEventListener('click', () => handleUpgradeFreezerCapacity(8));
+    }
+    if (btnFreezerBuy12) {
+      btnFreezerBuy12.addEventListener('click', () => handleUpgradeFreezerCapacity(12));
+    }
+    if (btnFreezerBrowseBooks8) {
+      btnFreezerBrowseBooks8.addEventListener('click', () => {
+        closeFreezerUpgradeModal();
+        openRecipePacksModal();
+      });
+    }
+    if (btnFreezerBrowseBundles12) {
+      btnFreezerBrowseBundles12.addEventListener('click', () => {
+        closeFreezerUpgradeModal();
+        openRecipePacksModal();
+      });
+    }
 
     // Shelf Collapse Toggle button
     const shelfCollapseBtn = document.getElementById('btnShelfToggleCollapse');

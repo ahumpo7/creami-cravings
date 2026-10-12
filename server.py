@@ -350,6 +350,7 @@ def format_user_payload(user):
         'customRecipes': user.get('customRecipes', []),
         'shoppingList': user.get('shoppingList', []),
         'freezerPints': user.get('freezerPints', []),
+        'freezerCapacity': user.get('freezerCapacity', 4),
         'subscriptions': user.get('subscriptions', fallback_subs)
     }
 
@@ -1275,6 +1276,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 'customRecipes': user.get('customRecipes', []),
                 'shoppingList': user.get('shoppingList', []),
                 'freezerPints': user.get('freezerPints', []),
+                'freezerCapacity': user.get('freezerCapacity', 4),
                 'subscriptions': user.get('subscriptions', list(DEFAULT_SUBSCRIPTIONS)),
                 'pendingClaims': [
                     inq.get('pack') for inq in stats_db.get('purchase_inquiries', [])
@@ -1374,6 +1376,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                     'created_at': u.get('created_at', ''),
                     'last_active': u.get('last_active', ''),
                     'subscriptions': u.get('subscriptions', list(DEFAULT_SUBSCRIPTIONS)),
+                    'freezerCapacity': u.get('freezerCapacity', 4),
                     'pantryCount': len(u.get('pantry', [])),
                     'favoritesCount': len(u.get('favorites', [])),
                     'customCount': len(u.get('customRecipes', [])),
@@ -2566,6 +2569,13 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
             if 'subscriptions' in data and isinstance(data['subscriptions'], list):
                 target_user['subscriptions'] = list(set(data['subscriptions']))
 
+            # Update standalone freezer capacity if provided
+            if 'freezerCapacity' in data:
+                try:
+                    target_user['freezerCapacity'] = int(data['freezerCapacity'])
+                except (ValueError, TypeError):
+                    pass
+
             target_user['last_active'] = datetime.utcnow().isoformat()
             save_json_file(USERS_DB_FILE, users_db)
 
@@ -2576,9 +2586,41 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                     'id': target_user.get('id'),
                     'email': target_user.get('email'),
                     'role': target_user.get('role', 'user'),
+                    'freezerCapacity': target_user.get('freezerCapacity', 4),
                     'subscriptions': target_user.get('subscriptions', [])
                 }
             })
+
+        # User: Upgrade Freezer Shelf Capacity (Model B Standalone Unlock)
+        elif self.path == '/api/user/freezer/upgrade':
+            user = self._get_user_from_token(data)
+            if not user:
+                self._send_json({'error': 'Authentication required to upgrade freezer capacity'}, 401)
+                return
+
+            target_slots = data.get('targetSlots') or data.get('slots')
+            try:
+                target_slots = int(target_slots)
+            except (ValueError, TypeError):
+                target_slots = 8
+
+            if target_slots not in [8, 12]:
+                target_slots = 8
+
+            cur_cap = user.get('freezerCapacity', 4)
+            if target_slots > cur_cap:
+                user['freezerCapacity'] = target_slots
+                user['last_active'] = datetime.utcnow().isoformat()
+                save_json_file(USERS_DB_FILE, users_db)
+
+            self._send_json({
+                'status': 'ok',
+                'success': True,
+                'message': f'Freezer shelf expanded to {user.get("freezerCapacity", 4)} containers!',
+                'freezerCapacity': user.get('freezerCapacity', 4),
+                'user': format_user_payload(user)
+            })
+            return
 
         # Admin: Delete User Account
         elif self.path == '/api/admin/user/delete':

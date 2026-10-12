@@ -397,7 +397,10 @@
             <div class="shelf-title-group">
               <span class="shelf-icon">🧊</span>
               <div class="shelf-title-text">
-                <h3 class="shelf-title">Virtual Freezer Shelf</h3>
+                <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                  <h3 class="shelf-title" style="margin: 0;">Virtual Freezer Shelf</h3>
+                  <span class="shelf-tier-badge" id="shelfTierBadge" style="display: none; font-size: 0.72rem; padding: 2px 8px; border-radius: 999px; font-weight: 700; letter-spacing: 0.3px;"></span>
+                </div>
                 <span class="shelf-subtitle" id="shelfCapacityText">0 of 4 Pints Chilling</span>
               </div>
             </div>
@@ -405,11 +408,12 @@
               <button type="button" class="btn-shelf-batch-prep" id="btnShelfOpenBatchPrep" title="Open Sunday Batch Prep Planner & Consolidated Grocery List">
                 🍱 Sunday Batch Prep
               </button>
-              <div class="shelf-slots-toggle" title="How many Creami containers do you own?">
+              <div class="shelf-slots-toggle" id="shelfSlotsToggle" title="Select active freezer container capacity">
                 <span class="shelf-slots-label">Containers:</span>
-                <button type="button" class="btn-slot-cap active" data-slots="4">4</button>
-                <button type="button" class="btn-slot-cap" data-slots="6">6</button>
-                <button type="button" class="btn-slot-cap" data-slots="8">8</button>
+                <button type="button" class="btn-slot-cap active" data-slots="4" id="btnSlotCap4">4</button>
+                <button type="button" class="btn-slot-cap" data-slots="6" id="btnSlotCap6">6</button>
+                <button type="button" class="btn-slot-cap" data-slots="8" id="btnSlotCap8">8</button>
+                <button type="button" class="btn-slot-cap" data-slots="12" id="btnSlotCap12">12</button>
               </div>
               <button type="button" class="btn-shelf-toggle-collapse" id="btnShelfToggleCollapse" title="Collapse or Expand Freezer Shelf">
                 <span id="shelfCollapseIcon">▾</span>
@@ -1013,6 +1017,107 @@
             <button type="submit" class="btn-primary" id="slotFillSubmitBtn">❄️ Start Freeze Countdown</button>
           </div>
         </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Freezer Shelf Expansion Modal (Model B Standalone + Model C Cookbook Bonus) -->
+  <div class="modal-overlay" id="freezerUpgradeModalOverlay" role="dialog" aria-modal="true" aria-hidden="true" style="display: none;">
+    <div class="modal-content" style="max-width: 680px; width: 95%; padding: 24px;">
+      <button class="modal-close" id="freezerUpgradeModalCloseBtn" aria-label="Close modal">&times;</button>
+      
+      <div class="modal-header" style="margin-bottom: 16px;">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div style="width: 48px; height: 48px; border-radius: 14px; background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(14, 165, 233, 0.35)); border: 1px solid rgba(56, 189, 248, 0.4); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; flex-shrink: 0;">
+            🧊
+          </div>
+          <div>
+            <h2 class="modal-title" style="margin: 0; font-size: 1.35rem;">Expand Your Virtual Freezer Shelf</h2>
+            <p class="modal-subtitle" style="margin: 4px 0 0 0; color: #94a3b8; font-size: 0.88rem;">Never run out of chilling space. Prep pints for the full week or get free shelf expansions with Creator Cookbooks.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dynamic Overflow / Context Banner -->
+      <div id="freezerUpgradeReasonBanner" style="background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 10px; padding: 12px 16px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
+        <span id="freezerUpgradeReasonText" style="color: #e0f2fe; font-size: 0.88rem; font-weight: 600;">🔒 Standard accounts include 4 free container slots. Choose how you want to expand:</span>
+        <span id="freezerUpgradeCurrentBadge" style="background: rgba(15, 23, 42, 0.7); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 999px; padding: 3px 10px; font-size: 0.75rem; font-weight: 700;">Current: 4 Slots</span>
+      </div>
+
+      <!-- 2-Column Tier Grid -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(265px, 1fr)); gap: 16px; margin-bottom: 18px;">
+        
+        <!-- Tier 1: 8 Slots (Full Week Prep) -->
+        <div id="freezerTierCard8" style="background: rgba(30, 41, 59, 0.65); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 10px;">
+              <div>
+                <span style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.6px; color: #38bdf8; font-weight: 800;">Full Week Meal Prep</span>
+                <h3 style="margin: 2px 0 0 0; font-size: 1.2rem; color: #f8fafc;">8 Container Slots</h3>
+              </div>
+              <span style="background: rgba(56, 189, 248, 0.18); color: #38bdf8; font-weight: 800; padding: 4px 10px; border-radius: 8px; font-size: 0.95rem;">$1.99</span>
+            </div>
+
+            <ul style="list-style: none; padding: 0; margin: 0 0 16px 0; font-size: 0.84rem; color: #cbd5e1; display: flex; flex-direction: column; gap: 7px;">
+              <li>✅ Unlocks <strong>6 &amp; 8 container slots</strong></li>
+              <li>✅ Prep a pint for every workday + weekend</li>
+              <li>✅ 8-Pint Sunday Batch Prep &amp; 16-hr timers</li>
+            </ul>
+          </div>
+
+          <div>
+            <button type="button" class="btn-primary" id="btnFreezerBuy8" style="width: 100%; justify-content: center; padding: 10px 14px; font-weight: 700; margin-bottom: 12px;">
+              ⚡ Unlock 8 Slots — $1.99 One-Time
+            </button>
+
+            <div style="background: rgba(15, 23, 42, 0.65); border: 1px dashed rgba(56, 189, 248, 0.4); border-radius: 10px; padding: 10px 12px;">
+              <div style="font-size: 0.76rem; color: #bae6fd; font-weight: 700; margin-bottom: 4px;">🎁 FREE WITH ANY CREATOR BOOK</div>
+              <p style="font-size: 0.75rem; color: #94a3b8; margin: 0 0 8px 0; line-height: 1.35;">Buy <strong>any single Creator Cookbook</strong> (Fan Favorites, Keto, No Protein, Sampler, etc.) and get <strong>8 Freezer Slots unlocked free!</strong></p>
+              <button type="button" class="btn-secondary btn-sm" id="btnFreezerBrowseBooks8" style="width: 100%; justify-content: center; font-size: 0.78rem; padding: 6px 10px;">
+                📚 Browse Creator Cookbooks →
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tier 2: 12 Slots (Deep Freeze Pro) -->
+        <div id="freezerTierCard12" style="background: linear-gradient(160deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9)); border: 1.5px solid rgba(245, 158, 11, 0.55); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between; position: relative;">
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 10px;">
+              <div>
+                <span style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.6px; color: #fbbf24; font-weight: 800;">👑 Deep Freeze Pro</span>
+                <h3 style="margin: 2px 0 0 0; font-size: 1.2rem; color: #f8fafc;">12 Container Slots</h3>
+              </div>
+              <span style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; font-weight: 800; padding: 4px 10px; border-radius: 8px; font-size: 0.95rem;">$3.99</span>
+            </div>
+
+            <ul style="list-style: none; padding: 0; margin: 0 0 16px 0; font-size: 0.84rem; color: #cbd5e1; display: flex; flex-direction: column; gap: 7px;">
+              <li>👑 Unlocks <strong>maximum 12 container slots</strong></li>
+              <li>👑 Built for serious preppers &amp; households</li>
+              <li>👑 Priority multi-batch 16-hr countdowns</li>
+            </ul>
+          </div>
+
+          <div>
+            <button type="button" class="btn-primary" id="btnFreezerBuy12" style="width: 100%; justify-content: center; padding: 10px 14px; font-weight: 700; margin-bottom: 12px; background: linear-gradient(135deg, #f59e0b, #d97706); border: none; color: #fff;">
+              👑 Unlock 12 Slots — $3.99 One-Time
+            </button>
+
+            <div style="background: rgba(15, 23, 42, 0.65); border: 1px dashed rgba(245, 158, 11, 0.45); border-radius: 10px; padding: 10px 12px;">
+              <div style="font-size: 0.76rem; color: #fde68a; font-weight: 700; margin-bottom: 4px;">👑 FREE WITH ALL-ACCESS OR VIP</div>
+              <p style="font-size: 0.75rem; color: #94a3b8; margin: 0 0 8px 0; line-height: 1.35;">Included automatically with any <strong>Creator All-Access Bundle</strong> or <strong>Creator VIP Circle</strong> membership!</p>
+              <button type="button" class="btn-secondary btn-sm" id="btnFreezerBrowseBundles12" style="width: 100%; justify-content: center; font-size: 0.78rem; padding: 6px 10px; border-color: rgba(245, 158, 11, 0.4); color: #fcd34d;">
+                👑 View All-Access Bundles →
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; padding-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.78rem; color: #64748b;">
+        <span>💡 One-time account upgrade • Syncs across all your devices</span>
+        <button type="button" class="btn-secondary btn-sm" id="btnFreezerUpgradeCloseBottom">Maybe Later</button>
       </div>
     </div>
   </div>
@@ -3032,6 +3137,6 @@
 
   <!-- Scripts -->
   <script src="recipes-data.js?v=beta9"></script>
-  <script src="app.js?v=beta13"></script>
+  <script src="app.js?v=beta14"></script>
 </body>
 </html>
