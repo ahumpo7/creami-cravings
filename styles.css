@@ -11707,6 +11707,408 @@ body.modal-open .cookie-consent-banner {
   }
 }
 
+/* ==========================================================================
+   Sunday Batch Prep & Consolidated Grocery List (Beta Staging)
+   ========================================================================== */
+
+/* Floating Batch Prep Dock */
+.batch-prep-dock {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 92%;
+  max-width: 680px;
+  z-index: 9995;
+  background: linear-gradient(135deg, rgba(30, 27, 75, 0.95) 0%, rgba(49, 46, 129, 0.95) 100%);
+  border: 1px solid rgba(165, 180, 252, 0.35);
+  border-radius: var(--radius-lg, 16px);
+  padding: 10px 16px;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.5), 0 0 25px rgba(99, 102, 241, 0.35);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  animation: slideUpDock 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUpDock {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.batch-prep-dock-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.batch-prep-dock-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.batch-prep-badge {
+  background: rgba(99, 102, 241, 0.3);
+  color: #c7d2fe;
+  font-size: 0.76rem;
+  font-weight: 800;
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(165, 180, 252, 0.3);
+}
+
+.batch-prep-count {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.batch-prep-dock-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-batch-dock-clear {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 6px 10px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+}
+
+.btn-batch-dock-clear:hover {
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.1);
+}
+
+.btn-batch-dock-open {
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  color: #ffffff;
+  border: 1px solid rgba(165, 180, 252, 0.4);
+  font-size: 0.82rem;
+  font-weight: 800;
+  padding: 8px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.4);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-batch-dock-open:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.55);
+}
+
+.batch-prep-arrow {
+  transition: transform 0.15s ease;
+}
+
+.btn-batch-dock-open:hover .batch-prep-arrow {
+  transform: translateX(3px);
+}
+
+/* Recipe Card Batch Prep Button */
+.btn-card-batch-prep {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.28);
+  color: #a5b4fc;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-card-batch-prep:hover {
+  background: rgba(99, 102, 241, 0.25);
+  color: #ffffff;
+}
+
+.btn-card-batch-prep.active {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  border-color: #818cf8;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.35);
+}
+
+.btn-modal-batch-prep {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(99, 102, 241, 0.14);
+  border: 1px solid rgba(99, 102, 241, 0.35);
+  color: #a5b4fc;
+  padding: 10px 16px;
+  border-radius: var(--radius-md, 10px);
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-modal-batch-prep:hover {
+  background: rgba(99, 102, 241, 0.26);
+  color: #ffffff;
+}
+
+.btn-modal-batch-prep.active {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  border-color: #818cf8;
+  color: #ffffff;
+}
+
+/* Batch Prep Modal Content */
+.batch-prep-modal-content {
+  max-width: 680px;
+  width: 94%;
+}
+
+.batch-prep-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.batch-prep-icon-badge {
+  font-size: 1.5rem;
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.35);
+  border-radius: 12px;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.batch-prep-modal-body {
+  padding-top: 10px;
+  max-height: 65vh;
+  overflow-y: auto;
+}
+
+.batch-prep-section {
+  margin-bottom: 20px;
+}
+
+.batch-prep-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.batch-prep-section-header h4 {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #f1f5f9;
+  margin: 0;
+}
+
+.batch-prep-pantry-match {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+/* Queued Pints Strip */
+.batch-prep-pints-strip {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scrollbar-width: thin;
+}
+
+.batch-pint-chip {
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 170px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.batch-pint-chip-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+.batch-pint-chip-title {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #f8fafc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.batch-pint-chip-scale {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.btn-batch-chip-remove {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 0.82rem;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.btn-batch-chip-remove:hover {
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.15);
+}
+
+/* Grocery Groups */
+.batch-prep-grocery-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.batch-prep-group {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.batch-prep-group-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.84rem;
+  font-weight: 800;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.batch-prep-group-title.missing {
+  color: #f59e0b;
+}
+
+.batch-prep-group-title.in-stock {
+  color: #10b981;
+}
+
+.btn-batch-add-all-shop {
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #fbbf24;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-batch-add-all-shop:hover {
+  background: #f59e0b;
+  color: #0f172a;
+}
+
+.batch-prep-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.batch-grocery-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  transition: background 0.15s ease;
+}
+
+.batch-grocery-item-row:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.batch-grocery-item-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.batch-grocery-item-name {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.batch-grocery-item-used {
+  font-size: 0.68rem;
+  color: #64748b;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 1px 6px;
+  border-radius: 999px;
+}
+
+.batch-grocery-item-qty {
+  font-size: 0.84rem;
+  font-weight: 800;
+  color: #38bdf8;
+  white-space: nowrap;
+}
+
+.batch-prep-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-top: 14px;
+}
+
+@media (max-width: 768px) {
+  .batch-prep-dock {
+    bottom: calc(var(--bottom-nav-height, 64px) + 10px);
+    width: 95%;
+    padding: 8px 12px;
+  }
+}
+
+
 
 
 

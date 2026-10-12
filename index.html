@@ -993,6 +993,71 @@
     </div>
   </div>
 
+  <!-- Sunday Batch Prep & Consolidated Grocery List Modal (Beta Staging) -->
+  <div class="modal-overlay" id="batchPrepModalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-content batch-prep-modal-content">
+      <button class="modal-close" id="batchPrepModalCloseBtn" aria-label="Close modal">&times;</button>
+      <div class="modal-header">
+        <div class="batch-prep-title-row">
+          <div class="batch-prep-icon-badge">🍱</div>
+          <div>
+            <h2 class="modal-title">Sunday Batch Prep &amp; Grocery List</h2>
+            <p class="modal-subtitle" id="batchPrepSubtitle">Aggregated shopping list for your weekly batch of pints.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="batch-prep-modal-body">
+        <!-- Queued Pints Row -->
+        <div class="batch-prep-section">
+          <div class="batch-prep-section-header">
+            <h4>Queued Pints for this Prep Session</h4>
+            <span class="count-pill" id="batchPrepPintsCount">0 Pints</span>
+          </div>
+          <div class="batch-prep-pints-strip" id="batchPrepPintsStrip">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Consolidated Grocery List -->
+        <div class="batch-prep-section">
+          <div class="batch-prep-section-header">
+            <h4>Consolidated Ingredients Breakdown</h4>
+            <span class="batch-prep-pantry-match" id="batchPrepPantryMatchBadge">Checking Pantry...</span>
+          </div>
+
+          <div class="batch-prep-grocery-groups">
+            <!-- Missing Items to Buy -->
+            <div class="batch-prep-group" id="batchPrepMissingGroup">
+              <div class="batch-prep-group-title missing">
+                <span>🛒 Need to Buy (<span id="batchPrepMissingCount">0</span> items)</span>
+                <button type="button" class="btn-batch-add-all-shop" id="btnBatchAddMissingToShopList">+ Add All to App List</button>
+              </div>
+              <div class="batch-prep-items-list" id="batchPrepMissingList"></div>
+            </div>
+
+            <!-- In Stock in Pantry -->
+            <div class="batch-prep-group" id="batchPrepInStockGroup">
+              <div class="batch-prep-group-title in-stock">
+                <span>✅ Already in Kitchen Pantry (<span id="batchPrepInStockCount">0</span> items)</span>
+              </div>
+              <div class="batch-prep-items-list" id="batchPrepInStockList"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer batch-prep-footer">
+        <div class="batch-prep-footer-left">
+          <button type="button" class="btn-secondary" id="btnBatchCopyList">📋 Copy Formatted List</button>
+        </div>
+        <div class="batch-prep-footer-right">
+          <button type="button" class="btn-primary" id="btnBatchFillFreezerSlots">❄️ Fill All Freezer Slots Now</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- 1-Tap Smart Ingredient Substitutions Modal (Roadmap Item 16) -->
   <div class="modal-overlay" id="swapModalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="modal-content swap-modal-content">
@@ -2351,6 +2416,23 @@
       </div>
     </div>
   </div>
+
+  <!-- Floating Sunday Batch Prep Dock (Beta Staging) -->
+  <aside id="batchPrepBar" class="batch-prep-dock" style="display: none;" aria-label="Sunday Batch Prep Queue">
+    <div class="batch-prep-dock-inner">
+      <div class="batch-prep-dock-left">
+        <span class="batch-prep-badge">🍱 Sunday Batch Prep</span>
+        <span class="batch-prep-count" id="batchPrepCountText">0 Pints Queued</span>
+      </div>
+      <div class="batch-prep-dock-actions">
+        <button type="button" class="btn-batch-dock-clear" id="btnBatchPrepClear" title="Clear all queued recipes">✕ Clear</button>
+        <button type="button" class="btn-batch-dock-open" id="btnBatchPrepOpenModal">
+          <span>🛒 View Consolidated Grocery List</span>
+          <span class="batch-prep-arrow">→</span>
+        </button>
+      </div>
+    </div>
+  </aside>
 
   <!-- Sticky Mobile Bottom Navigation (Visible on <= 768px) -->
   <nav class="mobile-bottom-nav" id="mobileBottomNav" aria-label="Mobile Navigation">

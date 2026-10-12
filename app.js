@@ -36,6 +36,7 @@
   const FREEZER_COLLAPSED_STORAGE_KEY = STORAGE_PREFIX + 'creami_freezer_shelf_collapsed_v1';
   const MIMIC_ROLE_STORAGE_KEY = STORAGE_PREFIX + 'creami_mimic_role_v1';
   const REAL_ADMIN_STORAGE_KEY = STORAGE_PREFIX + 'creami_real_admin_user_v1';
+  const BATCH_PREP_STORAGE_KEY = STORAGE_PREFIX + 'creami_batch_prep_queue_v1';
 
   // Default Staples Checked for New Users
   const DEFAULT_STAPLES = [];
@@ -417,6 +418,15 @@
   let freezerSlotCapacity = parseInt(localStorage.getItem(FREEZER_CAPACITY_STORAGE_KEY) || '4', 10);
   let isShelfCollapsed = localStorage.getItem(FREEZER_COLLAPSED_STORAGE_KEY) === 'true';
 
+  // Sunday Batch Prep Queue State (Beta Staging)
+  let batchPrepQueueState = [];
+  try {
+    const rawBatch = localStorage.getItem(BATCH_PREP_STORAGE_KEY);
+    if (rawBatch) batchPrepQueueState = JSON.parse(rawBatch);
+  } catch (e) {
+    batchPrepQueueState = [];
+  }
+
   // 1-Tap Smart Ingredient Substitutions State (Roadmap Item 16)
   let activeRecipeSwaps = {}; // { [recipeId]: { [originalIngName]: swapObj } }
   let currentSwapContext = null; // { ing, recipe, swapData }
@@ -611,6 +621,7 @@
     populateFreezerRecipeDatalist();
     updateFreezerBadges();
     renderFreezerShelfWidget();
+    updateBatchPrepDockUI();
     startFreezerTicker();
     initFreezeNotifications();
     initPwaInstall();
@@ -4018,6 +4029,7 @@
     const userMade = recipeMadeCounts[recipe.id] || 0;
     const commMade = communityStats.madeCounts[recipe.id] || 0;
     const creator = getRecipeCreator(recipe);
+    const inBatchPrep = isRecipeInBatchPrep(recipe.id);
 
     const isClaimPending = !isAccessible && (userPendingClaimsState.has(requiredTier) || userPendingClaimsState.has('All-Access'));
 
@@ -4106,12 +4118,25 @@
 
       <div class="recipe-card-bottom">
         <span class="spin-tag" title="Recommended spin cycle">🌀 ${recipe.spinSetting || 'Lite Ice Cream'}</span>
-        <div style="display: flex; gap: 6px; align-items: center;">
+        <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+          <button type="button" class="btn-card-batch-prep ${inBatchPrep ? 'active' : ''}" data-recipe-id="${recipe.id}" data-action="batch-prep-toggle" title="${inBatchPrep ? 'Remove from Sunday Batch Prep' : 'Add to Sunday Batch Prep'}">
+            ${inBatchPrep ? '🍱 Queued ✓' : '🍱 +Prep'}
+          </button>
           <button type="button" class="btn-quick-freeze-card" title="Place into Virtual Freezer Slot" data-action="quick-freeze">❄️ Freeze</button>
           <a href="/recipe/${encodeURIComponent(recipe.id)}" class="btn-view-recipe">${isAccessible ? 'View Recipe' : (isClaimPending ? '⏳ Pending' : '🔒 Locked')}</a>
         </div>
       </div>
     `;
+
+    // Sunday Batch Prep button click
+    const batchPrepCardBtn = card.querySelector('[data-action="batch-prep-toggle"]');
+    if (batchPrepCardBtn) {
+      batchPrepCardBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        toggleBatchPrepRecipe(recipe.id, 1.0);
+      });
+    }
 
     // Quick Freeze button click
     const quickFreezeBtn = card.querySelector('[data-action="quick-freeze"]');
@@ -6776,6 +6801,360 @@
   }
 
   // ==========================================================================
+  // Sunday Batch Prep Planner & Consolidated Grocery List Engine (Beta Staging)
+  // ==========================================================================
+  function saveBatchPrepQueue() {
+    localStorage.setItem(BATCH_PREP_STORAGE_KEY, JSON.stringify(batchPrepQueueState));
+    updateBatchPrepDockUI();
+  }
+
+  function isRecipeInBatchPrep(recipeId) {
+    return batchPrepQueueState.some(p => p.recipeId === recipeId);
+  }
+
+  function toggleBatchPrepRecipe(recipeId, scale = 1.0) {
+    const existingIndex = batchPrepQueueState.findIndex(p => p.recipeId === recipeId);
+    const rec = allRecipes.find(r => r.id === recipeId);
+    if (!rec) return;
+
+    if (existingIndex >= 0) {
+      batchPrepQueueState.splice(existingIndex, 1);
+      saveBatchPrepQueue();
+      showToast(`Removed "${rec.name}" from Sunday Batch Prep`);
+    } else {
+      batchPrepQueueState.push({
+        recipeId: rec.id,
+        recipeName: rec.name,
+        scale: scale || 1.0
+      });
+      saveBatchPrepQueue();
+      showToast(`🍱 Added "${rec.name}" to Sunday Batch Prep! (${batchPrepQueueState.length} total)`);
+    }
+    updateBatchPrepDockUI();
+  }
+
+  function clearBatchPrepQueue() {
+    batchPrepQueueState = [];
+    saveBatchPrepQueue();
+    closeBatchPrepModal();
+    showToast('Cleared Sunday Batch Prep queue');
+  }
+
+  function updateBatchPrepDockUI() {
+    const dock = document.getElementById('batchPrepBar');
+    const countEl = document.getElementById('batchPrepCountText');
+    if (!dock) return;
+
+    const count = batchPrepQueueState.length;
+    if (count > 0) {
+      dock.style.display = 'block';
+      if (countEl) countEl.textContent = `${count} Pint${count === 1 ? '' : 's'} Queued`;
+    } else {
+      dock.style.display = 'none';
+    }
+
+    // Update buttons on visible recipe cards
+    document.querySelectorAll('.btn-card-batch-prep').forEach(btn => {
+      const rId = btn.dataset.recipeId;
+      const inQueue = isRecipeInBatchPrep(rId);
+      btn.classList.toggle('active', inQueue);
+      btn.innerHTML = inQueue ? '🍱 Queued ✓' : '🍱 +Prep';
+      btn.title = inQueue ? 'Remove from Sunday Batch Prep' : 'Add to Sunday Batch Prep';
+    });
+
+    // Update button in active recipe modal if open
+    const modalBtn = document.getElementById('modalBatchPrepToggleBtn');
+    if (modalBtn && currentModalRecipe) {
+      const inQueue = isRecipeInBatchPrep(currentModalRecipe.id);
+      modalBtn.classList.toggle('active', inQueue);
+      modalBtn.innerHTML = inQueue ? '🍱 Queued in Batch Prep ✓' : '🍱 Add to Sunday Batch Prep';
+    }
+  }
+
+  function openBatchPrepModal() {
+    const modal = document.getElementById('batchPrepModalOverlay');
+    if (!modal) return;
+    renderBatchPrepModal();
+    modal.classList.add('active');
+    modal.setAttribute('aria-hidden', 'false');
+    lockBackgroundScroll();
+  }
+
+  function closeBatchPrepModal() {
+    const modal = document.getElementById('batchPrepModalOverlay');
+    if (!modal) return;
+    modal.classList.remove('active');
+    modal.setAttribute('aria-hidden', 'true');
+    unlockBackgroundScroll();
+  }
+
+  function renderBatchPrepModal() {
+    const strip = document.getElementById('batchPrepPintsStrip');
+    const pintsCount = document.getElementById('batchPrepPintsCount');
+    const missingList = document.getElementById('batchPrepMissingList');
+    const inStockList = document.getElementById('batchPrepInStockList');
+    const missingCount = document.getElementById('batchPrepMissingCount');
+    const inStockCount = document.getElementById('batchPrepInStockCount');
+    const matchBadge = document.getElementById('batchPrepPantryMatchBadge');
+    if (!strip || !missingList || !inStockList) return;
+
+    if (pintsCount) pintsCount.textContent = `${batchPrepQueueState.length} Pints`;
+
+    // 1. Render Queued Pints Strip
+    if (batchPrepQueueState.length === 0) {
+      strip.innerHTML = '<div style="color: #94a3b8; font-size: 0.85rem; padding: 6px;">No recipes queued yet. Click "+Prep" on any recipe card to add!</div>';
+    } else {
+      strip.innerHTML = batchPrepQueueState.map((item, idx) => {
+        const isDeluxe = item.scale === 1.5;
+        return `
+          <div class="batch-pint-chip" data-recipe-id="${item.recipeId}">
+            <span style="font-size: 1.1rem;">🍨</span>
+            <div class="batch-pint-chip-info">
+              <span class="batch-pint-chip-title" title="${escapeHtml(item.recipeName)}">${escapeHtml(item.recipeName)}</span>
+              <span class="batch-pint-chip-scale">${isDeluxe ? '24 oz Deluxe' : '16 oz Standard'}</span>
+            </div>
+            <button type="button" class="btn-batch-chip-remove" data-action="remove-queued-pint" data-index="${idx}" title="Remove from batch">✕</button>
+          </div>
+        `;
+      }).join('');
+
+      strip.querySelectorAll('[data-action="remove-queued-pint"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = parseInt(btn.dataset.index, 10);
+          batchPrepQueueState.splice(idx, 1);
+          saveBatchPrepQueue();
+          renderBatchPrepModal();
+        });
+      });
+    }
+
+    // 2. Aggregate ingredients across all queued recipes
+    const aggregated = new Map();
+
+    batchPrepQueueState.forEach(queued => {
+      const rec = allRecipes.find(r => r.id === queued.recipeId);
+      if (!rec || !rec.ingredients) return;
+      const scale = queued.scale || 1.0;
+
+      rec.ingredients.forEach(ing => {
+        const cleanName = sanitizeShoppingItemName(ing.name);
+        if (SHOPPING_EXCLUDED_ITEMS && SHOPPING_EXCLUDED_ITEMS.has(ing.id || cleanName.toLowerCase().replace(/[^a-z0-9]+/g, '_'))) {
+          return; // Skip salt, water, etc.
+        }
+
+        if (!aggregated.has(cleanName)) {
+          aggregated.set(cleanName, {
+            name: cleanName,
+            id: ing.id,
+            quantities: {},
+            rawStrings: new Set(),
+            usedInRecipes: new Set(),
+            isBase: Boolean(ing.isBase)
+          });
+        }
+
+        const entry = aggregated.get(cleanName);
+        entry.usedInRecipes.add(rec.name);
+
+        const qtyNum = parseFloat(ing.quantity);
+        const unit = (ing.unit || '').trim().toLowerCase();
+
+        if (!isNaN(qtyNum) && qtyNum > 0 && unit) {
+          const scaledQty = qtyNum * scale;
+          entry.quantities[unit] = (entry.quantities[unit] || 0) + scaledQty;
+        } else {
+          const formatted = formatIngredientAmount(ing, scale, 'metric');
+          if (formatted) entry.rawStrings.add(formatted);
+        }
+      });
+    });
+
+    // 3. Categorize into Missing vs In Stock
+    const missingItems = [];
+    const inStockItems = [];
+
+    aggregated.forEach(entry => {
+      const inPantry = isItemInPantry({ id: entry.id, name: entry.name });
+      
+      const qtyParts = [];
+      for (const [unit, sum] of Object.entries(entry.quantities)) {
+        let displaySum = Math.round(sum * 10) / 10;
+        if (displaySum % 1 === 0) displaySum = Math.round(displaySum);
+        qtyParts.push(`${displaySum} ${unit}`);
+      }
+      entry.rawStrings.forEach(raw => qtyParts.push(raw));
+      const totalDisplay = qtyParts.join(' + ') || 'As needed';
+
+      const itemData = {
+        name: entry.name,
+        qtyText: totalDisplay,
+        recipesCount: entry.usedInRecipes.size
+      };
+
+      if (inPantry) {
+        inStockItems.push(itemData);
+      } else {
+        missingItems.push(itemData);
+      }
+    });
+
+    if (missingCount) missingCount.textContent = missingItems.length;
+    if (inStockCount) inStockCount.textContent = inStockItems.length;
+
+    const totalIngs = missingItems.length + inStockItems.length;
+    if (matchBadge) {
+      if (totalIngs === 0) {
+        matchBadge.textContent = 'No ingredients to check';
+      } else if (missingItems.length === 0) {
+        matchBadge.innerHTML = '<span style="color: #4ade80; font-weight: 800;">🎉 100% In Stock in Pantry!</span>';
+      } else {
+        matchBadge.textContent = `${inStockItems.length} of ${totalIngs} in pantry`;
+      }
+    }
+
+    // Render Missing List
+    if (missingItems.length === 0) {
+      missingList.innerHTML = '<div style="color: #4ade80; font-size: 0.84rem; padding: 8px 6px;">🎉 Amazing! You have all ingredients needed for these pints in your pantry.</div>';
+    } else {
+      missingList.innerHTML = missingItems.map(item => `
+        <div class="batch-grocery-item-row">
+          <div class="batch-grocery-item-left">
+            <span style="color: #f59e0b;">🛒</span>
+            <span class="batch-grocery-item-name">${escapeHtml(item.name)}</span>
+            <span class="batch-grocery-item-used">in ${item.recipesCount} pint${item.recipesCount === 1 ? '' : 's'}</span>
+          </div>
+          <div class="batch-grocery-item-qty">${escapeHtml(item.qtyText)}</div>
+        </div>
+      `).join('');
+    }
+
+    // Render In Stock List
+    if (inStockItems.length === 0) {
+      inStockList.innerHTML = '<div style="color: #94a3b8; font-size: 0.84rem; padding: 6px;">No pantry items matched yet.</div>';
+    } else {
+      inStockList.innerHTML = inStockItems.map(item => `
+        <div class="batch-grocery-item-row">
+          <div class="batch-grocery-item-left">
+            <span style="color: #10b981;">✓</span>
+            <span class="batch-grocery-item-name">${escapeHtml(item.name)}</span>
+            <span class="batch-grocery-item-used">in ${item.recipesCount} pint${item.recipesCount === 1 ? '' : 's'}</span>
+          </div>
+          <div class="batch-grocery-item-qty" style="color: #94a3b8;">${escapeHtml(item.qtyText)}</div>
+        </div>
+      `).join('');
+    }
+  }
+
+  function copyBatchPrepGroceryList() {
+    if (batchPrepQueueState.length === 0) {
+      showToast('No pints in batch prep queue.');
+      return;
+    }
+
+    let text = `🍱 Sunday Batch Prep Grocery List (${batchPrepQueueState.length} Pints)\n`;
+    text += `Pints: ${batchPrepQueueState.map(p => p.recipeName).join(', ')}\n\n`;
+
+    const missingListEl = document.getElementById('batchPrepMissingList');
+    const inStockListEl = document.getElementById('batchPrepInStockList');
+
+    text += `🛒 NEED TO BUY:\n`;
+    if (missingListEl) {
+      missingListEl.querySelectorAll('.batch-grocery-item-row').forEach(row => {
+        const name = row.querySelector('.batch-grocery-item-name')?.textContent || '';
+        const qty = row.querySelector('.batch-grocery-item-qty')?.textContent || '';
+        text += `[ ] ${name} — ${qty}\n`;
+      });
+    }
+
+    text += `\n✅ IN KITCHEN PANTRY:\n`;
+    if (inStockListEl) {
+      inStockListEl.querySelectorAll('.batch-grocery-item-row').forEach(row => {
+        const name = row.querySelector('.batch-grocery-item-name')?.textContent || '';
+        const qty = row.querySelector('.batch-grocery-item-qty')?.textContent || '';
+        text += `[x] ${name} — ${qty}\n`;
+      });
+    }
+
+    text += `\nPrep on Creami Cravings: https://creamicravings.com/`;
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('📋 Copied consolidated grocery list to clipboard!');
+      }).catch(() => {
+        fallbackCopyText(text);
+      });
+    } else {
+      fallbackCopyText(text);
+    }
+  }
+
+  function addMissingBatchToShoppingList() {
+    const missingListEl = document.getElementById('batchPrepMissingList');
+    if (!missingListEl) return;
+
+    let addedCount = 0;
+    missingListEl.querySelectorAll('.batch-grocery-item-name').forEach(el => {
+      const name = el.textContent.trim();
+      if (name && !manualShoppingList.has(name)) {
+        manualShoppingList.add(name);
+        addedCount++;
+      }
+    });
+
+    if (addedCount > 0) {
+      saveManualShoppingList();
+      updateShoppingBadges();
+      showToast(`🛒 Added ${addedCount} missing ingredients to your app Shopping List!`);
+    } else {
+      showToast('All items are already in your shopping list.');
+    }
+  }
+
+  function batchFillFreezerSlots() {
+    if (batchPrepQueueState.length === 0) {
+      showToast('No pints in batch queue to fill.');
+      return;
+    }
+
+    const takenSlots = new Set(freezerPintsState.map(p => p.slot));
+    const emptySlots = [];
+    for (let s = 1; s <= freezerSlotCapacity; s++) {
+      if (!takenSlots.has(s)) emptySlots.push(s);
+    }
+
+    if (emptySlots.length === 0) {
+      showToast(`⚠️ All ${freezerSlotCapacity} freezer container slots are currently full! Spin or clear a container first.`);
+      return;
+    }
+
+    let filledCount = 0;
+    batchPrepQueueState.forEach(queued => {
+      if (emptySlots.length > 0) {
+        const slotNum = emptySlots.shift();
+        const newPint = {
+          id: `freezer_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+          slot: slotNum,
+          recipeId: queued.recipeId || null,
+          recipeName: queued.recipeName,
+          scale: queued.scale || 1.0,
+          sizeLabel: queued.scale === 1.5 ? '24 oz Deluxe' : '16 oz Standard',
+          frozenAt: Date.now(),
+          freezeHours: 16,
+          notes: 'Prepped during Sunday batch session',
+          notified: false
+        };
+        freezerPintsState.unshift(newPint);
+        filledCount++;
+      }
+    });
+
+    saveFreezerPints();
+    renderFreezerShelfWidget();
+    closeBatchPrepModal();
+    showToast(`❄️ Filled ${filledCount} container slots! 16-hour freeze timers running 🎉`);
+  }
+
+  // ==========================================================================
   // 1-Tap Smart Ingredient Substitutions Database & Engine (Roadmap Item 16)
   // Tested substitutions specifically calibrated for Ninja Creami freezing
   // mechanics, high-shear blade dynamics, overrun, and macro targets.
@@ -7817,18 +8196,23 @@
               <div class="trouble-a">Always create a 1.5-inch wide hole down to the bottom of the ice cream with a spoon before adding mix-ins, then use the <strong>Mix-In</strong> button (never Respin).</div>
             </div>
           </div>
-        <!-- Put in Freezer Action Card (Beta Staging) -->
+        <!-- Put in Freezer & Batch Prep Action Card (Beta Staging) -->
         <div class="recipe-freezer-action-card" style="margin-bottom: 16px; background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 12px; padding: 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
           <div style="display: flex; align-items: center; gap: 10px;">
             <span style="font-size: 1.4rem;">🧊</span>
             <div>
               <strong style="color: #f8fafc; font-size: 0.92rem; display: block;">Prep &amp; Chill this Pint</strong>
-              <span style="color: #94a3b8; font-size: 0.78rem;">Place into a Virtual Freezer slot and start the 16h countdown</span>
+              <span style="color: #94a3b8; font-size: 0.78rem;">Place into a Virtual Freezer slot or queue for Sunday Batch Prep</span>
             </div>
           </div>
-          <button type="button" class="btn-freeze-slot-primary" id="modalPutInFreezerBtn" title="Place this recipe into an open freezer container slot">
-            <span>❄️ Put in Freezer Slot</span>
-          </button>
+          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            <button type="button" class="btn-modal-batch-prep ${isRecipeInBatchPrep(recipe.id) ? 'active' : ''}" id="modalBatchPrepToggleBtn" title="Add or remove from Sunday Batch Prep Queue">
+              ${isRecipeInBatchPrep(recipe.id) ? '🍱 Queued in Batch Prep ✓' : '🍱 Add to Sunday Batch Prep'}
+            </button>
+            <button type="button" class="btn-freeze-slot-primary" id="modalPutInFreezerBtn" title="Place this recipe into an open freezer container slot">
+              <span>❄️ Put in Freezer Slot</span>
+            </button>
+          </div>
         </div>
 
         <!-- Recipe Batch & Spin Counter Tracker -->
@@ -8035,6 +8419,14 @@
     if (viewInFreezerBtn) {
       viewInFreezerBtn.addEventListener('click', () => {
         openFreezerModal();
+      });
+    }
+
+    // Sunday Batch Prep Modal Toggle Button (Beta Staging)
+    const modalBatchPrepBtn = recipeModalBody.querySelector('#modalBatchPrepToggleBtn');
+    if (modalBatchPrepBtn) {
+      modalBatchPrepBtn.addEventListener('click', () => {
+        toggleBatchPrepRecipe(recipe.id, modalScale || 1.0);
       });
     }
 
@@ -12708,6 +13100,8 @@
         closeRouletteModal();
         closeShoppingListModal();
         closeFreezerModal();
+        closeSlotFillModal();
+        closeBatchPrepModal();
         closeCustomRecipeModal();
         closeGoogleAuthModal();
         closeClaimAccessModal();
@@ -13055,6 +13449,44 @@
       btnResetKitchenData.addEventListener('click', () => {
         resetAllKitchenData();
       });
+    }
+
+    // Sunday Batch Prep Planner & Consolidated Grocery List (Beta Staging)
+    const btnBatchPrepOpen = document.getElementById('btnBatchPrepOpenModal');
+    if (btnBatchPrepOpen) {
+      btnBatchPrepOpen.addEventListener('click', openBatchPrepModal);
+    }
+
+    const batchPrepCloseBtn = document.getElementById('batchPrepModalCloseBtn');
+    if (batchPrepCloseBtn) {
+      batchPrepCloseBtn.addEventListener('click', closeBatchPrepModal);
+    }
+
+    const batchPrepOverlay = document.getElementById('batchPrepModalOverlay');
+    if (batchPrepOverlay) {
+      batchPrepOverlay.addEventListener('click', (e) => {
+        if (e.target === batchPrepOverlay) closeBatchPrepModal();
+      });
+    }
+
+    const btnBatchClear = document.getElementById('btnBatchPrepClear');
+    if (btnBatchClear) {
+      btnBatchClear.addEventListener('click', clearBatchPrepQueue);
+    }
+
+    const btnBatchCopy = document.getElementById('btnBatchCopyList');
+    if (btnBatchCopy) {
+      btnBatchCopy.addEventListener('click', copyBatchPrepGroceryList);
+    }
+
+    const btnBatchAddMissing = document.getElementById('btnBatchAddMissingToShopList');
+    if (btnBatchAddMissing) {
+      btnBatchAddMissing.addEventListener('click', addMissingBatchToShoppingList);
+    }
+
+    const btnBatchFillSlots = document.getElementById('btnBatchFillFreezerSlots');
+    if (btnBatchFillSlots) {
+      btnBatchFillFreezerSlots.addEventListener('click', batchFillFreezerSlots);
     }
 
     // Initialize PWA Offline Engine & Service Worker
