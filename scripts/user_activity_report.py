@@ -133,8 +133,17 @@ def generate_full_report():
             msg = fb.get('message', fb.get('notes', ''))
             fb_status = fb.get('status', 'new').capitalize()
             print(f"| **{name}** | {fb_type} | {rating_stars} | \"{msg}\" | `{fb_status}` |")
+    recipe_spins = [(k.replace('_', ' ').title(), v.get('totalMade', 0)) for k, v in stats.items() if isinstance(v, dict) and 'totalMade' in v]
+    recipe_spins.sort(key=lambda x: x[1], reverse=True)
+    print(f"\n### 🍨 Community Recipe Spins Logged ({len(recipe_spins)} Recipes)")
+    if recipe_spins:
+        print("| Recipe | Total Spins Logged |")
+        print("| :--- | :---: |")
+        for rec_name, count in recipe_spins:
+            print(f"| **{rec_name}** | **{count} spins** |")
     else:
-        print("*No user feedback submissions logged yet.*")
+        print("*No recipe batches logged yet.*")
 
 if __name__ == '__main__':
     generate_full_report()
+
