@@ -6775,9 +6775,10 @@
 
     if (tierBadge) {
       tierBadge.textContent = tierInfo.label;
+      tierBadge.style.display = 'inline-flex';
       tierBadge.style.background = tierInfo.bg;
       tierBadge.style.color = tierInfo.color;
-      tierBadge.style.borderColor = tierInfo.border;
+      tierBadge.style.border = `1px solid ${tierInfo.border}`;
     }
 
     // Ensure capacity toggle buttons reflect active & lock state

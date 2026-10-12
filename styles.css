@@ -11314,26 +11314,31 @@ body.modal-open .cookie-consent-banner {
 .shelf-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  flex-wrap: wrap;
+  max-width: 100%;
 }
 
 .shelf-slots-toggle {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   background: rgba(15, 23, 42, 0.6);
   padding: 3px 6px;
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.08);
+  max-width: 100%;
+  flex-wrap: nowrap;
 }
 
 .shelf-slots-label {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 700;
   color: #64748b;
-  margin-right: 4px;
+  margin-right: 3px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  white-space: nowrap;
 }
 
 .btn-slot-cap {
@@ -11342,10 +11347,16 @@ body.modal-open .cookie-consent-banner {
   color: #94a3b8;
   font-size: 0.78rem;
   font-weight: 700;
-  padding: 3px 8px;
+  padding: 4px 8px;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.15s ease;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  flex-shrink: 0;
 }
 
 .btn-slot-cap:hover {
@@ -11357,6 +11368,13 @@ body.modal-open .cookie-consent-banner {
   background: #38bdf8;
   color: #0f172a;
   box-shadow: 0 2px 8px rgba(56, 189, 248, 0.4);
+}
+
+.btn-slot-cap.locked-cap {
+  background: rgba(15, 23, 42, 0.45);
+  border: 1px dashed rgba(148, 163, 184, 0.28);
+  color: #cbd5e1;
+  padding: 3px 7px;
 }
 
 .btn-shelf-toggle-collapse {
@@ -11372,6 +11390,7 @@ body.modal-open .cookie-consent-banner {
   cursor: pointer;
   font-size: 0.9rem;
   transition: all 0.15s ease;
+  flex-shrink: 0;
 }
 
 .btn-shelf-toggle-collapse:hover {
@@ -11696,6 +11715,26 @@ body.modal-open .cookie-consent-banner {
 @media (max-width: 640px) {
   .freezer-shelf-widget {
     padding: 14px;
+  }
+  .shelf-actions {
+    width: 100%;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .btn-shelf-batch-prep {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+  .shelf-slots-toggle {
+    width: 100%;
+    justify-content: space-between;
+    padding: 5px 10px;
+    order: 3;
+  }
+  .btn-slot-cap {
+    flex: 1 1 0;
+    padding: 5px 6px;
+    font-size: 0.8rem;
   }
   .shelf-slots-grid {
     grid-template-columns: 1fr 1fr;
