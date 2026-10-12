@@ -5171,47 +5171,61 @@
     canvas.height = height;
     const ctx = canvas.getContext('2d');
 
-    // 1. Full-Bleed Deep Obsidian & Blackberry Gradient (Edge-to-Edge)
+    // 1. Full-Bleed Radiant Gradient extending 100% to all borders
     const bg = ctx.createLinearGradient(0, 0, width, height);
-    bg.addColorStop(0, '#0a0d18');
-    bg.addColorStop(0.3, '#10162a');
-    bg.addColorStop(0.65, '#201238');
-    bg.addColorStop(1, '#30114a');
+    bg.addColorStop(0, '#1c0a32');     // Deep royal violet
+    bg.addColorStop(0.25, '#2c084f');  // Rich purple
+    bg.addColorStop(0.55, '#450749');  // Vibrant plum / magenta
+    bg.addColorStop(0.85, '#35075a');  // Rich deep violet
+    bg.addColorStop(1, '#1a0533');     // Bottom violet
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, width, height);
 
-    // 2. Full-Bleed Radiant Mesh Glows extending to the very edges
-    // Top-right coral & rose aura
-    const glowPink = ctx.createRadialGradient(width * 0.9, height * 0.08, 0, width * 0.9, height * 0.08, width * 0.7);
-    glowPink.addColorStop(0, 'rgba(244, 63, 94, 0.40)');
-    glowPink.addColorStop(0.5, 'rgba(236, 72, 153, 0.18)');
-    glowPink.addColorStop(1, 'rgba(236, 72, 153, 0)');
+    // 2. Radiant mesh glows extending edge-to-edge
+    const glowPink = ctx.createRadialGradient(width * 0.85, height * 0.08, 0, width * 0.85, height * 0.08, width * 0.85);
+    glowPink.addColorStop(0, 'rgba(244, 63, 94, 0.48)');
+    glowPink.addColorStop(0.4, 'rgba(236, 72, 153, 0.30)');
+    glowPink.addColorStop(0.8, 'rgba(217, 70, 239, 0.15)');
+    glowPink.addColorStop(1, 'rgba(217, 70, 239, 0)');
     ctx.fillStyle = glowPink;
     ctx.fillRect(0, 0, width, height);
 
-    // Top-left electric violet aura
-    const glowViolet = ctx.createRadialGradient(width * 0.1, height * 0.25, 0, width * 0.1, height * 0.25, width * 0.65);
-    glowViolet.addColorStop(0, 'rgba(147, 51, 234, 0.35)');
-    glowViolet.addColorStop(0.5, 'rgba(147, 51, 234, 0.14)');
-    glowViolet.addColorStop(1, 'rgba(147, 51, 234, 0)');
+    const glowViolet = ctx.createRadialGradient(width * 0.1, height * 0.22, 0, width * 0.1, height * 0.22, width * 0.8);
+    glowViolet.addColorStop(0, 'rgba(147, 51, 234, 0.42)');
+    glowViolet.addColorStop(0.5, 'rgba(124, 58, 237, 0.22)');
+    glowViolet.addColorStop(1, 'rgba(99, 102, 241, 0)');
     ctx.fillStyle = glowViolet;
     ctx.fillRect(0, 0, width, height);
 
-    // Bottom-center warm peach & rose glow
-    const glowPeach = ctx.createRadialGradient(width * 0.5, height * 0.95, 0, width * 0.5, height * 0.95, width * 0.75);
-    glowPeach.addColorStop(0, 'rgba(251, 146, 60, 0.24)');
-    glowPeach.addColorStop(0.5, 'rgba(244, 114, 182, 0.14)');
-    glowPeach.addColorStop(1, 'rgba(244, 114, 182, 0)');
+    const glowPeach = ctx.createRadialGradient(width * 0.5, height * 0.95, 0, width * 0.5, height * 0.95, width * 0.85);
+    glowPeach.addColorStop(0, 'rgba(251, 146, 60, 0.35)');
+    glowPeach.addColorStop(0.45, 'rgba(244, 114, 182, 0.22)');
+    glowPeach.addColorStop(0.85, 'rgba(168, 85, 247, 0.12)');
+    glowPeach.addColorStop(1, 'rgba(168, 85, 247, 0)');
     ctx.fillStyle = glowPeach;
     ctx.fillRect(0, 0, width, height);
 
-    // NO black border frame or corner stars (colors extend edge-to-edge full bleed!)
+    const glowLeft = ctx.createRadialGradient(0, height * 0.55, 0, 0, height * 0.55, width * 0.5);
+    glowLeft.addColorStop(0, 'rgba(192, 38, 211, 0.22)');
+    glowLeft.addColorStop(1, 'rgba(192, 38, 211, 0)');
+    ctx.fillStyle = glowLeft;
+    ctx.fillRect(0, 0, width, height);
+
+    const glowRight = ctx.createRadialGradient(width, height * 0.45, 0, width, height * 0.45, width * 0.5);
+    glowRight.addColorStop(0, 'rgba(236, 72, 153, 0.25)');
+    glowRight.addColorStop(1, 'rgba(236, 72, 153, 0)');
+    ctx.fillStyle = glowRight;
+    ctx.fillRect(0, 0, width, height);
+
+    // CRITICAL: Initialize textAlign to center for all canvas text
+    ctx.textAlign = 'center';
 
     let curY = ratio === 'story' ? 110 : 65;
 
     // 3. Header Brand Pill
     const brandText = '🍨 CREAMICRAVINGS.COM';
     ctx.font = ratio === 'story' ? '800 32px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' : '800 26px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.textAlign = 'center';
     const brandWidth = ctx.measureText(brandText).width + (ratio === 'story' ? 56 : 46);
     const brandH = ratio === 'story' ? 56 : 46;
     drawRoundedRect(ctx, (width - brandWidth) / 2, curY - (brandH / 2), brandWidth, brandH, brandH / 2, 'rgba(255, 255, 255, 0.08)', 'rgba(255, 255, 255, 0.2)', 1.5);
@@ -5234,6 +5248,7 @@
     else if (cat.includes('CHOCOLATE')) catEmoji = '🍫';
 
     ctx.font = ratio === 'story' ? '800 26px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' : '800 22px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.textAlign = 'center';
     const tagText = `${catEmoji} ${cat} • OFFICIAL RECIPE`;
     const tagWidth = ctx.measureText(tagText).width + (ratio === 'story' ? 56 : 46);
     const tagH = ratio === 'story' ? 52 : 44;
@@ -5255,6 +5270,7 @@
     ctx.shadowColor = 'rgba(0, 0, 0, 0.95)';
     ctx.shadowBlur = 24;
     ctx.shadowOffsetY = 6;
+    ctx.textAlign = 'center';
 
     const lines = wrapCanvasText(ctx, recipe.name, titleMaxWidth);
     for (let i = 0; i < lines.length; i++) {
@@ -5276,6 +5292,7 @@
     const scoreGrade = recipe.creaminessGrade || 'Balanced';
     const scoreText = `🧪 Creaminess: ${scoreVal}/10 (${scoreGrade}) • 🥣 16 oz Pint • ⏱️ ${recipe.prepTime || '2 Min'} Prep`;
     ctx.font = ratio === 'story' ? '700 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' : '700 19px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.textAlign = 'center';
     const scoreWidth = ctx.measureText(scoreText).width + (ratio === 'story' ? 52 : 44);
     const scoreH = ratio === 'story' ? 48 : 40;
     drawRoundedRect(ctx, (width - scoreWidth) / 2, curY - (scoreH / 2), scoreWidth, scoreH, scoreH / 2, 'rgba(16, 185, 129, 0.16)', 'rgba(16, 185, 129, 0.5)', 1.5);
@@ -5319,6 +5336,7 @@
       drawRoundedRect(ctx, cx + 18, curY, cardW - 36, 6, 3, it.color, null);
 
       // Icon & Label
+      ctx.textAlign = 'center';
       ctx.font = ratio === 'story' ? '800 22px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' : '800 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
       ctx.fillStyle = '#94a3b8';
       ctx.fillText(`${it.icon} ${it.label}`, cx + cardW / 2, curY + (ratio === 'story' ? 38 : 32));
@@ -5344,6 +5362,7 @@
     drawRoundedRect(ctx, specX, curY, specW, specH, 22, 'rgba(15, 23, 42, 0.92)', 'rgba(168, 85, 247, 0.4)', 1.5);
 
     // Deck Header Tag
+    ctx.textAlign = 'center';
     ctx.font = ratio === 'story' ? '800 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' : '800 15px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
     ctx.fillStyle = '#c084fc';
     ctx.fillText('🌀 NINJA CREAMI® MACHINE SETTINGS', width / 2, curY + (ratio === 'story' ? 30 : 24));
@@ -5375,6 +5394,7 @@
       }
 
       // Column Label
+      ctx.textAlign = 'center';
       ctx.font = ratio === 'story' ? '800 16px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' : '800 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
       ctx.fillStyle = '#94a3b8';
       ctx.fillText(item.label, colX + colW / 2, curY + (ratio === 'story' ? 68 : 52));
@@ -5491,6 +5511,7 @@
 
           ctx.font = '700 21px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
           ctx.fillStyle = '#f8fafc';
+          ctx.textAlign = 'center';
 
           let displayTrimmed = displayText;
           const maxCellTextWidth = cellW - 24;
@@ -5508,6 +5529,7 @@
       // Pro Tip Pill for Square
       const tipText = '💡 Pro Tip: Spin on Lite Ice Cream + 1 Respin for silky texture!';
       ctx.font = '700 22px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.textAlign = 'center';
       const tipWidth = ctx.measureText(tipText).width + 50;
       drawRoundedRect(ctx, (width - tipWidth) / 2, curY, tipWidth, 48, 24, 'rgba(251, 191, 36, 0.08)', 'rgba(251, 191, 36, 0.32)', 1);
       ctx.fillStyle = '#fbbf24';
@@ -5520,6 +5542,7 @@
     // Glowing Action Pill
     const ctaText = '🍨 DISCOVER 200+ RECIPES • CREAMICRAVINGS.COM';
     ctx.font = ratio === 'story' ? '800 32px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' : '800 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.textAlign = 'center';
     const ctaWidth = ctx.measureText(ctaText).width + (ratio === 'story' ? 60 : 48);
     const ctaH = ratio === 'story' ? 62 : 48;
     drawRoundedRect(ctx, (width - ctaWidth) / 2, footerY - (ctaH / 2) - 8, ctaWidth, ctaH, ctaH / 2, 'rgba(236, 72, 153, 0.28)', 'rgba(236, 72, 153, 0.8)', 2);
