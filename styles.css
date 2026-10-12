@@ -11920,10 +11920,10 @@ body.modal-open .cookie-consent-banner {
 .batch-prep-modal-content {
   max-width: 720px;
   width: 94%;
-  height: min(88vh, 840px);
-  max-height: 88vh;
-  max-height: 88dvh;
-  padding: 24px 28px 20px;
+  height: min(90vh, 860px);
+  max-height: 90vh;
+  max-height: 90dvh;
+  padding: 16px 22px 14px;
   display: flex;
   flex-direction: column;
   overflow: hidden !important; /* Prevents the main/outer scrollbar completely */
@@ -11931,24 +11931,36 @@ body.modal-open .cookie-consent-banner {
 
 .batch-prep-modal-content .modal-header {
   flex-shrink: 0;
-  padding-bottom: 12px;
+  padding-bottom: 8px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  margin-bottom: 12px;
+  margin-bottom: 8px;
+}
+
+.batch-prep-modal-content .modal-title {
+  font-size: 1.15rem;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.batch-prep-modal-content .modal-subtitle {
+  font-size: 0.76rem;
+  margin: 2px 0 0;
+  line-height: 1.25;
 }
 
 .batch-prep-title-row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .batch-prep-icon-badge {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   background: rgba(99, 102, 241, 0.15);
   border: 1px solid rgba(99, 102, 241, 0.35);
-  border-radius: 12px;
-  width: 42px;
-  height: 42px;
+  border-radius: 10px;
+  width: 34px;
+  height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -11966,12 +11978,12 @@ body.modal-open .cookie-consent-banner {
 }
 
 .batch-prep-section {
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 
 .batch-prep-section.batch-prep-queued-section {
   flex-shrink: 0;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
 }
 
 .batch-prep-section.batch-prep-list-section {
@@ -11987,12 +11999,12 @@ body.modal-open .cookie-consent-banner {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   flex-shrink: 0;
 }
 
 .batch-prep-section-header h4 {
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   font-weight: 800;
   color: #f1f5f9;
   margin: 0;
@@ -12002,26 +12014,27 @@ body.modal-open .cookie-consent-banner {
   font-size: 0.74rem;
   font-weight: 700;
   color: #94a3b8;
+  white-space: nowrap;
 }
 
 /* Queued Pints Strip */
 .batch-prep-pints-strip {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   overflow-x: auto;
-  padding-bottom: 6px;
+  padding-bottom: 4px;
   scrollbar-width: thin;
 }
 
 .batch-pint-chip {
   background: rgba(30, 41, 59, 0.7);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
-  padding: 8px 12px;
+  border-radius: 10px;
+  padding: 5px 10px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  min-width: 170px;
+  gap: 8px;
+  min-width: 150px;
   flex-shrink: 0;
   position: relative;
 }
@@ -12034,7 +12047,7 @@ body.modal-open .cookie-consent-banner {
 }
 
 .batch-pint-chip-title {
-  font-size: 0.84rem;
+  font-size: 0.8rem;
   font-weight: 700;
   color: #f8fafc;
   white-space: nowrap;
@@ -12043,9 +12056,9 @@ body.modal-open .cookie-consent-banner {
 }
 
 .batch-pint-chip-scale {
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   color: #94a3b8;
-  margin-top: 2px;
+  margin-top: 1px;
 }
 
 .btn-batch-chip-remove {
@@ -12053,7 +12066,7 @@ body.modal-open .cookie-consent-banner {
   border: none;
   color: #64748b;
   cursor: pointer;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   padding: 2px 4px;
   border-radius: 4px;
   transition: all 0.15s ease;
@@ -12132,22 +12145,22 @@ body.modal-open .cookie-consent-banner {
 }
 
 .batch-quick-add-controls {
-  margin-top: 12px;
+  margin-top: 6px;
   display: flex;
-  gap: 8px;
+  gap: 6px;
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .batch-quick-add-select {
   flex: 1;
-  min-width: 220px;
-  padding: 8px 12px;
+  min-width: 0;
+  padding: 6px 10px;
   background: rgba(15, 23, 42, 0.7);
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 8px;
   color: #f8fafc;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   outline: none;
 }
 
@@ -12159,10 +12172,10 @@ body.modal-open .cookie-consent-banner {
   background: rgba(245, 158, 11, 0.15);
   border: 1px solid rgba(245, 158, 11, 0.4);
   color: #fbbf24;
-  font-size: 0.82rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  padding: 8px 12px;
-  border-radius: 8px;
+  padding: 4px 10px;
+  border-radius: 7px;
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
@@ -12183,8 +12196,8 @@ body.modal-open .cookie-consent-banner {
   -webkit-overflow-scrolling: touch;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding-right: 6px;
+  gap: 10px;
+  padding-right: 4px;
   scrollbar-width: thin;
   scrollbar-color: rgba(99, 102, 241, 0.45) transparent;
 }
@@ -12209,18 +12222,18 @@ body.modal-open .cookie-consent-banner {
 .batch-prep-group {
   background: rgba(15, 23, 42, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 12px;
-  padding: 12px 14px;
+  border-radius: 10px;
+  padding: 10px 12px;
 }
 
 .batch-prep-group-title {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 0.84rem;
+  font-size: 0.8rem;
   font-weight: 800;
-  margin-bottom: 10px;
-  padding-bottom: 8px;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
@@ -12302,15 +12315,15 @@ body.modal-open .cookie-consent-banner {
 .batch-prep-items-list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
 }
 
 .batch-grocery-item-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  padding: 6px 8px;
+  gap: 8px;
+  padding: 5px 8px;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.02);
   transition: background 0.15s ease;
@@ -12323,26 +12336,32 @@ body.modal-open .cookie-consent-banner {
 .batch-grocery-item-left {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   flex: 1;
+  min-width: 0;
 }
 
 .batch-grocery-item-name {
-  font-size: 0.84rem;
+  font-size: 0.82rem;
   font-weight: 600;
   color: #e2e8f0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .batch-grocery-item-used {
-  font-size: 0.68rem;
+  font-size: 0.66rem;
   color: #64748b;
   background: rgba(255, 255, 255, 0.06);
-  padding: 1px 6px;
+  padding: 1px 5px;
   border-radius: 999px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .batch-grocery-item-qty {
-  font-size: 0.84rem;
+  font-size: 0.82rem;
   font-weight: 800;
   color: #38bdf8;
   white-space: nowrap;
@@ -12352,12 +12371,27 @@ body.modal-open .cookie-consent-banner {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
+  gap: 8px;
+  flex-wrap: nowrap;
   flex-shrink: 0;
-  margin-top: 12px;
-  padding-top: 12px;
+  margin-top: 8px;
+  padding-top: 10px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.batch-prep-footer .batch-footer-btn-secondary {
+  flex: 0 1 auto;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.batch-prep-footer .batch-footer-btn-primary {
+  flex: 1 1 auto;
+  padding: 8px 14px;
+  font-size: 0.84rem;
+  white-space: nowrap;
+  justify-content: center;
 }
 
 @media (max-width: 640px) {
@@ -12366,25 +12400,25 @@ body.modal-open .cookie-consent-banner {
     height: 94vh;
     height: 94dvh;
     max-height: 94vh;
-    padding: 16px 14px 14px;
+    padding: 12px 12px 10px;
+  }
+  .batch-prep-modal-content .modal-subtitle {
+    display: none;
   }
   .batch-prep-footer {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+    padding-top: 8px;
   }
-  .batch-prep-footer-left,
-  .batch-prep-footer-right {
-    width: 100%;
-    display: flex;
-    justify-content: stretch;
-    gap: 8px;
+  .batch-prep-footer .batch-footer-btn-secondary {
+    padding: 8px 9px;
+    font-size: 0.76rem;
   }
-  .batch-prep-footer-left button,
-  .batch-prep-footer-right button {
-    flex: 1;
-    text-align: center;
-    justify-content: center;
+  .batch-prep-footer .batch-footer-btn-primary {
+    padding: 8px 10px;
+    font-size: 0.8rem;
   }
 }
 

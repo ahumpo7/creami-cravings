@@ -7833,7 +7833,7 @@
     // Populate Quick Add Select & Bind In-Modal Prep Controls
     const quickSelect = document.getElementById('batchPrepQuickAddSelect');
     if (quickSelect) {
-      const unqueued = allRecipes.filter(r => !isRecipeInBatchPrep(r.id)).slice(0, 80);
+      const unqueued = allRecipes.filter(r => isRecipeAccessible(r) && !isRecipeInBatchPrep(r.id)).slice(0, 120);
       quickSelect.innerHTML = '<option value="">+ Add a Recipe to this Batch...</option>' + 
         unqueued.map(r => `<option value="${r.id}">${escapeHtml(r.name)} (${escapeHtml(r.category || 'High Protein')})</option>`).join('');
     }
@@ -7856,16 +7856,43 @@
     if (samplerBtn && !samplerBtn._bound) {
       samplerBtn._bound = true;
       samplerBtn.addEventListener('click', () => {
-        const sampleIds = ['fairlife_chocolate', 'cookies_and_cream_fan_favorite', 'vanilla_protein_shake', 'peanut_butter_chocolate_banana'];
-        sampleIds.forEach(id => {
-          const rec = allRecipes.find(r => r.id === id);
-          if (rec && !isRecipeInBatchPrep(rec.id) && batchPrepQueueState.length < 4) {
-            batchPrepQueueState.push({ recipeId: rec.id, recipeName: rec.name, scale: 1.0 });
+        const preferredIds = [
+          'chocolate',
+          'cookies_and_cream_fan_favorite',
+          'vanilla_protein_shake',
+          'peanut_butter_chocolate_banana',
+          'vanilla',
+          'strawberry',
+          'mint_chocolate_chip',
+          'cake_batter_fan_favorite'
+        ];
+        const accessiblePool = allRecipes.filter(r => isRecipeAccessible(r));
+        const candidates = [];
+        preferredIds.forEach(id => {
+          const rec = accessiblePool.find(r => r.id === id) || allRecipes.find(r => r.id === id && isRecipeAccessible(r));
+          if (rec && !candidates.some(c => c.id === rec.id)) {
+            candidates.push(rec);
           }
         });
+        accessiblePool.forEach(rec => {
+          if (candidates.length < 8 && !candidates.some(c => c.id === rec.id)) {
+            candidates.push(rec);
+          }
+        });
+
+        // If user already had >= 4 pints queued, reset to a fresh 4-pint sampler; otherwise top up to 4 pints
+        if (batchPrepQueueState.length >= 4) {
+          batchPrepQueueState = [];
+        }
+        for (const rec of candidates) {
+          if (batchPrepQueueState.length >= 4) break;
+          if (!isRecipeInBatchPrep(rec.id)) {
+            batchPrepQueueState.push({ recipeId: rec.id, recipeName: rec.name, scale: 1.0 });
+          }
+        }
         saveBatchPrepQueue();
         renderBatchPrepModal();
-        showToast('🍱 Loaded 4 Signature Pints into Sunday Batch Prep!');
+        showToast(`🍱 Loaded ${batchPrepQueueState.length} Signature Pints into Sunday Batch Prep!`);
       });
     }
 

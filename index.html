@@ -108,7 +108,7 @@
   <link rel="icon" type="image/png" sizes="144x144" href="icon-144.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=beta15">
+  <link rel="stylesheet" href="styles.css?v=beta16">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -1130,8 +1130,8 @@
         <div class="batch-prep-title-row">
           <div class="batch-prep-icon-badge">🍱</div>
           <div>
-            <h2 class="modal-title">Sunday Batch Prep &amp; Grocery List</h2>
-            <p class="modal-subtitle" id="batchPrepSubtitle">Aggregated shopping list for your weekly batch of pints.</p>
+            <h2 class="modal-title">Sunday Batch Prep</h2>
+            <p class="modal-subtitle" id="batchPrepSubtitle">Weekly batch queue &amp; consolidated grocery list.</p>
           </div>
         </div>
       </div>
@@ -1140,8 +1140,11 @@
         <!-- Queued Pints Row -->
         <div class="batch-prep-section batch-prep-queued-section">
           <div class="batch-prep-section-header">
-            <h4>Queued Pints for this Prep Session</h4>
-            <span class="count-pill" id="batchPrepPintsCount">0 Pints</span>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <h4>Queued Pints</h4>
+              <span class="count-pill" id="batchPrepPintsCount">0 Pints</span>
+            </div>
+            <button type="button" class="btn-batch-sampler-quick" id="btnBatchPrepLoadSampler" title="Load 4 top-rated high-protein pints into your batch queue">⚡ 4-Pint Sampler</button>
           </div>
           <div class="batch-prep-pints-strip" id="batchPrepPintsStrip">
             <!-- Rendered dynamically -->
@@ -1150,15 +1153,14 @@
             <select id="batchPrepQuickAddSelect" class="batch-quick-add-select" aria-label="Select recipe to add to batch">
               <option value="">+ Add a Recipe to this Batch...</option>
             </select>
-            <button type="button" class="btn-secondary" id="btnBatchPrepQuickAdd" style="padding: 7px 12px; font-size: 0.85rem;">+ Add Pint</button>
-            <button type="button" class="btn-batch-sampler-quick" id="btnBatchPrepLoadSampler" title="Load 4 top-rated high-protein pints into your batch queue">⚡ 4-Pint Sampler</button>
+            <button type="button" class="btn-secondary" id="btnBatchPrepQuickAdd" style="padding: 6px 12px; font-size: 0.82rem; white-space: nowrap;">+ Add Pint</button>
           </div>
         </div>
 
         <!-- Consolidated Grocery List -->
         <div class="batch-prep-section batch-prep-list-section">
           <div class="batch-prep-section-header">
-            <h4>Consolidated Ingredients Breakdown</h4>
+            <h4>Consolidated Ingredients</h4>
             <span class="batch-prep-pantry-match" id="batchPrepPantryMatchBadge">Checking Pantry...</span>
           </div>
 
@@ -1184,13 +1186,9 @@
       </div>
 
       <div class="modal-footer batch-prep-footer">
-        <div class="batch-prep-footer-left">
-          <button type="button" class="btn-secondary" id="btnBatchCopyList">📋 Copy Formatted List</button>
-        </div>
-        <div class="batch-prep-footer-right" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-          <button type="button" class="btn-secondary" id="btnBatchFillFreezerSlots">❄️ Quick Freeze Slots</button>
-          <button type="button" class="btn-primary" id="btnStartBatchAssembly">👩‍🍳 Kitchen Assembly Mode →</button>
-        </div>
+        <button type="button" class="btn-secondary batch-footer-btn-secondary" id="btnBatchCopyList" title="Copy formatted grocery list">📋 Copy</button>
+        <button type="button" class="btn-secondary batch-footer-btn-secondary" id="btnBatchFillFreezerSlots" title="Fill empty freezer shelf slots with queued pints">❄️ Freeze Slots</button>
+        <button type="button" class="btn-primary batch-footer-btn-primary" id="btnStartBatchAssembly">👩‍🍳 Prep Mode →</button>
       </div>
     </div>
   </div>
@@ -3137,6 +3135,6 @@
 
   <!-- Scripts -->
   <script src="recipes-data.js?v=beta9"></script>
-  <script src="app.js?v=beta15"></script>
+  <script src="app.js?v=beta16"></script>
 </body>
 </html>
