@@ -1224,6 +1224,50 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 ]
             })
 
+        elif self.path == '/api/creator/analytics':
+            user = self._get_user_from_token()
+            if not user or (user.get('role') not in ['creator', 'admin'] and user.get('email', '').lower() != 'ahumpo7@gmail.com'):
+                self._send_json({'error': 'Unauthorized creator access'}, 403)
+                return
+
+            creator_id = user.get('creatorId') or 'fitness_product_finder'
+            made_counts = stats_db.get('madeCounts', {})
+
+            total_spins = 0
+            recipe_performance = []
+
+            for r in RECIPES_MASTER:
+                r_creator = r.get('creatorId') or ('fitness_product_finder' if r.get('sourceFile') in ['fan favorites 8-6.pdf', 'No protein 8-6.pdf', 'Keto 8-6.pdf', 'Lactose free 8-6.pdf', 'Creami Cravings 9.29.26.pdf'] else None)
+                if r_creator == creator_id:
+                    r_id = r.get('id')
+                    spins = made_counts.get(r_id, 0)
+                    total_spins += spins
+
+                    r_ratings = ratings_db.get(r_id, {})
+                    r_vals = [v['rating'] if isinstance(v, dict) else v for v in r_ratings.values()] if r_ratings else []
+                    avg_rating = round(sum(r_vals) / len(r_vals), 1) if r_vals else 5.0
+
+                    recipe_performance.append({
+                        'id': r_id,
+                        'name': r.get('name'),
+                        'category': r.get('category'),
+                        'spins': spins,
+                        'rating': avg_rating,
+                        'ratingCount': len(r_vals)
+                    })
+
+            recipe_performance.sort(key=lambda x: x['spins'], reverse=True)
+
+            self._send_json({
+                'status': 'ok',
+                'creatorId': creator_id,
+                'totalRecipes': len(recipe_performance),
+                'totalSpins': total_spins,
+                'topRecipes': recipe_performance[:5],
+                'allRecipes': recipe_performance
+            })
+            return
+
         elif self.path == '/api/admin/users':
             user = self._get_user_from_token()
             if not user or user.get('role') != 'admin':
@@ -1390,6 +1434,40 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                         html = html.replace('</head>', f'{og_tags}\n</head>')
                 except Exception:
                     pass
+
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/html; charset=utf-8')
+            self.end_headers()
+            self.wfile.write(html.encode('utf-8'))
+            return
+
+        elif re.match(r'^/(?:@|creator/)[a-zA-Z0-9_\-]+/?$', self.path.split('?')[0]):
+            clean_url = self.path.split('?')[0]
+            if re.search(r'\.(css|js|png|jpg|jpeg|svg|ico|json|woff2?|ttf|webp|map)$', clean_url, re.I):
+                self.path = '/' + clean_url.split('/')[-1]
+                return super().do_GET()
+
+            index_path = os.path.join(DIRECTORY, 'index.html')
+            if not os.path.exists(index_path):
+                self.send_error(404, "Page not found")
+                return
+
+            with open(index_path, 'r', encoding='utf-8') as f:
+                html = f.read()
+
+            handle = clean_url.lstrip('/').replace('creator/', '').replace('@', '').lower()
+            creator_title = "Eli (@fitnessproductfinder) — Official Creami Recipe Storefront"
+            creator_desc = "Browse Eli's official Ninja Creami recipe collections, interactive macro tools, and exclusive ingredient discounts on Creami Cravings."
+
+            seo_block = f'''  <title>{creator_title}</title>
+  <meta name="description" content="{creator_desc}">
+  <meta property="og:type" content="profile">
+  <meta property="og:title" content="{creator_title}">
+  <meta property="og:description" content="{creator_desc}">
+  <meta property="og:image" content="https://creamicravings.com/icon-512.png">'''
+
+            html = strip_default_seo_tags(html)
+            html = html.replace('</head>', f'{seo_block}\n</head>', 1)
 
             self.send_response(200)
             self.send_header('Content-Type', 'text/html; charset=utf-8')

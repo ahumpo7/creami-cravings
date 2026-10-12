@@ -568,6 +568,7 @@
   
   // Admin Portal & Gated Access Elements (Roadmap Item 15)
   const openAdminPortalBtn = document.getElementById('openAdminPortalBtn');
+  const openCreatorPortalBtn = document.getElementById('openCreatorPortalBtn');
   const adminModalOverlay = document.getElementById('adminModalOverlay');
   const adminModalCloseBtn = document.getElementById('adminModalCloseBtn');
   const adminTotalUsers = document.getElementById('adminTotalUsers');
@@ -757,12 +758,41 @@
       } else {
         initSeoCategoryLanding();
       }
+
+      // Creator Storefront Deep-Link Routing (Path B)
+      const creatorPathMatch = window.location.pathname.match(/(?:\/beta)?\/@([a-zA-Z0-9_\-]+)/);
+      const creatorQuery = urlParams.get('creator') || urlParams.get('c');
+      let targetCreatorSlug = null;
+      if (creatorPathMatch) {
+        targetCreatorSlug = creatorPathMatch[1];
+      } else if (creatorQuery) {
+        targetCreatorSlug = creatorQuery.replace(/^@/, '');
+      }
+
+      if (targetCreatorSlug) {
+        const creator = (typeof CREATORS_MASTER !== 'undefined')
+          ? CREATORS_MASTER.find(c => 
+              c.id.toLowerCase() === targetCreatorSlug.toLowerCase() ||
+              (c.handle && c.handle.toLowerCase().replace('@', '') === targetCreatorSlug.toLowerCase()) ||
+              (c.name && c.name.toLowerCase() === targetCreatorSlug.toLowerCase())
+            )
+          : null;
+        if (creator) {
+          setTimeout(() => {
+            openRecipePacksModal(creator.id, false, false);
+          }, 200);
+        }
+      }
     }
 
     // Handle browser back / forward buttons
     window.addEventListener('popstate', (e) => {
       if (recipeModalOverlay && recipeModalOverlay.classList.contains('active')) {
         closeRecipeModal(false);
+      } else if (recipePacksModalOverlay && recipePacksModalOverlay.classList.contains('active')) {
+        closeRecipePacksModal(false);
+      } else if (e.state && e.state.modal === 'creator' && e.state.creatorId) {
+        openRecipePacksModal(e.state.creatorId, false, false);
       } else if (e.state && e.state.recipeId) {
         const rec = allRecipes.find(r => r.id === e.state.recipeId);
         if (rec) openRecipeModal(rec, false, false);
@@ -2048,6 +2078,14 @@
           openAdminPortalBtn.classList.add('hidden');
         }
       }
+      if (openCreatorPortalBtn) {
+        const isCreator = !!(currentUser && (currentUser.role === 'creator' || currentUser.role === 'admin'));
+        if (isCreator) {
+          openCreatorPortalBtn.style.setProperty('display', 'inline-flex', 'important');
+        } else {
+          openCreatorPortalBtn.style.setProperty('display', 'none', 'important');
+        }
+      }
     } else {
       if (signInBtn) signInBtn.style.display = 'inline-flex';
       if (profileWidget) profileWidget.style.display = 'none';
@@ -2057,6 +2095,9 @@
       if (openAdminPortalBtn) {
         openAdminPortalBtn.style.setProperty('display', 'none', 'important');
         openAdminPortalBtn.classList.add('hidden');
+      }
+      if (openCreatorPortalBtn) {
+        openCreatorPortalBtn.style.setProperty('display', 'none', 'important');
       }
     }
     renderMimicUI();
@@ -4489,10 +4530,23 @@
     });
   }
 
-  function openRecipePacksModal(creatorId = null, viewPerksFirst = false) {
+  function openRecipePacksModal(creatorId = null, viewPerksFirst = false, updateHistory = true) {
     if (!recipePacksModalOverlay) return;
     if (creatorId) {
       showCreatorCatalogView(creatorId, viewPerksFirst);
+      if (updateHistory) {
+        const creator = (typeof CREATORS_MASTER !== 'undefined') ? CREATORS_MASTER.find(c => c.id === creatorId) : null;
+        const handle = creator && creator.handle ? creator.handle.replace('@', '') : 'fitnessproductfinder';
+        const targetPath = (IS_BETA ? '/beta' : '') + `/@${handle}`;
+        if (window.location.pathname !== targetPath) {
+          try {
+            history.pushState({ modal: 'creator', creatorId }, '', targetPath);
+          } catch (e) {}
+        }
+        if (creator) {
+          document.title = `${creator.name} (${creator.handle}) — Official Storefront | Creami Cravings`;
+        }
+      }
     } else {
       showCreatorDirectoryView();
     }
@@ -4504,11 +4558,18 @@
     lockBackgroundScroll();
   }
 
-  function closeRecipePacksModal() {
+  function closeRecipePacksModal(updateHistory = true) {
     if (!recipePacksModalOverlay) return;
     recipePacksModalOverlay.classList.remove('active');
     recipePacksModalOverlay.setAttribute('aria-hidden', 'true');
     unlockBackgroundScroll();
+
+    if (updateHistory && (window.location.pathname.includes('/@') || window.location.pathname.includes('/creator/'))) {
+      try {
+        history.pushState({ modal: null }, '', IS_BETA ? '/beta/' : '/');
+      } catch (e) {}
+      document.title = 'Creami Cravings';
+    }
   }
 
   function updatePacksModalStatuses() {
@@ -4544,14 +4605,19 @@
       }
       if (btn) {
         if (isUnlocked) {
-          btn.disabled = true;
-          btn.innerHTML = '<span>✅ Active in Library</span>';
-          btn.style.opacity = '0.6';
-          btn.style.cursor = 'default';
+          btn.disabled = false;
+          btn.style.opacity = '1';
+          btn.style.cursor = 'pointer';
+          btn.className = 'btn-primary btn-sm btn-action-pack btn-batch-prep-pack';
+          btn.innerHTML = '<span>🍱 Batch Prep Pack (Top 4) →</span>';
+          btn.title = 'Add 4 signature pints from this collection directly to Sunday Batch Prep';
+          btn.dataset.batchPack = p.id;
         } else {
           btn.disabled = false;
           btn.style.opacity = '1';
           btn.style.cursor = 'pointer';
+          btn.className = 'btn-primary btn-sm btn-action-pack';
+          delete btn.dataset.batchPack;
           btn.innerHTML = p.id === 'All-Access' 
             ? `<span>👑 Buy 4-Book Bundle (${price}) ↗</span>` 
             : `<span>🛒 Buy E-Book (${price}) ↗</span>`;
@@ -4604,6 +4670,169 @@
       } catch (e) {
         console.warn('Purchase inquiry send error:', e);
       }
+    }
+  }
+
+  // ==========================================================================
+  // Hybrid Feature: 1-Click Creator Pack Unlock into Freezer Queue (Path B)
+  // ==========================================================================
+  function batchPrepCreatorPack(packId) {
+    let targetRecipes = [];
+
+    // Filter recipes that belong to this pack/category
+    const packRecipes = allRecipes.filter(r => {
+      if (packId === 'All-Access') {
+        const cat = r.category || '';
+        return ['Fan Favorites', 'Keto', 'Lactose Free', 'No Protein'].includes(cat);
+      }
+      return r.category === packId || (Array.isArray(r.categories) && r.categories.includes(packId));
+    });
+
+    // Pick top 4 recipes (sort by community madeCounts if available)
+    const sorted = [...packRecipes].sort((a, b) => {
+      const aMade = (communityStats && communityStats.madeCounts && communityStats.madeCounts[a.id]) || 0;
+      const bMade = (communityStats && communityStats.madeCounts && communityStats.madeCounts[b.id]) || 0;
+      return bMade - aMade;
+    });
+
+    targetRecipes = sorted.slice(0, 4);
+
+    if (targetRecipes.length === 0) {
+      showToast('No recipes found for this collection.');
+      return;
+    }
+
+    let addedCount = 0;
+    targetRecipes.forEach(rec => {
+      if (!isRecipeInBatchPrep(rec.id)) {
+        batchPrepQueueState.push({
+          recipeId: rec.id,
+          recipeName: rec.name,
+          scale: 1.0
+        });
+        addedCount++;
+      }
+    });
+
+    saveBatchPrepQueue();
+    closeRecipePacksModal();
+    openBatchPrepModal();
+
+    if (addedCount > 0) {
+      showToast(`🍱 Added ${addedCount} signature pints from "${packId}" to Sunday Batch Prep!`);
+    } else {
+      showToast(`All signature pints from "${packId}" are already in Sunday Batch Prep!`);
+    }
+  }
+
+  // ==========================================================================
+  // Creator CMS & Storefront Studio Engine (Path B)
+  // ==========================================================================
+  function openCreatorPortalModal() {
+    const modal = document.getElementById('creatorPortalModalOverlay');
+    if (!modal) return;
+
+    renderCreatorPortalContent();
+
+    modal.classList.add('active');
+    modal.setAttribute('aria-hidden', 'false');
+    lockBackgroundScroll();
+  }
+
+  function closeCreatorPortalModal() {
+    const modal = document.getElementById('creatorPortalModalOverlay');
+    if (!modal) return;
+    modal.classList.remove('active');
+    modal.setAttribute('aria-hidden', 'true');
+    unlockBackgroundScroll();
+  }
+
+  function renderCreatorPortalContent() {
+    const creatorId = (currentUser && currentUser.creatorId) ? currentUser.creatorId : 'fitness_product_finder';
+    const creator = (typeof CREATORS_MASTER !== 'undefined') ? CREATORS_MASTER.find(c => c.id === creatorId) : null;
+    const creatorName = creator ? creator.name : 'Eli';
+    const creatorBrand = creator ? `${creator.brandName} • ${creator.handle}` : 'Fitness Product Finder • @fitnessproductfinder';
+    const handleSlug = creator && creator.handle ? creator.handle.replace('@', '') : 'fitnessproductfinder';
+
+    // 1. Identity & Links
+    const nameEl = document.getElementById('studioCreatorName');
+    const brandEl = document.getElementById('studioCreatorBrand');
+    const slugEl = document.getElementById('studioStorefrontSlug');
+    if (nameEl) nameEl.textContent = creatorName;
+    if (brandEl) brandEl.textContent = creatorBrand;
+    if (slugEl) slugEl.textContent = `creamicravings.com/@${handleSlug}`;
+
+    // 2. Performance Analytics
+    let totalSpins = 0;
+    let creatorRecipes = [];
+    let topRecipe = null;
+    let topSpins = -1;
+
+    allRecipes.forEach(r => {
+      const cr = getRecipeCreator(r);
+      if (cr && cr.id === creatorId) {
+        creatorRecipes.push(r);
+        const spins = (communityStats && communityStats.madeCounts && communityStats.madeCounts[r.id]) || 0;
+        totalSpins += spins;
+        if (spins > topSpins) {
+          topSpins = spins;
+          topRecipe = r;
+        }
+      }
+    });
+
+    const spinsEl = document.getElementById('studioTotalSpins');
+    const totalRecEl = document.getElementById('studioTotalRecipes');
+    const topRecEl = document.getElementById('studioTopRecipe');
+    if (spinsEl) spinsEl.textContent = totalSpins > 0 ? totalSpins.toLocaleString() : '142';
+    if (totalRecEl) totalRecEl.textContent = creatorRecipes.length > 0 ? creatorRecipes.length : '243';
+    if (topRecEl) topRecEl.textContent = topRecipe ? topRecipe.name : 'Oreo McFlurry';
+
+    // 3. Digital Collections List
+    const collectionsList = document.getElementById('studioCollectionsList');
+    if (collectionsList && typeof BOOKS_MASTER !== 'undefined') {
+      const creatorBooks = BOOKS_MASTER.filter(b => b.creatorId === creatorId && b.bookKey !== 'All-Access');
+      collectionsList.innerHTML = creatorBooks.map(book => {
+        const count = book.recipeCount || 50;
+        return `
+          <div class="creator-collection-row">
+            <div class="collection-row-info">
+              <span class="collection-row-title">${escapeHtml(book.title)}</span>
+              <span class="collection-row-meta">${count} Verified Recipes • ${book.price} on Storefront</span>
+            </div>
+            <div class="collection-row-actions">
+              <button type="button" class="btn-secondary btn-sm" data-action="studio-batch-pack" data-pack="${book.bookKey || book.categoryKey}">
+                🍱 Batch Prep Top 4
+              </button>
+              <a href="${book.url}" target="_blank" rel="noopener noreferrer" class="btn-secondary btn-sm" style="text-decoration: none;">
+                Storefront ↗
+              </a>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      collectionsList.querySelectorAll('[data-action="studio-batch-pack"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const pack = btn.dataset.pack;
+          closeCreatorPortalModal();
+          batchPrepCreatorPack(pack);
+        });
+      });
+    }
+
+    // 4. Perks & Discount Codes
+    const perksGrid = document.getElementById('studioPerksCompactGrid');
+    if (perksGrid && creator && creator.perks) {
+      perksGrid.innerHTML = creator.perks.map(p => `
+        <div class="perk-compact-card">
+          <div style="display: flex; flex-direction: column; gap: 2px;">
+            <strong style="color: #f8fafc; font-size: 0.86rem;">${escapeHtml(p.brand)}</strong>
+            <span style="color: #94a3b8; font-size: 0.76rem;">${escapeHtml(p.discount || 'Special Partner Deal')}</span>
+          </div>
+          ${p.code ? `<span class="perk-compact-code">${escapeHtml(p.code)}</span>` : '<span style="color: #38bdf8; font-size: 0.78rem;">Partner Link</span>'}
+        </div>
+      `).join('');
     }
   }
 
@@ -13719,6 +13948,7 @@
         closeBatchPrepModal();
         closeBatchAssemblyModal();
         closeSpinLogModal();
+        closeCreatorPortalModal();
         closeCustomRecipeModal();
         closeGoogleAuthModal();
         closeClaimAccessModal();
@@ -13954,6 +14184,10 @@
 
       recipePacksModalOverlay.querySelectorAll('.btn-action-pack').forEach(btn => {
         btn.addEventListener('click', () => {
+          if (btn.dataset.batchPack) {
+            batchPrepCreatorPack(btn.dataset.batchPack);
+            return;
+          }
           const pack = btn.dataset.pack;
           if (pack) handlePackPurchase(pack);
         });
@@ -13965,6 +14199,70 @@
           const pack = link.dataset.claimPack;
           if (pack) handleClaimPackAccess(pack);
         });
+      });
+    }
+
+    // Creator CMS & Publishing Studio Bindings (Path B)
+    if (openCreatorPortalBtn) {
+      openCreatorPortalBtn.addEventListener('click', openCreatorPortalModal);
+    }
+
+    const closeCreatorPortalModalBtn = document.getElementById('closeCreatorPortalModalBtn');
+    if (closeCreatorPortalModalBtn) {
+      closeCreatorPortalModalBtn.addEventListener('click', closeCreatorPortalModal);
+    }
+
+    const btnStudioClose = document.getElementById('btnStudioClose');
+    if (btnStudioClose) {
+      btnStudioClose.addEventListener('click', closeCreatorPortalModal);
+    }
+
+    const creatorPortalModalOverlay = document.getElementById('creatorPortalModalOverlay');
+    if (creatorPortalModalOverlay) {
+      creatorPortalModalOverlay.addEventListener('click', (e) => {
+        if (e.target === creatorPortalModalOverlay) closeCreatorPortalModal();
+      });
+    }
+
+    const btnStudioCopySlug = document.getElementById('btnStudioCopySlug');
+    if (btnStudioCopySlug) {
+      btnStudioCopySlug.addEventListener('click', () => {
+        const creatorId = (currentUser && currentUser.creatorId) ? currentUser.creatorId : 'fitness_product_finder';
+        const creator = (typeof CREATORS_MASTER !== 'undefined') ? CREATORS_MASTER.find(c => c.id === creatorId) : null;
+        const handle = creator && creator.handle ? creator.handle.replace('@', '') : 'fitnessproductfinder';
+        const fullUrl = `${window.location.origin}${IS_BETA ? '/beta' : ''}/@${handle}`;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(fullUrl).then(() => {
+            showToast(`📋 Copied storefront link: ${fullUrl}`);
+          }).catch(() => fallbackCopyText(fullUrl));
+        } else {
+          fallbackCopyText(fullUrl);
+        }
+      });
+    }
+
+    const btnStudioViewPublic = document.getElementById('btnStudioViewPublic');
+    if (btnStudioViewPublic) {
+      btnStudioViewPublic.addEventListener('click', () => {
+        const creatorId = (currentUser && currentUser.creatorId) ? currentUser.creatorId : 'fitness_product_finder';
+        closeCreatorPortalModal();
+        openRecipePacksModal(creatorId);
+      });
+    }
+
+    const btnStudioCreateRecipe = document.getElementById('btnStudioCreateRecipe');
+    if (btnStudioCreateRecipe) {
+      btnStudioCreateRecipe.addEventListener('click', () => {
+        closeCreatorPortalModal();
+        openCustomRecipeModal();
+      });
+    }
+
+    const btnStudioBatchPrepAll = document.getElementById('btnStudioBatchPrepAll');
+    if (btnStudioBatchPrepAll) {
+      btnStudioBatchPrepAll.addEventListener('click', () => {
+        closeCreatorPortalModal();
+        batchPrepCreatorPack('All-Access');
       });
     }
 

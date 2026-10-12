@@ -108,7 +108,7 @@
   <link rel="icon" type="image/png" sizes="144x144" href="icon-144.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=beta3">
+  <link rel="stylesheet" href="styles.css?v=beta4">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -242,6 +242,12 @@
           <button id="openAdminPortalBtn" class="btn-secondary-action btn-admin-header hidden" style="display: none !important;" title="Open Admin Portal (User Management & Tiered Access)">
             <span class="admin-text-desktop">👑 Admin Portal</span>
             <span class="admin-text-mobile">👑 Admin</span>
+          </button>
+
+          <!-- Creator Studio Header Button (Path B) -->
+          <button id="openCreatorPortalBtn" class="btn-secondary-action btn-creator-header" style="display: none;" title="Open Creator Publishing & Analytics Portal">
+            <span class="creator-text-desktop">👩‍🍳 Creator CMS</span>
+            <span class="creator-text-mobile">👩‍🍳 Creator</span>
           </button>
 
           <!-- Audio & Haptics Toggle (Roadmap Item 20) -->
@@ -2069,6 +2075,107 @@
           </p>
         </div>
       </div>
+  <!-- Creator Publishing & Analytics Studio Modal (Path B) -->
+  <div class="modal-overlay" id="creatorPortalModalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-content creator-portal-modal-content">
+      <div class="modal-handle-bar" aria-hidden="true"></div>
+      <button class="modal-close" id="closeCreatorPortalModalBtn" aria-label="Close creator portal">&times;</button>
+
+      <div class="modal-header-compact">
+        <div class="modal-title-row">
+          <span class="modal-title-icon">👩‍🍳</span>
+          <div>
+            <h2 class="modal-title" id="creatorStudioTitle">Creator Publishing &amp; Storefront Studio</h2>
+            <p class="modal-subtitle">Official verified creator portal • Audience analytics, pack batch preps &amp; recipe publishing</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="creator-portal-body">
+        <!-- Creator Identity & Storefront Quick Link -->
+        <div class="creator-studio-hero-card">
+          <div class="creator-studio-hero-left">
+            <div class="creator-studio-avatar">📖</div>
+            <div class="creator-studio-info">
+              <div class="creator-studio-name-row">
+                <h3 class="creator-studio-name" id="studioCreatorName">Eli</h3>
+                <span class="creator-verified-badge">✓ Verified Creator</span>
+              </div>
+              <span class="creator-studio-brand" id="studioCreatorBrand">Fitness Product Finder • @fitnessproductfinder</span>
+              <div class="creator-studio-link-row">
+                <span class="creator-studio-slug" id="studioStorefrontSlug">creamicravings.com/@fitnessproductfinder</span>
+                <button type="button" class="btn-studio-copy-slug" id="btnStudioCopySlug">📋 Copy Link</button>
+                <button type="button" class="btn-studio-view-public" id="btnStudioViewPublic">👁️ View Public Storefront</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Creator Audience Analytics Grid -->
+        <div class="creator-analytics-grid">
+          <div class="creator-analytic-card">
+            <span class="analytic-icon">🍨</span>
+            <div class="analytic-num" id="studioTotalSpins">0</div>
+            <div class="analytic-label">Follower Batches Spun</div>
+            <div class="analytic-sub">Total community spins</div>
+          </div>
+          <div class="creator-analytic-card">
+            <span class="analytic-icon">📖</span>
+            <div class="analytic-num" id="studioTotalRecipes">243</div>
+            <div class="analytic-label">Published Recipes</div>
+            <div class="analytic-sub">Across 5 official books</div>
+          </div>
+          <div class="creator-analytic-card">
+            <span class="analytic-icon">⭐</span>
+            <div class="analytic-num" id="studioAvgRating">4.9</div>
+            <div class="analytic-label">Average Community Rating</div>
+            <div class="analytic-sub">Texture &amp; flavor score</div>
+          </div>
+          <div class="creator-analytic-card">
+            <span class="analytic-icon">🔥</span>
+            <div class="analytic-num" id="studioTopRecipe">Oreo McFlurry</div>
+            <div class="analytic-label">#1 Most Spun Pint</div>
+            <div class="analytic-sub">Audience favorite</div>
+          </div>
+        </div>
+
+        <!-- Creator Actions Bar -->
+        <div class="creator-studio-actions-bar">
+          <button type="button" class="btn-primary" id="btnStudioCreateRecipe">
+            <span>✨ Formulate &amp; Publish New Recipe to Your Books</span>
+          </button>
+          <button type="button" class="btn-secondary" id="btnStudioBatchPrepAll">
+            <span>🍱 Sunday Batch Prep Creator Sampler (4 Pints)</span>
+          </button>
+        </div>
+
+        <!-- Creator Packs & Collections Management -->
+        <div class="creator-studio-section">
+          <div class="creator-studio-section-header">
+            <h3 class="creator-studio-section-title">📚 Your Digital Recipe Collections</h3>
+            <span class="creator-studio-badge">5 Active Collections</span>
+          </div>
+          <div class="creator-collections-list" id="studioCollectionsList">
+            <!-- Dynamically populated in app.js -->
+          </div>
+        </div>
+
+        <!-- Creator Ingredient Perks & Discount Codes -->
+        <div class="creator-studio-section">
+          <div class="creator-studio-section-header">
+            <h3 class="creator-studio-section-title">🎁 Your Active Brand Discount Codes</h3>
+            <span class="creator-studio-badge">Auto-embedded in recipe pages</span>
+          </div>
+          <div class="creator-perks-compact-grid" id="studioPerksCompactGrid">
+            <!-- Dynamically populated in app.js -->
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer creator-portal-footer">
+        <span class="creator-footer-note">💡 Followers who unlock your digital books get automatic 1-click batch prep into their visual freezer queue.</span>
+        <button type="button" class="btn-secondary" id="btnStudioClose">Close Studio</button>
+      </div>
     </div>
   </div>
 
@@ -2795,7 +2902,7 @@
   <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
   <!-- Scripts -->
-  <script src="recipes-data.js?v=beta3"></script>
-  <script src="app.js?v=beta3"></script>
+  <script src="recipes-data.js?v=beta4"></script>
+  <script src="app.js?v=beta4"></script>
 </body>
 </html>
