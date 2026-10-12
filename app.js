@@ -7355,20 +7355,75 @@
       }
     }
 
+    // Update Add All to Shopping List button state
+    const addAllShopBtn = document.getElementById('btnBatchAddMissingToShopList');
+    if (addAllShopBtn) {
+      if (missingItems.length === 0) {
+        addAllShopBtn.style.display = 'none';
+      } else {
+        addAllShopBtn.style.display = 'inline-flex';
+        const unaddedCount = missingItems.filter(item => {
+          const clean = sanitizeShoppingItemName(item.name);
+          return !manualShoppingList.has(clean) && !manualShoppingList.has(item.name);
+        }).length;
+
+        if (unaddedCount === 0) {
+          addAllShopBtn.classList.add('in-list');
+          addAllShopBtn.innerHTML = '✓ All in Shopping List';
+          addAllShopBtn.title = 'All missing ingredients are already in your app Shopping List';
+        } else {
+          addAllShopBtn.classList.remove('in-list');
+          addAllShopBtn.innerHTML = `+ Add All (${unaddedCount}) to App List`;
+          addAllShopBtn.title = 'Add all missing batch ingredients to your app Shopping List';
+        }
+      }
+    }
+
     // Render Missing List
     if (missingItems.length === 0) {
       missingList.innerHTML = '<div style="color: #4ade80; font-size: 0.84rem; padding: 8px 6px;">🎉 Amazing! You have all ingredients needed for these pints in your pantry.</div>';
     } else {
-      missingList.innerHTML = missingItems.map(item => `
-        <div class="batch-grocery-item-row">
-          <div class="batch-grocery-item-left">
-            <span style="color: #f59e0b;">🛒</span>
-            <span class="batch-grocery-item-name">${escapeHtml(item.name)}</span>
-            <span class="batch-grocery-item-used">in ${item.recipesCount} pint${item.recipesCount === 1 ? '' : 's'}</span>
+      missingList.innerHTML = missingItems.map(item => {
+        const cleanName = sanitizeShoppingItemName(item.name);
+        const inShopList = manualShoppingList.has(cleanName) || manualShoppingList.has(item.name);
+        return `
+          <div class="batch-grocery-item-row ${inShopList ? 'is-in-shop-list' : ''}">
+            <div class="batch-grocery-item-left">
+              <span style="font-size: 0.95rem;">${inShopList ? '✅' : '🛒'}</span>
+              <span class="batch-grocery-item-name">${escapeHtml(item.name)}</span>
+              <span class="batch-grocery-item-used">in ${item.recipesCount} pint${item.recipesCount === 1 ? '' : 's'}</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div class="batch-grocery-item-qty">${escapeHtml(item.qtyText)}</div>
+              <button type="button" class="btn-batch-item-toggle-shop ${inShopList ? 'in-list' : ''}" 
+                      data-action="toggle-single-batch-shop" 
+                      data-item-name="${escapeHtml(item.name)}" 
+                      title="${inShopList ? 'In your Shopping List (click to remove)' : 'Add to Shopping List'}">
+                ${inShopList ? '✓ In List' : '+ List'}
+              </button>
+            </div>
           </div>
-          <div class="batch-grocery-item-qty">${escapeHtml(item.qtyText)}</div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
+
+      missingList.querySelectorAll('[data-action="toggle-single-batch-shop"]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const rawName = btn.dataset.itemName;
+          const cleanName = sanitizeShoppingItemName(rawName);
+          if (manualShoppingList.has(cleanName) || manualShoppingList.has(rawName)) {
+            manualShoppingList.delete(cleanName);
+            manualShoppingList.delete(rawName);
+            showToast(`Removed "${rawName}" from Shopping List`);
+          } else {
+            manualShoppingList.add(cleanName);
+            showToast(`🛒 Added "${rawName}" to Shopping List!`);
+          }
+          saveManualShoppingList();
+          updateShoppingBadges();
+          renderBatchPrepModal();
+        });
+      });
     }
 
     // Render In Stock List
@@ -7438,8 +7493,9 @@
     let addedCount = 0;
     missingListEl.querySelectorAll('.batch-grocery-item-name').forEach(el => {
       const name = el.textContent.trim();
-      if (name && !manualShoppingList.has(name)) {
-        manualShoppingList.add(name);
+      const clean = sanitizeShoppingItemName(name);
+      if (clean && !manualShoppingList.has(clean) && !manualShoppingList.has(name)) {
+        manualShoppingList.add(clean);
         addedCount++;
       }
     });
@@ -7447,10 +7503,11 @@
     if (addedCount > 0) {
       saveManualShoppingList();
       updateShoppingBadges();
-      showToast(`🛒 Added ${addedCount} missing ingredients to your app Shopping List!`);
+      showToast(`🛒 Added ${addedCount} missing ingredient${addedCount === 1 ? '' : 's'} to your app Shopping List!`);
     } else {
-      showToast('All items are already in your shopping list.');
+      showToast('✓ All missing items are already in your shopping list.');
     }
+    renderBatchPrepModal();
   }
 
   function batchFillFreezerSlots() {
