@@ -5,19 +5,35 @@
 (function () {
   'use strict';
 
-  // LocalStorage Keys
-  const PANTRY_STORAGE_KEY = 'creami_pantry_v2';
-  const THEME_STORAGE_KEY = 'creami_theme_mode';
-  const FAVORITES_STORAGE_KEY = 'creami_favorites_v2';
-  const CUSTOM_RECIPES_STORAGE_KEY = 'creami_custom_recipes_v2';
-  const MANUAL_SHOPPING_STORAGE_KEY = 'creami_manual_shopping_v2';
-  const USER_RECIPE_DATA_KEY = 'creami_user_recipe_data_v2';
-  const USER_AUTH_STORAGE_KEY = 'creami_user_auth_v2';
-  const RECIPE_MADE_STORAGE_KEY = 'creami_recipe_made_v2';
-  const COMMUNITY_STATS_CACHE_KEY = 'creami_community_stats_v2';
-  const FREEZER_STORAGE_KEY = 'creami_freezer_pints_v2';
-  const MIMIC_ROLE_STORAGE_KEY = 'creami_mimic_role_v1';
-  const REAL_ADMIN_STORAGE_KEY = 'creami_real_admin_user_v1';
+  // Environment & Sandbox Isolation
+  const IS_BETA = window.location.pathname.startsWith('/beta');
+  const API_BASE = IS_BETA ? '/beta' : '';
+  const STORAGE_PREFIX = IS_BETA ? 'beta_' : '';
+
+  // Intercept fetch on beta to automatically route /api calls to /beta/api
+  if (IS_BETA && window.fetch) {
+    const origFetch = window.fetch;
+    window.fetch = function (url, options) {
+      if (typeof url === 'string' && url.startsWith('/api/')) {
+        url = '/beta' + url;
+      }
+      return origFetch.call(this, url, options);
+    };
+  }
+
+  // LocalStorage Keys (Namespaced on beta sandbox to prevent collisions with production)
+  const PANTRY_STORAGE_KEY = STORAGE_PREFIX + 'creami_pantry_v2';
+  const THEME_STORAGE_KEY = STORAGE_PREFIX + 'creami_theme_mode';
+  const FAVORITES_STORAGE_KEY = STORAGE_PREFIX + 'creami_favorites_v2';
+  const CUSTOM_RECIPES_STORAGE_KEY = STORAGE_PREFIX + 'creami_custom_recipes_v2';
+  const MANUAL_SHOPPING_STORAGE_KEY = STORAGE_PREFIX + 'creami_manual_shopping_v2';
+  const USER_RECIPE_DATA_KEY = STORAGE_PREFIX + 'creami_user_recipe_data_v2';
+  const USER_AUTH_STORAGE_KEY = STORAGE_PREFIX + 'creami_user_auth_v2';
+  const RECIPE_MADE_STORAGE_KEY = STORAGE_PREFIX + 'creami_recipe_made_v2';
+  const COMMUNITY_STATS_CACHE_KEY = STORAGE_PREFIX + 'creami_community_stats_v2';
+  const FREEZER_STORAGE_KEY = STORAGE_PREFIX + 'creami_freezer_pints_v2';
+  const MIMIC_ROLE_STORAGE_KEY = STORAGE_PREFIX + 'creami_mimic_role_v1';
+  const REAL_ADMIN_STORAGE_KEY = STORAGE_PREFIX + 'creami_real_admin_user_v1';
 
   // Default Staples Checked for New Users
   const DEFAULT_STAPLES = [];

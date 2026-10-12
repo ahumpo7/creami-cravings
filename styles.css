@@ -11179,5 +11179,63 @@ body.modal-open .cookie-consent-banner {
   color: #ffffff;
 }
 
+/* --- Beta Staging Sandbox Ribbon --- */
+.beta-ribbon-bar {
+  background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 50%, #db2777 100%);
+  color: #ffffff;
+  padding: 8px 18px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  box-shadow: 0 4px 16px rgba(79, 70, 229, 0.35);
+  position: sticky;
+  top: 0;
+  z-index: 10000;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.beta-ribbon-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.beta-badge {
+  background: rgba(0, 0, 0, 0.35);
+  color: #a5f3fc;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  border: 1px solid rgba(165, 243, 252, 0.4);
+}
+
+.beta-text {
+  color: #f1f5f9;
+  letter-spacing: 0.01em;
+}
+
+.beta-exit-link {
+  color: #ffffff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  opacity: 0.9;
+  transition: opacity 0.15s ease;
+  white-space: nowrap;
+}
+
+.beta-exit-link:hover {
+  opacity: 1;
+  color: #fed7aa;
+}
+
+
 
 
