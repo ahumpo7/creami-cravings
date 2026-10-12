@@ -56,6 +56,11 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Completely bypass service worker for beta staging environment
+  if (url.pathname.startsWith('/beta')) {
+    return;
+  }
+
   // 1. Navigation requests (HTML page): Network-first with cache fallback
   if (request.mode === 'navigate') {
     event.respondWith(

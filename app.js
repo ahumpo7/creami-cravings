@@ -6,7 +6,7 @@
   'use strict';
 
   // Environment & Sandbox Isolation
-  const IS_BETA = window.location.pathname.startsWith('/beta');
+  const IS_BETA = window.location.pathname.startsWith('/beta') || Boolean(document.querySelector('base[href*="beta"]'));
   const API_BASE = IS_BETA ? '/beta' : '';
   const STORAGE_PREFIX = IS_BETA ? 'beta_' : '';
 
@@ -14,8 +14,12 @@
   if (IS_BETA && window.fetch) {
     const origFetch = window.fetch;
     window.fetch = function (url, options) {
-      if (typeof url === 'string' && url.startsWith('/api/')) {
-        url = '/beta' + url;
+      if (typeof url === 'string') {
+        if (url.startsWith('/api/')) {
+          url = '/beta' + url;
+        } else if (url.startsWith('api/')) {
+          url = '/beta/' + url;
+        }
       }
       return origFetch.call(this, url, options);
     };
@@ -818,6 +822,15 @@
         } catch (e) {
           pantryState = new Set(DEFAULT_STAPLES);
         }
+      } else if (IS_BETA) {
+        // Clone initial pantry snapshot from production so beta user has starting items
+        const prodKey = currentUser && currentUser.id ? `creami_pantry_v2_${currentUser.id}` : 'creami_pantry_v2';
+        const prodPantry = localStorage.getItem(prodKey);
+        if (prodPantry) {
+          try { pantryState = new Set(JSON.parse(prodPantry)); } catch (e) { pantryState = new Set(DEFAULT_STAPLES); }
+        } else {
+          pantryState = new Set(DEFAULT_STAPLES);
+        }
       } else {
         pantryState = new Set(DEFAULT_STAPLES);
       }
@@ -903,7 +916,14 @@
 
   function loadStorage() {
     // 1. Google User Profile / Auth (MUST be loaded first so user identity is known!)
-    const savedUser = localStorage.getItem(USER_AUTH_STORAGE_KEY);
+    let savedUser = localStorage.getItem(USER_AUTH_STORAGE_KEY);
+    if (!savedUser && IS_BETA) {
+      const prodUser = localStorage.getItem('creami_user_auth_v2');
+      if (prodUser) {
+        localStorage.setItem(USER_AUTH_STORAGE_KEY, prodUser);
+        savedUser = prodUser;
+      }
+    }
     if (savedUser) {
       try {
         currentUser = JSON.parse(savedUser);
@@ -4065,7 +4085,7 @@
           </div>
         </div>
 
-        <h3 class="recipe-card-title"><a href="/recipe/${encodeURIComponent(recipe.id)}" class="recipe-title-link">${recipe.name}</a></h3>
+        <h3 class="recipe-card-title"><a href="${(IS_BETA ? '/beta' : '')}/recipe/${encodeURIComponent(recipe.id)}" class="recipe-title-link">${recipe.name}</a></h3>
 
         <div class="match-status-bar">
           <div class="match-status-row">
@@ -4123,7 +4143,7 @@
             ${inBatchPrep ? '🍱 Queued ✓' : '🍱 +Prep'}
           </button>
           <button type="button" class="btn-quick-freeze-card" title="Place into Virtual Freezer Slot" data-action="quick-freeze">❄️ Freeze</button>
-          <a href="/recipe/${encodeURIComponent(recipe.id)}" class="btn-view-recipe">${isAccessible ? 'View Recipe' : (isClaimPending ? '⏳ Pending' : '🔒 Locked')}</a>
+          <a href="${(IS_BETA ? '/beta' : '')}/recipe/${encodeURIComponent(recipe.id)}" class="btn-view-recipe">${isAccessible ? 'View Recipe' : (isClaimPending ? '⏳ Pending' : '🔒 Locked')}</a>
         </div>
       </div>
     `;
@@ -7792,7 +7812,7 @@
 
     // Sync browser URL with recipe deep-link
     if (updateHistory && recipe && recipe.id && !recipe.isSharedPortable) {
-      const targetPath = `/recipe/${encodeURIComponent(recipe.id)}`;
+      const targetPath = (IS_BETA ? '/beta' : '') + `/recipe/${encodeURIComponent(recipe.id)}`;
       if (window.location.pathname !== targetPath) {
         try {
           history.pushState({ modal: 'recipe', recipeId: recipe.id }, '', targetPath);
@@ -9045,9 +9065,9 @@
     if (recipeModalBody) recipeModalBody.scrollTop = 0;
     currentModalRecipe = null;
 
-    if (updateHistory && window.location.pathname.startsWith('/recipe/')) {
+    if (updateHistory && (window.location.pathname.startsWith('/recipe/') || window.location.pathname.startsWith('/beta/recipe/'))) {
       try {
-        history.pushState({ modal: null }, '', '/');
+        history.pushState({ modal: null }, '', IS_BETA ? '/beta/' : '/');
       } catch (e) {}
       document.title = 'Creami Cravings';
     }
@@ -13495,6 +13515,17 @@
 
   // --- Service Worker & PWA Offline Engine (Roadmap Item 11 & 17) ---
   function initPWA() {
+    if (IS_BETA) {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then((registrations) => {
+          for (let reg of registrations) {
+            reg.unregister();
+          }
+        });
+      }
+      return;
+    }
+
     const offlineBanner = document.getElementById('offlineIndicatorBanner');
 
     function updateOnlineStatus() {
@@ -14211,7 +14242,7 @@
           const allTab = categoryTabs.querySelector('[data-category="all"]');
           if (allTab) allTab.classList.add('active');
         }
-        window.history.pushState({}, document.title, '/');
+        window.history.pushState({}, document.title, IS_BETA ? '/beta/' : '/');
         renderRecipes();
       });
     }
