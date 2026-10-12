@@ -2081,7 +2081,7 @@
         }
       }
       if (openCreatorPortalBtn) {
-        const isCreator = !!(currentUser && (currentUser.role === 'creator' || currentUser.role === 'admin'));
+        const isCreator = !!(currentUser && currentUser.role === 'creator');
         if (isCreator) {
           openCreatorPortalBtn.style.setProperty('display', 'inline-flex', 'important');
         } else {
@@ -2120,10 +2120,8 @@
     }
 
     currentMimicRole = targetRole || 'admin';
-    if (targetRole === 'creator') {
-      if (targetCreatorId) {
-        currentMimicCreatorId = targetCreatorId;
-      }
+    if (targetCreatorId) {
+      currentMimicCreatorId = targetCreatorId;
       try { localStorage.setItem(MIMIC_CREATOR_STORAGE_KEY, currentMimicCreatorId); } catch (e) {}
     }
     try { localStorage.setItem(MIMIC_ROLE_STORAGE_KEY, currentMimicRole); } catch (e) {}
@@ -2131,28 +2129,50 @@
     if (currentMimicRole === 'guest') {
       currentUser = null;
     } else if (currentMimicRole === 'creator') {
+      const cId = targetCreatorId || currentMimicCreatorId || 'fitness_product_finder';
+      currentMimicCreatorId = cId;
       currentUser = {
         ...realAdminUser,
         role: 'creator',
-        creatorId: currentMimicCreatorId || 'fitness_product_finder',
-        subscriptions: ['All-Access', 'Base Flavors', 'Community Legends', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free', 'TestContent Sampler', 'Volume Pints']
+        creatorId: cId,
+        creatorVips: [],
+        subscriptions: cId === 'fitness_product_finder'
+          ? ['All-Access', 'Base Flavors', 'Community Legends', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free']
+          : ['Community Legends', 'TestContent Sampler', 'Volume Pints', 'TestContent All-Access']
       };
     } else if (currentMimicRole === 'vip') {
+      const cId = targetCreatorId || currentMimicCreatorId || 'fitness_product_finder';
+      currentMimicCreatorId = cId;
       currentUser = {
         ...realAdminUser,
-        role: 'vip',
-        subscriptions: ['All-Access', 'Base Flavors', 'Community Legends', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free', 'TestContent Sampler', 'Volume Pints']
+        role: 'user',
+        creatorId: null,
+        creatorVips: [cId],
+        subscriptions: ['Community Legends']
+      };
+    } else if (currentMimicRole === 'multi_sub') {
+      currentUser = {
+        ...realAdminUser,
+        role: 'user',
+        creatorId: null,
+        creatorVips: [],
+        subscriptions: ['Community Legends', 'Fan Favorites', 'TestContent Sampler']
       };
     } else if (currentMimicRole === 'user') {
       currentUser = {
         ...realAdminUser,
         role: 'user',
-        subscriptions: ['Base Flavors', 'Fan Favorites']
+        creatorId: null,
+        creatorVips: [],
+        subscriptions: ['Community Legends', 'Base Flavors']
       };
     } else {
-      // 'admin' (Real)
+      // 'admin' (Platform Support)
       currentMimicRole = 'admin';
       currentUser = JSON.parse(JSON.stringify(realAdminUser));
+      currentUser.role = 'admin';
+      currentUser.creatorId = null;
+      currentUser.creatorVips = [];
       try { localStorage.setItem(MIMIC_ROLE_STORAGE_KEY, 'admin'); } catch (e) {}
     }
 
@@ -2174,10 +2194,11 @@
       const activeCreator = (typeof CREATORS_MASTER !== 'undefined') ? CREATORS_MASTER.find(c => c.id === currentMimicCreatorId) : null;
       const creatorName = activeCreator ? activeCreator.name : 'Eli';
       const roleLabels = {
-        admin: '👑 Administrator (Real)',
-        creator: `🎨 Content Creator (${creatorName} Mode)`,
-        vip: '⭐ VIP Member (All-Access Pass)',
-        user: '👤 Standard User (Free Tier)',
+        admin: '👑 Administrator (Platform Support)',
+        creator: `🧑‍🍳 Content Creator (${creatorName} Studio)`,
+        vip: `⭐ ${creatorName} VIP Member (Unlocked)`,
+        multi_sub: '📚 Multi-Creator Subscriber (Eli + TestContent)',
+        user: '👤 Standard User (Free Starter)',
         guest: '👁️ Guest Visitor (Logged Out)'
       };
       showToast(`🎭 Active View: ${roleLabels[currentMimicRole] || currentMimicRole}`);
@@ -2205,17 +2226,19 @@
     const roleNameMap = {
       admin: 'Admin',
       creator: `Creator (${creatorName})`,
-      vip: 'VIP',
+      vip: `VIP (${creatorName})`,
+      multi_sub: 'Multi-Sub',
       user: 'User',
       guest: 'Guest'
     };
 
     const roleFullMap = {
-      admin: 'Administrator (Real)',
+      admin: 'Administrator (Platform Support)',
       creator: `Content Creator (${creatorName} Studio)`,
-      vip: 'VIP Member (All-Access)',
-      user: 'Standard User (Free Tier)',
-      guest: 'Guest (Logged Out)'
+      vip: `${creatorName} VIP Member (Unlocked)`,
+      multi_sub: 'Multi-Creator Subscriber (Eli + TestContent)',
+      user: 'Standard User (Free Starter)',
+      guest: 'Guest Visitor (Logged Out)'
     };
 
     // 1. Floating Pill
@@ -2249,7 +2272,10 @@
       adminMimicSec.querySelectorAll('.btn-mimic-select').forEach(btn => {
         const role = btn.dataset.role;
         const cId = btn.dataset.creatorId;
-        const isActive = (role === currentMimicRole) && (role !== 'creator' || (!cId || cId === currentMimicCreatorId));
+        let isActive = (role === currentMimicRole);
+        if (role === 'creator' || role === 'vip') {
+          isActive = isActive && (cId === currentMimicCreatorId);
+        }
         if (isActive) {
           btn.classList.add('active');
         } else {
@@ -2261,16 +2287,21 @@
     // 4. Modal Cards active states
     const cards = [
       { id: 'cardMimicAdmin', role: 'admin', creatorId: null },
-      { id: 'cardMimicCreator', role: 'creator', creatorId: 'fitness_product_finder' },
-      { id: 'cardMimicTestContent', role: 'creator', creatorId: 'test_content' },
-      { id: 'cardMimicVip', role: 'vip', creatorId: null },
+      { id: 'cardMimicCreatorEli', role: 'creator', creatorId: 'fitness_product_finder' },
+      { id: 'cardMimicCreatorTest', role: 'creator', creatorId: 'test_content' },
+      { id: 'cardMimicVipEli', role: 'vip', creatorId: 'fitness_product_finder' },
+      { id: 'cardMimicVipTest', role: 'vip', creatorId: 'test_content' },
+      { id: 'cardMimicMultiSub', role: 'multi_sub', creatorId: null },
       { id: 'cardMimicUser', role: 'user', creatorId: null },
       { id: 'cardMimicGuest', role: 'guest', creatorId: null }
     ];
     cards.forEach(c => {
       const el = document.getElementById(c.id);
       if (el) {
-        const isActive = (c.role === currentMimicRole) && (c.role !== 'creator' || (c.creatorId === currentMimicCreatorId));
+        let isActive = (c.role === currentMimicRole);
+        if (c.role === 'creator' || c.role === 'vip') {
+          isActive = isActive && (c.creatorId === currentMimicCreatorId);
+        }
         if (isActive) {
           el.classList.add('active');
         } else {
@@ -2318,9 +2349,24 @@
     if (!categoryName || categoryName === 'all' || categoryName === 'Community Legends' || categoryName === 'favorites' || categoryName === 'Custom') {
       return true;
     }
-    if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'vip' || currentUser.role === 'creator')) return true;
+    const book = (typeof BOOKS_MASTER !== 'undefined') 
+      ? BOOKS_MASTER.find(b => b.categoryKey === categoryName || b.bookKey === categoryName) 
+      : null;
+    const creatorId = book ? book.creatorId : 'fitness_product_finder';
+
+    if (currentUser) {
+      if (currentUser.role === 'creator' && currentUser.creatorId === creatorId) return true;
+      if (currentUser.creatorVips && Array.isArray(currentUser.creatorVips) && currentUser.creatorVips.includes(creatorId)) return true;
+      if (currentUser.role === 'admin') return true;
+    }
+
     const subs = (currentUser && Array.isArray(currentUser.subscriptions)) ? currentUser.subscriptions : ['Community Legends'];
-    if (subs.includes('All-Access')) return true;
+    
+    // Check creator-scoped all-access
+    if (creatorId === 'fitness_product_finder' && (subs.includes('All-Access') || subs.includes('Eli All-Access') || subs.includes('fitness_product_finder:all_access'))) return true;
+    if (creatorId === 'test_content' && (subs.includes('TestContent All-Access') || subs.includes('test_content:all_access'))) return true;
+    if (subs.includes(creatorId + ':all_access')) return true;
+
     const norm = normalizeCategoryName(categoryName);
     return subs.some(s => {
       const normS = normalizeCategoryName(s);
@@ -2370,6 +2416,8 @@
       if (norm.includes('keto')) return 'Keto';
       if (norm.includes('lactose')) return 'Lactose Free';
       if (norm.includes('noprot')) return 'No Protein';
+      if (norm.includes('sampler')) return 'TestContent Sampler';
+      if (norm.includes('volume')) return 'Volume Pints';
     }
     if (cats.some(c => normalizeCategoryName(c).includes('base'))) {
       return 'All-Access';
@@ -2395,18 +2443,42 @@
       return true;
     }
 
-    // All remaining recipes are Eli (FPF) recipes! Gated behind the Eli paywall.
-    if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'vip' || currentUser.role === 'creator')) {
-      return true;
+    // Determine recipe creator
+    const creatorId = recipe.creatorId || 'fitness_product_finder';
+
+    if (currentUser) {
+      // 1. Content creator owns this recipe
+      if (currentUser.role === 'creator' && currentUser.creatorId === creatorId) {
+        return true;
+      }
+      // 2. User is in this specific creator's VIP circle
+      if (currentUser.creatorVips && Array.isArray(currentUser.creatorVips) && currentUser.creatorVips.includes(creatorId)) {
+        return true;
+      }
+      // 3. User authored this custom recipe
+      if (recipe.userId && recipe.userId === currentUser.id) {
+        return true;
+      }
+      // 4. Admin preview access (for entitlement verification/support)
+      if (currentUser.role === 'admin') {
+        return true;
+      }
     }
-    if (currentUser && recipe.userId && recipe.userId === currentUser.id) {
-      return true;
-    }
+
     const subs = (currentUser && Array.isArray(currentUser.subscriptions)) ? currentUser.subscriptions : ['Community Legends'];
-    if (subs.includes('All-Access')) {
+
+    // Check creator-scoped All-Access
+    if (creatorId === 'fitness_product_finder' && (subs.includes('All-Access') || subs.includes('Eli All-Access') || subs.includes('fitness_product_finder:all_access'))) {
+      return true;
+    }
+    if (creatorId === 'test_content' && (subs.includes('TestContent All-Access') || subs.includes('test_content:all_access'))) {
+      return true;
+    }
+    if (subs.includes(creatorId + ':all_access')) {
       return true;
     }
 
+    // Check specific pack subscriptions
     const cats = (recipe.categories && recipe.categories.length > 0)
       ? recipe.categories
       : [recipe.category || 'All-Access'];
@@ -2414,12 +2486,12 @@
     return cats.some(c => {
       if (c === 'Community Legends') return true;
       if (c === 'Base Flavors') {
-        return subs.includes('All-Access') || subs.includes('Base Flavors');
+        return subs.includes('All-Access') || subs.includes('Base Flavors') || subs.includes('Eli All-Access');
       }
       const normC = normalizeCategoryName(c);
       return subs.some(s => {
         const normS = normalizeCategoryName(s);
-        return normS === normC || (normS.length > 3 && normC.includes(normS));
+        return normS === normC || (normS.length > 3 && norm.includes(normS));
       });
     });
   }
@@ -2519,27 +2591,12 @@
       ];
     }
 
-    // 2. Admin: can choose ANY cookbook / category
+    // 2. Admin: platform manager (Custom or Community Legends)
     if (user.role === 'admin') {
-      const allCats = [
+      return [
         { value: 'Custom', label: 'Custom Recipe (Personal)' },
-        { value: 'Base Flavors', label: 'Base Flavors (FPF - Eli)' },
-        { value: 'Community Legends', label: 'Community Legends (Universal Free)' },
-        { value: 'Fan Favorites', label: 'Fan Favorites (FPF - Eli)' },
-        { value: 'Keto', label: 'Keto & Low Carb (FPF - Eli)' },
-        { value: 'Lactose Free', label: 'Lactose Free (FPF - Eli)' },
-        { value: 'No Protein', label: 'No Protein (FPF - Eli)' }
+        { value: 'Community Legends', label: 'Community Legends (Universal Free)' }
       ];
-      if (typeof BOOKS_MASTER !== 'undefined') {
-        BOOKS_MASTER.forEach(b => {
-          if (b.categoryKey && !allCats.some(c => c.value === b.categoryKey)) {
-            const creator = (typeof CREATORS_MASTER !== 'undefined') ? CREATORS_MASTER.find(cr => cr.id === b.creatorId) : null;
-            const cLabel = creator ? `${b.categoryKey} (${creator.name})` : b.categoryKey;
-            allCats.push({ value: b.categoryKey, label: cLabel });
-          }
-        });
-      }
-      return allCats;
     }
 
     // 3. Content Creator: can choose any of THEIR categories, but only those categories (+ Custom for personal recipes)
@@ -2585,7 +2642,7 @@
     let hintClass = 'standard-hint';
 
     if (isAdmin) {
-      hintText = '👑 Admin Access: You can publish into any official cookbook or personal Custom library.';
+      hintText = '👑 Admin Access: You can create personal Custom recipes or publish to platform Community Legends. Official cookbooks belong strictly to content creators.';
       hintClass = 'admin-hint';
     } else if (isCreator) {
       const creatorId = getCreatorIdForUser(currentUser);
@@ -2594,7 +2651,7 @@
       hintText = `🧑‍🍳 Creator Access: You can publish to any of ${cName}'s official cookbooks or personal Custom.`;
       hintClass = 'creator-hint';
     } else {
-      hintText = '🔒 Standard users can only create personal Custom recipes. Official cookbook publishing is reserved for Creators and Admins.';
+      hintText = '🔒 Standard users can only create personal Custom recipes. Official cookbook publishing is reserved for Content Creators.';
       hintClass = 'standard-hint';
     }
 
@@ -2627,13 +2684,8 @@
     let creatorId = null;
 
     if (isAdmin) {
-      finalCategory = chosenCategory || 'Custom';
-      if (finalCategory !== 'Custom' && finalCategory !== 'Community Legends') {
-        const book = (typeof BOOKS_MASTER !== 'undefined') ? BOOKS_MASTER.find(b => b.categoryKey === finalCategory) : null;
-        if (book && book.creatorId) {
-          creatorId = book.creatorId;
-        }
-      }
+      finalCategory = (chosenCategory === 'Community Legends') ? 'Community Legends' : 'Custom';
+      creatorId = null;
     } else if (isCreator) {
       const cId = getCreatorIdForUser(currentUser);
       const allowedCats = getCategoriesForCreator(cId);
@@ -4833,6 +4885,10 @@
   // Creator CMS & Storefront Studio Engine (Path B)
   // ==========================================================================
   function openCreatorPortalModal() {
+    if (!currentUser || currentUser.role !== 'creator') {
+      showToast('⚠️ Creator Studio is reserved for content creators.');
+      return;
+    }
     const modal = document.getElementById('creatorPortalModalOverlay');
     if (!modal) return;
 
@@ -4941,6 +4997,149 @@
           ${p.code ? `<span class="perk-compact-code">${escapeHtml(p.code)}</span>` : '<span style="color: #38bdf8; font-size: 0.78rem;">Partner Link</span>'}
         </div>
       `).join('');
+    }
+    // 5. Creator VIP Member Circle
+    loadAndRenderCreatorVips(creatorId);
+  }
+
+  async function loadAndRenderCreatorVips(creatorId) {
+    const listEl = document.getElementById('studioVipsList');
+    const badgeEl = document.getElementById('studioVipCountBadge');
+    if (!listEl) return;
+
+    listEl.innerHTML = `<div style="text-align: center; color: #94a3b8; font-size: 0.85rem; padding: 12px;">Loading VIP members...</div>`;
+
+    try {
+      const headers = {};
+      if (currentUser && currentUser.token) headers['Authorization'] = `Bearer ${currentUser.token}`;
+      const res = await fetch('/api/creator/vips', { headers });
+      if (!res.ok) {
+        listEl.innerHTML = `<div style="color: #ef4444; font-size: 0.85rem; padding: 10px;">Failed to load VIP members (${res.status})</div>`;
+        return;
+      }
+      const data = await res.json();
+      const vips = data.vips || [];
+      if (badgeEl) badgeEl.textContent = `${vips.length} ${vips.length === 1 ? 'VIP' : 'VIPs'}`;
+      renderCreatorVipsList(vips);
+    } catch (err) {
+      console.error('[CREATOR VIPS] Error fetching VIPs:', err);
+      listEl.innerHTML = `<div style="color: #ef4444; font-size: 0.85rem; padding: 10px;">Error loading VIPs: ${escapeHtml(err.message)}</div>`;
+    }
+  }
+
+  function renderCreatorVipsList(vips) {
+    const listEl = document.getElementById('studioVipsList');
+    if (!listEl) return;
+
+    if (!vips || vips.length === 0) {
+      listEl.innerHTML = `
+        <div style="background: rgba(15, 23, 42, 0.4); border: 1px dashed rgba(255, 255, 255, 0.12); border-radius: 8px; padding: 18px; text-align: center; color: #94a3b8; font-size: 0.85rem;">
+          No VIP members added yet. Enter an email above to grant 100% unlocked access to your cookbooks!
+        </div>
+      `;
+      return;
+    }
+
+    listEl.innerHTML = vips.map(v => {
+      const email = typeof v === 'object' ? v.email : v;
+      const addedDate = (typeof v === 'object' && v.added_at) ? new Date(v.added_at).toLocaleDateString() : 'Active';
+      return `
+        <div class="creator-vip-row" style="display: flex; justify-content: space-between; align-items: center; background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 10px 14px; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+            <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #f59e0b, #d97706); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; flex-shrink: 0;">
+              ⭐
+            </div>
+            <div style="min-width: 0;">
+              <div style="font-weight: 600; color: #f8fafc; font-size: 0.88rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                ${escapeHtml(email)}
+              </div>
+              <div style="color: #94a3b8; font-size: 0.74rem;">
+                VIP Access Active • Granted ${escapeHtml(addedDate)}
+              </div>
+            </div>
+          </div>
+          <button type="button" class="btn-secondary btn-sm" data-action="remove-creator-vip" data-email="${escapeHtml(email)}" style="color: #f87171; border-color: rgba(239, 68, 68, 0.3); padding: 5px 10px; font-size: 0.78rem;">
+            ✕ Remove
+          </button>
+        </div>
+      `;
+    }).join('');
+
+    listEl.querySelectorAll('[data-action="remove-creator-vip"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const email = btn.dataset.email;
+        handleRemoveCreatorVip(email);
+      });
+    });
+  }
+
+  async function handleAddCreatorVip() {
+    const emailInput = document.getElementById('studioNewVipEmail');
+    if (!emailInput) return;
+    const email = emailInput.value.trim().toLowerCase();
+    if (!email || !email.includes('@')) {
+      showToast('⚠️ Please enter a valid email address.');
+      return;
+    }
+
+    const btn = document.getElementById('btnStudioAddVip');
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<span>Adding...</span>';
+    }
+
+    try {
+      const headers = { 'Content-Type': 'application/json' };
+      if (currentUser && currentUser.token) headers['Authorization'] = `Bearer ${currentUser.token}`;
+      const res = await fetch('/api/creator/vips/add', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ email, token: currentUser ? currentUser.token : '' })
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        showToast(`❌ ${data.error || 'Failed to add VIP'}`);
+        return;
+      }
+
+      showToast(`⭐ ${data.message || 'VIP access granted!'}`);
+      emailInput.value = '';
+      const creatorId = (currentUser && currentUser.creatorId) ? currentUser.creatorId : 'fitness_product_finder';
+      loadAndRenderCreatorVips(creatorId);
+    } catch (err) {
+      console.error('[CREATOR VIPS] Add VIP error:', err);
+      showToast(`❌ Error: ${err.message}`);
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<span>⭐ Grant VIP Access</span>';
+      }
+    }
+  }
+
+  async function handleRemoveCreatorVip(email) {
+    if (!email) return;
+    if (!confirm(`Are you sure you want to remove VIP access for ${email}?`)) return;
+
+    try {
+      const headers = { 'Content-Type': 'application/json' };
+      if (currentUser && currentUser.token) headers['Authorization'] = `Bearer ${currentUser.token}`;
+      const res = await fetch('/api/creator/vips/remove', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ email, token: currentUser ? currentUser.token : '' })
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        showToast(`❌ ${data.error || 'Failed to remove VIP'}`);
+        return;
+      }
+      showToast(`Removed VIP access for ${email}`);
+      const creatorId = (currentUser && currentUser.creatorId) ? currentUser.creatorId : 'fitness_product_finder';
+      loadAndRenderCreatorVips(creatorId);
+    } catch (err) {
+      console.error('[CREATOR VIPS] Remove VIP error:', err);
+      showToast(`❌ Error: ${err.message}`);
     }
   }
 
@@ -12866,7 +13065,10 @@
   }
 
   // --- Admin Portal & User Management (Roadmap Item 15) ---
-  const ALL_CATEGORY_SUBSCRIPTIONS = ['All-Access', 'Base Flavors', 'Community Legends', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free'];
+  const ELI_SUBSCRIPTIONS = ['All-Access', 'Base Flavors', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free'];
+  const TEST_CONTENT_SUBSCRIPTIONS = ['TestContent All-Access', 'TestContent Sampler', 'Volume Pints'];
+  const UNIVERSAL_SUBSCRIPTIONS = ['Community Legends'];
+  const ALL_CATEGORY_SUBSCRIPTIONS = ['Community Legends', ...ELI_SUBSCRIPTIONS, ...TEST_CONTENT_SUBSCRIPTIONS];
 
   function openAdminPortal() {
     const isSuper = (realAdminUser && (realAdminUser.email === 'ahumpo7@gmail.com' || realAdminUser.email === 'ahumpo@gmail.com')) ||
@@ -13073,16 +13275,31 @@
                   ${isCurrentAdmin ? `<span class="badge" style="font-size: 0.68rem; background: rgba(5, 150, 105, 0.2); color: #34d399; padding: 2px 6px; border-radius: 4px; font-weight: 700;">You</span>` : ''}
                 </div>
                 <div class="admin-user-email">${escapeHtml(u.email || 'No email attached')}${u.creatorId ? ` • <span style="color: #38bdf8; font-size: 0.76rem; font-weight: 600;">Creator ID: ${escapeHtml(u.creatorId)}</span>` : ''}</div>
+                ${(u.creatorVips && u.creatorVips.length > 0) ? `
+                  <div style="margin-top: 4px; display: flex; gap: 4px; flex-wrap: wrap;">
+                    ${u.creatorVips.map(cv => {
+                      const crObj = (typeof CREATORS_MASTER !== 'undefined') ? CREATORS_MASTER.find(c => c.id === cv) : null;
+                      const crName = crObj ? crObj.name : cv;
+                      return `<span style="font-size: 0.72rem; background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); border-radius: 4px; padding: 2px 6px; font-weight: 600;">⭐ VIP of: ${escapeHtml(crName)}</span>`;
+                    }).join('')}
+                  </div>
+                ` : ''}
               </div>
             </div>
 
-            <div class="admin-user-actions" style="display: flex; align-items: center; gap: 8px;">
+            <div class="admin-user-actions" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
               <select class="admin-role-select" data-user-id="${u.id}" ${isRootAdmin ? 'disabled title="Root administrator role cannot be changed"' : 'title="Change user system role"'}>
                 <option value="user" ${(!u.role || u.role === 'user') ? 'selected' : ''}>👤 Standard User</option>
                 <option value="creator" ${u.role === 'creator' ? 'selected' : ''}>🧑‍🍳 Content Creator</option>
-                <option value="vip" ${u.role === 'vip' ? 'selected' : ''}>⭐ VIP / Tester</option>
+                <option value="vip" ${u.role === 'vip' ? 'selected' : ''}>⭐ Legacy VIP / QA</option>
                 <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>👑 Administrator</option>
               </select>
+              ${u.role === 'creator' ? `
+                <select class="admin-creator-select" data-user-id="${u.id}" title="Assign Creator Storefront Profile" style="font-size: 0.78rem; background: rgba(15, 23, 42, 0.85); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 6px; padding: 6px 8px; font-weight: 600;">
+                  <option value="fitness_product_finder" ${(u.creatorId === 'fitness_product_finder' || !u.creatorId) ? 'selected' : ''}>🧑‍🍳 Eli (FPF)</option>
+                  <option value="test_content" ${u.creatorId === 'test_content' ? 'selected' : ''}>🧪 TestContent</option>
+                </select>
+              ` : ''}
               <button class="btn-admin-reset-pw" data-user-id="${u.id}" data-user-email="${u.email}" title="Reset user password directly">
                 🔑
               </button>
@@ -13104,31 +13321,83 @@
           </div>
 
           <div class="admin-subs-section">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;">
               <div class="admin-subs-title">📦 Recipe Pack Permissions:</div>
-              <div class="admin-presets-row">
-                <button type="button" class="btn-preset-all-access" data-user-id="${u.id}" title="1-Click: Unlock all 5 packs + All-Access pass">
-                  👑 Grant All-Access
+              <div class="admin-presets-row" style="display: flex; gap: 6px; flex-wrap: wrap;">
+                <button type="button" class="btn-preset-grant-eli" data-user-id="${u.id}" title="Grant Eli All-Access Bundle">
+                  👑 Eli All-Access
                 </button>
-                <button type="button" class="btn-preset-reset-free" data-user-id="${u.id}" title="1-Click: Reset to standard Base Flavors & Community Legends">
+                <button type="button" class="btn-preset-grant-test" data-user-id="${u.id}" title="Grant TestContent All-Access">
+                  🧪 TestContent All-Access
+                </button>
+                <button type="button" class="btn-preset-grant-all" data-user-id="${u.id}" title="Grant Everything Across All Creators">
+                  ✨ All Creators
+                </button>
+                <button type="button" class="btn-preset-reset-free" data-user-id="${u.id}" title="Reset to Community Legends (Free)">
                   🔒 Reset to Free
                 </button>
               </div>
             </div>
-            <div class="admin-subs-chips-wrap">
-              ${ALL_CATEGORY_SUBSCRIPTIONS.map(subName => {
-                const isActive = hasAllAccess || subs.includes(subName);
-                const isAllAccessChip = (subName === 'All-Access');
-                return `
-                  <button type="button" 
-                    class="btn-sub-chip ${isActive ? 'active' : ''} ${isAllAccessChip ? 'all-access' : ''}" 
-                    data-user-id="${u.id}" 
-                    data-sub="${subName}"
-                    title="${isActive ? 'Click to revoke ' + subName : 'Click to grant ' + subName}">
-                    ${isAllAccessChip ? '👑' : ''} ${subName} ${isActive ? '✓' : '+'}
-                  </button>
-                `;
-              }).join('')}
+
+            <!-- Platform / Universal Free -->
+            <div style="margin-bottom: 8px;">
+              <div style="font-size: 0.72rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">🌐 Platform / Universal:</div>
+              <div class="admin-subs-chips-wrap">
+                ${UNIVERSAL_SUBSCRIPTIONS.map(subName => {
+                  const isActive = subs.includes(subName);
+                  return `
+                    <button type="button" 
+                      class="btn-sub-chip ${isActive ? 'active' : ''}" 
+                      data-user-id="${u.id}" 
+                      data-sub="${subName}"
+                      title="${isActive ? 'Universal free community pack' : 'Click to enable ' + subName}">
+                      ${subName} ${isActive ? '✓' : '+'}
+                    </button>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+
+            <!-- Eli (FPF) Packs -->
+            <div style="margin-bottom: 8px;">
+              <div style="font-size: 0.72rem; color: #f59e0b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">🧑‍🍳 Eli (Fitness Product Finder):</div>
+              <div class="admin-subs-chips-wrap">
+                ${ELI_SUBSCRIPTIONS.map(subName => {
+                  const hasEliAll = subs.includes('All-Access') || subs.includes('Eli All-Access');
+                  const isActive = hasEliAll || subs.includes(subName);
+                  const isAllAccessChip = (subName === 'All-Access');
+                  return `
+                    <button type="button" 
+                      class="btn-sub-chip ${isActive ? 'active' : ''} ${isAllAccessChip ? 'all-access' : ''}" 
+                      data-user-id="${u.id}" 
+                      data-sub="${subName}"
+                      title="${isActive ? 'Click to revoke ' + subName : 'Click to grant ' + subName}">
+                      ${isAllAccessChip ? '👑 ' : ''}${subName} ${isActive ? '✓' : '+'}
+                    </button>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+
+            <!-- TestContent Studio Packs -->
+            <div>
+              <div style="font-size: 0.72rem; color: #38bdf8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">🧪 TestContent Studio:</div>
+              <div class="admin-subs-chips-wrap">
+                ${TEST_CONTENT_SUBSCRIPTIONS.map(subName => {
+                  const hasTestAll = subs.includes('TestContent All-Access');
+                  const isActive = hasTestAll || subs.includes(subName);
+                  const isAllAccessChip = (subName === 'TestContent All-Access');
+                  return `
+                    <button type="button" 
+                      class="btn-sub-chip ${isActive ? 'active' : ''} ${isAllAccessChip ? 'all-access' : ''}" 
+                      data-user-id="${u.id}" 
+                      data-sub="${subName}"
+                      title="${isActive ? 'Click to revoke ' + subName : 'Click to grant ' + subName}">
+                      ${isAllAccessChip ? '🧪 ' : ''}${subName} ${isActive ? '✓' : '+'}
+                    </button>
+                  `;
+                }).join('')}
+              </div>
             </div>
           </div>
         </div>
@@ -13148,18 +13417,53 @@
         const newRole = sel.value;
         const user = adminUsersState.find(u => u.id === userId);
         if (!user) return;
-        await updateUserPermissions(user.id, user.email, user.subscriptions || ['Community Legends'], newRole);
+        await updateUserPermissions(user.id, user.email, user.subscriptions || ['Community Legends'], newRole, user.creatorId);
       });
     });
 
-    // Preset: Grant All-Access
-    adminUsersList.querySelectorAll('.btn-preset-all-access').forEach(btn => {
+    // Creator Profile Select (when role is creator)
+    adminUsersList.querySelectorAll('.admin-creator-select').forEach(sel => {
+      sel.addEventListener('change', async () => {
+        const userId = sel.dataset.userId;
+        const newCreatorId = sel.value;
+        const user = adminUsersState.find(u => u.id === userId);
+        if (!user) return;
+        await updateUserPermissions(user.id, user.email, user.subscriptions || ['Community Legends'], user.role || 'creator', newCreatorId);
+      });
+    });
+
+    // Preset: Grant Eli All-Access
+    adminUsersList.querySelectorAll('.btn-preset-grant-eli').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const userId = btn.dataset.userId;
+        const user = adminUsersState.find(u => u.id === userId);
+        if (!user) return;
+        const existingOther = (user.subscriptions || []).filter(s => !ELI_SUBSCRIPTIONS.includes(s));
+        const newSubs = Array.from(new Set([...existingOther, ...ELI_SUBSCRIPTIONS, 'Community Legends']));
+        await updateUserPermissions(user.id, user.email, newSubs, user.role || 'user', user.creatorId);
+      });
+    });
+
+    // Preset: Grant TestContent All-Access
+    adminUsersList.querySelectorAll('.btn-preset-grant-test').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const userId = btn.dataset.userId;
+        const user = adminUsersState.find(u => u.id === userId);
+        if (!user) return;
+        const existingOther = (user.subscriptions || []).filter(s => !TEST_CONTENT_SUBSCRIPTIONS.includes(s));
+        const newSubs = Array.from(new Set([...existingOther, ...TEST_CONTENT_SUBSCRIPTIONS, 'Community Legends']));
+        await updateUserPermissions(user.id, user.email, newSubs, user.role || 'user', user.creatorId);
+      });
+    });
+
+    // Preset: Grant All Creators
+    adminUsersList.querySelectorAll('.btn-preset-grant-all').forEach(btn => {
       btn.addEventListener('click', async () => {
         const userId = btn.dataset.userId;
         const user = adminUsersState.find(u => u.id === userId);
         if (!user) return;
         const newSubs = [...ALL_CATEGORY_SUBSCRIPTIONS];
-        await updateUserPermissions(user.id, user.email, newSubs, user.role || 'user');
+        await updateUserPermissions(user.id, user.email, newSubs, user.role || 'user', user.creatorId);
       });
     });
 
@@ -13170,7 +13474,7 @@
         const user = adminUsersState.find(u => u.id === userId);
         if (!user) return;
         const newSubs = ['Community Legends'];
-        await updateUserPermissions(user.id, user.email, newSubs, user.role || 'user');
+        await updateUserPermissions(user.id, user.email, newSubs, user.role || 'user', user.creatorId);
       });
     });
 
@@ -13211,27 +13515,45 @@
 
         if (subName === 'All-Access') {
           if (curSubs.includes('All-Access')) {
-            curSubs = ['Community Legends'];
+            curSubs = curSubs.filter(s => !ELI_SUBSCRIPTIONS.includes(s));
+            if (!curSubs.includes('Community Legends')) curSubs.push('Community Legends');
           } else {
-            curSubs = [...ALL_CATEGORY_SUBSCRIPTIONS];
+            curSubs = Array.from(new Set([...curSubs, ...ELI_SUBSCRIPTIONS]));
+          }
+        } else if (subName === 'TestContent All-Access') {
+          if (curSubs.includes('TestContent All-Access')) {
+            curSubs = curSubs.filter(s => !TEST_CONTENT_SUBSCRIPTIONS.includes(s));
+            if (!curSubs.includes('Community Legends')) curSubs.push('Community Legends');
+          } else {
+            curSubs = Array.from(new Set([...curSubs, ...TEST_CONTENT_SUBSCRIPTIONS]));
           }
         } else {
           if (curSubs.includes(subName)) {
             if (subName === 'Community Legends' && curSubs.length === 1) {
-              showToast('Community Legends is the free community pack and cannot be removed.');
+              showToast('Community Legends is universal free and cannot be removed.');
               return;
             }
-            curSubs = curSubs.filter(s => s !== subName && s !== 'All-Access');
+            curSubs = curSubs.filter(s => s !== subName);
+            if (ELI_SUBSCRIPTIONS.includes(subName)) {
+              curSubs = curSubs.filter(s => s !== 'All-Access');
+            }
+            if (TEST_CONTENT_SUBSCRIPTIONS.includes(subName)) {
+              curSubs = curSubs.filter(s => s !== 'TestContent All-Access');
+            }
           } else {
             curSubs.push(subName);
-            const nonAll = ALL_CATEGORY_SUBSCRIPTIONS.filter(s => s !== 'All-Access');
-            if (nonAll.every(s => curSubs.includes(s))) {
-              curSubs.push('All-Access');
+            const nonAllEli = ELI_SUBSCRIPTIONS.filter(s => s !== 'All-Access');
+            if (nonAllEli.every(s => curSubs.includes(s))) {
+              if (!curSubs.includes('All-Access')) curSubs.push('All-Access');
+            }
+            const nonAllTest = TEST_CONTENT_SUBSCRIPTIONS.filter(s => s !== 'TestContent All-Access');
+            if (nonAllTest.every(s => curSubs.includes(s))) {
+              if (!curSubs.includes('TestContent All-Access')) curSubs.push('TestContent All-Access');
             }
           }
         }
 
-        await updateUserPermissions(user.id, user.email, curSubs, user.role);
+        await updateUserPermissions(user.id, user.email, curSubs, user.role, user.creatorId);
       });
     });
   }
@@ -13573,9 +13895,19 @@
     }
   }
 
-  async function updateUserPermissions(userId, email, newSubs, newRole) {
+  async function updateUserPermissions(userId, email, newSubs, newRole, newCreatorId = null) {
     try {
       showToast('Updating permissions...');
+      const payload = {
+        token: currentUser.token,
+        adminEmail: currentUser.email,
+        userId,
+        email,
+        subscriptions: newSubs,
+        role: newRole
+      };
+      if (newCreatorId) payload.creatorId = newCreatorId;
+
       const res = await fetch('/api/admin/user/permissions', {
         method: 'POST',
         headers: {
@@ -13583,14 +13915,7 @@
           'Authorization': currentUser.token ? `Bearer ${currentUser.token}` : '',
           'X-User-Email': currentUser.email || ''
         },
-        body: JSON.stringify({
-          token: currentUser.token,
-          adminEmail: currentUser.email,
-          userId,
-          email,
-          subscriptions: newSubs,
-          role: newRole
-        })
+        body: JSON.stringify(payload)
       });
 
       const data = await res.json();
@@ -13601,12 +13926,14 @@
         if (idx !== -1) {
           adminUsersState[idx].subscriptions = newSubs;
           adminUsersState[idx].role = newRole;
+          if (newCreatorId) adminUsersState[idx].creatorId = newCreatorId;
         }
 
         // If updating the currently signed in user, refresh their session
         if (currentUser && (currentUser.id === userId || (email && currentUser.email === email))) {
           currentUser.subscriptions = newSubs;
           currentUser.role = newRole;
+          if (newCreatorId) currentUser.creatorId = newCreatorId;
           saveUserAuth();
           updateAuthUI();
           renderRecipes();
@@ -14631,6 +14958,21 @@
           batchPrepCreatorPack('TestContent Sampler');
         } else {
           batchPrepCreatorPack('All-Access');
+        }
+      });
+    }
+
+    const btnStudioAddVip = document.getElementById('btnStudioAddVip');
+    if (btnStudioAddVip) {
+      btnStudioAddVip.addEventListener('click', handleAddCreatorVip);
+    }
+
+    const studioNewVipEmail = document.getElementById('studioNewVipEmail');
+    if (studioNewVipEmail) {
+      studioNewVipEmail.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          handleAddCreatorVip();
         }
       });
     }

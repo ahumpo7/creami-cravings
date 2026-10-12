@@ -2239,6 +2239,30 @@
             <!-- Dynamically populated in app.js -->
           </div>
         </div>
+
+        <!-- Creator VIP Member Circle Management -->
+        <div class="creator-studio-section" id="studioVipSection">
+          <div class="creator-studio-section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <div>
+              <h3 class="creator-studio-section-title" style="margin: 0;">⭐ Your VIP Members Circle</h3>
+              <p style="font-size: 0.8rem; color: #94a3b8; margin: 3px 0 0 0;">Grant 100% unlocked free access to all your digital cookbooks &amp; recipes for friends, family, or patreon supporters.</p>
+            </div>
+            <span class="creator-studio-badge" id="studioVipCountBadge">0 VIPs</span>
+          </div>
+
+          <!-- Add VIP Member Form -->
+          <div class="creator-vip-add-form" style="display: flex; gap: 8px; margin-top: 14px; margin-bottom: 14px; flex-wrap: wrap;">
+            <input type="email" id="studioNewVipEmail" class="form-input" placeholder="Enter supporter's email (e.g. friend@gmail.com)" style="flex: 1; min-width: 240px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; padding: 10px 14px; color: #f8fafc; font-size: 0.88rem;" />
+            <button type="button" class="btn-primary" id="btnStudioAddVip" style="padding: 10px 18px; font-weight: 600;">
+              <span>⭐ Grant VIP Access</span>
+            </button>
+          </div>
+
+          <!-- Active VIPs List -->
+          <div class="creator-vips-list" id="studioVipsList" style="display: flex; flex-direction: column; gap: 8px;">
+            <!-- Rendered dynamically by app.js -->
+          </div>
+        </div>
       </div>
 
       <div class="modal-footer creator-portal-footer">
@@ -2326,9 +2350,11 @@
           </div>
           <div class="admin-mimic-buttons-row">
             <button type="button" class="btn-mimic-select" data-role="admin">👑 Admin</button>
-            <button type="button" class="btn-mimic-select" data-role="creator" data-creator-id="fitness_product_finder">🎨 Eli</button>
+            <button type="button" class="btn-mimic-select" data-role="creator" data-creator-id="fitness_product_finder">🧑‍🍳 Eli</button>
             <button type="button" class="btn-mimic-select" data-role="creator" data-creator-id="test_content">🧪 TestContent</button>
-            <button type="button" class="btn-mimic-select" data-role="vip">⭐ VIP</button>
+            <button type="button" class="btn-mimic-select" data-role="vip" data-creator-id="fitness_product_finder">⭐ Eli VIP</button>
+            <button type="button" class="btn-mimic-select" data-role="vip" data-creator-id="test_content">⭐ Test VIP</button>
+            <button type="button" class="btn-mimic-select" data-role="multi_sub">📚 Multi-Sub</button>
             <button type="button" class="btn-mimic-select" data-role="user">👤 User</button>
             <button type="button" class="btn-mimic-select" data-role="guest">👁️ Guest</button>
           </div>
@@ -2793,43 +2819,65 @@
           <div class="mimic-card-header">
             <span class="mimic-role-emoji">👑</span>
             <div class="mimic-role-info">
-              <div class="mimic-role-title">Administrator (Real)</div>
-              <div class="mimic-role-desc">Full system controls, Admin Portal, user directory, recipe publishing to all cookbooks.</div>
+              <div class="mimic-role-title">Administrator (Support &amp; Platform)</div>
+              <div class="mimic-role-desc">Platform user directory, password resets, subscription pack permissions. Cannot publish to creator cookbooks or access Creator CMS.</div>
             </div>
             <span class="mimic-check-indicator" id="checkMimicAdmin">✓</span>
           </div>
         </button>
 
-        <button type="button" class="mimic-role-card" data-role="creator" data-creator-id="fitness_product_finder" id="cardMimicCreator">
+        <button type="button" class="mimic-role-card" data-role="creator" data-creator-id="fitness_product_finder" id="cardMimicCreatorEli">
           <div class="mimic-card-header">
-            <span class="mimic-role-emoji">🎨</span>
+            <span class="mimic-role-emoji">🧑‍🍳</span>
             <div class="mimic-role-info">
-              <div class="mimic-role-title">Content Creator (Eli / Fitness Product Finder)</div>
-              <div class="mimic-role-desc">Creator Studio CMS, publish recipes to Eli's official cookbooks, batch prep signature packs, and view audience analytics.</div>
+              <div class="mimic-role-title">Content Creator: Eli (Fitness Product Finder)</div>
+              <div class="mimic-role-desc">Full Creator Studio CMS, owns 243 Eli recipes, manages Eli's personal VIP Member Circle, publishes to Eli's official cookbooks.</div>
             </div>
-            <span class="mimic-check-indicator" id="checkMimicCreator">✓</span>
+            <span class="mimic-check-indicator" id="checkMimicCreatorEli">✓</span>
           </div>
         </button>
 
-        <button type="button" class="mimic-role-card" data-role="creator" data-creator-id="test_content" id="cardMimicTestContent">
+        <button type="button" class="mimic-role-card" data-role="creator" data-creator-id="test_content" id="cardMimicCreatorTest">
           <div class="mimic-card-header">
             <span class="mimic-role-emoji">🧪</span>
             <div class="mimic-role-info">
-              <div class="mimic-role-title">Content Creator (TestContent Studio)</div>
-              <div class="mimic-role-desc">Creator Studio CMS, publish recipes to TestContent's official cookbooks, batch prep signature packs, and view audience analytics.</div>
+              <div class="mimic-role-title">Content Creator: TestContent Studio</div>
+              <div class="mimic-role-desc">Equal peer creator. Full Creator Studio CMS, owns TestContent recipes, manages TestContent's VIP Circle, publishes to TestContent cookbooks.</div>
             </div>
-            <span class="mimic-check-indicator" id="checkMimicTestContent">✓</span>
+            <span class="mimic-check-indicator" id="checkMimicCreatorTest">✓</span>
           </div>
         </button>
 
-        <button type="button" class="mimic-role-card" data-role="vip" id="cardMimicVip">
+        <button type="button" class="mimic-role-card" data-role="vip" data-creator-id="fitness_product_finder" id="cardMimicVipEli">
           <div class="mimic-card-header">
             <span class="mimic-role-emoji">⭐</span>
             <div class="mimic-role-info">
-              <div class="mimic-role-title">VIP Member (All-Access Pass)</div>
-              <div class="mimic-role-desc">All 212 recipes unlocked with 0 locks. Standard custom recipe interface, no admin privileges.</div>
+              <div class="mimic-role-title">Eli VIP Member (Granted by Eli)</div>
+              <div class="mimic-role-desc">Standard user with scoped VIP pass to Eli's cookbooks. All 243 Eli recipes 100% unlocked. TestContent recipes remain paywalled.</div>
             </div>
-            <span class="mimic-check-indicator" id="checkMimicVip">✓</span>
+            <span class="mimic-check-indicator" id="checkMimicVipEli">✓</span>
+          </div>
+        </button>
+
+        <button type="button" class="mimic-role-card" data-role="vip" data-creator-id="test_content" id="cardMimicVipTest">
+          <div class="mimic-card-header">
+            <span class="mimic-role-emoji">⭐</span>
+            <div class="mimic-role-info">
+              <div class="mimic-role-title">TestContent VIP Member (Granted by TestContent)</div>
+              <div class="mimic-role-desc">Standard user with scoped VIP pass to TestContent. All TestContent recipes 100% unlocked. Eli's recipes remain paywalled.</div>
+            </div>
+            <span class="mimic-check-indicator" id="checkMimicVipTest">✓</span>
+          </div>
+        </button>
+
+        <button type="button" class="mimic-role-card" data-role="multi_sub" id="cardMimicMultiSub">
+          <div class="mimic-card-header">
+            <span class="mimic-role-emoji">📚</span>
+            <div class="mimic-role-info">
+              <div class="mimic-role-title">Multi-Creator Subscriber (Standard User)</div>
+              <div class="mimic-role-desc">Subscribed to packs across multiple creators (e.g. Eli's Fan Favorites + TestContent's Signature Sampler). Proves multi-tenant subscriptions.</div>
+            </div>
+            <span class="mimic-check-indicator" id="checkMimicMultiSub">✓</span>
           </div>
         </button>
 
@@ -2837,8 +2885,8 @@
           <div class="mimic-card-header">
             <span class="mimic-role-emoji">👤</span>
             <div class="mimic-role-info">
-              <div class="mimic-role-title">Standard User (Free Tier)</div>
-              <div class="mimic-role-desc">Default free user experience: "Base Flavors" &amp; "Fan Favorites" unlocked. Keto, No Protein &amp; Lactose Free locked with teaser cards and upgrade banners.</div>
+              <div class="mimic-role-title">Standard User (Free Starter Tier)</div>
+              <div class="mimic-role-desc">Only Community Legends &amp; Base Flavors unlocked. All creator paid collections locked with preview teasers &amp; storefront links.</div>
             </div>
             <span class="mimic-check-indicator" id="checkMimicUser">✓</span>
           </div>
@@ -2849,7 +2897,7 @@
             <span class="mimic-role-emoji">👁️</span>
             <div class="mimic-role-info">
               <div class="mimic-role-title">Guest Visitor (Logged Out)</div>
-              <div class="mimic-role-desc">Simulate an unauthenticated visitor: Favorites heart prompts to sign in, custom recipes hidden, locked recipe teasers prompt to sign in.</div>
+              <div class="mimic-role-desc">Unauthenticated visitor. Favorites heart prompts login, custom recipes hidden, locked recipe teasers prompt to sign in.</div>
             </div>
             <span class="mimic-check-indicator" id="checkMimicGuest">✓</span>
           </div>
@@ -2984,6 +3032,6 @@
 
   <!-- Scripts -->
   <script src="recipes-data.js?v=beta9"></script>
-  <script src="app.js?v=beta12"></script>
+  <script src="app.js?v=beta13"></script>
 </body>
 </html>

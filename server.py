@@ -40,6 +40,7 @@ GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '').strip()
 USERS_DB_FILE = os.path.join(DIRECTORY, 'db_users.json')
 RATINGS_DB_FILE = os.path.join(DIRECTORY, 'db_ratings.json')
 STATS_DB_FILE = os.path.join(DIRECTORY, 'db_recipe_stats.json')
+CREATOR_VIPS_DB_FILE = os.path.join(DIRECTORY, 'db_creator_vips.json')
 
 DEFAULT_STAPLES = []
 
@@ -309,6 +310,27 @@ https://creamicravings.com
         print(f"[AUTH MAGIC LINK ERROR] Could not send email to {to_email}: {e}")
         return False, str(e)
 
+# Load DBs
+users_db = load_json_file(USERS_DB_FILE, {})
+ratings_db = load_json_file(RATINGS_DB_FILE, {})
+stats_db = load_json_file(STATS_DB_FILE, {})
+creator_vips_db = load_json_file(CREATOR_VIPS_DB_FILE, {})
+
+def get_user_creator_vips(email):
+    if not email:
+        return []
+    em = email.strip().lower()
+    vips = []
+    for c_id, vip_list in creator_vips_db.items():
+        if not isinstance(vip_list, list):
+            continue
+        for v in vip_list:
+            v_em = v.get('email', '').strip().lower() if isinstance(v, dict) else str(v).strip().lower()
+            if v_em == em:
+                vips.append(c_id)
+                break
+    return vips
+
 def format_user_payload(user):
     is_admin = user.get('email', '').lower() in ADMIN_EMAILS or user.get('role') == 'admin'
     fallback_subs = list(ALL_SUBSCRIPTIONS) if is_admin else list(DEFAULT_SUBSCRIPTIONS)
@@ -320,6 +342,7 @@ def format_user_payload(user):
         'picture': user.get('picture', ''),
         'role': 'admin' if is_admin else (user.get('role') or 'user'),
         'creatorId': user.get('creatorId', ''),
+        'creatorVips': get_user_creator_vips(user.get('email')),
         'pantry': user.get('pantry') if user.get('pantry') is not None else list(DEFAULT_STAPLES),
         'favorites': user.get('favorites', []),
         'madeCounts': user.get('madeCounts', {}),
@@ -329,11 +352,6 @@ def format_user_payload(user):
         'freezerPints': user.get('freezerPints', []),
         'subscriptions': user.get('subscriptions', fallback_subs)
     }
-
-# Load DBs
-users_db = load_json_file(USERS_DB_FILE, {})
-ratings_db = load_json_file(RATINGS_DB_FILE, {})
-stats_db = load_json_file(STATS_DB_FILE, {})
 
 RECIPES_MASTER = []
 RECIPES_BY_ID = {}
@@ -1249,6 +1267,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 'picture': user.get('picture', ''),
                 'role': user.get('role', 'user'),
                 'creatorId': user.get('creatorId', ''),
+                'creatorVips': get_user_creator_vips(user.get('email')),
                 'pantry': user.get('pantry') if user.get('pantry') is not None else list(DEFAULT_STAPLES),
                 'favorites': user.get('favorites', []),
                 'madeCounts': user.get('madeCounts', {}),
@@ -1321,6 +1340,20 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
             })
             return
 
+        elif clean_path == '/api/creator/vips':
+            user = self._get_user_from_token()
+            if not user or user.get('role') != 'creator':
+                self._send_json({'error': 'Unauthorized: Content creator access required'}, 403)
+                return
+            creator_id = user.get('creatorId') or 'fitness_product_finder'
+            vips = creator_vips_db.get(creator_id, [])
+            self._send_json({
+                'status': 'ok',
+                'creatorId': creator_id,
+                'vips': vips
+            })
+            return
+
         elif self.path == '/api/admin/users':
             user = self._get_user_from_token()
             if not user or user.get('role') != 'admin':
@@ -1337,6 +1370,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                     'picture': u.get('picture', ''),
                     'role': u.get('role', 'user'),
                     'creatorId': u.get('creatorId', ''),
+                    'creatorVips': get_user_creator_vips(u.get('email')),
                     'created_at': u.get('created_at', ''),
                     'last_active': u.get('last_active', ''),
                     'subscriptions': u.get('subscriptions', list(DEFAULT_SUBSCRIPTIONS)),
@@ -2443,6 +2477,52 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
             save_json_file(USERS_DB_FILE, users_db)
             self._send_json({'status': 'ok', 'success': True})
 
+        # Creator VIP Management
+        elif self.path == '/api/creator/vips/add':
+            user = self._get_user_from_token(data)
+            if not user or user.get('role') != 'creator':
+                self._send_json({'error': 'Unauthorized: Content creator access required'}, 403)
+                return
+            creator_id = user.get('creatorId') or 'fitness_product_finder'
+            target_email = data.get('email', '').strip().lower()
+            if not target_email or '@' not in target_email:
+                self._send_json({'error': 'A valid email address is required'}, 400)
+                return
+            
+            if creator_id not in creator_vips_db or not isinstance(creator_vips_db[creator_id], list):
+                creator_vips_db[creator_id] = []
+            
+            existing = next((v for v in creator_vips_db[creator_id] if isinstance(v, dict) and v.get('email', '').lower() == target_email), None)
+            if existing:
+                self._send_json({'status': 'ok', 'message': f'{target_email} is already in your VIP list', 'vip': existing})
+                return
+            
+            new_vip = {
+                'email': target_email,
+                'added_at': datetime.utcnow().isoformat()
+            }
+            creator_vips_db[creator_id].append(new_vip)
+            save_json_file(CREATOR_VIPS_DB_FILE, creator_vips_db)
+            self._send_json({'status': 'ok', 'message': f'Successfully added {target_email} as VIP!', 'vip': new_vip})
+            return
+
+        elif self.path == '/api/creator/vips/remove':
+            user = self._get_user_from_token(data)
+            if not user or user.get('role') != 'creator':
+                self._send_json({'error': 'Unauthorized: Content creator access required'}, 403)
+                return
+            creator_id = user.get('creatorId') or 'fitness_product_finder'
+            target_email = data.get('email', '').strip().lower()
+            
+            if creator_id in creator_vips_db and isinstance(creator_vips_db[creator_id], list):
+                creator_vips_db[creator_id] = [
+                    v for v in creator_vips_db[creator_id]
+                    if (v.get('email', '').lower() if isinstance(v, dict) else str(v).lower()) != target_email
+                ]
+                save_json_file(CREATOR_VIPS_DB_FILE, creator_vips_db)
+            self._send_json({'status': 'ok', 'message': f'Removed {target_email} from VIP list'})
+            return
+
         # Admin: Update User Permissions / Role / Subscriptions
         elif self.path == '/api/admin/user/permissions':
             admin_user = self._get_user_from_token(data)
@@ -2477,6 +2557,10 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                         u_mail = target_user.get('email', '').lower()
                         c_id = 'fitness_product_finder' if ('eli' in u_name or 'eli' in u_mail) else f"creator_{u_name}"
                     target_user['creatorId'] = c_id
+
+            # Update creatorId if explicitly provided
+            if 'creatorId' in data and data['creatorId']:
+                target_user['creatorId'] = data['creatorId'].strip()
 
             # Update category subscription packs
             if 'subscriptions' in data and isinstance(data['subscriptions'], list):
