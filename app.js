@@ -5173,48 +5173,36 @@
 
     // 1. Full-Bleed Radiant Gradient extending 100% to all borders
     const bg = ctx.createLinearGradient(0, 0, width, height);
-    bg.addColorStop(0, '#1c0a32');     // Deep royal violet
-    bg.addColorStop(0.25, '#2c084f');  // Rich purple
-    bg.addColorStop(0.55, '#450749');  // Vibrant plum / magenta
-    bg.addColorStop(0.85, '#35075a');  // Rich deep violet
-    bg.addColorStop(1, '#1a0533');     // Bottom violet
+    bg.addColorStop(0, '#be185d');      // Vibrant deep rose / hot fuchsia (top-left)
+    bg.addColorStop(0.28, '#831843');   // Deep berry
+    bg.addColorStop(0.55, '#581c87');   // Vivid purple
+    bg.addColorStop(0.82, '#312e81');   // Indigo
+    bg.addColorStop(1, '#1e1b4b');      // Deep night violet (bottom-right)
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, width, height);
 
     // 2. Radiant mesh glows extending edge-to-edge
-    const glowPink = ctx.createRadialGradient(width * 0.85, height * 0.08, 0, width * 0.85, height * 0.08, width * 0.85);
-    glowPink.addColorStop(0, 'rgba(244, 63, 94, 0.48)');
-    glowPink.addColorStop(0.4, 'rgba(236, 72, 153, 0.30)');
-    glowPink.addColorStop(0.8, 'rgba(217, 70, 239, 0.15)');
+    const glowPink = ctx.createRadialGradient(width * 0.9, height * 0.05, 0, width * 0.9, height * 0.05, width * 0.9);
+    glowPink.addColorStop(0, 'rgba(244, 63, 94, 0.70)');
+    glowPink.addColorStop(0.4, 'rgba(236, 72, 153, 0.45)');
+    glowPink.addColorStop(0.8, 'rgba(217, 70, 239, 0.20)');
     glowPink.addColorStop(1, 'rgba(217, 70, 239, 0)');
     ctx.fillStyle = glowPink;
     ctx.fillRect(0, 0, width, height);
 
-    const glowViolet = ctx.createRadialGradient(width * 0.1, height * 0.22, 0, width * 0.1, height * 0.22, width * 0.8);
-    glowViolet.addColorStop(0, 'rgba(147, 51, 234, 0.42)');
-    glowViolet.addColorStop(0.5, 'rgba(124, 58, 237, 0.22)');
+    const glowViolet = ctx.createRadialGradient(width * 0.1, height * 0.20, 0, width * 0.1, height * 0.20, width * 0.85);
+    glowViolet.addColorStop(0, 'rgba(168, 85, 247, 0.60)');
+    glowViolet.addColorStop(0.5, 'rgba(124, 58, 237, 0.35)');
     glowViolet.addColorStop(1, 'rgba(99, 102, 241, 0)');
     ctx.fillStyle = glowViolet;
     ctx.fillRect(0, 0, width, height);
 
-    const glowPeach = ctx.createRadialGradient(width * 0.5, height * 0.95, 0, width * 0.5, height * 0.95, width * 0.85);
-    glowPeach.addColorStop(0, 'rgba(251, 146, 60, 0.35)');
-    glowPeach.addColorStop(0.45, 'rgba(244, 114, 182, 0.22)');
-    glowPeach.addColorStop(0.85, 'rgba(168, 85, 247, 0.12)');
-    glowPeach.addColorStop(1, 'rgba(168, 85, 247, 0)');
-    ctx.fillStyle = glowPeach;
-    ctx.fillRect(0, 0, width, height);
-
-    const glowLeft = ctx.createRadialGradient(0, height * 0.55, 0, 0, height * 0.55, width * 0.5);
-    glowLeft.addColorStop(0, 'rgba(192, 38, 211, 0.22)');
-    glowLeft.addColorStop(1, 'rgba(192, 38, 211, 0)');
-    ctx.fillStyle = glowLeft;
-    ctx.fillRect(0, 0, width, height);
-
-    const glowRight = ctx.createRadialGradient(width, height * 0.45, 0, width, height * 0.45, width * 0.5);
-    glowRight.addColorStop(0, 'rgba(236, 72, 153, 0.25)');
-    glowRight.addColorStop(1, 'rgba(236, 72, 153, 0)');
-    ctx.fillStyle = glowRight;
+    const glowBottom = ctx.createRadialGradient(width * 0.5, height * 0.98, 0, width * 0.5, height * 0.98, width * 0.9);
+    glowBottom.addColorStop(0, 'rgba(244, 63, 94, 0.55)');
+    glowBottom.addColorStop(0.45, 'rgba(217, 70, 239, 0.35)');
+    glowBottom.addColorStop(0.85, 'rgba(139, 92, 246, 0.20)');
+    glowBottom.addColorStop(1, 'rgba(139, 92, 246, 0)');
+    ctx.fillStyle = glowBottom;
     ctx.fillRect(0, 0, width, height);
 
     // CRITICAL: Initialize textAlign to center for all canvas text
@@ -5260,7 +5248,7 @@
     curY += (tagH / 2) + (ratio === 'story' ? 62 : 42);
 
     // 5. Recipe Title (Wrapped & Scaled)
-    const titleMaxWidth = width - 160;
+    const titleMaxWidth = width - 120;
     const isLongName = (recipe.name || '').length > 28;
     const titleFontSize = ratio === 'story' ? (isLongName ? 62 : 74) : (isLongName ? 48 : 56);
     const titleLineHeight = ratio === 'story' ? (isLongName ? 74 : 86) : (isLongName ? 58 : 66);
@@ -5295,8 +5283,8 @@
     ctx.textAlign = 'center';
     const scoreWidth = ctx.measureText(scoreText).width + (ratio === 'story' ? 52 : 44);
     const scoreH = ratio === 'story' ? 48 : 40;
-    drawRoundedRect(ctx, (width - scoreWidth) / 2, curY - (scoreH / 2), scoreWidth, scoreH, scoreH / 2, 'rgba(16, 185, 129, 0.16)', 'rgba(16, 185, 129, 0.5)', 1.5);
-    ctx.fillStyle = '#34d399';
+    drawRoundedRect(ctx, (width - scoreWidth) / 2, curY - (scoreH / 2), scoreWidth, scoreH, scoreH / 2, 'rgba(15, 23, 42, 0.85)', 'rgba(52, 211, 153, 0.8)', 1.5);
+    ctx.fillStyle = '#6ee7b7';
     ctx.fillText(scoreText, width / 2, curY + (ratio === 'story' ? 8 : 6));
 
     curY += (scoreH / 2) + (ratio === 'story' ? Math.max(30, 48 - multiLineAdj) : 32);
@@ -5308,16 +5296,16 @@
     const carbVal = `${macros.carbs || '15g'}`.replace(/g/i, '').trim();
     const fatVal = `${macros.fat || '4g'}`.replace(/g/i, '').trim();
 
-    const cardW = 214;
+    const cardW = 226;
     const cardH = ratio === 'story' ? 165 : 132;
     const gap = 16;
     const startX = (width - (cardW * 4 + gap * 3)) / 2;
 
     const macroItems = [
       { label: 'CALORIES', val: calVal, unit: 'KCAL', color: '#f43f5e', icon: '🔥' },
-      { label: 'PROTEIN', val: proVal, unit: 'GRAMS', color: '#0ea5e9', icon: '💪' },
-      { label: 'CARBS', val: carbVal, unit: 'GRAMS', color: '#10b981', icon: '🌾' },
-      { label: 'FAT', val: fatVal, unit: 'GRAMS', color: '#f59e0b', icon: '🥑' }
+      { label: 'PROTEIN', val: proVal, unit: 'GRAMS', color: '#38bdf8', icon: '💪' },
+      { label: 'CARBS', val: carbVal, unit: 'GRAMS', color: '#34d399', icon: '🌾' },
+      { label: 'FAT', val: fatVal, unit: 'GRAMS', color: '#fbbf24', icon: '🥑' }
     ];
 
     for (let i = 0; i < macroItems.length; i++) {
@@ -5326,10 +5314,10 @@
 
       // Card Background with soft drop shadow
       ctx.save();
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.55)';
-      ctx.shadowBlur = 16;
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
+      ctx.shadowBlur = 18;
       ctx.shadowOffsetY = 6;
-      drawRoundedRect(ctx, cx, curY, cardW, cardH, 22, 'rgba(15, 23, 42, 0.88)', 'rgba(255, 255, 255, 0.14)', 1.5);
+      drawRoundedRect(ctx, cx, curY, cardW, cardH, 22, 'rgba(15, 23, 42, 0.90)', 'rgba(255, 255, 255, 0.22)', 1.5);
       ctx.restore();
 
       // Top colored accent stripe
@@ -5355,11 +5343,16 @@
     curY += cardH + (ratio === 'story' ? Math.max(30, 48 - multiLineAdj) : 28);
 
     // 8. Ninja Creami Machine Settings Deck (Stacked Label + Value in 3 Columns with Vertical Dividers)
-    const specW = width - 160; // 920px
+    const specW = width - 120; // 960px
     const specH = ratio === 'story' ? 138 : 100;
-    const specX = 80;
+    const specX = 60;
 
-    drawRoundedRect(ctx, specX, curY, specW, specH, 22, 'rgba(15, 23, 42, 0.92)', 'rgba(168, 85, 247, 0.4)', 1.5);
+    ctx.save();
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
+    ctx.shadowBlur = 18;
+    ctx.shadowOffsetY = 6;
+    drawRoundedRect(ctx, specX, curY, specW, specH, 22, 'rgba(15, 23, 42, 0.92)', 'rgba(192, 132, 252, 0.5)', 1.5);
+    ctx.restore();
 
     // Deck Header Tag
     ctx.textAlign = 'center';
@@ -5385,7 +5378,7 @@
 
       // Vertical dividers between columns
       if (c > 0) {
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(colX, curY + (ratio === 'story' ? 44 : 34));
@@ -5412,13 +5405,20 @@
       // Ingredients Card
       const ings = (recipe.ingredients || []).slice(0, 5);
       if (ings.length > 0) {
-        const boxW = width - 160; // 920px
+        const boxW = width - 120; // 960px
         const boxH = 470;
-        const boxX = 80;
-        drawRoundedRect(ctx, boxX, curY, boxW, boxH, 24, 'rgba(15, 23, 42, 0.88)', 'rgba(255, 255, 255, 0.12)', 1.5);
+        const boxX = 60;
 
+        ctx.save();
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
+        ctx.shadowBlur = 18;
+        ctx.shadowOffsetY = 6;
+        drawRoundedRect(ctx, boxX, curY, boxW, boxH, 24, 'rgba(15, 23, 42, 0.90)', 'rgba(255, 255, 255, 0.18)', 1.5);
+        ctx.restore();
+
+        ctx.textAlign = 'center';
         ctx.font = '800 26px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-        ctx.fillStyle = '#c084fc';
+        ctx.fillStyle = '#e879f9';
         ctx.fillText(`🥣 PINT INGREDIENTS LIST (${ings.length} ITEMS)`, width / 2, curY + 46);
 
         let ingY = curY + 108;
@@ -5429,7 +5429,7 @@
 
           // Diamond icon
           ctx.font = '700 22px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-          ctx.fillStyle = '#ec4899';
+          ctx.fillStyle = '#f472b6';
           ctx.textAlign = 'left';
           ctx.fillText('✦', boxX + 32, ingY);
 
@@ -5439,7 +5439,7 @@
             ctx.font = '800 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
             qW = ctx.measureText(ingQty).width + 36;
             const qX = boxX + boxW - 32 - qW;
-            drawRoundedRect(ctx, qX, ingY - 28, qW, 42, 21, 'rgba(255, 255, 255, 0.1)', 'rgba(255, 255, 255, 0.22)', 1.5);
+            drawRoundedRect(ctx, qX, ingY - 28, qW, 42, 21, 'rgba(255, 255, 255, 0.12)', 'rgba(255, 255, 255, 0.3)', 1.5);
             ctx.fillStyle = '#ffffff';
             ctx.fillText(ingQty, qX + 18, ingY + 2);
           }
@@ -5459,7 +5459,7 @@
 
           // Row divider
           if (j < ings.length - 1) {
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(boxX + 32, ingY + 26);
@@ -5474,11 +5474,18 @@
       }
 
       // Pro Tip Callout Box
-      const tipBoxW = width - 160;
+      const tipBoxW = width - 120;
       const tipBoxH = 195;
-      const tipBoxX = 80;
-      drawRoundedRect(ctx, tipBoxX, curY, tipBoxW, tipBoxH, 22, 'rgba(251, 191, 36, 0.08)', 'rgba(251, 191, 36, 0.35)', 1.5);
+      const tipBoxX = 60;
 
+      ctx.save();
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
+      ctx.shadowBlur = 18;
+      ctx.shadowOffsetY = 6;
+      drawRoundedRect(ctx, tipBoxX, curY, tipBoxW, tipBoxH, 22, 'rgba(15, 23, 42, 0.90)', 'rgba(251, 191, 36, 0.5)', 1.5);
+      ctx.restore();
+
+      ctx.textAlign = 'center';
       ctx.font = '800 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
       ctx.fillStyle = '#fbbf24';
       ctx.fillText('💡 NINJA CREAMI PRO SECRET', width / 2, curY + 44);
@@ -5491,10 +5498,10 @@
       // Square Mode (1:1): Key Ingredients 2x2 Grid + Pro Tip
       const ings = (recipe.ingredients || []).slice(0, 4);
       if (ings.length > 0) {
-        const gridW = width - 160;
+        const gridW = width - 120;
         const cellW = (gridW - 16) / 2;
         const cellH = 58;
-        const gridX = 80;
+        const gridX = 60;
 
         for (let j = 0; j < ings.length; j++) {
           const row = Math.floor(j / 2);
@@ -5502,7 +5509,7 @@
           const gx = gridX + col * (cellW + 16);
           const gy = curY + row * (cellH + 12);
 
-          drawRoundedRect(ctx, gx, gy, cellW, cellH, 18, 'rgba(15, 23, 42, 0.88)', 'rgba(255, 255, 255, 0.12)', 1);
+          drawRoundedRect(ctx, gx, gy, cellW, cellH, 18, 'rgba(15, 23, 42, 0.90)', 'rgba(255, 255, 255, 0.16)', 1);
 
           const ing = ings[j];
           const ingName = ing.name || ing.raw || '';
@@ -5531,7 +5538,7 @@
       ctx.font = '700 22px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
       ctx.textAlign = 'center';
       const tipWidth = ctx.measureText(tipText).width + 50;
-      drawRoundedRect(ctx, (width - tipWidth) / 2, curY, tipWidth, 48, 24, 'rgba(251, 191, 36, 0.08)', 'rgba(251, 191, 36, 0.32)', 1);
+      drawRoundedRect(ctx, (width - tipWidth) / 2, curY, tipWidth, 48, 24, 'rgba(15, 23, 42, 0.85)', 'rgba(251, 191, 36, 0.6)', 1);
       ctx.fillStyle = '#fbbf24';
       ctx.fillText(tipText, width / 2, curY + 31);
     }
@@ -5545,20 +5552,24 @@
     ctx.textAlign = 'center';
     const ctaWidth = ctx.measureText(ctaText).width + (ratio === 'story' ? 60 : 48);
     const ctaH = ratio === 'story' ? 62 : 48;
-    drawRoundedRect(ctx, (width - ctaWidth) / 2, footerY - (ctaH / 2) - 8, ctaWidth, ctaH, ctaH / 2, 'rgba(236, 72, 153, 0.28)', 'rgba(236, 72, 153, 0.8)', 2);
-    ctx.fillStyle = '#f472b6';
+    drawRoundedRect(ctx, (width - ctaWidth) / 2, footerY - (ctaH / 2) - 8, ctaWidth, ctaH, ctaH / 2, 'rgba(15, 23, 42, 0.85)', 'rgba(244, 114, 182, 0.9)', 2);
+    ctx.fillStyle = '#f9a8d4';
     ctx.fillText(ctaText, width / 2, footerY + (ratio === 'story' ? 4 : 0));
 
     if (ratio === 'story') {
       ctx.font = '700 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-      ctx.fillStyle = '#cbd5e1';
+      ctx.fillStyle = '#ffffff';
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+      ctx.shadowBlur = 8;
       ctx.fillText('✦ Match recipes to the exact ingredients in your pantry! ✦', width / 2, footerY + 54);
+      ctx.shadowBlur = 0;
     }
 
     // Export image to preview
     canvas.toBlob((blob) => {
       currentStoryBlob = blob;
       if (previewImg && blob) {
+        previewImg.style.aspectRatio = ratio === 'story' ? '9 / 16' : '1 / 1';
         previewImg.src = URL.createObjectURL(blob);
       }
       if (loadingInd) loadingInd.style.display = 'none';
