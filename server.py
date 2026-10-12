@@ -1014,8 +1014,8 @@ def compute_community_stats():
     made_summary = {}
     total_community_batches = 0
     for r_id, stat in stats_db.items():
-        if r_id.startswith('custom_'):
-            continue  # Strictly exclude private custom recipes
+        if r_id in ('purchase_inquiries', 'user_feedback') or r_id.startswith('custom_'):
+            continue  # Strictly exclude reserved metadata and private custom recipes
         m_count = 0
         if isinstance(stat, dict):
             m_count = int(stat.get('totalMade', 0) or 0)
