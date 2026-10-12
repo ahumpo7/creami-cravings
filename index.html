@@ -382,6 +382,37 @@
       <!-- Right Panel: Recipes Explorer -->
       <main class="panel recipes-panel">
         
+        <!-- Visual Freezer Shelf Widget (Beta Staging) -->
+        <section class="freezer-shelf-widget" id="freezerShelfWidget" aria-label="Virtual Freezer Shelf">
+          <div class="shelf-header">
+            <div class="shelf-title-group">
+              <span class="shelf-icon">🧊</span>
+              <div class="shelf-title-text">
+                <h3 class="shelf-title">Virtual Freezer Shelf</h3>
+                <span class="shelf-subtitle" id="shelfCapacityText">0 of 4 Pints Chilling</span>
+              </div>
+            </div>
+            <div class="shelf-actions">
+              <div class="shelf-slots-toggle" title="How many Creami containers do you own?">
+                <span class="shelf-slots-label">Containers:</span>
+                <button type="button" class="btn-slot-cap active" data-slots="4">4</button>
+                <button type="button" class="btn-slot-cap" data-slots="6">6</button>
+                <button type="button" class="btn-slot-cap" data-slots="8">8</button>
+              </div>
+              <button type="button" class="btn-shelf-toggle-collapse" id="btnShelfToggleCollapse" title="Collapse or Expand Freezer Shelf">
+                <span id="shelfCollapseIcon">▾</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Slots Container -->
+          <div class="shelf-slots-wrapper" id="shelfSlotsWrapper">
+            <div class="shelf-slots-grid" id="shelfSlotsGrid">
+              <!-- Rendered dynamically by app.js -->
+            </div>
+          </div>
+        </section>
+
         <!-- Controls & Filter Bar -->
         <div class="recipes-controls-bar">
           <!-- Search Recipes -->
@@ -906,6 +937,59 @@
 
       <!-- Pints Cards Grid / Empty State -->
       <div class="freezer-pints-list" id="freezerPintsList"></div>
+    </div>
+  </div>
+
+  <!-- Quick Slot Fill Modal (Beta Freezer Hub) -->
+  <div class="modal-overlay" id="slotFillModalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-content slot-fill-modal-content">
+      <button class="modal-close" id="slotFillModalCloseBtn" aria-label="Close modal">&times;</button>
+      <div class="modal-header">
+        <div class="slot-fill-title-row">
+          <div class="freezer-icon-badge">🍨</div>
+          <div>
+            <h2 class="modal-title" id="slotFillModalTitle">Put a Pint in Slot 1</h2>
+            <p class="modal-subtitle">Pick a recipe from your collection or enter a custom creation to begin the freeze countdown.</p>
+          </div>
+        </div>
+      </div>
+      <div class="slot-fill-body">
+        <form id="slotFillForm">
+          <input type="hidden" id="slotFillTargetSlotNumber" value="1">
+          <input type="hidden" id="slotFillRecipeId" value="">
+          <div class="form-group">
+            <label for="slotFillRecipeInput">Select Recipe or Custom Name *</label>
+            <input type="text" id="slotFillRecipeInput" list="slotFillDatalist" required placeholder="Type or select a recipe...">
+            <datalist id="slotFillDatalist"></datalist>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="slotFillPintScale">Pint Size</label>
+              <select id="slotFillPintScale">
+                <option value="1.0" selected>🍨 Standard (16 oz / NC300)</option>
+                <option value="1.5">🥣 Deluxe (24 oz / NC500)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="slotFillFreezeHours">Freeze Duration</label>
+              <select id="slotFillFreezeHours">
+                <option value="16" selected>⏱️ 16 Hours (Standard)</option>
+                <option value="24">⏱️ 24 Hours (Full Solid)</option>
+                <option value="12">⏱️ 12 Hours (Quick Freeze)</option>
+                <option value="8">⏱️ 8 Hours (Speed Test)</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="slotFillNotes">Flavor Notes / Substitutions (Optional)</label>
+            <input type="text" id="slotFillNotes" placeholder="e.g. Subbed Fairlife skim milk, added 1 tbsp PB2">
+          </div>
+          <div class="slot-fill-actions">
+            <button type="button" class="btn-secondary" id="slotFillCancelBtn">Cancel</button>
+            <button type="submit" class="btn-primary" id="slotFillSubmitBtn">❄️ Start Freeze Countdown</button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 

@@ -32,6 +32,8 @@
   const RECIPE_MADE_STORAGE_KEY = STORAGE_PREFIX + 'creami_recipe_made_v2';
   const COMMUNITY_STATS_CACHE_KEY = STORAGE_PREFIX + 'creami_community_stats_v2';
   const FREEZER_STORAGE_KEY = STORAGE_PREFIX + 'creami_freezer_pints_v2';
+  const FREEZER_CAPACITY_STORAGE_KEY = STORAGE_PREFIX + 'creami_freezer_capacity_v1';
+  const FREEZER_COLLAPSED_STORAGE_KEY = STORAGE_PREFIX + 'creami_freezer_shelf_collapsed_v1';
   const MIMIC_ROLE_STORAGE_KEY = STORAGE_PREFIX + 'creami_mimic_role_v1';
   const REAL_ADMIN_STORAGE_KEY = STORAGE_PREFIX + 'creami_real_admin_user_v1';
 
@@ -412,6 +414,8 @@
   const FREEZE_DURATION_MS = 16 * 60 * 60 * 1000; // 16 hours calibrated
   let freezerTickerInterval = null;
   let freezerSelectedTimeOffset = 0; // 0, 4, 8, 12, 16 hours
+  let freezerSlotCapacity = parseInt(localStorage.getItem(FREEZER_CAPACITY_STORAGE_KEY) || '4', 10);
+  let isShelfCollapsed = localStorage.getItem(FREEZER_COLLAPSED_STORAGE_KEY) === 'true';
 
   // 1-Tap Smart Ingredient Substitutions State (Roadmap Item 16)
   let activeRecipeSwaps = {}; // { [recipeId]: { [originalIngName]: swapObj } }
@@ -606,6 +610,7 @@
     initGoogleAuth();
     populateFreezerRecipeDatalist();
     updateFreezerBadges();
+    renderFreezerShelfWidget();
     startFreezerTicker();
     initFreezeNotifications();
     initPwaInstall();
@@ -4101,9 +4106,30 @@
 
       <div class="recipe-card-bottom">
         <span class="spin-tag" title="Recommended spin cycle">🌀 ${recipe.spinSetting || 'Lite Ice Cream'}</span>
-        <a href="/recipe/${encodeURIComponent(recipe.id)}" class="btn-view-recipe">${isAccessible ? 'View Recipe' : (isClaimPending ? '⏳ Pending Verification' : '🔒 Locked Preview')}</a>
+        <div style="display: flex; gap: 6px; align-items: center;">
+          <button type="button" class="btn-quick-freeze-card" title="Place into Virtual Freezer Slot" data-action="quick-freeze">❄️ Freeze</button>
+          <a href="/recipe/${encodeURIComponent(recipe.id)}" class="btn-view-recipe">${isAccessible ? 'View Recipe' : (isClaimPending ? '⏳ Pending' : '🔒 Locked')}</a>
+        </div>
       </div>
     `;
+
+    // Quick Freeze button click
+    const quickFreezeBtn = card.querySelector('[data-action="quick-freeze"]');
+    if (quickFreezeBtn) {
+      quickFreezeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        const takenSlots = new Set(freezerPintsState.map(p => p.slot));
+        let targetSlot = 1;
+        for (let s = 1; s <= freezerSlotCapacity; s++) {
+          if (!takenSlots.has(s)) {
+            targetSlot = s;
+            break;
+          }
+        }
+        openSlotFillModal(targetSlot, recipe);
+      });
+    }
 
     // Favorite button click
     const favBtn = card.querySelector('.favorite-btn');
@@ -5816,10 +5842,11 @@
   function computePintStatus(pint) {
     const now = Date.now();
     const frozenAt = pint.frozenAt || now;
+    const durationMs = pint.freezeHours ? pint.freezeHours * 60 * 60 * 1000 : FREEZE_DURATION_MS;
     const elapsedMs = Math.max(0, now - frozenAt);
-    const remainingMs = Math.max(0, FREEZE_DURATION_MS - elapsedMs);
+    const remainingMs = Math.max(0, durationMs - elapsedMs);
     const isReady = remainingMs <= 0;
-    const percent = Math.min(100, Math.max(0, Math.round((elapsedMs / FREEZE_DURATION_MS) * 100)));
+    const percent = Math.min(100, Math.max(0, Math.round((elapsedMs / durationMs) * 100)));
 
     const hoursLeft = Math.floor(remainingMs / (1000 * 60 * 60));
     const minsLeft = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
@@ -5874,6 +5901,210 @@
     if (freezerPintsCount) {
       freezerPintsCount.textContent = `${total} Pint${total === 1 ? '' : 's'}`;
     }
+
+    renderFreezerShelfWidget();
+  }
+
+  // --- Visual Freezer Shelf & Multi-Container Slots Engine ---
+  function renderFreezerShelfWidget() {
+    const widget = document.getElementById('freezerShelfWidget');
+    const grid = document.getElementById('shelfSlotsGrid');
+    const capText = document.getElementById('shelfCapacityText');
+    const wrapper = document.getElementById('shelfSlotsWrapper');
+    const collapseIcon = document.getElementById('shelfCollapseIcon');
+    if (!widget || !grid) return;
+
+    if (wrapper && collapseIcon) {
+      if (isShelfCollapsed) {
+        wrapper.classList.add('collapsed');
+        collapseIcon.textContent = '▸';
+      } else {
+        wrapper.classList.remove('collapsed');
+        collapseIcon.textContent = '▾';
+      }
+    }
+
+    // Ensure capacity toggle buttons reflect active state
+    widget.querySelectorAll('.btn-slot-cap').forEach(btn => {
+      const cap = parseInt(btn.dataset.slots, 10);
+      btn.classList.toggle('active', cap === freezerSlotCapacity);
+    });
+
+    // Make sure pints in state have valid slots 1..freezerSlotCapacity
+    const takenSlots = new Set();
+    freezerPintsState.forEach(p => {
+      if (typeof p.slot === 'number' && p.slot >= 1 && p.slot <= freezerSlotCapacity && !takenSlots.has(p.slot)) {
+        takenSlots.add(p.slot);
+      } else {
+        // Find first untaken slot
+        for (let s = 1; s <= freezerSlotCapacity; s++) {
+          if (!takenSlots.has(s)) {
+            p.slot = s;
+            takenSlots.add(s);
+            break;
+          }
+        }
+      }
+    });
+
+    const activeCount = freezerPintsState.filter(p => p.slot && p.slot <= freezerSlotCapacity).length;
+    let readyCount = 0;
+    freezerPintsState.forEach(p => {
+      if (computePintStatus(p).isReady) readyCount++;
+    });
+
+    if (capText) {
+      if (readyCount > 0) {
+        capText.innerHTML = `<span style="color: #4ade80; font-weight: 800;">🎉 ${readyCount} Pint${readyCount === 1 ? '' : 's'} Ready to Spin!</span> • ${activeCount} of ${freezerSlotCapacity} Full`;
+      } else {
+        capText.textContent = `${activeCount} of ${freezerSlotCapacity} Containers Chilling`;
+      }
+    }
+
+    // Build slots HTML
+    let html = '';
+    for (let slotNum = 1; slotNum <= freezerSlotCapacity; slotNum++) {
+      const pint = freezerPintsState.find(p => p.slot === slotNum);
+      if (!pint) {
+        // Empty Slot
+        html += `
+          <div class="shelf-slot-card empty" data-slot="${slotNum}" title="Click to fill container slot ${slotNum}">
+            <div class="slot-number-badge">Slot ${slotNum}</div>
+            <div class="slot-empty-icon">➕</div>
+            <div class="slot-empty-label">Empty Container</div>
+            <div class="slot-empty-sub">Ready to Prep</div>
+            <button type="button" class="btn-slot-fill" data-action="fill-slot" data-slot="${slotNum}">Fill Slot ${slotNum}</button>
+          </div>
+        `;
+      } else {
+        const status = computePintStatus(pint);
+        const isDeluxe = pint.scale === 1.5 || (pint.sizeLabel && pint.sizeLabel.includes('24 oz'));
+        const sizeTag = isDeluxe ? '24 oz' : '16 oz';
+
+        if (status.isReady) {
+          // Ready Slot
+          html += `
+            <div class="shelf-slot-card ready" data-slot="${slotNum}" data-pint-id="${pint.id}">
+              <div class="slot-header-row">
+                <span class="slot-number-badge">Slot ${slotNum}</span>
+                <span class="slot-status-pill ready">🟢 READY!</span>
+              </div>
+              <div class="slot-recipe-name" title="${escapeHtml(pint.recipeName)}">${escapeHtml(pint.recipeName)}</div>
+              <div class="slot-meta-info">🍨 ${sizeTag} • 100% Solid &amp; Ready</div>
+              <button type="button" class="btn-slot-spin-ready" data-action="spin-slot" data-pint-id="${pint.id}">
+                <span>🍨 Spin &amp; Enjoy (+1)</span>
+              </button>
+            </div>
+          `;
+        } else {
+          // Chilling Slot
+          html += `
+            <div class="shelf-slot-card chilling" data-slot="${slotNum}" data-pint-id="${pint.id}">
+              <div class="slot-header-row">
+                <span class="slot-number-badge">Slot ${slotNum}</span>
+                <span class="slot-status-pill chilling">❄️ ${status.timeRemainingLabel}</span>
+              </div>
+              <div class="slot-recipe-name" title="${escapeHtml(pint.recipeName)}">${escapeHtml(pint.recipeName)}</div>
+              <div class="slot-meta-info">${sizeTag} • ${status.percent}% Solid</div>
+              <div class="slot-progress-container">
+                <div class="slot-progress-track">
+                  <div class="slot-progress-bar" style="width: ${status.percent}%;"></div>
+                </div>
+              </div>
+              <div class="slot-actions-row">
+                ${pint.recipeId ? `<button type="button" class="btn-slot-action btn-slot-recipe" data-action="view-recipe" data-recipe-id="${pint.recipeId}">📖 Recipe</button>` : '<span></span>'}
+                <button type="button" class="btn-slot-action btn-slot-discard" data-action="discard-slot" data-pint-id="${pint.id}" title="Remove container">🗑️</button>
+              </div>
+            </div>
+          `;
+        }
+      }
+    }
+    grid.innerHTML = html;
+
+    // Attach slot card event handlers
+    grid.querySelectorAll('.shelf-slot-card.empty').forEach(card => {
+      card.addEventListener('click', (e) => {
+        const slot = parseInt(card.dataset.slot, 10);
+        openSlotFillModal(slot);
+      });
+    });
+
+    grid.querySelectorAll('[data-action="spin-slot"]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const pintId = btn.dataset.pintId;
+        spinAndEnjoyFreezerPint(pintId);
+      });
+    });
+
+    grid.querySelectorAll('[data-action="view-recipe"]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const rId = btn.dataset.recipeId;
+        const rec = allRecipes.find(r => r.id === rId);
+        if (rec) openRecipeModal(rec);
+      });
+    });
+
+    grid.querySelectorAll('[data-action="discard-slot"]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const pintId = btn.dataset.pintId;
+        if (confirm('Remove this pint container from the freezer?')) {
+          removeFreezerPint(pintId);
+        }
+      });
+    });
+  }
+
+  function openSlotFillModal(slotNum = 1, preselectedRecipe = null) {
+    const modal = document.getElementById('slotFillModalOverlay');
+    const slotInput = document.getElementById('slotFillTargetSlotNumber');
+    const recipeInput = document.getElementById('slotFillRecipeInput');
+    const recipeIdInput = document.getElementById('slotFillRecipeId');
+    const titleEl = document.getElementById('slotFillModalTitle');
+    const datalist = document.getElementById('slotFillDatalist');
+    const scaleSelect = document.getElementById('slotFillPintScale');
+    const hoursSelect = document.getElementById('slotFillFreezeHours');
+    const notesInput = document.getElementById('slotFillNotes');
+    if (!modal) return;
+
+    if (slotInput) slotInput.value = slotNum;
+    if (titleEl) titleEl.textContent = `Put a Pint in Container Slot ${slotNum}`;
+
+    if (datalist) {
+      datalist.innerHTML = '';
+      allRecipes.forEach(r => {
+        const opt = document.createElement('option');
+        opt.value = r.name;
+        datalist.appendChild(opt);
+      });
+    }
+
+    if (preselectedRecipe) {
+      if (recipeInput) recipeInput.value = preselectedRecipe.name;
+      if (recipeIdInput) recipeIdInput.value = preselectedRecipe.id;
+      if (scaleSelect) scaleSelect.value = (modalScale || 1.0).toString();
+    } else {
+      if (recipeInput) recipeInput.value = '';
+      if (recipeIdInput) recipeIdInput.value = '';
+    }
+    if (notesInput) notesInput.value = '';
+    if (hoursSelect) hoursSelect.value = '16';
+
+    modal.classList.add('active');
+    modal.setAttribute('aria-hidden', 'false');
+    lockBackgroundScroll();
+    if (recipeInput && !preselectedRecipe) recipeInput.focus();
+  }
+
+  function closeSlotFillModal() {
+    const modal = document.getElementById('slotFillModalOverlay');
+    if (!modal) return;
+    modal.classList.remove('active');
+    modal.setAttribute('aria-hidden', 'true');
+    unlockBackgroundScroll();
   }
 
   // --- Freezer Notification Engine (Roadmap Item 17) ---
@@ -7586,6 +7817,18 @@
               <div class="trouble-a">Always create a 1.5-inch wide hole down to the bottom of the ice cream with a spoon before adding mix-ins, then use the <strong>Mix-In</strong> button (never Respin).</div>
             </div>
           </div>
+        <!-- Put in Freezer Action Card (Beta Staging) -->
+        <div class="recipe-freezer-action-card" style="margin-bottom: 16px; background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 12px; padding: 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 1.4rem;">🧊</span>
+            <div>
+              <strong style="color: #f8fafc; font-size: 0.92rem; display: block;">Prep &amp; Chill this Pint</strong>
+              <span style="color: #94a3b8; font-size: 0.78rem;">Place into a Virtual Freezer slot and start the 16h countdown</span>
+            </div>
+          </div>
+          <button type="button" class="btn-freeze-slot-primary" id="modalPutInFreezerBtn" title="Place this recipe into an open freezer container slot">
+            <span>❄️ Put in Freezer Slot</span>
+          </button>
         </div>
 
         <!-- Recipe Batch & Spin Counter Tracker -->
@@ -7792,6 +8035,23 @@
     if (viewInFreezerBtn) {
       viewInFreezerBtn.addEventListener('click', () => {
         openFreezerModal();
+      });
+    }
+
+    // Put in Freezer Slot Button (Beta Staging)
+    const putInFreezerBtn = recipeModalBody.querySelector('#modalPutInFreezerBtn');
+    if (putInFreezerBtn) {
+      putInFreezerBtn.addEventListener('click', () => {
+        closeRecipeModal();
+        const takenSlots = new Set(freezerPintsState.map(p => p.slot));
+        let targetSlot = 1;
+        for (let s = 1; s <= freezerSlotCapacity; s++) {
+          if (!takenSlots.has(s)) {
+            targetSlot = s;
+            break;
+          }
+        }
+        openSlotFillModal(targetSlot, recipe);
       });
     }
 
@@ -12279,6 +12539,77 @@
     if (freezerModalOverlay) {
       freezerModalOverlay.addEventListener('click', (e) => {
         if (e.target === freezerModalOverlay) closeFreezerModal();
+      });
+    }
+
+    // Quick Slot Fill Modal & Virtual Freezer Shelf Controls (Beta Staging)
+    const slotFillModalOverlay = document.getElementById('slotFillModalOverlay');
+    const slotFillModalCloseBtn = document.getElementById('slotFillModalCloseBtn');
+    const slotFillCancelBtn = document.getElementById('slotFillCancelBtn');
+    const slotFillForm = document.getElementById('slotFillForm');
+
+    if (slotFillModalCloseBtn) slotFillModalCloseBtn.addEventListener('click', closeSlotFillModal);
+    if (slotFillCancelBtn) slotFillCancelBtn.addEventListener('click', closeSlotFillModal);
+    if (slotFillModalOverlay) {
+      slotFillModalOverlay.addEventListener('click', (e) => {
+        if (e.target === slotFillModalOverlay) closeSlotFillModal();
+      });
+    }
+
+    if (slotFillForm) {
+      slotFillForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const slotNum = parseInt(document.getElementById('slotFillTargetSlotNumber').value, 10);
+        const recName = document.getElementById('slotFillRecipeInput').value.trim();
+        let recId = document.getElementById('slotFillRecipeId').value;
+        if (!recId) {
+          const match = allRecipes.find(r => r.name.toLowerCase() === recName.toLowerCase());
+          if (match) recId = match.id;
+        }
+        const scale = parseFloat(document.getElementById('slotFillPintScale').value) || 1.0;
+        const hours = parseInt(document.getElementById('slotFillFreezeHours').value, 10) || 16;
+        const notes = document.getElementById('slotFillNotes').value.trim();
+
+        // Remove any pint currently occupying this slot
+        freezerPintsState = freezerPintsState.filter(p => p.slot !== slotNum);
+
+        const newPint = {
+          id: `freezer_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+          slot: slotNum,
+          recipeId: recId || null,
+          recipeName: recName,
+          scale: scale,
+          sizeLabel: scale === 1.5 ? '24 oz Deluxe' : '16 oz Standard',
+          frozenAt: Date.now(),
+          freezeHours: hours,
+          notes: notes,
+          notified: false
+        };
+
+        freezerPintsState.unshift(newPint);
+        saveFreezerPints();
+        closeSlotFillModal();
+        renderFreezerShelfWidget();
+        showToast(`❄️ Slot ${slotNum} filled with "${recName}"! ${hours}h countdown active. 🎉`);
+      });
+    }
+
+    // Shelf Capacity Toggle buttons
+    document.querySelectorAll('.btn-slot-cap').forEach(btn => {
+      btn.addEventListener('click', () => {
+        freezerSlotCapacity = parseInt(btn.dataset.slots, 10);
+        localStorage.setItem(FREEZER_CAPACITY_STORAGE_KEY, freezerSlotCapacity.toString());
+        renderFreezerShelfWidget();
+      });
+    });
+
+    // Shelf Collapse Toggle button
+    const shelfCollapseBtn = document.getElementById('btnShelfToggleCollapse');
+    if (shelfCollapseBtn) {
+      shelfCollapseBtn.addEventListener('click', () => {
+        isShelfCollapsed = !isShelfCollapsed;
+        localStorage.setItem(FREEZER_COLLAPSED_STORAGE_KEY, isShelfCollapsed ? 'true' : 'false');
+        renderFreezerShelfWidget();
       });
     }
 
