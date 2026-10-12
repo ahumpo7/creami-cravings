@@ -11879,8 +11879,22 @@ body.modal-open .cookie-consent-banner {
 
 /* Batch Prep Modal Content */
 .batch-prep-modal-content {
-  max-width: 680px;
+  max-width: 720px;
   width: 94%;
+  height: min(88vh, 840px);
+  max-height: 88vh;
+  max-height: 88dvh;
+  padding: 24px 28px 20px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden !important; /* Prevents the main/outer scrollbar completely */
+}
+
+.batch-prep-modal-content .modal-header {
+  flex-shrink: 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 12px;
 }
 
 .batch-prep-title-row {
@@ -11899,16 +11913,34 @@ body.modal-open .cookie-consent-banner {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .batch-prep-modal-body {
-  padding-top: 10px;
-  max-height: 65vh;
-  overflow-y: auto;
+  padding-top: 0;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* No scrollbar on outer body */
+  max-height: none;
 }
 
 .batch-prep-section {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
+}
+
+.batch-prep-section.batch-prep-queued-section {
+  flex-shrink: 0;
+  margin-bottom: 14px;
+}
+
+.batch-prep-section.batch-prep-list-section {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0;
 }
 
 .batch-prep-section-header {
@@ -11916,11 +11948,12 @@ body.modal-open .cookie-consent-banner {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
+  flex-shrink: 0;
 }
 
 .batch-prep-section-header h4 {
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   font-weight: 800;
   color: #f1f5f9;
   margin: 0;
@@ -12102,11 +12135,36 @@ body.modal-open .cookie-consent-banner {
   color: #ffffff;
 }
 
-/* Grocery Groups */
+/* Grocery Groups - The single dedicated scrollable list */
 .batch-prep-grocery-groups {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
+  padding-right: 6px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(99, 102, 241, 0.45) transparent;
+}
+
+.batch-prep-grocery-groups::-webkit-scrollbar {
+  width: 6px;
+}
+
+.batch-prep-grocery-groups::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.batch-prep-grocery-groups::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.4);
+  border-radius: 4px;
+}
+
+.batch-prep-grocery-groups::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.7);
 }
 
 .batch-prep-group {
@@ -12207,7 +12265,38 @@ body.modal-open .cookie-consent-banner {
   justify-content: space-between;
   gap: 12px;
   flex-wrap: wrap;
-  padding-top: 14px;
+  flex-shrink: 0;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+@media (max-width: 640px) {
+  .batch-prep-modal-content {
+    width: 96%;
+    height: 94vh;
+    height: 94dvh;
+    max-height: 94vh;
+    padding: 16px 14px 14px;
+  }
+  .batch-prep-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .batch-prep-footer-left,
+  .batch-prep-footer-right {
+    width: 100%;
+    display: flex;
+    justify-content: stretch;
+    gap: 8px;
+  }
+  .batch-prep-footer-left button,
+  .batch-prep-footer-right button {
+    flex: 1;
+    text-align: center;
+    justify-content: center;
+  }
 }
 
 @media (max-width: 768px) {
