@@ -8406,18 +8406,27 @@
     const nextBtn = document.getElementById('btnAssemblyNextStep');
     if (prevBtn) {
       prevBtn.style.display = assemblyCurrentStep > 1 ? 'inline-flex' : 'none';
-      if (assemblyCurrentStep === 2) prevBtn.textContent = '← Step 1: Liquids';
-      else if (assemblyCurrentStep === 3) prevBtn.textContent = '← Step 2: Powders';
-      else if (assemblyCurrentStep === 4) prevBtn.textContent = '← Step 3: Froth';
+      if (assemblyCurrentStep === 2) prevBtn.textContent = '← Step 1';
+      else if (assemblyCurrentStep === 3) prevBtn.textContent = '← Step 2';
+      else if (assemblyCurrentStep === 4) prevBtn.textContent = '← Step 3';
     }
     if (nextBtn) {
       if (assemblyCurrentStep === 1) nextBtn.textContent = 'Next: Add Powders →';
       else if (assemblyCurrentStep === 2) nextBtn.textContent = 'Next: Froth & Whisk →';
       else if (assemblyCurrentStep === 3) nextBtn.textContent = 'Next: Lid & Freeze →';
-      else if (assemblyCurrentStep === 4) nextBtn.textContent = '❄️ Move Pints to Freezer Shelf (Start Timers)';
+      else if (assemblyCurrentStep === 4) nextBtn.textContent = '❄️ Freeze Pints & Start Timers';
     }
 
     renderAssemblyStepBody(assemblyCurrentStep);
+
+    // Always reset scroll position to top when switching steps
+    const bodyEl = document.getElementById('assemblyBody');
+    if (bodyEl) {
+      bodyEl.scrollTop = 0;
+      requestAnimationFrame(() => {
+        bodyEl.scrollTop = 0;
+      });
+    }
   }
 
   function renderAssemblyStepBody(step) {
