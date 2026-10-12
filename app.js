@@ -4732,7 +4732,11 @@
     const modal = document.getElementById('creatorPortalModalOverlay');
     if (!modal) return;
 
-    renderCreatorPortalContent();
+    try {
+      renderCreatorPortalContent();
+    } catch (e) {
+      console.warn('renderCreatorPortalContent warning:', e);
+    }
 
     modal.classList.add('active');
     modal.setAttribute('aria-hidden', 'false');
@@ -12625,7 +12629,9 @@
   const ALL_CATEGORY_SUBSCRIPTIONS = ['All-Access', 'Base Flavors', 'Community Legends', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free'];
 
   function openAdminPortal() {
-    if (!currentUser || (currentUser.role !== 'admin' && currentUser.email !== 'ahumpo7@gmail.com')) {
+    const isSuper = (realAdminUser && (realAdminUser.email === 'ahumpo7@gmail.com' || realAdminUser.email === 'ahumpo@gmail.com')) ||
+                    (currentUser && (currentUser.email === 'ahumpo7@gmail.com' || currentUser.email === 'ahumpo@gmail.com'));
+    if (!isSuper && (!currentUser || currentUser.role !== 'admin')) {
       showToast('⚠️ Admin privileges required to access the Admin Portal.');
       return;
     }
