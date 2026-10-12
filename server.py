@@ -1822,18 +1822,20 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 save_json_file(USERS_DB_FILE, users_db)
 
             community_stats = compute_community_stats()
-            self._send_json({
+            resp_payload = {
                 'status': 'ok',
                 'success': True,
                 'recipeId': recipe_id,
-                'userMade': user_made_count,
-                'userMadeCount': user_made_count,
                 'communityMade': new_community_count,
                 'communityTotalMade': new_community_count,
                 'totalBatches': community_stats['totalBatches'],
                 'totalCommunityBatches': community_stats['totalBatches'],
                 'isCustom': is_custom
-            })
+            }
+            if user:
+                resp_payload['userMade'] = user_made_count
+                resp_payload['userMadeCount'] = user_made_count
+            self._send_json(resp_payload)
 
         # 4. User Rating & Tasting Notes
         elif self.path == '/api/user/rate':

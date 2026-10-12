@@ -856,7 +856,16 @@
         recipeMadeCounts = {};
       }
     } else {
-      recipeMadeCounts = {};
+      const legacyMade = localStorage.getItem(RECIPE_MADE_STORAGE_KEY);
+      if (legacyMade !== null) {
+        try {
+          recipeMadeCounts = JSON.parse(legacyMade);
+        } catch (e) {
+          recipeMadeCounts = {};
+        }
+      } else {
+        recipeMadeCounts = {};
+      }
     }
   }
 
@@ -2851,6 +2860,10 @@
     recipeMadeCounts[recipeId] = newCount;
     saveRecipeMadeCounts();
 
+    // Immediately update modal counter and recipe listing UI
+    updateModalBatchDisplay(recipeId);
+    renderRecipes();
+
     if (delta > 0) {
       playAudioSuccess();
       triggerHaptic(25);
@@ -2858,6 +2871,9 @@
         recipe_id: recipeId,
         new_batch_count: newCount
       });
+      showToast(`🍨 Batch logged! You have spun this ${newCount} time${newCount === 1 ? '' : 's'}.`);
+    } else {
+      showToast(`Batch counter updated (${newCount}).`);
     }
 
     // Optimistic community update
@@ -2865,6 +2881,7 @@
     communityStats.madeCounts[recipeId] = Math.max(0, currentComm + delta);
     communityStats.totalBatches = Math.max(0, (communityStats.totalBatches || 0) + delta);
     saveCommunityStats();
+    updateModalBatchDisplay(recipeId);
 
     // Persist to backend server
     try {
@@ -2880,25 +2897,25 @@
       if (res.ok) {
         const data = await res.json();
         if (data.status === 'ok' || data.success) {
-          communityStats.madeCounts[recipeId] = data.communityMade ?? data.communityTotalMade ?? data.madeCounts?.[recipeId];
-          communityStats.totalBatches = data.totalBatches ?? data.totalCommunityBatches;
-          recipeMadeCounts[recipeId] = data.userMade ?? data.userMadeCount;
+          if (data.communityMade !== undefined || data.communityTotalMade !== undefined) {
+            communityStats.madeCounts[recipeId] = data.communityMade ?? data.communityTotalMade;
+          }
+          if (data.totalBatches !== undefined || data.totalCommunityBatches !== undefined) {
+            communityStats.totalBatches = data.totalBatches ?? data.totalCommunityBatches;
+          }
+          // Only overwrite personal userMade if a signed-in user session exists and server returned a value
+          if (currentUser && (data.userMade !== undefined || data.userMadeCount !== undefined)) {
+            recipeMadeCounts[recipeId] = data.userMade ?? data.userMadeCount;
+          }
           saveRecipeMadeCounts();
           saveCommunityStats();
+          updateModalBatchDisplay(recipeId);
         }
       }
     } catch (err) {
       console.warn('Batch logging sync warning:', err);
     }
 
-    if (delta > 0) {
-      showToast(`🍨 Batch logged! You have spun this ${newCount} time${newCount === 1 ? '' : 's'}.`);
-    } else {
-      showToast(`Batch counter updated (${newCount}).`);
-    }
-
-    updateModalBatchDisplay(recipeId);
-    renderRecipes();
     triggerCloudSync();
   }
 
@@ -5122,172 +5139,324 @@
     canvas.height = height;
     const ctx = canvas.getContext('2d');
 
-    // 1. Background Gradient
+    // 1. Deep Obsidian & Blackberry Canvas Gradient
     const bg = ctx.createLinearGradient(0, 0, width, height);
-    bg.addColorStop(0, '#090d16');
-    bg.addColorStop(0.5, '#0f172a');
-    bg.addColorStop(1, '#1e1b4b');
+    bg.addColorStop(0, '#070a13');
+    bg.addColorStop(0.35, '#0d1322');
+    bg.addColorStop(0.7, '#190e2d');
+    bg.addColorStop(1, '#260d3d');
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, width, height);
 
-    // 2. Cosmic Ambient Radial Glows
-    const radialPink = ctx.createRadialGradient(width * 0.85, height * 0.15, 0, width * 0.85, height * 0.15, width * 0.6);
-    radialPink.addColorStop(0, 'rgba(236, 72, 153, 0.35)');
-    radialPink.addColorStop(1, 'rgba(236, 72, 153, 0)');
-    ctx.fillStyle = radialPink;
+    // 2. Multi-layer Radiant Mesh Glows
+    // Top-right coral aura
+    const glowPink = ctx.createRadialGradient(width * 0.85, height * 0.12, 0, width * 0.85, height * 0.12, width * 0.55);
+    glowPink.addColorStop(0, 'rgba(244, 63, 94, 0.32)');
+    glowPink.addColorStop(0.6, 'rgba(236, 72, 153, 0.12)');
+    glowPink.addColorStop(1, 'rgba(236, 72, 153, 0)');
+    ctx.fillStyle = glowPink;
     ctx.fillRect(0, 0, width, height);
 
-    const radialPurple = ctx.createRadialGradient(width * 0.15, height * 0.85, 0, width * 0.15, height * 0.85, width * 0.65);
-    radialPurple.addColorStop(0, 'rgba(139, 92, 246, 0.35)');
-    radialPurple.addColorStop(1, 'rgba(139, 92, 246, 0)');
-    ctx.fillStyle = radialPurple;
+    // Top-left electric violet aura
+    const glowViolet = ctx.createRadialGradient(width * 0.15, height * 0.3, 0, width * 0.15, height * 0.3, width * 0.5);
+    glowViolet.addColorStop(0, 'rgba(147, 51, 234, 0.28)');
+    glowViolet.addColorStop(0.6, 'rgba(147, 51, 234, 0.08)');
+    glowViolet.addColorStop(1, 'rgba(147, 51, 234, 0)');
+    ctx.fillStyle = glowViolet;
     ctx.fillRect(0, 0, width, height);
 
-    // 3. Subtle Outer Border
-    drawRoundedRect(ctx, 40, 40, width - 80, height - 80, 40, null, 'rgba(255, 255, 255, 0.12)', 3);
+    // Center/Bottom warm peach & rose glow
+    const glowPeach = ctx.createRadialGradient(width * 0.5, height * 0.85, 0, width * 0.5, height * 0.85, width * 0.6);
+    glowPeach.addColorStop(0, 'rgba(251, 146, 60, 0.18)');
+    glowPeach.addColorStop(0.5, 'rgba(244, 114, 182, 0.10)');
+    glowPeach.addColorStop(1, 'rgba(244, 114, 182, 0)');
+    ctx.fillStyle = glowPeach;
+    ctx.fillRect(0, 0, width, height);
 
-    let curY = ratio === 'story' ? 150 : 105;
+    // 3. Double Luxury Border Frame
+    const framePad = 36;
+    drawRoundedRect(ctx, framePad, framePad, width - framePad * 2, height - framePad * 2, 44, null, 'rgba(255, 255, 255, 0.09)', 2);
+    drawRoundedRect(ctx, framePad + 14, framePad + 14, width - (framePad + 14) * 2, height - (framePad + 14) * 2, 34, null, 'rgba(255, 255, 255, 0.035)', 1);
 
-    // 4. Header Brand Badge
+    // Corner Star Accents
+    ctx.font = '700 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillStyle = 'rgba(251, 191, 36, 0.45)';
     ctx.textAlign = 'center';
-    ctx.font = '800 32px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-    ctx.fillStyle = '#f472b6';
-    ctx.fillText('🍨 CREAMICRAVINGS.COM', width / 2, curY);
+    ctx.fillText('✦', framePad + 28, framePad + 36);
+    ctx.fillText('✦', width - framePad - 28, framePad + 36);
+    ctx.fillText('✦', framePad + 28, height - framePad - 20);
+    ctx.fillText('✦', width - framePad - 28, height - framePad - 20);
 
-    curY += 45;
-    ctx.font = '700 22px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    let curY = ratio === 'story' ? 115 : 75;
+
+    // 4. Header Brand Pill
+    const brandText = '🍨 CREAMICRAVINGS.COM';
+    ctx.font = '800 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    const brandWidth = ctx.measureText(brandText).width + 48;
+    drawRoundedRect(ctx, (width - brandWidth) / 2, curY - 24, brandWidth, 44, 22, 'rgba(255, 255, 255, 0.06)', 'rgba(255, 255, 255, 0.16)', 1.5);
+    ctx.fillStyle = '#f9a8d4';
+    ctx.fillText(brandText, width / 2, curY + 6);
+
+    curY += 46;
+    ctx.font = '700 17px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
     ctx.fillStyle = '#94a3b8';
-    ctx.fillText('THE ULTIMATE NINJA CREAMI COMPANION', width / 2, curY);
+    ctx.fillText('✦ THE ULTIMATE NINJA CREAMI® COMPANION ✦', width / 2, curY);
 
-    curY += ratio === 'story' ? 70 : 55;
+    curY += ratio === 'story' ? 62 : 46;
 
     // 5. Category Tag Pill
     const cat = (recipe.category || 'High Protein').toUpperCase();
-    ctx.font = '800 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-    const tagText = `⭐ ${cat} • NINJA CREAMI`;
+    let catEmoji = '⭐';
+    if (cat.includes('PROTEIN')) catEmoji = '💪';
+    else if (cat.includes('SORBET') || cat.includes('FRUIT')) catEmoji = '🍧';
+    else if (cat.includes('KETO') || cat.includes('CARB')) catEmoji = '🥑';
+    else if (cat.includes('CHOCOLATE')) catEmoji = '🍫';
+
+    ctx.font = '800 22px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    const tagText = `${catEmoji} ${cat} • OFFICIAL RECIPE`;
     const tagWidth = ctx.measureText(tagText).width + 50;
-    drawRoundedRect(ctx, (width - tagWidth) / 2, curY - 32, tagWidth, 50, 25, 'rgba(236, 72, 153, 0.2)', 'rgba(236, 72, 153, 0.55)', 2);
+    drawRoundedRect(ctx, (width - tagWidth) / 2, curY - 24, tagWidth, 44, 22, 'rgba(236, 72, 153, 0.22)', 'rgba(236, 72, 153, 0.6)', 2);
     ctx.fillStyle = '#f472b6';
-    ctx.fillText(tagText, width / 2, curY + 4);
+    ctx.fillText(tagText, width / 2, curY + 6);
 
-    curY += ratio === 'story' ? 95 : 75;
+    curY += ratio === 'story' ? 80 : 60;
 
-    // 6. Recipe Title (Wrapped)
-    ctx.font = '900 64px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    // 6. Recipe Title (Wrapped & Scaled)
+    const titleMaxWidth = width - 180;
+    const isLongName = (recipe.name || '').length > 32;
+    const titleFontSize = ratio === 'story' ? (isLongName ? 58 : 68) : (isLongName ? 48 : 54);
+    const titleLineHeight = ratio === 'story' ? (isLongName ? 70 : 80) : (isLongName ? 58 : 64);
+
+    ctx.font = `900 ${titleFontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
     ctx.fillStyle = '#ffffff';
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
-    ctx.shadowBlur = 18;
-    ctx.shadowOffsetY = 4;
-    
-    const lines = wrapCanvasText(ctx, recipe.name, width - 180);
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+    ctx.shadowBlur = 22;
+    ctx.shadowOffsetY = 6;
+
+    const lines = wrapCanvasText(ctx, recipe.name, titleMaxWidth);
     for (let i = 0; i < lines.length; i++) {
       ctx.fillText(lines[i], width / 2, curY);
-      curY += 76;
+      curY += titleLineHeight;
     }
     ctx.shadowColor = 'transparent';
     ctx.shadowBlur = 0;
     ctx.shadowOffsetY = 0;
 
-    curY += ratio === 'story' ? 30 : 15;
+    // 7. Creaminess Score Ribbon
+    const scoreVal = recipe.creaminessScore || '9.4';
+    const scoreGrade = recipe.creaminessGrade || 'Balanced';
+    const scoreText = `🧪 Creaminess: ${scoreVal}/10 (${scoreGrade}) • 🥣 16 oz Pint • ⏱️ ${recipe.prepTime || '2 Min'} Prep`;
+    ctx.font = '700 19px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    const scoreWidth = ctx.measureText(scoreText).width + 44;
+    drawRoundedRect(ctx, (width - scoreWidth) / 2, curY - 20, scoreWidth, 38, 19, 'rgba(16, 185, 129, 0.15)', 'rgba(16, 185, 129, 0.45)', 1.5);
+    ctx.fillStyle = '#34d399';
+    ctx.fillText(scoreText, width / 2, curY + 6);
 
-    // 7. Macro 4-Grid Cards
+    curY += ratio === 'story' ? 52 : 38;
+
+    // 8. Macro 4-Grid Cards
     const macros = recipe.macros || {};
     const calVal = `${macros.calories || macros.cal || '240'}`.replace(/kcal|cal/i, '').trim();
-    const proVal = `${macros.protein || '30g'}`.trim();
-    const carbVal = `${macros.carbs || '15g'}`.trim();
-    const fatVal = `${macros.fat || '4g'}`.trim();
+    const proVal = `${macros.protein || '30g'}`.replace(/g/i, '').trim();
+    const carbVal = `${macros.carbs || '15g'}`.replace(/g/i, '').trim();
+    const fatVal = `${macros.fat || '4g'}`.replace(/g/i, '').trim();
 
-    const cardW = 210;
-    const cardH = ratio === 'story' ? 140 : 115;
-    const gap = 20;
+    const cardW = 212;
+    const cardH = ratio === 'story' ? 148 : 122;
+    const gap = 18;
     const startX = (width - (cardW * 4 + gap * 3)) / 2;
 
     const macroItems = [
       { label: 'CALORIES', val: calVal, unit: 'KCAL', color: '#f43f5e', icon: '🔥' },
-      { label: 'PROTEIN', val: proVal, unit: '', color: '#3b82f6', icon: '💪' },
-      { label: 'CARBS', val: carbVal, unit: '', color: '#10b981', icon: '🌾' },
-      { label: 'FAT', val: fatVal, unit: '', color: '#f59e0b', icon: '💧' }
+      { label: 'PROTEIN', val: proVal, unit: 'GRAMS', color: '#0ea5e9', icon: '💪' },
+      { label: 'CARBS', val: carbVal, unit: 'GRAMS', color: '#10b981', icon: '🌾' },
+      { label: 'FAT', val: fatVal, unit: 'GRAMS', color: '#f59e0b', icon: '🥑' }
     ];
 
     for (let i = 0; i < macroItems.length; i++) {
       const it = macroItems[i];
       const cx = startX + i * (cardW + gap);
-      drawRoundedRect(ctx, cx, curY, cardW, cardH, 20, 'rgba(30, 41, 59, 0.8)', 'rgba(255, 255, 255, 0.1)', 2);
+      
+      // Card Background with soft drop shadow
+      ctx.save();
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+      ctx.shadowBlur = 14;
+      ctx.shadowOffsetY = 6;
+      drawRoundedRect(ctx, cx, curY, cardW, cardH, 20, 'rgba(15, 23, 42, 0.88)', 'rgba(255, 255, 255, 0.12)', 1.5);
+      ctx.restore();
 
-      // Icon + Label
-      ctx.font = '700 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      // Top colored accent stripe
+      drawRoundedRect(ctx, cx + 18, curY, cardW - 36, 5, 2.5, it.color, null);
+
+      // Icon & Label
+      ctx.font = '800 16px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
       ctx.fillStyle = '#94a3b8';
-      ctx.fillText(`${it.icon} ${it.label}`, cx + cardW / 2, curY + 34);
+      ctx.fillText(`${it.icon} ${it.label}`, cx + cardW / 2, curY + 36);
 
       // Value
-      ctx.font = '900 36px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-      ctx.fillStyle = it.color;
-      ctx.fillText(it.val, cx + cardW / 2, curY + (ratio === 'story' ? 88 : 78));
+      ctx.font = '900 44px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(it.val, cx + cardW / 2, curY + (ratio === 'story' ? 92 : 80));
 
-      if (it.unit) {
-        ctx.font = '800 14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-        ctx.fillStyle = '#94a3b8';
-        ctx.fillText(it.unit, cx + cardW / 2, curY + (ratio === 'story' ? 116 : 100));
-      }
+      // Unit
+      ctx.font = '800 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.fillStyle = it.color;
+      ctx.fillText(it.unit, cx + cardW / 2, curY + (ratio === 'story' ? 122 : 106));
     }
 
-    curY += cardH + (ratio === 'story' ? 45 : 30);
+    curY += cardH + (ratio === 'story' ? 40 : 26);
 
-    // 8. Machine Settings Specs Row
-    const specW = (width - 180);
-    const specH = 68;
-    const specX = 90;
-    drawRoundedRect(ctx, specX, curY, specW, specH, 20, 'rgba(15, 23, 42, 0.8)', 'rgba(139, 92, 246, 0.35)', 2);
+    // 9. Ninja Creami Machine Settings Deck
+    const specW = width - 176;
+    const specH = ratio === 'story' ? 94 : 78;
+    const specX = 88;
 
-    const spinText = `🌀 Spin: ${recipe.spinSetting || 'Lite Ice Cream'}`;
-    const freezeText = `❄️ Freeze: ${recipe.freezeTime || '16+ Hours'}`;
-    const sizeText = `🥣 Size: ${recipe.makes || '16 oz Pint'}`;
+    drawRoundedRect(ctx, specX, curY, specW, specH, 20, 'rgba(15, 23, 42, 0.9)', 'rgba(168, 85, 247, 0.35)', 1.5);
 
-    ctx.font = '700 22px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    // Deck Header Tag
+    ctx.font = '800 14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillStyle = '#c084fc';
+    ctx.fillText('🌀 NINJA CREAMI® MACHINE SETTINGS', width / 2, curY + 26);
+
+    // 3 Spec Columns
+    const colW = specW / 3;
+    const spinSetting = recipe.spinSetting || 'Lite Ice Cream';
+    const freezeTime = recipe.freezeTime || '16+ Hours';
+    const respinTip = '+1 Splash Milk';
+
+    ctx.font = '700 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
     ctx.fillStyle = '#e2e8f0';
-    ctx.fillText(`${spinText}    •    ${freezeText}    •    ${sizeText}`, width / 2, curY + 42);
+    ctx.fillText(`Program: ${spinSetting}`, specX + colW * 0.5, curY + (ratio === 'story' ? 64 : 56));
+    ctx.fillText(`Freeze: ${freezeTime}`, specX + colW * 1.5, curY + (ratio === 'story' ? 64 : 56));
+    ctx.fillText(`Re-Spin: ${respinTip}`, specX + colW * 2.5, curY + (ratio === 'story' ? 64 : 56));
 
-    curY += specH + (ratio === 'story' ? 45 : 30);
+    curY += specH + (ratio === 'story' ? 40 : 26);
 
-    // 9. Key Ingredients Section (Vertical Story only)
+    // 10. Key Ingredients & Pro Tip (Story Mode vs Square Mode)
     if (ratio === 'story') {
+      // Ingredients Card
       const ings = (recipe.ingredients || []).slice(0, 5);
       if (ings.length > 0) {
-        const boxW = width - 180;
+        const boxW = width - 176;
         const boxH = 430;
-        drawRoundedRect(ctx, 90, curY, boxW, boxH, 24, 'rgba(15, 23, 42, 0.85)', 'rgba(255, 255, 255, 0.1)', 2);
+        drawRoundedRect(ctx, 88, curY, boxW, boxH, 24, 'rgba(15, 23, 42, 0.88)', 'rgba(255, 255, 255, 0.1)', 1.5);
 
-        ctx.font = '800 22px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        ctx.font = '800 20px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
         ctx.fillStyle = '#c084fc';
-        ctx.fillText('🥄 KEY INGREDIENTS', width / 2, curY + 48);
+        ctx.fillText('🥣 PINT INGREDIENTS LIST', width / 2, curY + 44);
 
-        let ingY = curY + 105;
-        ctx.textAlign = 'left';
+        let ingY = curY + 102;
         for (let j = 0; j < ings.length; j++) {
           const ing = ings[j];
           const ingName = ing.name || ing.raw || '';
           const ingQty = ing.quantity || ing.amount || '';
-          const displayText = ingQty ? `• ${ingName} (${ingQty})` : `• ${ingName}`;
 
-          ctx.font = '600 26px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+          // Diamond icon
+          ctx.font = '700 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+          ctx.fillStyle = '#ec4899';
+          ctx.textAlign = 'left';
+          ctx.fillText('✦', 125, ingY);
+
+          // Name
+          ctx.font = '600 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
           ctx.fillStyle = '#f8fafc';
-          ctx.fillText(displayText.length > 44 ? displayText.slice(0, 42) + '...' : displayText, 130, ingY);
-          ingY += 62;
+          const maxNameLen = ingQty ? 34 : 45;
+          const nameTrimmed = ingName.length > maxNameLen ? ingName.slice(0, maxNameLen - 2) + '...' : ingName;
+          ctx.fillText(nameTrimmed, 155, ingY);
+
+          // Qty Pill on right
+          if (ingQty) {
+            ctx.font = '700 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+            const qtyText = ingQty;
+            const qW = ctx.measureText(qtyText).width + 32;
+            const qX = width - 125 - qW;
+            drawRoundedRect(ctx, qX, ingY - 24, qW, 34, 17, 'rgba(255, 255, 255, 0.08)', 'rgba(255, 255, 255, 0.18)', 1);
+            ctx.fillStyle = '#e2e8f0';
+            ctx.fillText(qtyText, qX + 16, ingY - 1);
+          }
+
+          // Row divider
+          if (j < ings.length - 1) {
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(125, ingY + 22);
+            ctx.lineTo(width - 125, ingY + 22);
+            ctx.stroke();
+          }
+
+          ingY += 66;
         }
         ctx.textAlign = 'center';
-        curY += boxH + 40;
+        curY += boxH + 34;
       }
+
+      // Pro Tip Callout Box
+      const tipBoxW = width - 176;
+      const tipBoxH = 175;
+      drawRoundedRect(ctx, 88, curY, tipBoxW, tipBoxH, 20, 'rgba(251, 191, 36, 0.07)', 'rgba(251, 191, 36, 0.28)', 1.5);
+
+      ctx.font = '800 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.fillStyle = '#fbbf24';
+      ctx.fillText('💡 NINJA CREAMI PRO SECRET', width / 2, curY + 40);
+
+      ctx.font = '600 21px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.fillStyle = '#f1f5f9';
+      ctx.fillText('If pint looks crumbly or powdery on the first spin, don\'t worry!', width / 2, curY + 82);
+      ctx.fillText('Add 1 tbsp of milk and hit RESPIN for ultra-creamy soft-serve texture.', width / 2, curY + 118);
+    } else {
+      // Square Mode (1:1): Key Ingredients 2x2 Grid + Pro Tip
+      const ings = (recipe.ingredients || []).slice(0, 4);
+      if (ings.length > 0) {
+        const gridW = width - 176;
+        const cellW = (gridW - 16) / 2;
+        const cellH = 50;
+
+        for (let j = 0; j < ings.length; j++) {
+          const row = Math.floor(j / 2);
+          const col = j % 2;
+          const gx = 88 + col * (cellW + 16);
+          const gy = curY + row * (cellH + 12);
+
+          drawRoundedRect(ctx, gx, gy, cellW, cellH, 16, 'rgba(15, 23, 42, 0.82)', 'rgba(255, 255, 255, 0.1)', 1);
+
+          const ing = ings[j];
+          const ingName = ing.name || ing.raw || '';
+          const ingQty = ing.quantity || ing.amount || '';
+          const displayText = ingQty ? `🥣 ${ingQty} ${ingName}` : `🥣 ${ingName}`;
+
+          ctx.font = '600 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+          ctx.fillStyle = '#f8fafc';
+          ctx.fillText(displayText.length > 28 ? displayText.slice(0, 26) + '...' : displayText, gx + cellW / 2, gy + 32);
+        }
+        curY += (Math.ceil(ings.length / 2)) * (cellH + 12) + 20;
+      }
+
+      // Pro Tip Pill for Square
+      const tipText = '💡 Pro Tip: Spin on Lite Ice Cream + 1 Respin for silky texture!';
+      ctx.font = '700 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      const tipWidth = ctx.measureText(tipText).width + 44;
+      drawRoundedRect(ctx, (width - tipWidth) / 2, curY, tipWidth, 42, 21, 'rgba(251, 191, 36, 0.08)', 'rgba(251, 191, 36, 0.3)', 1);
+      ctx.fillStyle = '#fbbf24';
+      ctx.fillText(tipText, width / 2, curY + 27);
     }
 
-    // 10. Footer Callout & Link
-    const footerY = height - (ratio === 'story' ? 120 : 65);
-    ctx.font = '800 28px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText('Find 150+ Tested Ninja Creami Recipes 🍨', width / 2, footerY - 32);
+    // 11. Footer Callout & Link
+    const footerY = height - (ratio === 'story' ? 115 : 62);
+    
+    // Glowing Action Pill
+    const ctaText = '🍨 DISCOVER 200+ RECIPES • CREAMICRAVINGS.COM';
+    ctx.font = '800 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    const ctaWidth = ctx.measureText(ctaText).width + 50;
+    drawRoundedRect(ctx, (width - ctaWidth) / 2, footerY - 42, ctaWidth, 50, 25, 'rgba(236, 72, 153, 0.22)', 'rgba(236, 72, 153, 0.65)', 2);
+    ctx.fillStyle = '#f472b6';
+    ctx.fillText(ctaText, width / 2, footerY - 9);
 
-    ctx.font = '700 22px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-    ctx.fillStyle = '#ec4899';
-    ctx.fillText('creamicravings.com', width / 2, footerY + 8);
+    if (ratio === 'story') {
+      ctx.font = '600 19px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillText('✦ Match recipes to the exact ingredients in your pantry! ✦', width / 2, footerY + 28);
+    }
 
     // Export image to preview
     canvas.toBlob((blob) => {
