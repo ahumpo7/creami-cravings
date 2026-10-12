@@ -7795,10 +7795,31 @@
     unlockBackgroundScroll();
   }
 
+  function isMixinIngredient(ing) {
+    if (!ing) return false;
+    if (ing.isMixin === true || ing.isMixIn === true || ing.isMixin === 'true' || ing.isMixIn === 'true') {
+      return true;
+    }
+    const sec = (ing.section || '').toLowerCase();
+    if (sec.includes('mix') || sec.includes('topping')) {
+      return true;
+    }
+    const cat = (ing.category || '').toLowerCase();
+    if (cat.includes('mixin') || cat === 'mixins_snacks') {
+      return true;
+    }
+    const name = (ing.name || ing.raw || '').toLowerCase();
+    if (/(pretzels?|oreos?|cookie dough|graham cracker|chocolate chips?|mini chips?|candy|sprinkles?|m&ms?|peanut butter cup|reeses|bites\b|wafers?|brownie|mini muffins?)/i.test(name)) {
+      return true;
+    }
+    return false;
+  }
+
   function isLiquidIngredient(ing) {
+    if (isMixinIngredient(ing)) return false;
     const name = (ing.name || ing.raw || '').toLowerCase();
     const unit = (ing.unit || '').toLowerCase();
-    if (/(powder|pudding|mix\b|gum|flour|sugar|sweetener|splenda|stevia|monk|erythritol|allulose|salt|cinnamon|cocoa|cacao|chips|oreo|cookie)/i.test(name)) {
+    if (/(powder|pudding|mix\b|gum|flour|sugar|sweetener|splenda|stevia|monk|erythritol|allulose|salt|cinnamon|cocoa|cacao)/i.test(name)) {
       return false;
     }
     if (/(milk|water|shake|juice|cream|syrup|puree|coffee|espresso|extract|paste|yogurt|applesauce|liquid)/i.test(name)) {
@@ -7811,7 +7832,8 @@
   }
 
   function isDryIngredient(ing) {
-    return !isLiquidIngredient(ing) && !ing.isMixIn;
+    if (isMixinIngredient(ing)) return false;
+    return !isLiquidIngredient(ing);
   }
 
   function goToAssemblyStep(step) {
@@ -7908,11 +7930,15 @@
       body.innerHTML = html;
 
     } else if (step === 2) {
-      // Step 2: Powders & Dry Mixes
+      // Step 2: Powders & Dry Mixes (Mix-ins strictly excluded until post-freeze spin)
       let html = `
-        <div style="margin-bottom: 16px;">
-          <h3 style="font-size: 1.15rem; color: #f8fafc; margin-bottom: 4px;">🥄 Stage 2: Measure &amp; Add Powders</h3>
-          <p style="font-size: 0.88rem; color: #94a3b8; margin: 0;">Add protein powders, pudding mixes, sweeteners, and stabilizers directly into each pint:</p>
+        <div style="margin-bottom: 12px;">
+          <h3 style="font-size: 1.15rem; color: #f8fafc; margin-bottom: 4px;">🥄 Stage 2: Measure &amp; Add Base Powders</h3>
+          <p style="font-size: 0.88rem; color: #94a3b8; margin: 0;">Add base protein powders, pudding mixes, sweeteners, and stabilizers directly into each pint:</p>
+        </div>
+        <div style="margin-bottom: 16px; background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 10px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; font-size: 0.84rem; color: #bae6fd;">
+          <span style="font-size: 1.2rem; flex-shrink: 0;">💡</span>
+          <span><strong>Mix-ins are held for post-spin!</strong> Cookies, chips, pretzels, and dough bites are excluded here—they fold in after freezing &amp; your first Creami spin.</span>
         </div>
         <div class="assembly-pints-grid">
       `;
@@ -8015,7 +8041,7 @@
       body.innerHTML = html;
 
     } else if (step === 4) {
-      // Step 4: Lid & Freeze
+      // Step 4: Lid & Freeze Flat + Post-Spin Mix-Ins to Reserve
       let html = `
         <div class="assembly-freeze-stage-card">
           <div class="assembly-freeze-icon">❄️</div>
@@ -8039,6 +8065,74 @@
           </div>
         </div>
       `;
+
+      // Check if any pints in queue have mix-ins to reserve for post-spin
+      const pintsWithMixins = [];
+      batchPrepQueueState.forEach((queued, idx) => {
+        const rec = allRecipes.find(r => r.id === queued.recipeId);
+        const scale = queued.scale || 1.0;
+        const mixins = rec ? (rec.ingredients || []).filter(isMixinIngredient) : [];
+        if (mixins.length > 0) {
+          pintsWithMixins.push({
+            idx,
+            recipeName: queued.recipeName,
+            scale,
+            mixins
+          });
+        }
+      });
+
+      if (pintsWithMixins.length > 0) {
+        html += `
+          <div style="margin-top: 20px; background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 12px; padding: 18px 20px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 1.25rem;">🍪</span>
+                <h4 style="margin: 0; font-size: 1.05rem; color: #fef3c7;">Post-Spin Mix-Ins to Reserve</h4>
+              </div>
+              <span style="font-size: 0.78rem; background: rgba(245, 158, 11, 0.18); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.35); padding: 3px 10px; border-radius: 12px; font-weight: 600;">
+                Add Tomorrow on Mix-In Cycle
+              </span>
+            </div>
+            <p style="font-size: 0.86rem; color: #cbd5e1; margin: 0 0 14px 0; line-height: 1.45;">
+              Keep these in your pantry or fridge. Tomorrow, after freezing 16+ hours, run your Creami spin, core a center tunnel with a butter knife, drop in your mix-ins, and run the <strong>Mix-In cycle</strong>:
+            </p>
+            <div class="assembly-pints-grid">
+        `;
+
+        pintsWithMixins.forEach(item => {
+          const sizeBadge = item.scale === 1.5 ? '24 oz Deluxe' : '16 oz Standard';
+          html += `
+            <div class="assembly-pint-card" style="border-color: rgba(245, 158, 11, 0.25);">
+              <div class="assembly-pint-card-header" style="background: rgba(245, 158, 11, 0.08);">
+                <span class="assembly-pint-title">#${item.idx + 1} ${escapeHtml(item.recipeName)}</span>
+                <span class="assembly-pint-badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24;">${sizeBadge}</span>
+              </div>
+              <div class="assembly-items-list">
+          `;
+          item.mixins.forEach((mix, mIdx) => {
+            const key = `step4_mixin_${item.idx}_${mIdx}`;
+            const isChecked = assemblyCheckedItems.has(key);
+            const formattedQty = formatIngredientAmount(mix, item.scale, 'metric');
+            const cleanName = sanitizeShoppingItemName(mix.name);
+            html += `
+              <div class="assembly-item-row ${isChecked ? 'checked' : ''}" data-item-key="${key}">
+                <span class="assembly-item-name" style="color: #fef3c7;">🍪 ${escapeHtml(cleanName)}</span>
+                <span class="assembly-item-qty" style="color: #fbbf24; font-weight: 600;">${escapeHtml(formattedQty || '1 portion')}</span>
+              </div>
+            `;
+          });
+          html += `
+              </div>
+            </div>
+          `;
+        });
+
+        html += `
+            </div>
+          </div>
+        `;
+      }
       body.innerHTML = html;
     }
 
