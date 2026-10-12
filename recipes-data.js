@@ -71,6 +71,35 @@ const CREATORS_MASTER = [
         "url": "https://urlgeni.us/amazon/owizeD"
       }
     ]
+  },
+  {
+    "id": "test_content",
+    "name": "TestContent",
+    "brandName": "TestContent Studio",
+    "handle": "@testcontent",
+    "url": "https://creamicravings.com/beta/@testcontent",
+    "storeUrl": "https://creamicravings.com/beta/@testcontent",
+    "bio": "Official test creator profile for multi-creator storefronts, batch prep packs, and audience analytics.",
+    "perks": [
+      {
+        "id": "clean_protein_lab",
+        "brand": "Clean Protein Lab",
+        "category": "Whey Isolate & Casein",
+        "code": "TEST20",
+        "discount": "20% OFF",
+        "description": "Lab-tested unflavored & Madagascar vanilla whey/casein blend engineered for ultra-dense micro-crystals.",
+        "url": "https://creamicravings.com/beta/@testcontent"
+      },
+      {
+        "id": "flavor_burst_drops",
+        "brand": "FlavorBurst Zero Drops",
+        "category": "Calorie-Free Flavoring",
+        "code": "TESTFREE",
+        "discount": "Free Shipping",
+        "description": "Concentrated monk fruit flavoring drops in Cinnamon Roll, Birthday Batter, and Salted Caramel.",
+        "url": "https://creamicravings.com/beta/@testcontent"
+      }
+    ]
   }
 ];
 
@@ -144,6 +173,34 @@ const BOOKS_MASTER = [
     "imageUrl": "https://cdn.shopify.com/s/files/1/0770/1797/2901/files/book-cover-ipad-lactose-free_15544142-911c-498a-9d82-196fc46ed61f.png?v=1782237564",
     "recipeCount": 51,
     "description": "100% real dairy taste using ultra-filtered milk and lactose-free bases."
+  },
+  {
+    "id": "tc_sampler_pack",
+    "creatorId": "test_content",
+    "title": "TestContent Signature Sampler",
+    "shortTitle": "Signature Sampler",
+    "bookKey": "TestContent Sampler",
+    "categoryKey": "TestContent Sampler",
+    "sourceFile": "TestContent Sampler.pdf",
+    "price": "$19.99",
+    "url": "https://creamicravings.com/beta/@testcontent",
+    "imageUrl": "https://creamicravings.com/icon-512.png",
+    "recipeCount": 4,
+    "description": "TestContent's signature high-protein ice cream formulations tested for rich micro-crystal texture."
+  },
+  {
+    "id": "tc_volume_pints",
+    "creatorId": "test_content",
+    "title": "High-Volume Macro Pints",
+    "shortTitle": "Volume Pints",
+    "bookKey": "Volume Pints",
+    "categoryKey": "Volume Pints",
+    "sourceFile": "Volume Pints.pdf",
+    "price": "$24.99",
+    "url": "https://creamicravings.com/beta/@testcontent",
+    "imageUrl": "https://creamicravings.com/icon-512.png",
+    "recipeCount": 4,
+    "description": "Massive volume low-calorie pints formulated for cutting phases and maximum satiety."
   }
 ];
 
@@ -25557,6 +25614,852 @@ const RECIPES_MASTER = [
       "choco_frosted_donut_blizzard",
       "choco_frosted_donut_blast",
       "blizzard"
+    ]
+  },
+  {
+    "id": "tc_salted_caramel_swirl",
+    "name": "Salted Caramel Pretzel Swirl",
+    "category": "TestContent Sampler",
+    "categories": [
+      "TestContent Sampler"
+    ],
+    "creatorId": "test_content",
+    "sources": [
+      {
+        "book": "TestContent Sampler",
+        "page": 1,
+        "sourceFile": "TestContent Sampler.pdf"
+      }
+    ],
+    "sourceFile": "TestContent Sampler.pdf",
+    "page": 1,
+    "macros": {
+      "calories": "280",
+      "protein": "38g",
+      "carbs": "18g",
+      "fat": "4g",
+      "sugar": "3g",
+      "fiber": "2g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "3 MIN",
+    "freezeTime": "24 HOURS",
+    "makes": "1 PINT",
+    "proTip": "Add the crushed pretzels and sugar-free caramel drizzle during the Mix-In cycle for crunch in every spoonful.",
+    "ingredients": [
+      {
+        "id": "fat_free_ultra_filtered_milk",
+        "name": "Fat Free Ultra-Filtered Milk",
+        "quantity": "340",
+        "unit": "g",
+        "raw": "340G FAT FREE ULTRA-FILTERED MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "vanilla_protein_powder",
+        "name": "Vanilla Whey/Casein Powder",
+        "quantity": "30",
+        "unit": "g",
+        "raw": "30G VANILLA WHEY/CASEIN POWDER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Monk Fruit Sweetener",
+        "quantity": "15",
+        "unit": "g",
+        "raw": "15G MONK FRUIT SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sea_salt",
+        "name": "Flaky Sea Salt",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G FLAKY SEA SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "pretzels",
+        "name": "Crushed Pretzels",
+        "quantity": "15",
+        "unit": "g",
+        "raw": "15G CRUSHED PRETZELS",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": ""
+      }
+    ],
+    "instructions": [
+      "WHISK MILK, PROTEIN POWDER, SWEETENER, XANTHAN GUM, AND SEA SALT UNTIL DISSOLVED",
+      "POUR INTO CREAM PINT CONTAINER AND FREEZE FOR 24 HOURS",
+      "SPIN ON LITE ICE CREAM SETTING",
+      "BORE OUT A CENTER HOLE, ADD CRUSHED PRETZELS, AND RUN THE MIX-IN CYCLE"
+    ],
+    "aliases": [
+      "salted_caramel_pretzel_swirl",
+      "testcontent_caramel"
+    ]
+  },
+  {
+    "id": "tc_strawberry_shortcake_crisp",
+    "name": "Strawberry Shortcake Crisp",
+    "category": "TestContent Sampler",
+    "categories": [
+      "TestContent Sampler"
+    ],
+    "creatorId": "test_content",
+    "sources": [
+      {
+        "book": "TestContent Sampler",
+        "page": 2,
+        "sourceFile": "TestContent Sampler.pdf"
+      }
+    ],
+    "sourceFile": "TestContent Sampler.pdf",
+    "page": 2,
+    "macros": {
+      "calories": "260",
+      "protein": "36g",
+      "carbs": "16g",
+      "fat": "3g",
+      "sugar": "4g",
+      "fiber": "3g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "24 HOURS",
+    "makes": "1 PINT",
+    "proTip": "Blend freeze-dried strawberries directly into the base milk to create a natural vibrant pink hue and deep berry flavor.",
+    "ingredients": [
+      {
+        "id": "fat_free_ultra_filtered_milk",
+        "name": "Fat Free Ultra-Filtered Milk",
+        "quantity": "340",
+        "unit": "g",
+        "raw": "340G FAT FREE ULTRA-FILTERED MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "vanilla_protein_powder",
+        "name": "Vanilla Protein Powder",
+        "quantity": "28",
+        "unit": "g",
+        "raw": "28G VANILLA PROTEIN POWDER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "strawberries",
+        "name": "Freeze-Dried Strawberries",
+        "quantity": "10",
+        "unit": "g",
+        "raw": "10G FREEZE-DRIED STRAWBERRIES",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Monk Fruit Sweetener",
+        "quantity": "12",
+        "unit": "g",
+        "raw": "12G MONK FRUIT SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "graham_crackers",
+        "name": "Crushed Graham Crackers",
+        "quantity": "12",
+        "unit": "g",
+        "raw": "12G CRUSHED GRAHAM CRACKERS",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": ""
+      }
+    ],
+    "instructions": [
+      "BLEND MILK, PROTEIN POWDER, FREEZE-DRIED STRAWBERRIES, SWEETENER, AND XANTHAN GUM",
+      "FREEZE FOR 24 HOURS IN NINJA CREAMI PINT",
+      "SPIN ON LITE ICE CREAM CYCLE",
+      "ADD CRUSHED GRAHAM CRACKERS AND RUN MIX-IN CYCLE"
+    ],
+    "aliases": [
+      "strawberry_shortcake_crisp"
+    ]
+  },
+  {
+    "id": "tc_cookies_and_cream_blitz",
+    "name": "Cookies & Cream Blitz",
+    "category": "TestContent Sampler",
+    "categories": [
+      "TestContent Sampler"
+    ],
+    "creatorId": "test_content",
+    "sources": [
+      {
+        "book": "TestContent Sampler",
+        "page": 3,
+        "sourceFile": "TestContent Sampler.pdf"
+      }
+    ],
+    "sourceFile": "TestContent Sampler.pdf",
+    "page": 3,
+    "macros": {
+      "calories": "290",
+      "protein": "40g",
+      "carbs": "20g",
+      "fat": "4g",
+      "sugar": "4g",
+      "fiber": "2g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "24 HOURS",
+    "makes": "1 PINT",
+    "proTip": "Add black cocoa powder to the sweet cream base for true Oreo cookie dough undertones.",
+    "ingredients": [
+      {
+        "id": "fat_free_ultra_filtered_milk",
+        "name": "Fat Free Ultra-Filtered Milk",
+        "quantity": "340",
+        "unit": "g",
+        "raw": "340G FAT FREE ULTRA-FILTERED MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "vanilla_protein_powder",
+        "name": "Cookies & Cream Whey Powder",
+        "quantity": "30",
+        "unit": "g",
+        "raw": "30G COOKIES & CREAM WHEY POWDER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "cocoa_powder",
+        "name": "Black Cocoa Powder",
+        "quantity": "4",
+        "unit": "g",
+        "raw": "4G BLACK COCOA POWDER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Sweetener",
+        "quantity": "12",
+        "unit": "g",
+        "raw": "12G SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "oreos",
+        "name": "Oreo Thins",
+        "quantity": "14",
+        "unit": "g",
+        "raw": "14G (2 COOKIES) OREO THINS",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": ""
+      }
+    ],
+    "instructions": [
+      "WHISK MILK, PROTEIN POWDER, BLACK COCOA, SWEETENER, AND XANTHAN GUM",
+      "FREEZE SOLID FOR AT LEAST 20-24 HOURS",
+      "SPIN ON LITE ICE CREAM CYCLE",
+      "HOLLOW CENTER, DROP IN CRUSHED OREO THINS, AND RUN MIX-IN CYCLE"
+    ],
+    "aliases": [
+      "cookies_and_cream_blitz"
+    ]
+  },
+  {
+    "id": "tc_cinnamon_roll_dough",
+    "name": "Cinnamon Roll Dough",
+    "category": "TestContent Sampler",
+    "categories": [
+      "TestContent Sampler"
+    ],
+    "creatorId": "test_content",
+    "sources": [
+      {
+        "book": "TestContent Sampler",
+        "page": 4,
+        "sourceFile": "TestContent Sampler.pdf"
+      }
+    ],
+    "sourceFile": "TestContent Sampler.pdf",
+    "page": 4,
+    "macros": {
+      "calories": "275",
+      "protein": "37g",
+      "carbs": "17g",
+      "fat": "3.5g",
+      "sugar": "3g",
+      "fiber": "2g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "3 MIN",
+    "freezeTime": "24 HOURS",
+    "makes": "1 PINT",
+    "proTip": "Pair vanilla casein with pure ground Saigon cinnamon for bakery cinnamon bun decadence.",
+    "ingredients": [
+      {
+        "id": "almond_milk",
+        "name": "Unsweetened Vanilla Almond Milk",
+        "quantity": "180",
+        "unit": "g",
+        "raw": "180G UNSWEETENED VANILLA ALMOND MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "fat_free_ultra_filtered_milk",
+        "name": "Fat Free Ultra-Filtered Milk",
+        "quantity": "160",
+        "unit": "g",
+        "raw": "160G FAT FREE ULTRA-FILTERED MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "vanilla_protein_powder",
+        "name": "Vanilla Whey/Casein Blend",
+        "quantity": "28",
+        "unit": "g",
+        "raw": "28G VANILLA WHEY/CASEIN BLEND",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "cinnamon",
+        "name": "Ground Cinnamon",
+        "quantity": "3",
+        "unit": "g",
+        "raw": "3G GROUND CINNAMON",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Monk Fruit Sweetener",
+        "quantity": "15",
+        "unit": "g",
+        "raw": "15G MONK FRUIT SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "protein_cookie_dough",
+        "name": "Protein Cinnamon Cookie Dough Bites",
+        "quantity": "15",
+        "unit": "g",
+        "raw": "15G PROTEIN CINNAMON COOKIE DOUGH BITES",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": ""
+      }
+    ],
+    "instructions": [
+      "WHISK ALL BASE INGREDIENTS THOROUGHLY AND FREEZE FLAT FOR 24 HOURS",
+      "SPIN ON LITE ICE CREAM CYCLE",
+      "ADD COOKIE DOUGH BITES TO CENTER AND RUN MIX-IN CYCLE"
+    ],
+    "aliases": [
+      "cinnamon_roll_dough"
+    ]
+  },
+  {
+    "id": "tc_dark_chocolate_fudge",
+    "name": "Ultra-Volume Dark Chocolate Fudge",
+    "category": "Volume Pints",
+    "categories": [
+      "Volume Pints"
+    ],
+    "creatorId": "test_content",
+    "sources": [
+      {
+        "book": "Volume Pints",
+        "page": 1,
+        "sourceFile": "Volume Pints.pdf"
+      }
+    ],
+    "sourceFile": "Volume Pints.pdf",
+    "page": 1,
+    "macros": {
+      "calories": "220",
+      "protein": "34g",
+      "carbs": "14g",
+      "fat": "2.5g",
+      "sugar": "2g",
+      "fiber": "5g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "24 HOURS",
+    "makes": "1 PINT",
+    "proTip": "Use unsweetened almond milk with Dutch processed cocoa and tara/xanthan gum for ultra-thick volume under 220 calories.",
+    "ingredients": [
+      {
+        "id": "almond_milk",
+        "name": "Unsweetened Almond Milk",
+        "quantity": "350",
+        "unit": "g",
+        "raw": "350G UNSWEETENED ALMOND MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "chocolate_protein_powder",
+        "name": "Chocolate Whey/Casein Blend",
+        "quantity": "28",
+        "unit": "g",
+        "raw": "28G CHOCOLATE WHEY/CASEIN BLEND",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "cocoa_powder",
+        "name": "Dutch Cocoa Powder",
+        "quantity": "12",
+        "unit": "g",
+        "raw": "12G DUTCH COCOA POWDER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Allulose Sweetener",
+        "quantity": "15",
+        "unit": "g",
+        "raw": "15G ALLULOSE SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1.5",
+        "unit": "g",
+        "raw": "1.5G XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "chocolate_chips",
+        "name": "Sugar-Free Mini Chocolate Chips",
+        "quantity": "10",
+        "unit": "g",
+        "raw": "10G SUGAR-FREE MINI CHOCOLATE CHIPS",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": ""
+      }
+    ],
+    "instructions": [
+      "BLEND ALMOND MILK, CHOCOLATE PROTEIN, COCOA, ALLULOSE, AND XANTHAN GUM",
+      "FREEZE FOR 24 HOURS",
+      "SPIN ON LITE ICE CREAM CYCLE (RESPIN ONCE IF POWDERY)",
+      "ADD MINI CHOCOLATE CHIPS AND RUN MIX-IN CYCLE"
+    ],
+    "aliases": [
+      "ultra_volume_dark_chocolate_fudge"
+    ]
+  },
+  {
+    "id": "tc_blueberry_lemon_bliss",
+    "name": "Blueberry Lemon Meringue Volume",
+    "category": "Volume Pints",
+    "categories": [
+      "Volume Pints"
+    ],
+    "creatorId": "test_content",
+    "sources": [
+      {
+        "book": "Volume Pints",
+        "page": 2,
+        "sourceFile": "Volume Pints.pdf"
+      }
+    ],
+    "sourceFile": "Volume Pints.pdf",
+    "page": 2,
+    "macros": {
+      "calories": "195",
+      "protein": "30g",
+      "carbs": "15g",
+      "fat": "1.5g",
+      "sugar": "5g",
+      "fiber": "4g"
+    },
+    "spinSetting": "Sorbet",
+    "prepTime": "2 MIN",
+    "freezeTime": "24 HOURS",
+    "makes": "1 PINT",
+    "proTip": "The combination of fresh lemon juice with frozen wild blueberries on the Sorbet cycle yields a bright, creamy soft serve.",
+    "ingredients": [
+      {
+        "id": "blueberries",
+        "name": "Frozen Wild Blueberries",
+        "quantity": "120",
+        "unit": "g",
+        "raw": "120G FROZEN WILD BLUEBERRIES",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "almond_milk",
+        "name": "Unsweetened Almond Milk",
+        "quantity": "220",
+        "unit": "g",
+        "raw": "220G UNSWEETENED ALMOND MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "vanilla_protein_powder",
+        "name": "Vanilla Whey Isolate",
+        "quantity": "24",
+        "unit": "g",
+        "raw": "24G VANILLA WHEY ISOLATE",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "lemon_juice",
+        "name": "Fresh Lemon Juice & Zest",
+        "quantity": "10",
+        "unit": "g",
+        "raw": "10G FRESH LEMON JUICE & ZEST",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Monk Fruit Sweetener",
+        "quantity": "14",
+        "unit": "g",
+        "raw": "14G MONK FRUIT SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      }
+    ],
+    "instructions": [
+      "BLEND BLUEBERRIES, ALMOND MILK, VANILLA WHEY, LEMON JUICE, SWEETENER, AND GUM",
+      "FREEZE FOR 24 HOURS IN CREAMI PINT",
+      "SPIN ON SORBET SETTING",
+      "RESPIN ONCE WITH 1 TBSP COLD WATER IF FLUFFY TEXTURE DESIRED"
+    ],
+    "aliases": [
+      "blueberry_lemon_meringue_volume"
+    ]
+  },
+  {
+    "id": "tc_peanut_butter_power",
+    "name": "Peanut Butter Cup High-Volume",
+    "category": "Volume Pints",
+    "categories": [
+      "Volume Pints"
+    ],
+    "creatorId": "test_content",
+    "sources": [
+      {
+        "book": "Volume Pints",
+        "page": 3,
+        "sourceFile": "Volume Pints.pdf"
+      }
+    ],
+    "sourceFile": "Volume Pints.pdf",
+    "page": 3,
+    "macros": {
+      "calories": "250",
+      "protein": "42g",
+      "carbs": "12g",
+      "fat": "3.5g",
+      "sugar": "2g",
+      "fiber": "4g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "2 MIN",
+    "freezeTime": "24 HOURS",
+    "makes": "1 PINT",
+    "proTip": "De-fatted peanut butter powder delivers huge roasted peanut flavor without the heavy calorie density of standard nut butter.",
+    "ingredients": [
+      {
+        "id": "fat_free_ultra_filtered_milk",
+        "name": "Fat Free Ultra-Filtered Milk",
+        "quantity": "320",
+        "unit": "g",
+        "raw": "320G FAT FREE ULTRA-FILTERED MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "peanut_butter_powder",
+        "name": "PB2 / Powdered Peanut Butter",
+        "quantity": "18",
+        "unit": "g",
+        "raw": "18G POWDERED PEANUT BUTTER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "vanilla_protein_powder",
+        "name": "Peanut Butter Whey/Casein Blend",
+        "quantity": "26",
+        "unit": "g",
+        "raw": "26G PEANUT BUTTER WHEY/CASEIN BLEND",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Monk Fruit Sweetener",
+        "quantity": "12",
+        "unit": "g",
+        "raw": "12G MONK FRUIT SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sea_salt",
+        "name": "Sea Salt",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G SEA SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "reeses_miniatures",
+        "name": "Sugar-Free Peanut Butter Cup Minis",
+        "quantity": "14",
+        "unit": "g",
+        "raw": "14G SUGAR-FREE PEANUT BUTTER CUP MINIS",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": ""
+      }
+    ],
+    "instructions": [
+      "WHISK MILK, POWDERED PB, PROTEIN, SWEETENER, SALT, AND XANTHAN GUM",
+      "FREEZE FOR 24 HOURS",
+      "SPIN ON LITE ICE CREAM CYCLE",
+      "ADD CHOPPED PB CUP MINIS AND RUN MIX-IN CYCLE"
+    ],
+    "aliases": [
+      "peanut_butter_cup_high_volume"
+    ]
+  },
+  {
+    "id": "tc_banana_cream_dream",
+    "name": "Banana Cream Pie Mega-Volume",
+    "category": "Volume Pints",
+    "categories": [
+      "Volume Pints"
+    ],
+    "creatorId": "test_content",
+    "sources": [
+      {
+        "book": "Volume Pints",
+        "page": 4,
+        "sourceFile": "Volume Pints.pdf"
+      }
+    ],
+    "sourceFile": "Volume Pints.pdf",
+    "page": 4,
+    "macros": {
+      "calories": "210",
+      "protein": "32g",
+      "carbs": "18g",
+      "fat": "2g",
+      "sugar": "6g",
+      "fiber": "3g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "3 MIN",
+    "freezeTime": "24 HOURS",
+    "makes": "1 PINT",
+    "proTip": "Blending 50g of ripe banana with cashew milk and sugar-free pudding creates rich custard body without excess carbs.",
+    "ingredients": [
+      {
+        "id": "banana",
+        "name": "Ripe Banana",
+        "quantity": "50",
+        "unit": "g",
+        "raw": "50G RIPE BANANA",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "almond_milk",
+        "name": "Unsweetened Cashew or Almond Milk",
+        "quantity": "300",
+        "unit": "g",
+        "raw": "300G UNSWEETENED CASHEW OR ALMOND MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "vanilla_protein_powder",
+        "name": "Vanilla Whey Protein Powder",
+        "quantity": "25",
+        "unit": "g",
+        "raw": "25G VANILLA WHEY PROTEIN POWDER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "banana_pudding_mix",
+        "name": "Sugar-Free Banana Pudding Mix",
+        "quantity": "6",
+        "unit": "g",
+        "raw": "6G SUGAR-FREE BANANA PUDDING MIX",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Monk Fruit Sweetener",
+        "quantity": "10",
+        "unit": "g",
+        "raw": "10G MONK FRUIT SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "vanilla_wafers",
+        "name": "Crushed Mini Vanilla Wafers",
+        "quantity": "8",
+        "unit": "g",
+        "raw": "8G CRUSHED MINI VANILLA WAFERS",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": ""
+      }
+    ],
+    "instructions": [
+      "BLEND BANANA, MILK, VANILLA WHEY, PUDDING MIX, SWEETENER, AND GUM UNTIL SMOOTH",
+      "FREEZE FOR 24 HOURS IN NINJA CREAMI PINT CONTAINER",
+      "SPIN ON LITE ICE CREAM SETTING",
+      "HOLLOW CENTER, ADD CRUSHED WAFERS, AND RUN MIX-IN CYCLE"
+    ],
+    "aliases": [
+      "banana_cream_pie_mega_volume"
     ]
   }
 ];

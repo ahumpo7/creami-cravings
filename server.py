@@ -337,9 +337,10 @@ stats_db = load_json_file(STATS_DB_FILE, {})
 
 RECIPES_MASTER = []
 RECIPES_BY_ID = {}
+CREATORS_MASTER = []
 
 def load_recipes_master():
-    global RECIPES_MASTER, RECIPES_BY_ID
+    global RECIPES_MASTER, RECIPES_BY_ID, CREATORS_MASTER
     recipes_js_path = os.path.join(DIRECTORY, 'recipes-data.js')
     if os.path.exists(recipes_js_path):
         try:
@@ -350,6 +351,10 @@ def load_recipes_master():
                 RECIPES_MASTER = json.loads(m.group(1))
                 RECIPES_BY_ID = {r['id']: r for r in RECIPES_MASTER if 'id' in r}
                 print(f"Loaded {len(RECIPES_MASTER)} master recipes for SEO & deep linking.")
+            m_creators = re.search(r'const CREATORS_MASTER\s*=\s*(\[[\s\S]*?\]);', content)
+            if m_creators:
+                CREATORS_MASTER = json.loads(m_creators.group(1))
+                print(f"Loaded {len(CREATORS_MASTER)} creators from recipes-data.js.")
         except Exception as e:
             print(f"Error loading recipes for SEO: {e}")
 
@@ -1118,13 +1123,15 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
 
         if user and user.get('email', '').lower() == 'ahumpo7@gmail.com':
             mimic_role = self.headers.get('X-Mimic-Role', '').strip().lower()
+            mimic_creator = self.headers.get('X-Mimic-Creator', '').strip().lower()
             if not mimic_role and data and isinstance(data, dict):
                 mimic_role = data.get('mimicRole', '').strip().lower()
+                mimic_creator = data.get('mimicCreator', '').strip().lower()
             if mimic_role in ['creator', 'vip', 'user']:
                 u_copy = dict(user)
                 u_copy['role'] = mimic_role
                 if mimic_role == 'creator':
-                    u_copy['creatorId'] = user.get('creatorId') or 'fitness_product_finder'
+                    u_copy['creatorId'] = mimic_creator or user.get('creatorId') or 'fitness_product_finder'
                 elif mimic_role == 'user':
                     u_copy['subscriptions'] = ['Base Flavors', 'Fan Favorites']
                 return u_copy
@@ -1243,6 +1250,8 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
             creator_id = (req_creator.replace('@', '').lower() if req_creator else (user.get('creatorId') if user else 'fitness_product_finder')) or 'fitness_product_finder'
             if creator_id in ['eli', 'fitnessproductfinder', 'fitness_product_finder']:
                 creator_id = 'fitness_product_finder'
+            elif creator_id in ['testcontent', 'test_content']:
+                creator_id = 'test_content'
 
             made_counts = stats_db.get('madeCounts', {})
 
@@ -1469,8 +1478,20 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 html = f.read()
 
             handle = clean_url.lstrip('/').replace('creator/', '').replace('@', '').lower()
-            creator_title = "Eli (@fitnessproductfinder) — Official Creami Recipe Storefront"
-            creator_desc = "Browse Eli's official Ninja Creami recipe collections, interactive macro tools, and exclusive ingredient discounts on Creami Cravings."
+            creator_obj = None
+            for c in CREATORS_MASTER:
+                c_handle = c.get('handle', '').replace('@', '').lower()
+                c_id = c.get('id', '').lower()
+                if handle in [c_handle, c_id]:
+                    creator_obj = c
+                    break
+
+            if creator_obj:
+                creator_title = f"{creator_obj.get('name')} ({creator_obj.get('handle')}) — Official Creami Recipe Storefront"
+                creator_desc = f"Browse {creator_obj.get('name')}'s official Ninja Creami recipe collections, interactive macro tools, and batch prep pints on Creami Cravings."
+            else:
+                creator_title = "Eli (@fitnessproductfinder) — Official Creami Recipe Storefront"
+                creator_desc = "Browse Eli's official Ninja Creami recipe collections, interactive macro tools, and exclusive ingredient discounts on Creami Cravings."
 
             seo_block = f'''  <title>{creator_title}</title>
   <meta name="description" content="{creator_desc}">

@@ -39,6 +39,7 @@
   const FREEZER_CAPACITY_STORAGE_KEY = STORAGE_PREFIX + 'creami_freezer_capacity_v1';
   const FREEZER_COLLAPSED_STORAGE_KEY = STORAGE_PREFIX + 'creami_freezer_shelf_collapsed_v1';
   const MIMIC_ROLE_STORAGE_KEY = STORAGE_PREFIX + 'creami_mimic_role_v1';
+  const MIMIC_CREATOR_STORAGE_KEY = STORAGE_PREFIX + 'creami_mimic_creator_v1';
   const REAL_ADMIN_STORAGE_KEY = STORAGE_PREFIX + 'creami_real_admin_user_v1';
   const BATCH_PREP_STORAGE_KEY = STORAGE_PREFIX + 'creami_batch_prep_queue_v1';
   const HABIT_STREAK_STORAGE_KEY = STORAGE_PREFIX + 'creami_habit_streaks_v1';
@@ -370,6 +371,7 @@
   let currentUser = null; // { id, email, name, picture, token }
   let realAdminUser = null; // Preserved root administrator credentials for ahumpo7@gmail.com
   let currentMimicRole = localStorage.getItem(MIMIC_ROLE_STORAGE_KEY) || 'admin';
+  let currentMimicCreatorId = localStorage.getItem(MIMIC_CREATOR_STORAGE_KEY) || 'fitness_product_finder';
   let recipeMadeCounts = {}; // { [recipeId]: number }
   let communityStats = {
     ratings: {},
@@ -2110,7 +2112,7 @@
     return em === 'ahumpo7@gmail.com' || em === 'ahumpo@gmail.com';
   }
 
-  function applyMimicRole(targetRole, showToastNotice = true) {
+  function applyMimicRole(targetRole, showToastNotice = true, targetCreatorId = null) {
     if (!realAdminUser && !isSuperAdminAccount(currentUser)) return;
     if (!realAdminUser && currentUser) {
       realAdminUser = JSON.parse(JSON.stringify(currentUser));
@@ -2118,6 +2120,12 @@
     }
 
     currentMimicRole = targetRole || 'admin';
+    if (targetRole === 'creator') {
+      if (targetCreatorId) {
+        currentMimicCreatorId = targetCreatorId;
+      }
+      try { localStorage.setItem(MIMIC_CREATOR_STORAGE_KEY, currentMimicCreatorId); } catch (e) {}
+    }
     try { localStorage.setItem(MIMIC_ROLE_STORAGE_KEY, currentMimicRole); } catch (e) {}
 
     if (currentMimicRole === 'guest') {
@@ -2126,14 +2134,14 @@
       currentUser = {
         ...realAdminUser,
         role: 'creator',
-        creatorId: 'fitness_product_finder',
-        subscriptions: ['All-Access', 'Base Flavors', 'Community Legends', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free']
+        creatorId: currentMimicCreatorId || 'fitness_product_finder',
+        subscriptions: ['All-Access', 'Base Flavors', 'Community Legends', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free', 'TestContent Sampler', 'Volume Pints']
       };
     } else if (currentMimicRole === 'vip') {
       currentUser = {
         ...realAdminUser,
         role: 'vip',
-        subscriptions: ['All-Access', 'Base Flavors', 'Community Legends', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free']
+        subscriptions: ['All-Access', 'Base Flavors', 'Community Legends', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free', 'TestContent Sampler', 'Volume Pints']
       };
     } else if (currentMimicRole === 'user') {
       currentUser = {
@@ -2163,9 +2171,11 @@
     renderPantryList();
 
     if (showToastNotice) {
+      const activeCreator = (typeof CREATORS_MASTER !== 'undefined') ? CREATORS_MASTER.find(c => c.id === currentMimicCreatorId) : null;
+      const creatorName = activeCreator ? activeCreator.name : 'Eli';
       const roleLabels = {
         admin: '👑 Administrator (Real)',
-        creator: '🎨 Content Creator (Eli Mode)',
+        creator: `🎨 Content Creator (${creatorName} Mode)`,
         vip: '⭐ VIP Member (All-Access Pass)',
         user: '👤 Standard User (Free Tier)',
         guest: '👁️ Guest Visitor (Logged Out)'
@@ -2189,9 +2199,12 @@
       return;
     }
 
+    const activeCreator = (typeof CREATORS_MASTER !== 'undefined') ? CREATORS_MASTER.find(c => c.id === currentMimicCreatorId) : null;
+    const creatorName = activeCreator ? activeCreator.name : 'Eli';
+
     const roleNameMap = {
       admin: 'Admin',
-      creator: 'Creator',
+      creator: `Creator (${creatorName})`,
       vip: 'VIP',
       user: 'User',
       guest: 'Guest'
@@ -2199,7 +2212,7 @@
 
     const roleFullMap = {
       admin: 'Administrator (Real)',
-      creator: 'Content Creator (Eli Mode)',
+      creator: `Content Creator (${creatorName} Studio)`,
       vip: 'VIP Member (All-Access)',
       user: 'Standard User (Free Tier)',
       guest: 'Guest (Logged Out)'
@@ -2234,7 +2247,10 @@
     if (adminMimicSec) {
       adminMimicSec.style.display = 'flex';
       adminMimicSec.querySelectorAll('.btn-mimic-select').forEach(btn => {
-        if (btn.dataset.role === currentMimicRole) {
+        const role = btn.dataset.role;
+        const cId = btn.dataset.creatorId;
+        const isActive = (role === currentMimicRole) && (role !== 'creator' || (!cId || cId === currentMimicCreatorId));
+        if (isActive) {
           btn.classList.add('active');
         } else {
           btn.classList.remove('active');
@@ -2244,16 +2260,18 @@
 
     // 4. Modal Cards active states
     const cards = [
-      { id: 'cardMimicAdmin', role: 'admin' },
-      { id: 'cardMimicCreator', role: 'creator' },
-      { id: 'cardMimicVip', role: 'vip' },
-      { id: 'cardMimicUser', role: 'user' },
-      { id: 'cardMimicGuest', role: 'guest' }
+      { id: 'cardMimicAdmin', role: 'admin', creatorId: null },
+      { id: 'cardMimicCreator', role: 'creator', creatorId: 'fitness_product_finder' },
+      { id: 'cardMimicTestContent', role: 'creator', creatorId: 'test_content' },
+      { id: 'cardMimicVip', role: 'vip', creatorId: null },
+      { id: 'cardMimicUser', role: 'user', creatorId: null },
+      { id: 'cardMimicGuest', role: 'guest', creatorId: null }
     ];
     cards.forEach(c => {
       const el = document.getElementById(c.id);
       if (el) {
-        if (c.role === currentMimicRole) {
+        const isActive = (c.role === currentMimicRole) && (c.role !== 'creator' || (c.creatorId === currentMimicCreatorId));
+        if (isActive) {
           el.classList.add('active');
         } else {
           el.classList.remove('active');
@@ -2444,6 +2462,10 @@
       const match = BOOKS_MASTER.find(b => b.categoryKey === cat || b.bookKey === cat);
       if (match) return match;
     }
+    if (recipe.creatorId && recipe.creatorId !== 'fitness_product_finder') {
+      const creatorBook = BOOKS_MASTER.find(b => b.creatorId === recipe.creatorId);
+      if (creatorBook) return creatorBook;
+    }
     return BOOKS_MASTER.find(b => b.id === 'fpf_complete_bundle') || null;
   }
 
@@ -2456,6 +2478,9 @@
 
     if (email.includes('fitnessproductfinder') || username === 'eli' || name.includes('eli')) {
       return 'fitness_product_finder';
+    }
+    if (email.includes('testcontent') || username === 'testcontent' || name.includes('testcontent')) {
+      return 'test_content';
     }
 
     if (typeof CREATORS_MASTER !== 'undefined') {
@@ -2925,8 +2950,9 @@
     document.querySelectorAll('.mimic-role-card').forEach(btn => {
       btn.addEventListener('click', () => {
         const role = btn.dataset.role;
+        const creatorId = btn.dataset.creatorId || null;
         if (role) {
-          applyMimicRole(role);
+          applyMimicRole(role, true, creatorId);
           closeMimicModal();
         }
       });
@@ -2935,8 +2961,9 @@
     document.querySelectorAll('.btn-mimic-select').forEach(btn => {
       btn.addEventListener('click', () => {
         const role = btn.dataset.role;
+        const creatorId = btn.dataset.creatorId || null;
         if (role) {
-          applyMimicRole(role);
+          applyMimicRole(role, true, creatorId);
         }
       });
     });
@@ -4404,15 +4431,75 @@
 
   let activeStoreCreatorId = null;
 
-  function showCreatorDirectoryView() {
+  function showCreatorDirectoryView(updateHistory = true) {
     const dirView = document.getElementById('creatorsDirectoryView');
     const catView = document.getElementById('creatorCatalogView');
     if (dirView) dirView.style.display = 'block';
     if (catView) catView.style.display = 'none';
     activeStoreCreatorId = null;
+    if (updateHistory && (window.location.pathname.includes('/@') || window.location.pathname.includes('/creator/'))) {
+      try {
+        history.pushState({ modal: 'creators_directory' }, '', IS_BETA ? '/beta/' : '/');
+      } catch (e) {}
+      document.title = 'Featured Recipe Creators | Creami Cravings';
+    }
   }
 
-  function showCreatorCatalogView(creatorId = 'fitness_product_finder', viewPerksFirst = false) {
+  function renderCreatorBooks(creatorId) {
+    const packsGrid = document.getElementById('recipePacksGrid');
+    if (!packsGrid || typeof BOOKS_MASTER === 'undefined') return;
+
+    const creatorBooks = BOOKS_MASTER.filter(b => b.creatorId === creatorId);
+    const creator = (typeof CREATORS_MASTER !== 'undefined') ? CREATORS_MASTER.find(c => c.id === creatorId) : null;
+    const creatorName = creator ? creator.name : 'Creator';
+    const brandName = creator ? creator.brandName : '';
+
+    const iconMap = {
+      'Fan Favorites': '⭐',
+      'Keto': '🥑',
+      'Lactose Free': '🥛',
+      'No Protein': '💪',
+      'All-Access': '👑',
+      'TestContent Sampler': '🥣',
+      'Volume Pints': '🔥'
+    };
+
+    packsGrid.innerHTML = creatorBooks.map(book => {
+      const isBundle = book.id.endsWith('_bundle') || book.bookKey === 'All-Access';
+      const cardClass = isBundle ? 'recipe-pack-card vip-bundle' : 'recipe-pack-card';
+      const icon = iconMap[book.bookKey] || (isBundle ? '👑' : '📖');
+      const badgeClass = isBundle ? 'vip' : 'fan-fav';
+      const tag = `by ${escapeHtml(creatorName)} (${escapeHtml(brandName || '')})`;
+      return `
+        <div class="${cardClass}" data-pack="${escapeHtml(book.bookKey || book.categoryKey)}">
+          <div class="pack-card-header">
+            <span class="pack-card-icon">${icon}</span>
+            <div class="pack-card-title-col">
+              <div class="pack-card-title-row">
+                <h3 class="pack-card-name">${escapeHtml(book.title)}</h3>
+                <span class="pack-card-badge ${badgeClass}">${book.recipeCount || 0} Recipes</span>
+              </div>
+              <span class="pack-card-tagline">${tag}</span>
+            </div>
+          </div>
+          <p class="pack-card-desc">${escapeHtml(book.description || '')}</p>
+          <div class="pack-card-footer">
+            <div class="pack-card-status">
+              <span class="pack-status-available">🛍️ Available on ${escapeHtml(creatorName)} (${escapeHtml(book.price)})</span>
+            </div>
+            <button type="button" class="btn-primary btn-sm btn-action-pack" data-pack="${escapeHtml(book.bookKey || book.categoryKey)}">
+              <span>🛒 Buy E-Book (${escapeHtml(book.price)}) ↗</span>
+            </button>
+          </div>
+          <div style="text-align: center; margin-top: 6px;">
+            <a href="#" class="btn-pack-own-link" data-claim-pack="${escapeHtml(book.bookKey || book.categoryKey)}">Already own this book from ${escapeHtml(creatorName)}? Claim access &rarr;</a>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function showCreatorCatalogView(creatorId = 'fitness_product_finder', viewPerksFirst = false, updateHistory = true) {
     const dirView = document.getElementById('creatorsDirectoryView');
     const catView = document.getElementById('creatorCatalogView');
     if (dirView) dirView.style.display = 'none';
@@ -4436,12 +4523,25 @@
         storeBtn.href = creator.storeUrl || creator.url;
         storeBtn.innerHTML = `<span>Visit ${creator.name}'s Storefront ↗</span>`;
       }
+      renderCreatorBooks(creatorId);
       renderCreatorPerks(creator);
 
+      if (updateHistory) {
+        const handle = creator.handle ? creator.handle.replace('@', '') : creator.id;
+        const targetPath = (IS_BETA ? '/beta' : '') + `/@${handle}`;
+        if (window.location.pathname !== targetPath) {
+          try {
+            history.pushState({ modal: 'creator', creatorId }, '', targetPath);
+          } catch (e) {}
+        }
+        document.title = `${creator.name} (${creator.handle}) — Official Storefront | Creami Cravings`;
+      }
+
       // If user already owns the books or requested perks first, place perks section FIRST!
+      const creatorCats = getCategoriesForCreator(creatorId);
       const hasAllBooks = isCategoryUnlocked('All-Access') ||
         (currentUser && (currentUser.role === 'admin' || currentUser.role === 'vip' || currentUser.role === 'creator')) ||
-        ['Fan Favorites', 'Keto', 'Lactose Free', 'No Protein'].every(p => isCategoryUnlocked(p));
+        (creatorCats.length > 0 && creatorCats.every(p => isCategoryUnlocked(p)));
 
       const perksSection = document.getElementById('creatorPerksSection');
       const packsGrid = document.getElementById('recipePacksGrid');
@@ -4574,25 +4674,24 @@
 
   function updatePacksModalStatuses() {
     if (!recipePacksModalOverlay) return;
-    const packs = [
-      { id: 'Fan Favorites', statusEl: 'statusPackFan' },
-      { id: 'Keto', statusEl: 'statusPackKeto' },
-      { id: 'Lactose Free', statusEl: 'statusPackLactose' },
-      { id: 'No Protein', statusEl: 'statusPackNoProtein' },
-      { id: 'All-Access', statusEl: 'statusPackAllAccess' }
-    ];
+    const cards = recipePacksModalOverlay.querySelectorAll('.recipe-pack-card');
 
-    packs.forEach(p => {
-      const el = document.getElementById(p.statusEl);
-      const isUnlocked = isCategoryUnlocked(p.id);
-      const isPending = userPendingClaimsState.has(p.id) || userPendingClaimsState.has('All-Access');
-      const card = recipePacksModalOverlay.querySelector(`.recipe-pack-card[data-pack="${p.id}"]`);
-      const btn = card ? card.querySelector('.btn-action-pack') : null;
-      const ownLink = card ? card.querySelector('.btn-pack-own-link') : null;
+    cards.forEach(card => {
+      const packId = card.dataset.pack;
+      if (!packId) return;
+      const el = card.querySelector('.pack-card-status');
+      const isUnlocked = isCategoryUnlocked(packId);
+      const isPending = userPendingClaimsState.has(packId) || userPendingClaimsState.has('All-Access');
+      const btn = card.querySelector('.btn-action-pack');
+      const ownLink = card.querySelector('.btn-pack-own-link');
       const book = (typeof BOOKS_MASTER !== 'undefined')
-        ? BOOKS_MASTER.find(b => b.bookKey === p.id || b.categoryKey === p.id || b.id === p.id)
+        ? BOOKS_MASTER.find(b => b.bookKey === packId || b.categoryKey === packId || b.id === packId)
         : null;
-      const price = book ? book.price : (p.id === 'All-Access' ? '$49.99' : '$27.99');
+      const price = book ? book.price : (packId === 'All-Access' ? '$49.99' : '$27.99');
+      const creator = (book && typeof CREATORS_MASTER !== 'undefined')
+        ? CREATORS_MASTER.find(c => c.id === book.creatorId)
+        : null;
+      const creatorName = creator ? creator.name : 'Creator';
 
       if (el) {
         if (isUnlocked) {
@@ -4600,7 +4699,7 @@
         } else if (isPending) {
           el.innerHTML = '<span class="badge-claim-pending">⏳ Verification Pending</span>';
         } else {
-          el.innerHTML = `<span class="pack-status-available">🛍️ Available on Fitness Product Finder (${price})</span>`;
+          el.innerHTML = `<span class="pack-status-available">🛍️ Available on ${escapeHtml(creatorName)} (${escapeHtml(price)})</span>`;
         }
       }
       if (btn) {
@@ -4611,16 +4710,16 @@
           btn.className = 'btn-primary btn-sm btn-action-pack btn-batch-prep-pack';
           btn.innerHTML = '<span>🍱 Batch Prep Pack (Top 4) →</span>';
           btn.title = 'Add 4 signature pints from this collection directly to Sunday Batch Prep';
-          btn.dataset.batchPack = p.id;
+          btn.dataset.batchPack = packId;
         } else {
           btn.disabled = false;
           btn.style.opacity = '1';
           btn.style.cursor = 'pointer';
           btn.className = 'btn-primary btn-sm btn-action-pack';
           delete btn.dataset.batchPack;
-          btn.innerHTML = p.id === 'All-Access' 
-            ? `<span>👑 Buy 4-Book Bundle (${price}) ↗</span>` 
-            : `<span>🛒 Buy E-Book (${price}) ↗</span>`;
+          btn.innerHTML = packId === 'All-Access' 
+            ? `<span>👑 Buy 4-Book Bundle (${escapeHtml(price)}) ↗</span>` 
+            : `<span>🛒 Buy E-Book (${escapeHtml(price)}) ↗</span>`;
         }
       }
       if (ownLink) {
@@ -4634,9 +4733,9 @@
         } else {
           ownLink.style.display = 'inline-block';
           ownLink.style.pointerEvents = 'auto';
-          ownLink.textContent = p.id === 'All-Access' 
-            ? 'Already own the bundle from Eli? Claim access →' 
-            : 'Already own this book from Eli? Claim access →';
+          ownLink.textContent = packId === 'All-Access' 
+            ? `Already own the bundle from ${escapeHtml(creatorName)}? Claim access →` 
+            : `Already own this book from ${escapeHtml(creatorName)}? Claim access →`;
           ownLink.style.color = '';
         }
       }
@@ -14285,33 +14384,36 @@
 
     if (recipePacksModalOverlay) {
       recipePacksModalOverlay.addEventListener('click', (e) => {
-        if (e.target === recipePacksModalOverlay) closeRecipePacksModal();
-      });
+        if (e.target === recipePacksModalOverlay) {
+          closeRecipePacksModal();
+          return;
+        }
 
-      recipePacksModalOverlay.querySelectorAll('.btn-browse-creator-books').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const cId = btn.dataset.creatorId || 'fitness_product_finder';
+        const browseBtn = e.target.closest('.btn-browse-creator-books');
+        if (browseBtn) {
+          const cId = browseBtn.dataset.creatorId || 'fitness_product_finder';
           showCreatorCatalogView(cId);
-        });
-      });
+          return;
+        }
 
-      recipePacksModalOverlay.querySelectorAll('.btn-action-pack').forEach(btn => {
-        btn.addEventListener('click', () => {
-          if (btn.dataset.batchPack) {
-            batchPrepCreatorPack(btn.dataset.batchPack);
+        const actionBtn = e.target.closest('.btn-action-pack');
+        if (actionBtn) {
+          if (actionBtn.dataset.batchPack) {
+            batchPrepCreatorPack(actionBtn.dataset.batchPack);
             return;
           }
-          const pack = btn.dataset.pack;
+          const pack = actionBtn.dataset.pack;
           if (pack) handlePackPurchase(pack);
-        });
-      });
+          return;
+        }
 
-      recipePacksModalOverlay.querySelectorAll('.btn-pack-own-link').forEach(link => {
-        link.addEventListener('click', (e) => {
+        const ownLink = e.target.closest('.btn-pack-own-link');
+        if (ownLink) {
           e.preventDefault();
-          const pack = link.dataset.claimPack;
+          const pack = ownLink.dataset.claimPack;
           if (pack) handleClaimPackAccess(pack);
-        });
+          return;
+        }
       });
     }
 
@@ -14375,7 +14477,12 @@
     if (btnStudioBatchPrepAll) {
       btnStudioBatchPrepAll.addEventListener('click', () => {
         closeCreatorPortalModal();
-        batchPrepCreatorPack('All-Access');
+        const cId = (currentUser && currentUser.creatorId) ? currentUser.creatorId : 'fitness_product_finder';
+        if (cId === 'test_content') {
+          batchPrepCreatorPack('TestContent Sampler');
+        } else {
+          batchPrepCreatorPack('All-Access');
+        }
       });
     }
 

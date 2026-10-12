@@ -108,7 +108,7 @@
   <link rel="icon" type="image/png" sizes="144x144" href="icon-144.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=beta8">
+  <link rel="stylesheet" href="styles.css?v=beta9">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -1898,6 +1898,40 @@
             </div>
           </div>
 
+          <!-- TestContent Studio Card -->
+          <div class="creator-directory-card" data-creator-id="test_content">
+            <div class="creator-card-badge-row">
+              <span class="creator-badge-featured">🧪 Verified Creator</span>
+              <span class="creator-book-count-pill">2 Books • 8 Recipes</span>
+            </div>
+            <div class="creator-card-header">
+              <div class="creator-avatar-wrap">
+                <span class="creator-avatar-icon">🥣</span>
+              </div>
+              <div class="creator-card-info">
+                <h3 class="creator-name">TestContent</h3>
+                <div class="creator-brand">TestContent Studio <span class="creator-handle">@testcontent</span></div>
+              </div>
+            </div>
+            <p class="creator-bio">
+              Official test creator profile for multi-creator storefronts, batch prep packs, and audience analytics. Specializing in high-volume macro pints and protein crystal formulation.
+            </p>
+            <div class="creator-stats-row">
+              <span class="creator-stat-pill">🥣 High Volume</span>
+              <span class="creator-stat-pill">🍓 Macro Hacks</span>
+              <span class="creator-stat-pill">🧊 Batch Prep</span>
+              <span class="creator-stat-pill">🔬 Lab Tested</span>
+            </div>
+            <div class="creator-card-actions">
+              <button type="button" class="btn-primary btn-browse-creator-books" data-creator-id="test_content">
+                <span>Browse TestContent's Books (2) &rarr;</span>
+              </button>
+              <a href="/beta/@testcontent" class="btn-creator-website-link">
+                Storefront ↗
+              </a>
+            </div>
+          </div>
+
           <!-- Creator Partnership Callout Card -->
           <div class="creator-partner-card">
             <div class="creator-partner-icon">🤝</div>
@@ -2285,7 +2319,8 @@
           </div>
           <div class="admin-mimic-buttons-row">
             <button type="button" class="btn-mimic-select" data-role="admin">👑 Admin</button>
-            <button type="button" class="btn-mimic-select" data-role="creator">🎨 Creator</button>
+            <button type="button" class="btn-mimic-select" data-role="creator" data-creator-id="fitness_product_finder">🎨 Eli</button>
+            <button type="button" class="btn-mimic-select" data-role="creator" data-creator-id="test_content">🧪 TestContent</button>
             <button type="button" class="btn-mimic-select" data-role="vip">⭐ VIP</button>
             <button type="button" class="btn-mimic-select" data-role="user">👤 User</button>
             <button type="button" class="btn-mimic-select" data-role="guest">👁️ Guest</button>
@@ -2758,7 +2793,7 @@
           </div>
         </button>
 
-        <button type="button" class="mimic-role-card" data-role="creator" id="cardMimicCreator">
+        <button type="button" class="mimic-role-card" data-role="creator" data-creator-id="fitness_product_finder" id="cardMimicCreator">
           <div class="mimic-card-header">
             <span class="mimic-role-emoji">🎨</span>
             <div class="mimic-role-info">
@@ -2766,6 +2801,17 @@
               <div class="mimic-role-desc">Creator badge, "+ Add Recipe" to Eli's cookbooks &amp; Community Legends, creator permissions, no Admin Portal button.</div>
             </div>
             <span class="mimic-check-indicator" id="checkMimicCreator">✓</span>
+          </div>
+        </button>
+
+        <button type="button" class="mimic-role-card" data-role="creator" data-creator-id="test_content" id="cardMimicTestContent">
+          <div class="mimic-card-header">
+            <span class="mimic-role-emoji">🧪</span>
+            <div class="mimic-role-info">
+              <div class="mimic-role-title">Test Creator (TestContent Studio)</div>
+              <div class="mimic-role-desc">Test creator studio, publish to TestContent Sampler &amp; Volume Pints, batch prep test packs, and view audience analytics.</div>
+            </div>
+            <span class="mimic-check-indicator" id="checkMimicTestContent">✓</span>
           </div>
         </button>
 
@@ -2930,7 +2976,7 @@
   <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
   <!-- Scripts -->
-  <script src="recipes-data.js?v=beta8"></script>
-  <script src="app.js?v=beta8"></script>
+  <script src="recipes-data.js?v=beta9"></script>
+  <script src="app.js?v=beta9"></script>
 </body>
 </html>
