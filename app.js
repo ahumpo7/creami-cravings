@@ -2201,6 +2201,29 @@
       try { localStorage.setItem(USER_AUTH_STORAGE_KEY, JSON.stringify(realAdminUser)); } catch (e) {}
     }
 
+    // Ensure active category and diet filter are accessible for the target role
+    if (activeCategory !== 'all' && !isCategoryUnlocked(activeCategory)) {
+      activeCategory = 'all';
+      if (categoryTabs) {
+        categoryTabs.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        const allTab = categoryTabs.querySelector('[data-category="all"]');
+        if (allTab) allTab.classList.add('active');
+      }
+    }
+    if (activeDietFilter === 'low_carb' && !isCategoryUnlocked('Keto')) {
+      activeDietFilter = 'all';
+      if (dietFilterSelect) {
+        dietFilterSelect.value = 'all';
+        dietFilterSelect.classList.remove('active');
+      }
+    }
+
+    // Close admin portal modal if open so it doesn't lock the screen
+    const adminOverlay = document.getElementById('adminModalOverlay');
+    if (adminOverlay && (adminOverlay.classList.contains('active') || adminOverlay.style.display === 'flex')) {
+      if (typeof closeAdminPortal === 'function') closeAdminPortal();
+    }
+
     renderMimicUI();
     updateAuthUI();
     if (recipeCardCache && typeof recipeCardCache.clear === 'function') {
@@ -3039,6 +3062,7 @@
         const creatorId = btn.dataset.creatorId || null;
         if (role) {
           applyMimicRole(role, true, creatorId);
+          if (typeof closeAdminPortal === 'function') closeAdminPortal();
         }
       });
     });
