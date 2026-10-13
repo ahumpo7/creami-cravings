@@ -6585,6 +6585,85 @@
     }
   }
 
+  // --- Amazon Replacement Pint Lid Color System ---
+  const PINT_LID_COLORS = [
+    { id: 'blue', name: 'Blue', hex: '#38bdf8', border: '#0284c7', text: '#0c4a6e', bgTint: 'rgba(56, 189, 248, 0.18)', icon: '🔵' },
+    { id: 'pink', name: 'Pink', hex: '#f472b6', border: '#db2777', text: '#831843', bgTint: 'rgba(244, 114, 182, 0.18)', icon: '🌸' },
+    { id: 'green', name: 'Green', hex: '#4ade80', border: '#16a34a', text: '#14532d', bgTint: 'rgba(74, 222, 128, 0.18)', icon: '🟢' },
+    { id: 'yellow', name: 'Yellow', hex: '#facc15', border: '#ca8a04', text: '#713f12', bgTint: 'rgba(250, 204, 21, 0.20)', icon: '🟡' },
+    { id: 'purple', name: 'Purple', hex: '#c084fc', border: '#9333ea', text: '#581c87', bgTint: 'rgba(192, 132, 252, 0.18)', icon: '🟣' },
+    { id: 'orange', name: 'Orange', hex: '#fb923c', border: '#ea580c', text: '#7c2d12', bgTint: 'rgba(251, 146, 60, 0.18)', icon: '🟠' },
+    { id: 'teal', name: 'Teal', hex: '#2dd4bf', border: '#0d9488', text: '#134e4a', bgTint: 'rgba(45, 212, 191, 0.18)', icon: '🌊' },
+    { id: 'gray', name: 'Gray', hex: '#94a3b8', border: '#64748b', text: '#334155', bgTint: 'rgba(148, 163, 184, 0.18)', icon: '⚪' }
+  ];
+
+  function getPintLidColor(colorIdOrSlot) {
+    if (typeof colorIdOrSlot === 'string') {
+      const found = PINT_LID_COLORS.find(c => c.id === colorIdOrSlot.toLowerCase());
+      if (found) return found;
+    }
+    if (typeof colorIdOrSlot === 'number') {
+      const idx = (colorIdOrSlot - 1) % PINT_LID_COLORS.length;
+      return PINT_LID_COLORS[idx >= 0 ? idx : 0];
+    }
+    return PINT_LID_COLORS[0];
+  }
+
+  function renderLidColorSwatches(containerId, hiddenInputId, selectedColorId = 'blue') {
+    const container = document.getElementById(containerId);
+    const hiddenInput = document.getElementById(hiddenInputId);
+    if (!container) return;
+    if (hiddenInput) hiddenInput.value = selectedColorId;
+
+    container.innerHTML = PINT_LID_COLORS.map(c => {
+      const isSelected = c.id === selectedColorId;
+      return `
+        <button type="button" class="lid-swatch-btn ${isSelected ? 'active' : ''}" data-color-id="${c.id}" style="--swatch-glow: ${c.hex}; ${isSelected ? `border-color: ${c.border}; background: ${c.bgTint};` : ''}" title="${c.name} Lid">
+          <span class="lid-swatch-circle" style="background: ${c.hex};">${isSelected ? '✓' : ''}</span>
+          <span>${c.name}</span>
+        </button>
+      `;
+    }).join('');
+
+    container.querySelectorAll('.lid-swatch-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const colorId = btn.dataset.colorId;
+        if (hiddenInput) hiddenInput.value = colorId;
+        container.querySelectorAll('.lid-swatch-btn').forEach(b => {
+          const isThis = b.dataset.colorId === colorId;
+          const col = PINT_LID_COLORS.find(item => item.id === b.dataset.colorId);
+          b.classList.toggle('active', isThis);
+          if (isThis && col) {
+            b.style.borderColor = col.border;
+            b.style.background = col.bgTint;
+          } else {
+            b.style.borderColor = '';
+            b.style.background = '';
+          }
+          const circle = b.querySelector('.lid-swatch-circle');
+          if (circle) circle.textContent = isThis ? '✓' : '';
+        });
+      });
+    });
+  }
+
+  function cyclePintLidColor(pintId) {
+    const pint = freezerPintsState.find(p => p.id === pintId);
+    if (!pint) return;
+    const currentColor = getPintLidColor(pint.lidColor || pint.slot || 1);
+    const currentIndex = PINT_LID_COLORS.findIndex(c => c.id === currentColor.id);
+    const nextIndex = (currentIndex + 1) % PINT_LID_COLORS.length;
+    const nextColor = PINT_LID_COLORS[nextIndex];
+    pint.lidColor = nextColor.id;
+    saveFreezerPints();
+    renderFreezerShelfWidget();
+    if (freezerModalOverlay && freezerModalOverlay.classList.contains('active')) {
+      renderFreezerModal();
+    }
+    showToast(`${nextColor.icon} Assigned ${nextColor.name} lid to "${pint.recipeName}"!`);
+  }
+
   // --- Freezer Inventory & 16-Hour Timer Engine (Roadmap Item 8) ---
   function computePintStatus(pint) {
     const now = Date.now();
@@ -6976,13 +7055,19 @@
         const status = computePintStatus(pint);
         const isDeluxe = pint.scale === 1.5 || (pint.sizeLabel && pint.sizeLabel.includes('24 oz'));
         const sizeTag = isDeluxe ? '24 oz' : '16 oz';
+        const lid = getPintLidColor(pint.lidColor || slotNum);
 
         if (status.isReady) {
           // Ready Slot
           html += `
             <div class="shelf-slot-card ready" data-slot="${slotNum}" data-pint-id="${pint.id}">
+              <div class="slot-lid-bar" style="background: ${lid.hex}; box-shadow: 0 0 10px ${lid.hex}55;"></div>
               <div class="slot-header-row">
                 <span class="slot-number-badge">Slot ${slotNum}</span>
+                <button type="button" class="slot-lid-pill" data-action="cycle-lid-color" data-pint-id="${pint.id}" style="border-color: ${lid.border}; color: ${lid.hex};" title="Lid: ${lid.name} (Click to change)">
+                  <span class="lid-pill-dot" style="background: ${lid.hex};"></span>
+                  <span>${lid.name}</span>
+                </button>
                 <span class="slot-status-pill ready">🟢 READY!</span>
               </div>
               <div class="slot-recipe-name" title="${escapeHtml(pint.recipeName)}">${escapeHtml(pint.recipeName)}</div>
@@ -6996,8 +7081,13 @@
           // Chilling Slot
           html += `
             <div class="shelf-slot-card chilling" data-slot="${slotNum}" data-pint-id="${pint.id}">
+              <div class="slot-lid-bar" style="background: ${lid.hex}; box-shadow: 0 0 10px ${lid.hex}55;"></div>
               <div class="slot-header-row">
                 <span class="slot-number-badge">Slot ${slotNum}</span>
+                <button type="button" class="slot-lid-pill" data-action="cycle-lid-color" data-pint-id="${pint.id}" style="border-color: ${lid.border}; color: ${lid.hex};" title="Lid: ${lid.name} (Click to change)">
+                  <span class="lid-pill-dot" style="background: ${lid.hex};"></span>
+                  <span>${lid.name}</span>
+                </button>
                 <span class="slot-status-pill chilling">❄️ ${status.timeRemainingLabel}</span>
               </div>
               <div class="slot-recipe-name" title="${escapeHtml(pint.recipeName)}">${escapeHtml(pint.recipeName)}</div>
@@ -7023,6 +7113,14 @@
       card.addEventListener('click', (e) => {
         const slot = parseInt(card.dataset.slot, 10);
         openSlotFillModal(slot);
+      });
+    });
+
+    grid.querySelectorAll('[data-action="cycle-lid-color"]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const pintId = btn.dataset.pintId;
+        cyclePintLidColor(pintId);
       });
     });
 
@@ -7088,6 +7186,10 @@
     }
     if (notesInput) notesInput.value = '';
     if (hoursSelect) hoursSelect.value = '16';
+
+    const existingPint = freezerPintsState.find(p => p.slot === slotNum);
+    const chosenLid = existingPint ? (existingPint.lidColor || getPintLidColor(slotNum).id) : getPintLidColor(slotNum).id;
+    renderLidColorSwatches('slotFillLidSwatches', 'slotFillLidColor', chosenLid);
 
     modal.classList.add('active');
     modal.setAttribute('aria-hidden', 'false');
@@ -7554,11 +7656,12 @@
       freezerToggleAddText.textContent = nextState ? 'Close Form' : 'Log a Chilling Pint';
     }
     if (nextState) {
+      renderLidColorSwatches('freezerAddLidSwatches', 'freezerAddLidColor', 'blue');
       if (freezerRecipeNameInput) freezerRecipeNameInput.focus();
     }
   }
 
-  async function addFreezerPint({ recipeId, recipeName, scale, notes, frozenAt, requestNotification }) {
+  async function addFreezerPint({ recipeId, recipeName, scale, notes, frozenAt, requestNotification, lidColor }) {
     if (!recipeName || !recipeName.trim()) return;
 
     const maxAllowed = getUserMaxFreezerSlots(currentUser);
@@ -7586,13 +7689,26 @@
       if (match) matchedRecipeId = match.id;
     }
 
+    const takenSlots = new Set(freezerPintsState.map(p => p.slot));
+    let assignedSlot = null;
+    for (let s = 1; s <= freezerSlotCapacity; s++) {
+      if (!takenSlots.has(s)) {
+        assignedSlot = s;
+        break;
+      }
+    }
+    const finalLidColor = lidColor || (assignedSlot ? getPintLidColor(assignedSlot).id : 'blue');
+
     const newPint = {
       id: `freezer_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+      slot: assignedSlot,
       recipeId: matchedRecipeId || null,
       recipeName: recipeName.trim(),
       scale: finalScale,
       sizeLabel: finalScale === 1.5 ? '24 oz Deluxe' : '16 oz Standard',
       frozenAt: finalFrozenAt,
+      freezeHours: 16,
+      lidColor: finalLidColor,
       notes: (notes || '').trim(),
       notified: false
     };
@@ -7603,6 +7719,7 @@
       recipe_name: newPint.recipeName,
       size_label: newPint.sizeLabel
     });
+    renderFreezerShelfWidget();
     renderFreezerModal();
     toggleFreezerAddForm(false);
 
@@ -7708,9 +7825,10 @@
       const status = computePintStatus(pint);
       const isDeluxe = pint.scale === 1.5 || (pint.sizeLabel && pint.sizeLabel.includes('24 oz'));
       const hasRecipe = Boolean(pint.recipeId && allRecipes.some(r => r.id === pint.recipeId));
+      const lid = getPintLidColor(pint.lidColor || pint.slot || 1);
 
       return `
-        <div class="freezer-pint-card ${status.isReady ? 'ready' : ''}" data-id="${pint.id}">
+        <div class="freezer-pint-card ${status.isReady ? 'ready' : ''}" data-id="${pint.id}" style="border-left: 4px solid ${lid.hex};">
           <div class="freezer-card-top-row">
             <div class="freezer-pint-title-group">
               <div class="freezer-pint-title">${pint.recipeName}</div>
@@ -7718,6 +7836,9 @@
                 <span class="freezer-tag ${isDeluxe ? 'size-deluxe' : 'size-standard'}">
                   ${isDeluxe ? '🥣 24 oz Deluxe' : '🍨 16 oz Standard'}
                 </span>
+                <button type="button" class="freezer-tag lid-color-tag" data-action="cycle-modal-lid" data-pint-id="${pint.id}" style="border-color: ${lid.border}; background: ${lid.bgTint}; color: ${lid.hex};" title="Lid Color: ${lid.name} (Click to change)">
+                  <span class="lid-pill-dot" style="background: ${lid.hex};"></span> ${lid.name} Lid
+                </button>
                 <span class="freezer-tag">Mixed: ${status.mixedLabel}</span>
                 ${pint.notified 
                   ? '<span class="freezer-tag notif-tag sent">🔔 Alert Sent</span>' 
@@ -7767,6 +7888,14 @@
     }).join('');
 
     // Bind Pint Card Buttons
+    freezerPintsList.querySelectorAll('[data-action="cycle-modal-lid"]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const pintId = btn.dataset.pintId;
+        cyclePintLidColor(pintId);
+      });
+    });
+
     freezerPintsList.querySelectorAll('.freezer-pint-card').forEach(card => {
       const pintId = card.dataset.id;
       const pint = freezerPintsState.find(p => p.id === pintId);
@@ -8301,6 +8430,7 @@
     batchPrepQueueState.forEach(queued => {
       if (emptySlots.length > 0) {
         const slotNum = emptySlots.shift();
+        const lid = getPintLidColor(slotNum);
         const newPint = {
           id: `freezer_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
           slot: slotNum,
@@ -8310,6 +8440,7 @@
           sizeLabel: queued.scale === 1.5 ? '24 oz Deluxe' : '16 oz Standard',
           frozenAt: Date.now(),
           freezeHours: 16,
+          lidColor: lid.id,
           notes: 'Prepped during Sunday batch session',
           notified: false
         };
@@ -14985,6 +15116,7 @@
         const scale = parseFloat(document.getElementById('slotFillPintScale').value) || 1.0;
         const hours = parseInt(document.getElementById('slotFillFreezeHours').value, 10) || 16;
         const notes = document.getElementById('slotFillNotes').value.trim();
+        const lidColor = document.getElementById('slotFillLidColor') ? document.getElementById('slotFillLidColor').value : getPintLidColor(slotNum).id;
 
         // Remove any pint currently occupying this slot
         freezerPintsState = freezerPintsState.filter(p => p.slot !== slotNum);
@@ -14998,6 +15130,7 @@
           sizeLabel: scale === 1.5 ? '24 oz Deluxe' : '16 oz Standard',
           frozenAt: Date.now(),
           freezeHours: hours,
+          lidColor: lidColor,
           notes: notes,
           notified: false
         };
@@ -15131,13 +15264,15 @@
         }
 
         const reqNotif = freezerNotifyOnReady ? freezerNotifyOnReady.checked : true;
+        const lidColor = document.getElementById('freezerAddLidColor') ? document.getElementById('freezerAddLidColor').value : 'blue';
 
         addFreezerPint({
           recipeName: name,
           scale: scale,
           notes: notes,
           frozenAt: frozenAt,
-          requestNotification: reqNotif
+          requestNotification: reqNotif,
+          lidColor: lidColor
         });
 
         freezerAddForm.reset();

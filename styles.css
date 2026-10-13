@@ -13541,3 +13541,113 @@ body.modal-open .cookie-consent-banner {
   flex: 1;
 }
 
+/* --- Pint Lid Color Customization (Amazon Multi-Pack Lids) --- */
+.lid-color-selector-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lid-color-swatches-grid {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.lid-swatch-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px 5px 6px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+  color: #cbd5e1;
+  font-size: 0.76rem;
+  font-weight: 700;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+.lid-swatch-btn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #ffffff;
+}
+
+.lid-swatch-btn.active {
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 14px var(--swatch-glow, rgba(56, 189, 248, 0.35));
+  color: #ffffff;
+}
+
+.lid-swatch-circle {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 900;
+  color: #0f172a;
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.4), 0 1px 4px rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
+}
+
+/* Shelf Slot Card Lid Accent & Pill */
+.slot-lid-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  border-top-left-radius: 13px;
+  border-top-right-radius: 13px;
+  transition: background 0.25s ease, box-shadow 0.25s ease;
+}
+
+.slot-lid-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(15, 23, 42, 0.7);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  line-height: 1;
+}
+
+.slot-lid-pill:hover {
+  transform: scale(1.06);
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+.lid-pill-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+  flex-shrink: 0;
+}
+
+.freezer-tag.lid-color-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-weight: 700;
+}
+
+.freezer-tag.lid-color-tag:hover {
+  transform: scale(1.05);
+}
+

@@ -108,7 +108,7 @@
   <link rel="icon" type="image/png" sizes="144x144" href="icon-144.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=beta21">
+  <link rel="stylesheet" href="styles.css?v=beta22">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -922,6 +922,17 @@
             </div>
           </div>
 
+          <div class="form-group" style="margin-bottom: 14px;">
+            <label style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <span>Pint Lid Color</span>
+              <span style="font-size: 0.72rem; color: #94a3b8; font-weight: normal;">(Amazon replacement lid colors)</span>
+            </label>
+            <div class="lid-color-selector-wrap">
+              <div class="lid-color-swatches-grid" id="freezerAddLidSwatches"></div>
+              <input type="hidden" id="freezerAddLidColor" value="blue">
+            </div>
+          </div>
+
           <div class="form-row">
             <div class="form-group flex-2">
               <label>When Did You Mix &amp; Freeze It?</label>
@@ -1010,6 +1021,16 @@
                 <option value="12">⏱️ 12 Hours (Quick Freeze)</option>
                 <option value="8">⏱️ 8 Hours (Speed Test)</option>
               </select>
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom: 14px;">
+            <label style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <span>Pint Lid Color</span>
+              <span style="font-size: 0.72rem; color: #94a3b8; font-weight: normal;">(Amazon replacement lid colors)</span>
+            </label>
+            <div class="lid-color-selector-wrap">
+              <div class="lid-color-swatches-grid" id="slotFillLidSwatches"></div>
+              <input type="hidden" id="slotFillLidColor" value="blue">
             </div>
           </div>
           <div class="form-group">
@@ -3139,6 +3160,6 @@
 
   <!-- Scripts -->
   <script src="recipes-data.js?v=beta9"></script>
-  <script src="app.js?v=beta23"></script>
+  <script src="app.js?v=beta24"></script>
 </body>
 </html>
