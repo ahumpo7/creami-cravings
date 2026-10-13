@@ -852,11 +852,6 @@
     if (savedPantry !== null) {
       try {
         pantryState = new Set(JSON.parse(savedPantry));
-        // If the user had previously selected all ingredients, keep newly introduced pantry items checked
-        if (typeof INGREDIENTS_MASTER !== 'undefined' && pantryState.size >= 150) {
-          INGREDIENTS_MASTER.forEach(i => pantryState.add(i.id));
-          localStorage.setItem(key, JSON.stringify(Array.from(pantryState)));
-        }
         if (pantryState.has('cinnamon_cereal')) {
           pantryState.delete('cinnamon_cereal');
           pantryState.add('cinnamon_toast_crunch');
@@ -1140,6 +1135,7 @@
   }
 
   function savePantry() {
+    lastLocalMutationTime = Date.now();
     const key = getPantryStorageKey();
     localStorage.setItem(key, JSON.stringify(Array.from(pantryState)));
     if (currentUser) {
@@ -1150,6 +1146,7 @@
   }
 
   function saveFavorites() {
+    lastLocalMutationTime = Date.now();
     if (currentUser && currentUser.id) {
       const userFavKey = `${FAVORITES_STORAGE_KEY}_${currentUser.id}`;
       localStorage.setItem(userFavKey, JSON.stringify(Array.from(favoritesState)));
@@ -1160,6 +1157,7 @@
   }
 
   function saveManualShoppingList() {
+    lastLocalMutationTime = Date.now();
     const key = getShoppingStorageKey();
     localStorage.setItem(key, JSON.stringify(Array.from(manualShoppingList)));
     if (currentUser) {
@@ -1170,6 +1168,7 @@
   }
 
   function saveUserRecipeData() {
+    lastLocalMutationTime = Date.now();
     const key = getUserRecipeDataKey();
     localStorage.setItem(key, JSON.stringify(userRecipeData));
     if (currentUser) {
@@ -1189,6 +1188,7 @@
   }
 
   function saveRecipeMadeCounts() {
+    lastLocalMutationTime = Date.now();
     const key = getRecipeMadeStorageKey();
     localStorage.setItem(key, JSON.stringify(recipeMadeCounts));
     if (currentUser) {
@@ -1203,6 +1203,7 @@
   }
 
   function saveCustomRecipes() {
+    lastLocalMutationTime = Date.now();
     if (currentUser && currentUser.id) {
       const userCustomKey = `${CUSTOM_RECIPES_STORAGE_KEY}_${currentUser.id}`;
       localStorage.setItem(userCustomKey, JSON.stringify(customRecipesState));
@@ -1215,6 +1216,7 @@
   }
 
   function saveFreezerPints() {
+    lastLocalMutationTime = Date.now();
     if (currentUser && currentUser.id) {
       const userFreezerKey = `${FREEZER_STORAGE_KEY}_${currentUser.id}`;
       localStorage.setItem(userFreezerKey, JSON.stringify(freezerPintsState));
@@ -1232,6 +1234,7 @@
     clearTimeout(syncTimeout);
 
     const performSync = async () => {
+      syncTimeout = null;
       try {
         const payload = {
           token: currentUser.token || '',
@@ -1260,16 +1263,17 @@
     };
 
     if (immediate) {
+      syncTimeout = null;
       performSync();
     } else {
-      syncTimeout = setTimeout(performSync, 800);
+      syncTimeout = setTimeout(performSync, 400);
     }
   }
 
   // --- Real-Time Multi-Device Account Sync Fetcher ---
   async function fetchLatestUserData() {
     if (!currentUser || (!currentUser.token && !currentUser.email)) return;
-    if (Date.now() - lastLocalMutationTime < 3500) return;
+    if (Date.now() - lastLocalMutationTime < 5000 || syncTimeout !== null) return;
     try {
       const headers = { 'Content-Type': 'application/json' };
       if (currentUser.token) headers['Authorization'] = `Bearer ${currentUser.token}`;
@@ -1858,98 +1862,102 @@
       method: method
     });
 
+    const hasRecentLocalMutation = (Date.now() - lastLocalMutationTime < 5000) || (syncTimeout !== null);
+
     // 1. Restore & switch to authenticated user's pantry (STRICT ISOLATION - do not merge with guest session!)
-    if (data.user && Array.isArray(data.user.pantry)) {
-      pantryState = new Set(data.user.pantry);
-    } else {
-      const userPantryKey = `${PANTRY_STORAGE_KEY}_${currentUser.id}`;
-      const savedUserPantry = localStorage.getItem(userPantryKey);
-      if (savedUserPantry !== null) {
-        try {
-          pantryState = new Set(JSON.parse(savedUserPantry));
-        } catch (e) {
+    if (!data.isSilent || !hasRecentLocalMutation) {
+      if (data.user && Array.isArray(data.user.pantry)) {
+        pantryState = new Set(data.user.pantry);
+      } else {
+        const userPantryKey = `${PANTRY_STORAGE_KEY}_${currentUser.id}`;
+        const savedUserPantry = localStorage.getItem(userPantryKey);
+        if (savedUserPantry !== null) {
+          try {
+            pantryState = new Set(JSON.parse(savedUserPantry));
+          } catch (e) {
+            pantryState = new Set(DEFAULT_STAPLES);
+          }
+        } else {
           pantryState = new Set(DEFAULT_STAPLES);
         }
-      } else {
-        pantryState = new Set(DEFAULT_STAPLES);
       }
-    }
-    if (pantryState.has('cinnamon_cereal')) {
-      pantryState.delete('cinnamon_cereal');
-      pantryState.add('cinnamon_toast_crunch');
-      triggerCloudSync();
-    }
-    const pantryKey = getPantryStorageKey();
-    localStorage.setItem(pantryKey, JSON.stringify(Array.from(pantryState)));
-    if (currentUser) {
-      localStorage.removeItem(PANTRY_STORAGE_KEY);
-    }
-    updateStats();
-    updatePantryCheckboxVisuals();
-    renderPantryList();
-
-    // 2. Restore user's favorites
-    favoritesState = new Set(Array.isArray(data.user.favorites) ? data.user.favorites : []);
-    if (currentUser && currentUser.id) {
-      const userFavKey = `${FAVORITES_STORAGE_KEY}_${currentUser.id}`;
-      localStorage.setItem(userFavKey, JSON.stringify(Array.from(favoritesState)));
-    }
-    localStorage.removeItem(FAVORITES_STORAGE_KEY);
-    updateCategoryCounts();
-
-    // 3. Restore made counts
-    recipeMadeCounts = (data.user.madeCounts && typeof data.user.madeCounts === 'object') ? { ...data.user.madeCounts } : {};
-    if (currentUser && currentUser.id) {
-      const userMadeKey = `${RECIPE_MADE_STORAGE_KEY}_${currentUser.id}`;
-      localStorage.setItem(userMadeKey, JSON.stringify(recipeMadeCounts));
-    }
-    localStorage.removeItem(RECIPE_MADE_STORAGE_KEY);
-
-    // 4. Restore ratings
-    userRecipeData = (data.user.ratings && typeof data.user.ratings === 'object') ? { ...data.user.ratings } : {};
-    if (currentUser && currentUser.id) {
-      const userRatingKey = `${USER_RECIPE_DATA_KEY}_${currentUser.id}`;
-      localStorage.setItem(userRatingKey, JSON.stringify(userRecipeData));
-    }
-    localStorage.removeItem(USER_RECIPE_DATA_KEY);
-
-    // 5. Restore custom recipes
-    if (data.user.customRecipes && Array.isArray(data.user.customRecipes)) {
-      customRecipesState = data.user.customRecipes;
-      const userCustomKey = `${CUSTOM_RECIPES_STORAGE_KEY}_${currentUser.id}`;
-      localStorage.setItem(userCustomKey, JSON.stringify(customRecipesState));
-      mergeRecipes();
-      calculateIngredientUsage();
-      renderPantryList();
-    } else {
-      customRecipesState = [];
-    }
-
-    // 6. Restore shopping list (STRICT ISOLATION - do not merge!)
-    if (data.user.shoppingList && Array.isArray(data.user.shoppingList)) {
-      manualShoppingList = new Set(
-        data.user.shoppingList
-          .filter(item => !isShoppingExcluded(item))
-          .map(item => sanitizeShoppingItemName(item))
-      );
-      const shopKey = getShoppingStorageKey();
-      localStorage.setItem(shopKey, JSON.stringify(Array.from(manualShoppingList)));
+      if (pantryState.has('cinnamon_cereal')) {
+        pantryState.delete('cinnamon_cereal');
+        pantryState.add('cinnamon_toast_crunch');
+        triggerCloudSync();
+      }
+      const pantryKey = getPantryStorageKey();
+      localStorage.setItem(pantryKey, JSON.stringify(Array.from(pantryState)));
       if (currentUser) {
-        localStorage.removeItem(MANUAL_SHOPPING_STORAGE_KEY);
+        localStorage.removeItem(PANTRY_STORAGE_KEY);
       }
-      updateShoppingListBadge();
-    } else {
-      manualShoppingList = new Set();
-    }
+      updateStats();
+      updatePantryCheckboxVisuals();
+      renderPantryList();
 
-    // 7. Restore freezer pints
-    if (data.user.freezerPints && Array.isArray(data.user.freezerPints)) {
-      freezerPintsState = data.user.freezerPints;
-      const userFreezerKey = `${FREEZER_STORAGE_KEY}_${currentUser.id}`;
-      localStorage.setItem(userFreezerKey, JSON.stringify(freezerPintsState));
-      updateFreezerBadges();
-    } else {
-      freezerPintsState = [];
+      // 2. Restore user's favorites
+      favoritesState = new Set(Array.isArray(data.user.favorites) ? data.user.favorites : []);
+      if (currentUser && currentUser.id) {
+        const userFavKey = `${FAVORITES_STORAGE_KEY}_${currentUser.id}`;
+        localStorage.setItem(userFavKey, JSON.stringify(Array.from(favoritesState)));
+      }
+      localStorage.removeItem(FAVORITES_STORAGE_KEY);
+      updateCategoryCounts();
+
+      // 3. Restore made counts
+      recipeMadeCounts = (data.user.madeCounts && typeof data.user.madeCounts === 'object') ? { ...data.user.madeCounts } : {};
+      if (currentUser && currentUser.id) {
+        const userMadeKey = `${RECIPE_MADE_STORAGE_KEY}_${currentUser.id}`;
+        localStorage.setItem(userMadeKey, JSON.stringify(recipeMadeCounts));
+      }
+      localStorage.removeItem(RECIPE_MADE_STORAGE_KEY);
+
+      // 4. Restore ratings
+      userRecipeData = (data.user.ratings && typeof data.user.ratings === 'object') ? { ...data.user.ratings } : {};
+      if (currentUser && currentUser.id) {
+        const userRatingKey = `${USER_RECIPE_DATA_KEY}_${currentUser.id}`;
+        localStorage.setItem(userRatingKey, JSON.stringify(userRecipeData));
+      }
+      localStorage.removeItem(USER_RECIPE_DATA_KEY);
+
+      // 5. Restore custom recipes
+      if (data.user.customRecipes && Array.isArray(data.user.customRecipes)) {
+        customRecipesState = data.user.customRecipes;
+        const userCustomKey = `${CUSTOM_RECIPES_STORAGE_KEY}_${currentUser.id}`;
+        localStorage.setItem(userCustomKey, JSON.stringify(customRecipesState));
+        mergeRecipes();
+        calculateIngredientUsage();
+        renderPantryList();
+      } else {
+        customRecipesState = [];
+      }
+
+      // 6. Restore shopping list (STRICT ISOLATION - do not merge!)
+      if (data.user.shoppingList && Array.isArray(data.user.shoppingList)) {
+        manualShoppingList = new Set(
+          data.user.shoppingList
+            .filter(item => !isShoppingExcluded(item))
+            .map(item => sanitizeShoppingItemName(item))
+        );
+        const shopKey = getShoppingStorageKey();
+        localStorage.setItem(shopKey, JSON.stringify(Array.from(manualShoppingList)));
+        if (currentUser) {
+          localStorage.removeItem(MANUAL_SHOPPING_STORAGE_KEY);
+        }
+        updateShoppingListBadge();
+      } else {
+        manualShoppingList = new Set();
+      }
+
+      // 7. Restore freezer pints
+      if (data.user.freezerPints && Array.isArray(data.user.freezerPints)) {
+        freezerPintsState = data.user.freezerPints;
+        const userFreezerKey = `${FREEZER_STORAGE_KEY}_${currentUser.id}`;
+        localStorage.setItem(userFreezerKey, JSON.stringify(freezerPintsState));
+        updateFreezerBadges();
+      } else {
+        freezerPintsState = [];
+      }
     }
 
     // 8. Restore pending access claims from server
