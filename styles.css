@@ -794,11 +794,53 @@ body::before {
   margin-bottom: 0;
 }
 
+.controls-actions-cluster {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .filter-toggles-row {
   display: flex;
   align-items: center;
   gap: 14px;
   flex-wrap: wrap;
+}
+
+/* Toggle Pill */
+.toggle-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: var(--bg-glass);
+  border: 1px solid var(--border-glass);
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  user-select: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.toggle-pill input {
+  display: none;
+}
+
+.toggle-pill:hover {
+  background: var(--bg-glass-hover);
+  color: var(--text-main);
+  border-color: var(--border-highlight);
+}
+
+.toggle-pill:has(input:checked),
+.toggle-pill.checked {
+  background: rgba(16, 185, 129, 0.18);
+  border-color: rgba(16, 185, 129, 0.5);
+  color: #10b981;
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.2);
 }
 
 /* Toggle Switch */
@@ -2509,16 +2551,96 @@ body.modal-open .cookie-consent-banner {
 /* ==========================================================================
    Quick Nutrition & Macro Filter Chips
    ========================================================================== */
-.quick-filter-chips-bar {
+.quick-filter-chips-bar,
+.condensed-filter-bar {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
   flex-wrap: wrap;
   width: 100%;
   max-width: 100%;
   min-width: 0;
   box-sizing: border-box;
+}
+
+.filter-dropdown-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.filter-dropdown-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background: var(--bg-glass);
+  border: 1px solid var(--border-glass);
+  border-radius: 999px;
+  padding: 6px 30px 6px 14px;
+  color: var(--text-main);
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.6)' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 11px 11px;
+}
+
+[data-theme="light"] .filter-dropdown-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(0,0,0,0.6)' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+}
+
+.filter-dropdown-select:hover {
+  background-color: var(--bg-glass-hover);
+  border-color: var(--border-highlight);
+}
+
+.filter-dropdown-select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-glow);
+}
+
+.filter-dropdown-select.active {
+  background-color: var(--primary);
+  border-color: var(--primary);
+  color: #ffffff;
+  box-shadow: 0 4px 14px var(--primary-glow);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+}
+
+.filter-dropdown-select.active-craving {
+  background-color: #ec4899;
+  border-color: #ec4899;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(236, 72, 153, 0.4);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+}
+
+.btn-clear-filters-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: 999px;
+  color: #ef4444;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-clear-filters-pill:hover {
+  background: rgba(239, 68, 68, 0.22);
+  border-color: #ef4444;
+  transform: translateY(-1px);
 }
 
 .quick-filter-label {
@@ -4806,6 +4928,36 @@ body.modal-open .cookie-consent-banner {
     padding: 12px 16px 12px 42px;
   }
 
+  .controls-actions-cluster {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .controls-actions-cluster .sort-select-wrapper {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .controls-actions-cluster .sort-select-wrapper select {
+    width: 100%;
+    min-height: 46px;
+    font-size: 0.92rem !important;
+    font-weight: 700;
+    padding: 8px 12px;
+  }
+
+  .controls-actions-cluster .btn-roulette {
+    flex-shrink: 0;
+    width: auto;
+    min-height: 46px;
+    padding: 8px 16px;
+    font-size: 0.92rem;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+
   .filter-toggles-row {
     width: 100%;
     justify-content: space-between;
@@ -4818,29 +4970,9 @@ body.modal-open .cookie-consent-banner {
     min-height: 44px;
   }
 
-  .sort-select-wrapper {
-    width: 100%;
-  }
-
-  .sort-select-wrapper select {
-    width: 100%;
-    min-height: 48px;
-    font-size: 0.95rem !important;
-    font-weight: 700;
-    padding: 10px 14px;
-  }
-
-  .btn-roulette {
-    width: 100%;
-    justify-content: center;
-    min-height: 48px;
-    font-size: 1rem;
-    font-weight: 800;
-  }
-
   /* Smooth Horizontal Scroll for Tabs & Filter Chips with Rubber-Banding Prevention */
   .category-tabs-bar {
-    margin-bottom: 16px;
+    margin-bottom: 14px;
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
@@ -4866,12 +4998,13 @@ body.modal-open .cookie-consent-banner {
 
   .tab-btn {
     flex-shrink: 0;
-    min-height: 44px;
-    padding: 10px 18px;
-    font-size: 0.95rem;
+    min-height: 42px;
+    padding: 9px 16px;
+    font-size: 0.92rem;
     font-weight: 700;
   }
 
+  .condensed-filter-bar,
   .quick-filter-chips-bar {
     flex-wrap: nowrap !important;
     overflow-x: auto !important;
@@ -4884,6 +5017,19 @@ body.modal-open .cookie-consent-banner {
     box-sizing: border-box !important;
     overscroll-behavior-x: contain !important;
     gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .condensed-filter-bar::-webkit-scrollbar,
+  .quick-filter-chips-bar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .toggle-pill,
+  .filter-dropdown-select,
+  .filter-chip {
+    flex-shrink: 0;
+    min-height: 38px;
   }
 
   .quick-filter-chips-bar::-webkit-scrollbar {

@@ -108,7 +108,7 @@
   <link rel="icon" type="image/png" sizes="144x144" href="icon-144.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=beta18">
+  <link rel="stylesheet" href="styles.css?v=beta19">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -378,7 +378,7 @@
             <button class="chip" data-preset="shakes" title="Common protein shakes + protein powder">+ Shakes</button>
             <button class="chip" data-preset="choc" title="Cocoa powders, chocolate chips, Oreos">+ Chocolate</button>
             <button class="chip" data-preset="fruit" title="Bananas, strawberries, blueberries, lemons">+ Fruit</button>
-            <button class="chip" data-preset="keto" title="Keto staples and sweeteners">+ Keto</button>
+            <button class="chip" data-preset="keto" id="presetKetoChip" title="Keto staples and sweeteners" style="display: none;">+ Keto</button>
           </div>
         </div>
 
@@ -429,7 +429,7 @@
           </div>
         </section>
 
-        <!-- Controls & Filter Bar -->
+        <!-- Controls Bar: Search, Sort, Roulette -->
         <div class="recipes-controls-bar">
           <!-- Search Recipes -->
           <div class="search-box recipe-search-box">
@@ -438,20 +438,7 @@
             <button id="clearRecipeSearchBtn" class="clear-input-btn" style="display: none;">&times;</button>
           </div>
 
-          <!-- Toggles & Sorts -->
-          <div class="filter-toggles-row">
-            <label class="toggle-container" title="Show only recipes where you have 100% of all ingredients">
-              <input type="checkbox" id="readyOnlyToggle">
-              <span class="toggle-track"></span>
-              <span class="toggle-text">⚡ Ready Only</span>
-            </label>
-
-            <label class="toggle-container" title="Show recipes where you have all base ingredients (mix-ins can be flexible)">
-              <input type="checkbox" id="baseOnlyToggle">
-              <span class="toggle-track"></span>
-              <span class="toggle-text">🥣 Base Ready</span>
-            </label>
-
+          <div class="controls-actions-cluster">
             <div class="sort-select-wrapper">
               <select id="sortSelect" aria-label="Sort recipes by">
                 <option value="match_desc">Sort: Highest Match</option>
@@ -468,33 +455,103 @@
             <!-- Creami Roulette (Surprise Me) -->
             <button id="rouletteBtn" class="btn-roulette" title="Decision paralysis? Let Creami Roulette pick the perfect pint from your pantry!">
               <span class="roulette-icon">🎰</span>
-              <span>Creami Roulette</span>
+              <span>Roulette</span>
             </button>
           </div>
         </div>
 
-        <!-- Quick Nutrition & Macro Filter Chips -->
-        <div class="quick-filter-chips-bar" id="quickFilterChipsBar">
-          <span class="quick-filter-label">Quick Filters:</span>
-          <button class="filter-chip active" data-filter="all">All</button>
-          <button class="filter-chip" data-filter="high_protein">💪 High Protein (≥35g)</button>
-          <button class="filter-chip" data-filter="low_cal">🔥 Low Calorie (&lt;200 cal)</button>
-          <button class="filter-chip" data-filter="low_carb">🥑 Low Carb (&le;10g)</button>
-          <button class="filter-chip" data-filter="low_fat">🧈 Low Fat (&le;5g)</button>
-          <button class="filter-chip" data-filter="my_rated">⭐ My Rated</button>
-          <button class="filter-chip" data-filter="pro_tips" style="display: none;">💡 Pro Tips</button>
-          
-          <span class="chip-divider"></span>
-          <span class="quick-filter-label">Cravings:</span>
-          <button class="filter-chip craving-chip" data-filter="craving_chocolate">🍫 Chocolate</button>
-          <button class="filter-chip craving-chip" data-filter="craving_fruit">🍓 Fruity</button>
-          <button class="filter-chip craving-chip" data-filter="craving_bakery">🍪 Bakery &amp; Cookie</button>
-          <button class="filter-chip craving-chip" data-filter="craving_coffee">☕ Coffee &amp; Latte</button>
+        <!-- Cookbook Category Filter Tabs (Cookbook Collections) -->
+        <div class="category-tabs-bar">
+          <div class="category-tabs" id="categoryTabs">
+            <button class="tab-btn active" data-category="all">
+              <span>🌟 All</span>
+              <span class="tab-count" id="countAll">12</span>
+            </button>
+            <button class="tab-btn" data-category="Base Flavors">
+              <span>🥣 Base Flavors</span>
+              <span class="tab-count" id="countBase">12</span>
+            </button>
+            <button class="tab-btn" data-category="Community Legends">
+              <span>🔥 Community Legends</span>
+              <span class="tab-count" id="countLegends">13</span>
+            </button>
+            <button class="tab-btn" data-category="Fan Favorites" style="display: none;">
+              <span>⭐ Fan Favorites</span>
+              <span class="tab-count" id="countFan">0</span>
+              <span class="tab-lock-indicator" id="lockFan" style="display: none;" title="Pack available for purchase">🔒</span>
+            </button>
+            <button class="tab-btn" data-category="Keto" style="display: none;">
+              <span>🥑 Keto</span>
+              <span class="tab-count" id="countKeto">0</span>
+              <span class="tab-lock-indicator" id="lockKeto" style="display: none;" title="Pack available for purchase">🔒</span>
+            </button>
+            <button class="tab-btn" data-category="Lactose Free" style="display: none;">
+              <span>🥛 Lactose Free</span>
+              <span class="tab-count" id="countLactose">0</span>
+              <span class="tab-lock-indicator" id="lockLactose" style="display: none;" title="Pack available for purchase">🔒</span>
+            </button>
+            <button class="tab-btn" data-category="No Protein" style="display: none;">
+              <span>💪 No Protein</span>
+              <span class="tab-count" id="countNoProtein">0</span>
+              <span class="tab-lock-indicator" id="lockNoProtein" style="display: none;" title="Pack available for purchase">🔒</span>
+            </button>
+            <button class="tab-btn" data-category="favorites">
+              <span>💖 Favorites</span>
+              <span class="tab-count" id="countFavorites">0</span>
+            </button>
+            <button class="tab-btn" data-category="Custom" id="tabCustomRecipes" style="display: none;">
+              <span>🧑‍🍳 My Recipes</span>
+              <span class="tab-count" id="countCustom">0</span>
+            </button>
+          </div>
 
-          <span class="chip-divider"></span>
+          <div class="custom-actions" id="customActionsContainer" style="display: none;">
+            <button id="addCustomRecipeBtn" class="btn-add-recipe" title="Add your personal Creami recipe (saved to your Google account)">
+              ➕ Custom Recipe
+            </button>
+          </div>
+        </div>
+
+        <!-- Condensed Secondary Filters Toolbar -->
+        <div class="condensed-filter-bar" id="quickFilterChipsBar">
+          <label class="toggle-pill" id="readyOnlyPill" title="Show only recipes where you have 100% of all ingredients">
+            <input type="checkbox" id="readyOnlyToggle">
+            <span>⚡ Ready Only</span>
+          </label>
+
+          <label class="toggle-pill" id="baseOnlyPill" title="Show recipes where you have all base ingredients">
+            <input type="checkbox" id="baseOnlyToggle">
+            <span>🥣 Base Ready</span>
+          </label>
+
+          <div class="filter-dropdown-wrapper">
+            <select id="dietFilterSelect" class="filter-dropdown-select" aria-label="Filter by Diet & Macros">
+              <option value="all">🥗 Diet: Any</option>
+              <option value="high_protein">💪 High Protein (≥35g)</option>
+              <option value="low_cal">🔥 Low Calorie (&lt;200 cal)</option>
+              <option value="low_carb" id="dietOptLowCarb" style="display: none;" hidden>🥑 Low Carb (&le;10g)</option>
+              <option value="low_fat">🧈 Low Fat (&le;5g)</option>
+              <option value="my_rated">⭐ My Rated</option>
+            </select>
+          </div>
+
+          <div class="filter-dropdown-wrapper">
+            <select id="cravingFilterSelect" class="filter-dropdown-select" aria-label="Filter by Flavor Craving">
+              <option value="all">😋 Craving: Any</option>
+              <option value="craving_chocolate">🍫 Chocolate</option>
+              <option value="craving_fruit">🍓 Fruity</option>
+              <option value="craving_bakery">🍪 Bakery &amp; Cookie</option>
+              <option value="craving_coffee">☕ Coffee &amp; Latte</option>
+            </select>
+          </div>
+
           <button class="filter-chip macro-toggle-chip" id="toggleMacroSlidersBtn" title="Customize target protein, calorie, and fat ranges">
             <span>🎯 Macro Targets</span>
             <span class="macro-active-indicator" id="macroActiveIndicator" style="display: none;"></span>
+          </button>
+
+          <button class="btn-clear-filters-pill" id="clearAllFiltersBtn" style="display: none;" title="Reset all active filters">
+            <span>✕ Clear</span>
           </button>
         </div>
 
@@ -558,58 +615,6 @@
                 <span>20g (Any)</span>
               </div>
             </div>
-          </div>
-        </div>
-
-        <!-- Cookbook Category Filter Tabs -->
-        <div class="category-tabs-bar">
-          <div class="category-tabs" id="categoryTabs">
-            <button class="tab-btn active" data-category="all">
-              <span>🌟 All</span>
-              <span class="tab-count" id="countAll">12</span>
-            </button>
-            <button class="tab-btn" data-category="Base Flavors">
-              <span>🥣 Base Flavors</span>
-              <span class="tab-count" id="countBase">12</span>
-            </button>
-            <button class="tab-btn" data-category="Community Legends">
-              <span>🔥 Community Legends</span>
-              <span class="tab-count" id="countLegends">13</span>
-            </button>
-            <button class="tab-btn" data-category="Fan Favorites">
-              <span>⭐ Fan Favorites</span>
-              <span class="tab-count" id="countFan">1</span>
-              <span class="tab-lock-indicator" id="lockFan" style="display: none;" title="Pack available for purchase">🔒</span>
-            </button>
-            <button class="tab-btn" data-category="Keto">
-              <span>🥑 Keto</span>
-              <span class="tab-count" id="countKeto">6</span>
-              <span class="tab-lock-indicator" id="lockKeto" style="display: none;" title="Pack available for purchase">🔒</span>
-            </button>
-            <button class="tab-btn" data-category="Lactose Free">
-              <span>🥛 Lactose Free</span>
-              <span class="tab-count" id="countLactose">8</span>
-              <span class="tab-lock-indicator" id="lockLactose" style="display: none;" title="Pack available for purchase">🔒</span>
-            </button>
-            <button class="tab-btn" data-category="No Protein">
-              <span>💪 No Protein</span>
-              <span class="tab-count" id="countNoProtein">5</span>
-              <span class="tab-lock-indicator" id="lockNoProtein" style="display: none;" title="Pack available for purchase">🔒</span>
-            </button>
-            <button class="tab-btn" data-category="favorites">
-              <span>💖 Favorites</span>
-              <span class="tab-count" id="countFavorites">0</span>
-            </button>
-            <button class="tab-btn" data-category="Custom" id="tabCustomRecipes" style="display: none;">
-              <span>🧑‍🍳 My Recipes</span>
-              <span class="tab-count" id="countCustom">0</span>
-            </button>
-          </div>
-
-          <div class="custom-actions" id="customActionsContainer" style="display: none;">
-            <button id="addCustomRecipeBtn" class="btn-add-recipe" title="Add your personal Creami recipe (saved to your Google account)">
-              ➕ Custom Recipe
-            </button>
           </div>
         </div>
 
@@ -3135,6 +3140,6 @@
 
   <!-- Scripts -->
   <script src="recipes-data.js?v=beta9"></script>
-  <script src="app.js?v=beta18"></script>
+  <script src="app.js?v=beta19"></script>
 </body>
 </html>

@@ -384,6 +384,8 @@
   // Active Filters
   let activeCategory = 'all';
   let activeQuickFilter = 'all';
+  let activeDietFilter = 'all';
+  let activeCravingFilter = 'all';
   let activeSeoLanding = null;
   let readyOnlyFilter = false;
   let baseOnlyFilter = false;
@@ -474,6 +476,11 @@
   const clearRecipeSearchBtn = document.getElementById('clearRecipeSearchBtn');
   const readyOnlyToggle = document.getElementById('readyOnlyToggle');
   const baseOnlyToggle = document.getElementById('baseOnlyToggle');
+  const readyOnlyPill = document.getElementById('readyOnlyPill');
+  const baseOnlyPill = document.getElementById('baseOnlyPill');
+  const dietFilterSelect = document.getElementById('dietFilterSelect');
+  const cravingFilterSelect = document.getElementById('cravingFilterSelect');
+  const clearAllFiltersBtn = document.getElementById('clearAllFiltersBtn');
   const sortSelect = document.getElementById('sortSelect');
   const categoryTabs = document.getElementById('categoryTabs');
   const recipeGrid = document.getElementById('recipeGrid');
@@ -3842,30 +3849,35 @@
         if (spin !== 'gelato' && !text.includes('gelato') && !text.includes('custard')) return false;
       }
 
-      // Quick Filter Chips
-      if (activeQuickFilter === 'high_protein') {
+      // Quick Nutrition & Macro Filter (Diet Dropdown + legacy quick filter)
+      const currentDiet = activeDietFilter !== 'all' ? activeDietFilter : activeQuickFilter;
+      if (currentDiet === 'high_protein') {
         const pro = parseInt(recipe.macros.protein) || 0;
         if (pro < 35) return false;
-      } else if (activeQuickFilter === 'low_cal') {
+      } else if (currentDiet === 'low_cal') {
         const cal = parseInt(recipe.macros.calories) || 999;
         if (cal >= 200) return false;
-      } else if (activeQuickFilter === 'low_carb') {
+      } else if (currentDiet === 'low_carb') {
         const carbs = parseInt(recipe.macros.carbs) || 999;
         if (carbs > 10) return false;
-      } else if (activeQuickFilter === 'low_fat') {
+      } else if (currentDiet === 'low_fat') {
         const fat = parseInt(recipe.macros.fat) || 0;
         if (fat > 5) return false;
-      } else if (activeQuickFilter === 'my_rated') {
+      } else if (currentDiet === 'my_rated') {
         if (!userRecipeData[recipe.id] || !userRecipeData[recipe.id].rating) return false;
-      } else if (activeQuickFilter === 'pro_tips') {
+      } else if (currentDiet === 'pro_tips') {
         if (!recipe.proTip) return false;
-      } else if (activeQuickFilter === 'craving_chocolate') {
+      }
+
+      // Flavor Craving Filter (Craving Dropdown + legacy quick filter)
+      const currentCraving = activeCravingFilter !== 'all' ? activeCravingFilter : activeQuickFilter;
+      if (currentCraving === 'craving_chocolate') {
         if (!matchesCraving(recipe, 'chocolate')) return false;
-      } else if (activeQuickFilter === 'craving_fruit') {
+      } else if (currentCraving === 'craving_fruit') {
         if (!matchesCraving(recipe, 'fruit')) return false;
-      } else if (activeQuickFilter === 'craving_bakery') {
+      } else if (currentCraving === 'craving_bakery') {
         if (!matchesCraving(recipe, 'bakery')) return false;
-      } else if (activeQuickFilter === 'craving_coffee') {
+      } else if (currentCraving === 'craving_coffee') {
         if (!matchesCraving(recipe, 'coffee')) return false;
       }
 
@@ -3966,16 +3978,19 @@
     const hintParts = [];
     if (readyOnlyFilter) hintParts.push('⚡ 100% Ready to Make');
     if (baseOnlyFilter) hintParts.push('🥣 Base Ready to Freeze');
-    if (activeQuickFilter === 'high_protein') hintParts.push('💪 High Protein (≥35g)');
-    if (activeQuickFilter === 'low_cal') hintParts.push('🔥 Low Calorie (<200 cal)');
-    if (activeQuickFilter === 'low_carb') hintParts.push('🥑 Low Carb (≤10g)');
-    if (activeQuickFilter === 'low_fat') hintParts.push('🧈 Low Fat (≤5g)');
-    if (activeQuickFilter === 'my_rated') hintParts.push('⭐ My Rated');
-    if (activeQuickFilter === 'pro_tips') hintParts.push(`💡 Official Author Pro Tips (${filtered.length} recipes)`);
-    if (activeQuickFilter === 'craving_chocolate') hintParts.push('🍫 Chocolate Craving');
-    if (activeQuickFilter === 'craving_fruit') hintParts.push('🍓 Fruity & Refreshing');
-    if (activeQuickFilter === 'craving_bakery') hintParts.push('🍪 Bakery, Cookie & Dough');
-    if (activeQuickFilter === 'craving_coffee') hintParts.push('☕ Coffee & Latte');
+    const displayDiet = activeDietFilter !== 'all' ? activeDietFilter : activeQuickFilter;
+    if (displayDiet === 'high_protein') hintParts.push('💪 High Protein (≥35g)');
+    if (displayDiet === 'low_cal') hintParts.push('🔥 Low Calorie (<200 cal)');
+    if (displayDiet === 'low_carb') hintParts.push('🥑 Low Carb (≤10g)');
+    if (displayDiet === 'low_fat') hintParts.push('🧈 Low Fat (≤5g)');
+    if (displayDiet === 'my_rated') hintParts.push('⭐ My Rated');
+    if (displayDiet === 'pro_tips') hintParts.push(`💡 Official Author Pro Tips (${filtered.length} recipes)`);
+
+    const displayCraving = activeCravingFilter !== 'all' ? activeCravingFilter : activeQuickFilter;
+    if (displayCraving === 'craving_chocolate') hintParts.push('🍫 Chocolate Craving');
+    if (displayCraving === 'craving_fruit') hintParts.push('🍓 Fruity & Refreshing');
+    if (displayCraving === 'craving_bakery') hintParts.push('🍪 Bakery, Cookie & Dough');
+    if (displayCraving === 'craving_coffee') hintParts.push('☕ Coffee & Latte');
 
     const macroParts = [];
     if (macroFilters.minProtein > 0) macroParts.push(`≥${macroFilters.minProtein}g P`);
@@ -3984,6 +3999,34 @@
     if (macroParts.length > 0) hintParts.push(`🎯 Targets: ${macroParts.join(', ')}`);
 
     activePantryHint.textContent = hintParts.length > 0 ? `• Filtered by ${hintParts.join(' • ')}` : '';
+
+    // Sync filter UI controls
+    if (dietFilterSelect) {
+      dietFilterSelect.value = activeDietFilter;
+      dietFilterSelect.classList.toggle('active', activeDietFilter !== 'all');
+    }
+    if (cravingFilterSelect) {
+      cravingFilterSelect.value = activeCravingFilter;
+      cravingFilterSelect.classList.toggle('active-craving', activeCravingFilter !== 'all');
+    }
+    if (readyOnlyPill) readyOnlyPill.classList.toggle('checked', readyOnlyFilter);
+    if (baseOnlyPill) baseOnlyPill.classList.toggle('checked', baseOnlyFilter);
+
+    // Show/hide Clear All Filters button
+    const hasActiveFilters = readyOnlyFilter || 
+      baseOnlyFilter || 
+      activeDietFilter !== 'all' || 
+      activeCravingFilter !== 'all' || 
+      (activeQuickFilter !== 'all' && activeQuickFilter !== '') || 
+      activeCategory !== 'all' || 
+      (recipeSearchQuery && recipeSearchQuery.trim().length > 0) || 
+      macroFilters.minProtein > 0 || 
+      macroFilters.maxCalories < 450 || 
+      macroFilters.maxFat < 20;
+
+    if (clearAllFiltersBtn) {
+      clearAllFiltersBtn.style.display = hasActiveFilters ? 'inline-flex' : 'none';
+    }
 
     updateCategoryCounts();
     updateShoppingListBadge();
@@ -5342,6 +5385,24 @@
       tabCustom.style.display = (currentUser && customRecipesState.length > 0) ? 'inline-flex' : 'none';
     }
 
+    // Update category tab visibility based on access
+    const lockedCategories = ['Fan Favorites', 'Keto', 'Lactose Free', 'No Protein'];
+    lockedCategories.forEach(cat => {
+      const tab = categoryTabs ? categoryTabs.querySelector(`[data-category="${cat}"]`) : null;
+      if (tab) {
+        const unlocked = isCategoryUnlocked(cat);
+        tab.style.display = unlocked ? 'inline-flex' : 'none';
+        if (!unlocked && activeCategory === cat && !activeSeoLanding) {
+          activeCategory = 'all';
+          if (categoryTabs) {
+            categoryTabs.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            const allTab = categoryTabs.querySelector('[data-category="all"]');
+            if (allTab) allTab.classList.add('active');
+          }
+        }
+      }
+    });
+
     // Update lock indicators on category tabs
     const lockFan = document.getElementById('lockFan');
     const lockKeto = document.getElementById('lockKeto');
@@ -5352,6 +5413,26 @@
     if (lockKeto) lockKeto.style.display = isCategoryUnlocked('Keto') ? 'none' : 'inline';
     if (lockLactose) lockLactose.style.display = isCategoryUnlocked('Lactose Free') ? 'none' : 'inline';
     if (lockNoPro) lockNoPro.style.display = isCategoryUnlocked('No Protein') ? 'none' : 'inline';
+
+    // Conditionally hide Keto / Low Carb filters & pantry preset if user has no access to Keto
+    const isKetoUnlocked = isCategoryUnlocked('Keto');
+    const presetKeto = document.getElementById('presetKetoChip');
+    if (presetKeto) {
+      presetKeto.style.display = isKetoUnlocked ? 'inline-flex' : 'none';
+    }
+
+    const dietOptLowCarb = document.getElementById('dietOptLowCarb');
+    if (dietOptLowCarb) {
+      dietOptLowCarb.style.display = isKetoUnlocked ? '' : 'none';
+      dietOptLowCarb.hidden = !isKetoUnlocked;
+      if (!isKetoUnlocked && activeDietFilter === 'low_carb') {
+        activeDietFilter = 'all';
+        if (dietFilterSelect) {
+          dietFilterSelect.value = 'all';
+          dietFilterSelect.classList.remove('active');
+        }
+      }
+    }
   }
 
   function updateStats() {
@@ -14702,7 +14783,32 @@
       });
     }
 
-    // Quick Nutrition & Macro Filter Chips
+    // Condensed Secondary Filter Bar Events
+    if (dietFilterSelect) {
+      dietFilterSelect.addEventListener('change', (e) => {
+        activeDietFilter = e.target.value;
+        if (activeDietFilter !== 'all') {
+          dietFilterSelect.classList.add('active');
+        } else {
+          dietFilterSelect.classList.remove('active');
+        }
+        renderRecipes();
+      });
+    }
+
+    if (cravingFilterSelect) {
+      cravingFilterSelect.addEventListener('change', (e) => {
+        activeCravingFilter = e.target.value;
+        if (activeCravingFilter !== 'all') {
+          cravingFilterSelect.classList.add('active-craving');
+        } else {
+          cravingFilterSelect.classList.remove('active-craving');
+        }
+        renderRecipes();
+      });
+    }
+
+    // Legacy quick filter chips handler (if present)
     const quickFilterChipsBar = document.getElementById('quickFilterChipsBar');
     if (quickFilterChipsBar) {
       quickFilterChipsBar.addEventListener('click', (e) => {
@@ -14710,7 +14816,6 @@
         if (!btn || btn.id === 'toggleMacroSlidersBtn') return;
         const filterVal = btn.dataset.filter;
 
-        // If clicking on an already active filter (and it's not 'all'), toggle it off!
         if (activeQuickFilter === filterVal && filterVal !== 'all') {
           activeQuickFilter = 'all';
           quickFilterChipsBar.querySelectorAll('.filter-chip').forEach(b => {
@@ -14731,43 +14836,56 @@
       });
     }
 
-    // Reset Filters in Empty State
+    // Complete Filter Reset Function
+    function resetAllFilters() {
+      if (recipeSearch) recipeSearch.value = '';
+      recipeSearchQuery = '';
+      if (clearRecipeSearchBtn) clearRecipeSearchBtn.style.display = 'none';
+      if (readyOnlyToggle) readyOnlyToggle.checked = false;
+      readyOnlyFilter = false;
+      if (baseOnlyToggle) baseOnlyToggle.checked = false;
+      baseOnlyFilter = false;
+      if (readyOnlyPill) readyOnlyPill.classList.remove('checked');
+      if (baseOnlyPill) baseOnlyPill.classList.remove('checked');
+
+      activeCategory = 'all';
+      activeDietFilter = 'all';
+      activeCravingFilter = 'all';
+      activeQuickFilter = 'all';
+      if (dietFilterSelect) {
+        dietFilterSelect.value = 'all';
+        dietFilterSelect.classList.remove('active');
+      }
+      if (cravingFilterSelect) {
+        cravingFilterSelect.value = 'all';
+        cravingFilterSelect.classList.remove('active-craving');
+      }
+
+      // Reset macro target sliders
+      macroFilters.minProtein = 0;
+      macroFilters.maxCalories = 450;
+      macroFilters.maxFat = 20;
+      if (minProteinSlider) minProteinSlider.value = 0;
+      if (maxCaloriesSlider) maxCaloriesSlider.value = 450;
+      if (maxFatSlider) maxFatSlider.value = 20;
+      updateMacroFiltersUI();
+      if (macroSlidersPanel) macroSlidersPanel.style.display = 'none';
+      if (toggleMacroSlidersBtn) toggleMacroSlidersBtn.classList.remove('active-panel');
+
+      if (categoryTabs) {
+        categoryTabs.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        const allBtn = categoryTabs.querySelector('[data-category="all"]');
+        if (allBtn) allBtn.classList.add('active');
+      }
+      renderRecipes();
+    }
+
+    if (clearAllFiltersBtn) {
+      clearAllFiltersBtn.addEventListener('click', resetAllFilters);
+    }
+
     if (resetFiltersBtn) {
-      resetFiltersBtn.addEventListener('click', () => {
-        if (recipeSearch) recipeSearch.value = '';
-        recipeSearchQuery = '';
-        if (readyOnlyToggle) readyOnlyToggle.checked = false;
-        readyOnlyFilter = false;
-        if (baseOnlyToggle) baseOnlyToggle.checked = false;
-        baseOnlyFilter = false;
-        activeCategory = 'all';
-        activeQuickFilter = 'all';
-
-        // Reset macro target sliders
-        macroFilters.minProtein = 0;
-        macroFilters.maxCalories = 450;
-        macroFilters.maxFat = 20;
-        if (minProteinSlider) minProteinSlider.value = 0;
-        if (maxCaloriesSlider) maxCaloriesSlider.value = 450;
-        if (maxFatSlider) maxFatSlider.value = 20;
-        updateMacroFiltersUI();
-        if (macroSlidersPanel) macroSlidersPanel.style.display = 'none';
-        if (toggleMacroSlidersBtn) toggleMacroSlidersBtn.classList.remove('active-panel');
-
-        if (quickFilterChipsBar) {
-          quickFilterChipsBar.querySelectorAll('.filter-chip').forEach(b => {
-            if (b.id !== 'toggleMacroSlidersBtn') b.classList.remove('active');
-          });
-          const allChip = quickFilterChipsBar.querySelector('[data-filter="all"]');
-          if (allChip) allChip.classList.add('active');
-        }
-        if (categoryTabs) {
-          categoryTabs.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-          const allBtn = categoryTabs.querySelector('[data-category="all"]');
-          if (allBtn) allBtn.classList.add('active');
-        }
-        renderRecipes();
-      });
+      resetFiltersBtn.addEventListener('click', resetAllFilters);
     }
 
     // Modals Close
