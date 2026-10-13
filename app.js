@@ -2537,7 +2537,7 @@
       const normC = normalizeCategoryName(c);
       return subs.some(s => {
         const normS = normalizeCategoryName(s);
-        return normS === normC || (normS.length > 3 && norm.includes(normS));
+        return normS === normC || (normS.length > 3 && normC.includes(normS)) || (normC.length > 3 && normS.includes(normC));
       });
     });
   }
