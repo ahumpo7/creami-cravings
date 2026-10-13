@@ -3786,6 +3786,27 @@
     const tabRecipeCount = document.getElementById('mobileTabRecipeCount');
     if (tabRecipeCount) tabRecipeCount.textContent = accessibleTotal;
 
+    // Guard: if activeCategory is a locked pack the current user can't access,
+    // reset to 'all' NOW before the filter runs (not after inside updateCategoryCounts)
+    const lockedPackCats = ['Fan Favorites', 'Keto', 'Lactose Free', 'No Protein'];
+    if (lockedPackCats.includes(activeCategory) && !isCategoryUnlocked(activeCategory) && !activeSeoLanding) {
+      activeCategory = 'all';
+      if (categoryTabs) {
+        categoryTabs.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        const allTab = categoryTabs.querySelector('[data-category="all"]');
+        if (allTab) allTab.classList.add('active');
+      }
+    }
+
+    // Guard: if activeDietFilter is 'low_carb' and Keto pack is locked, clear it
+    if (activeDietFilter === 'low_carb' && !isCategoryUnlocked('Keto')) {
+      activeDietFilter = 'all';
+      if (dietFilterSelect) {
+        dietFilterSelect.value = 'all';
+        dietFilterSelect.classList.remove('active');
+      }
+    }
+
     // Apply active category and filter toggles
     let filtered = scoredRecipes.filter(({ recipe, match }) => {
       // Only show recipes the user has access to!
@@ -5392,14 +5413,6 @@
       if (tab) {
         const unlocked = isCategoryUnlocked(cat);
         tab.style.display = unlocked ? 'inline-flex' : 'none';
-        if (!unlocked && activeCategory === cat && !activeSeoLanding) {
-          activeCategory = 'all';
-          if (categoryTabs) {
-            categoryTabs.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            const allTab = categoryTabs.querySelector('[data-category="all"]');
-            if (allTab) allTab.classList.add('active');
-          }
-        }
       }
     });
 
