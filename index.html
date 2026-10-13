@@ -108,7 +108,7 @@
   <link rel="icon" type="image/png" sizes="144x144" href="icon-144.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=beta19">
+  <link rel="stylesheet" href="styles.css?v=beta20">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -504,12 +504,6 @@
               <span class="tab-count" id="countCustom">0</span>
             </button>
           </div>
-
-          <div class="custom-actions" id="customActionsContainer" style="display: none;">
-            <button id="addCustomRecipeBtn" class="btn-add-recipe" title="Add your personal Creami recipe (saved to your Google account)">
-              ➕ Custom Recipe
-            </button>
-          </div>
         </div>
 
         <!-- Condensed Secondary Filters Toolbar -->
@@ -641,6 +635,11 @@
               <span class="btn-packs-icon">🛍️</span>
               <span class="btn-packs-label"><strong id="lockedCountBadge">137</strong> Available for Purchase</span>
             </button>
+            <div class="custom-actions" id="customActionsContainer" style="display: none;">
+              <button id="addCustomRecipeBtn" class="btn-add-recipe" title="Add your personal Creami recipe (saved to your Google account)">
+                ➕ Custom Recipe
+              </button>
+            </div>
           </div>
         </div>
 
@@ -3140,6 +3139,6 @@
 
   <!-- Scripts -->
   <script src="recipes-data.js?v=beta9"></script>
-  <script src="app.js?v=beta19"></script>
+  <script src="app.js?v=beta20"></script>
 </body>
 </html>

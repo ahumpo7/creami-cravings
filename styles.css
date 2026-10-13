@@ -912,10 +912,9 @@ body::before {
 /* Category Tabs */
 .category-tabs-bar {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   gap: 12px;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
   flex-wrap: wrap;
   width: 100%;
   max-width: 100%;
@@ -978,24 +977,34 @@ body::before {
   display: none;
 }
 
+.custom-actions {
+  display: inline-flex;
+  align-items: center;
+}
+
 .btn-add-recipe {
-  padding: 8px 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
   background: var(--bg-glass);
   border: 1px solid var(--border-glass);
   border-radius: 999px;
   color: var(--text-main);
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-size: 0.82rem;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: var(--font-body);
+  white-space: nowrap;
 }
 
 .btn-add-recipe:hover {
-  background: var(--bg-card-hover);
-  border-color: var(--border-highlight);
+  background: var(--bg-glass-hover);
+  border-color: var(--primary);
   color: var(--primary);
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--primary-glow);
 }
 
 /* Results Header */
@@ -1003,10 +1012,12 @@ body::before {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 18px;
+  gap: 12px;
+  margin-bottom: 16px;
   font-size: 0.9rem;
   color: var(--text-muted);
   min-height: 26px;
+  flex-wrap: wrap;
 }
 
 .results-summary {
@@ -7530,6 +7541,8 @@ body.modal-open .cookie-consent-banner {
 .access-filter-wrap {
   display: flex;
   align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .access-filter-label {

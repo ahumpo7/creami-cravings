@@ -2070,7 +2070,7 @@
       }
       // Show + Custom Recipe button only for signed-in user
       if (customActions) {
-        customActions.style.display = 'block';
+        customActions.style.display = 'inline-flex';
         const addBtn = document.getElementById('addCustomRecipeBtn');
         if (addBtn) {
           if (currentUser.role === 'admin') {
