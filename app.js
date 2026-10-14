@@ -1001,7 +1001,11 @@
             try { localStorage.setItem(REAL_ADMIN_STORAGE_KEY, JSON.stringify(realAdminUser)); } catch (e) {}
           }
           const userMaxSlots = getUserMaxFreezerSlots(currentUser);
-          if (freezerSlotCapacity < userMaxSlots) {
+          const savedCap = localStorage.getItem(FREEZER_CAPACITY_STORAGE_KEY);
+          if (!savedCap) {
+            freezerSlotCapacity = userMaxSlots;
+            try { localStorage.setItem(FREEZER_CAPACITY_STORAGE_KEY, freezerSlotCapacity.toString()); } catch (e) {}
+          } else if (freezerSlotCapacity > userMaxSlots) {
             freezerSlotCapacity = userMaxSlots;
             try { localStorage.setItem(FREEZER_CAPACITY_STORAGE_KEY, freezerSlotCapacity.toString()); } catch (e) {}
           }
@@ -1988,7 +1992,11 @@
 
     // Sync freezer shelf capacity from account permissions
     const userMaxSlots = getUserMaxFreezerSlots(currentUser);
-    if (freezerSlotCapacity < userMaxSlots) {
+    const savedCap = localStorage.getItem(FREEZER_CAPACITY_STORAGE_KEY);
+    if (!savedCap) {
+      freezerSlotCapacity = userMaxSlots;
+      try { localStorage.setItem(FREEZER_CAPACITY_STORAGE_KEY, freezerSlotCapacity.toString()); } catch (e) {}
+    } else if (freezerSlotCapacity > userMaxSlots) {
       freezerSlotCapacity = userMaxSlots;
       try { localStorage.setItem(FREEZER_CAPACITY_STORAGE_KEY, freezerSlotCapacity.toString()); } catch (e) {}
     }
@@ -7156,10 +7164,6 @@
     const maxAllowed = tierInfo.maxSlots;
     if (freezerSlotCapacity > maxAllowed) {
       freezerSlotCapacity = maxAllowed;
-    }
-    if (freezerSlotCapacity < maxAllowed && (freezerSlotCapacity === 4 || !localStorage.getItem(FREEZER_CAPACITY_STORAGE_KEY))) {
-      freezerSlotCapacity = maxAllowed;
-      try { localStorage.setItem(FREEZER_CAPACITY_STORAGE_KEY, freezerSlotCapacity.toString()); } catch (e) {}
     }
 
     if (tierBadge) {
