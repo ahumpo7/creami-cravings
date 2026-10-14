@@ -108,7 +108,7 @@
   <link rel="icon" type="image/png" sizes="144x144" href="icon-144.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=v3.6">
+  <link rel="stylesheet" href="styles.css?v=v3.7">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -2327,6 +2327,53 @@
           </div>
         </div>
 
+        <!-- Creator Social Media & Card Attribution Section -->
+        <div class="creator-studio-section" id="studioSocialSection">
+          <div class="creator-studio-section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <div>
+              <h3 class="creator-studio-section-title" style="margin: 0;">📱 Social Media &amp; Story Card Branding</h3>
+              <p style="font-size: 0.8rem; color: #94a3b8; margin: 3px 0 0 0;">Add your social handles so when you share story cards, your brand and socials take center stage as the creator rather than this site.</p>
+            </div>
+            <span class="creator-studio-badge" id="studioSocialStatusBadge">Active on Cards</span>
+          </div>
+
+          <div class="creator-social-links-form" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin-top: 12px;">
+            <div class="form-group-compact">
+              <label for="studioSocialInstagram" style="font-size: 0.78rem; font-weight: 700; color: #f472b6; display: flex; align-items: center; gap: 5px; margin-bottom: 4px;">
+                📸 Instagram Handle / Link
+              </label>
+              <input type="text" id="studioSocialInstagram" class="form-input" placeholder="@yourhandle" style="width: 100%; box-sizing: border-box; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; padding: 9px 12px; color: #f8fafc; font-size: 0.85rem;" />
+            </div>
+
+            <div class="form-group-compact">
+              <label for="studioSocialTiktok" style="font-size: 0.78rem; font-weight: 700; color: #38bdf8; display: flex; align-items: center; gap: 5px; margin-bottom: 4px;">
+                🎵 TikTok Handle / Link
+              </label>
+              <input type="text" id="studioSocialTiktok" class="form-input" placeholder="@yourhandle" style="width: 100%; box-sizing: border-box; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; padding: 9px 12px; color: #f8fafc; font-size: 0.85rem;" />
+            </div>
+
+            <div class="form-group-compact">
+              <label for="studioSocialYoutube" style="font-size: 0.78rem; font-weight: 700; color: #f87171; display: flex; align-items: center; gap: 5px; margin-bottom: 4px;">
+                ▶️ YouTube Channel
+              </label>
+              <input type="text" id="studioSocialYoutube" class="form-input" placeholder="@channel or URL" style="width: 100%; box-sizing: border-box; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; padding: 9px 12px; color: #f8fafc; font-size: 0.85rem;" />
+            </div>
+
+            <div class="form-group-compact">
+              <label for="studioSocialWebsite" style="font-size: 0.78rem; font-weight: 700; color: #34d399; display: flex; align-items: center; gap: 5px; margin-bottom: 4px;">
+                🌐 Personal Website / Shop
+              </label>
+              <input type="text" id="studioSocialWebsite" class="form-input" placeholder="https://yourstore.com" style="width: 100%; box-sizing: border-box; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; padding: 9px 12px; color: #f8fafc; font-size: 0.85rem;" />
+            </div>
+
+            <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 8px; margin-top: 2px;">
+              <button type="button" class="btn-primary" id="btnStudioSaveSocial" style="padding: 9px 18px; font-weight: 700; font-size: 0.84rem;">
+                💾 Save Social Profile
+              </button>
+            </div>
+          </div>
+        </div>
+
         <!-- Creator Audience Analytics Grid -->
         <div class="creator-analytics-grid">
           <div class="creator-analytic-card">
@@ -3183,7 +3230,7 @@
   <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
   <!-- Scripts -->
-  <script src="recipes-data.js?v=v3.6"></script>
-  <script src="app.js?v=v3.6"></script>
+  <script src="recipes-data.js?v=v3.7"></script>
+  <script src="app.js?v=v3.7"></script>
 </body>
 </html>

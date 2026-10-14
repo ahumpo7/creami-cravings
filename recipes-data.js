@@ -23,6 +23,12 @@ const CREATORS_MASTER = [
     "handle": "@fitnessproductfinder",
     "url": "https://fitnessproductfinder.com",
     "storeUrl": "https://fitnessproductfinder.com/collections/creami-cravings-recipe-books",
+    "socialLinks": {
+      "instagram": "@fitnessproductfinder",
+      "tiktok": "@fitnessproductfinder",
+      "youtube": "@fitnessproductfinder",
+      "website": "https://fitnessproductfinder.com"
+    },
     "bio": "Creator of the original best-selling Creami Cravings high-protein and low-calorie recipe books.",
     "perks": [
       {
@@ -79,6 +85,12 @@ const CREATORS_MASTER = [
     "handle": "@testcontent",
     "url": "https://creamicravings.com/beta/@testcontent",
     "storeUrl": "https://creamicravings.com/beta/@testcontent",
+    "socialLinks": {
+      "instagram": "@testcontent",
+      "tiktok": "@testcontent",
+      "youtube": "@testcontent",
+      "website": "https://testcontent.com"
+    },
     "bio": "Official test creator profile for multi-creator storefronts, batch prep packs, and audience analytics.",
     "perks": [
       {
