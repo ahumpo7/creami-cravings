@@ -5043,6 +5043,10 @@ body.modal-open .cookie-consent-banner {
     min-height: 38px;
   }
 
+  .macro-toggle-chip {
+    order: -1 !important;
+  }
+
   .quick-filter-chips-bar::-webkit-scrollbar {
     display: none;
   }
