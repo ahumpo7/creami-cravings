@@ -1877,6 +1877,10 @@
         : (data.user.subscriptions || ['Community Legends']),
       token: data.token || (currentUser ? currentUser.token : '')
     };
+    if (isSuperAdminAccount(currentUser)) {
+      realAdminUser = JSON.parse(JSON.stringify(currentUser));
+      try { localStorage.setItem(REAL_ADMIN_STORAGE_KEY, JSON.stringify(realAdminUser)); } catch (e) {}
+    }
     saveUserAuth();
     trackAnalyticsEvent('login', {
       method: method
@@ -1986,6 +1990,9 @@
       localStorage.setItem('creami_pending_claims_v1', JSON.stringify(Array.from(userPendingClaimsState)));
     }
 
+    mergeRecipes();
+    calculateIngredientUsage();
+    updateCategoryCounts();
     updateAuthUI();
     updateFreezerBadges();
     recipeCardCache.clear();
@@ -6075,18 +6082,20 @@
   let currentStoryRecipe = null;
   let currentStoryRatio = 'story'; // 'story' (9:16) or 'square' (1:1)
   let currentStoryBlob = null;
+  let currentStoryFile = null;
   let currentStoryDataUrl = null;
   let storyRenderingPromise = null;
 
   function openStoryCardModal(recipeInput) {
     if (!recipeInput) return;
     const recipe = typeof recipeInput === 'string'
-      ? (recipes.find(r => r.id === recipeInput) || (typeof customRecipes !== 'undefined' ? customRecipes.find(r => r.id === recipeInput) : null) || (typeof allRecipes !== 'undefined' ? allRecipes.find(r => r.id === recipeInput) : null))
+      ? ((typeof allRecipes !== 'undefined' ? allRecipes.find(r => r.id === recipeInput) : null) || (typeof customRecipesState !== 'undefined' ? customRecipesState.find(r => r.id === recipeInput) : null))
       : recipeInput;
     if (!recipe) return;
     currentStoryRecipe = recipe;
     currentStoryRatio = 'story';
     currentStoryBlob = null;
+    currentStoryFile = null;
     currentStoryDataUrl = null;
     storyRenderingPromise = null;
 
@@ -6146,7 +6155,7 @@
       if (!currentStoryBlob && storyRenderingPromise) {
         await storyRenderingPromise;
       }
-      if (!currentStoryBlob && !currentStoryDataUrl) {
+      if (!currentStoryBlob) {
         showToast('Please wait a moment, card is still rendering...');
         return;
       }
@@ -6158,43 +6167,52 @@
 
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
-      // On iOS Safari, a[download] on blob URLs is not permitted by WebKit; open image in new tab for direct long-press save
+      // On iOS Safari:
+      // WebKit forbids programmatic downloading of data URLs or blob URLs via <a download>.
+      // Attempting window.open or window.location.href locks up or crashes iOS Safari tabs.
+      // Instead, use Web Share API to "Save Image" or provide direct tap & hold instruction.
       if (isIOS) {
-        const targetUrl = currentStoryDataUrl || (currentStoryBlob ? URL.createObjectURL(currentStoryBlob) : null);
-        if (targetUrl) {
-          const win = window.open(targetUrl, '_blank');
-          if (!win) {
-            window.location.href = targetUrl;
+        const fileToShare = currentStoryFile || (currentStoryBlob ? new File([currentStoryBlob], filename, { type: 'image/png' }) : null);
+        if (fileToShare && navigator.canShare && navigator.canShare({ files: [fileToShare] })) {
+          try {
+            await navigator.share({
+              files: [fileToShare],
+              title: currentStoryRecipe?.name || 'Ninja Creami Recipe'
+            });
+            showToast('📸 Tap "Save Image" to save directly to your Photos!');
+            return;
+          } catch (e) {
+            if (e.name === 'AbortError') return;
           }
-          showToast('📸 Card opened! Tap & hold image to "Save to Photos"');
+        }
+        showToast('📸 Tap & hold the card image above to "Save to Photos"!');
+        const img = document.getElementById('storyCardPreviewImg');
+        if (img) {
+          img.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          img.style.boxShadow = '0 0 0 4px #ec4899, 0 20px 48px rgba(0, 0, 0, 0.9)';
+          setTimeout(() => {
+            if (img) img.style.boxShadow = '';
+          }, 2500);
         }
         return;
       }
 
-      // Standard Desktop & Android download via data URL or blob URL
-      const downloadUrl = currentStoryDataUrl || (currentStoryBlob ? URL.createObjectURL(currentStoryBlob) : null);
-      if (downloadUrl) {
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = downloadUrl;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(() => {
-          if (a.parentNode) document.body.removeChild(a);
-        }, 1500);
-        showToast(`⬇️ Downloaded ${filename}!`);
-      }
+      // Standard Desktop & Android: direct blob URL download
+      const blobUrl = URL.createObjectURL(currentStoryBlob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        if (a.parentNode) document.body.removeChild(a);
+        URL.revokeObjectURL(blobUrl);
+      }, 2500);
+      showToast(`⬇️ Downloaded ${filename}!`);
     } catch (err) {
       console.error('Download error:', err);
-      // Fallback: open in new tab
-      if (currentStoryDataUrl || currentStoryBlob) {
-        const fallbackUrl = currentStoryDataUrl || URL.createObjectURL(currentStoryBlob);
-        window.open(fallbackUrl, '_blank');
-        showToast('Card opened in new window. Right-click or long-press to save!');
-      } else {
-        showToast('Could not download image. Please try again.');
-      }
+      showToast('📸 Tap & hold (or right-click) the image above to save directly!');
     } finally {
       if (btn) {
         btn.innerHTML = origHtml;
@@ -6206,6 +6224,30 @@
   async function shareStoryCardNative() {
     const btn = document.getElementById('btnShareStoryNative');
     const origHtml = btn ? btn.innerHTML : '';
+
+    const slug = (currentStoryRecipe?.id || currentStoryRecipe?.name || 'creami-recipe')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-');
+    const filename = `${slug}-${currentStoryRatio}-card.png`;
+
+    // 1. FAST PATH: If image file is ALREADY rendered and navigator.share is supported,
+    // invoke navigator.share immediately and SYNCHRONOUSLY without any await!
+    // This preserves the transient user activation required by iOS Safari & Android Chrome.
+    if (currentStoryFile && navigator.canShare && navigator.canShare({ files: [currentStoryFile] })) {
+      try {
+        await navigator.share({
+          files: [currentStoryFile],
+          title: currentStoryRecipe?.name || 'Ninja Creami Recipe'
+        });
+        showToast('Shared successfully!');
+        return;
+      } catch (shareErr) {
+        if (shareErr.name === 'AbortError') return; // User tapped Cancel on the share sheet
+        console.warn('Direct file share notice:', shareErr);
+      }
+    }
+
+    // 2. Slow path: card was still rendering
     if (btn) {
       btn.innerHTML = '<span>⏳ Preparing...</span>';
       btn.disabled = true;
@@ -6215,34 +6257,26 @@
       if (!currentStoryBlob && storyRenderingPromise) {
         await storyRenderingPromise;
       }
-      if (!currentStoryBlob && !currentStoryDataUrl) {
-        showToast('Please wait a moment, card is still rendering...');
+      if (!currentStoryBlob) {
+        showToast('Card is rendering, please tap again in a moment.');
         return;
       }
 
-      const slug = (currentStoryRecipe?.id || currentStoryRecipe?.name || 'creami-recipe')
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-');
-      const filename = `${slug}-${currentStoryRatio}-card.png`;
-
-      // Try Web Share API Level 2 (files alone has best cross-platform mobile support)
-      if (currentStoryBlob && navigator.canShare) {
+      const fileToShare = currentStoryFile || new File([currentStoryBlob], filename, { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [fileToShare] })) {
         try {
-          const file = new File([currentStoryBlob], filename, { type: 'image/png' });
-          if (navigator.canShare({ files: [file] })) {
-            await navigator.share({
-              files: [file]
-            });
-            showToast('Shared successfully!');
-            return;
-          }
+          await navigator.share({
+            files: [fileToShare],
+            title: currentStoryRecipe?.name || 'Ninja Creami Recipe'
+          });
+          showToast('Shared successfully!');
+          return;
         } catch (shareErr) {
-          if (shareErr.name === 'AbortError') return; // User simply closed the share sheet
-          console.warn('Native file share failed:', shareErr);
+          if (shareErr.name === 'AbortError') return;
         }
       }
 
-      // If native file share is not supported or rejected, fall back to download seamlessly
+      // If share is not supported or failed, seamlessly fall back to download
       await triggerStoryDownload();
     } catch (err) {
       console.error('Share error:', err);
@@ -6789,6 +6823,19 @@
       }
       canvas.toBlob((blob) => {
         currentStoryBlob = blob;
+        if (blob) {
+          try {
+            const slug = (recipe?.id || recipe?.name || 'creami-recipe')
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, '-');
+            const filename = `${slug}-${ratio}-card.png`;
+            currentStoryFile = new File([blob], filename, { type: 'image/png' });
+          } catch (e) {
+            currentStoryFile = null;
+          }
+        } else {
+          currentStoryFile = null;
+        }
         if (previewImg && blob) {
           previewImg.style.aspectRatio = ratio === 'story' ? '9 / 16' : '1 / 1';
           previewImg.src = URL.createObjectURL(blob);
@@ -7530,6 +7577,16 @@
     const collapseIcon = document.getElementById('shelfCollapseIcon');
     if (!widget || !grid) return;
 
+    const shelfHeaderEl = document.getElementById('freezerShelfHeader');
+    const collapseBtnEl = document.getElementById('btnShelfToggleCollapse');
+    if (shelfHeaderEl) {
+      shelfHeaderEl.setAttribute('aria-expanded', isShelfCollapsed ? 'false' : 'true');
+    }
+    if (collapseBtnEl) {
+      collapseBtnEl.setAttribute('aria-expanded', isShelfCollapsed ? 'false' : 'true');
+      collapseBtnEl.setAttribute('title', isShelfCollapsed ? 'Expand Freezer Shelf' : 'Collapse Freezer Shelf');
+    }
+
     if (wrapper && collapseIcon) {
       if (isShelfCollapsed) {
         wrapper.classList.add('collapsed');
@@ -7637,7 +7694,7 @@
         const mixinBadgeHtml = mixins.length > 0
           ? `<div class="slot-mixin-badge" title="Mix-in: ${escapeHtml(mixinSummary)}"><span class="mixin-badge-icon">🍪</span><span class="mixin-badge-text"><strong>Mix-in:</strong> ${escapeHtml(mixinSummary)}</span></div>`
           : '';
-        const shelfRecipe = pint.recipeId ? (recipes.find(r => r.id === pint.recipeId) || (typeof allRecipes !== 'undefined' ? allRecipes.find(r => r.id === pint.recipeId) : null) || (typeof customRecipes !== 'undefined' ? customRecipes.find(r => r.id === pint.recipeId) : null)) : null;
+        const shelfRecipe = pint.recipeId ? ((typeof allRecipes !== 'undefined' ? allRecipes.find(r => r.id === pint.recipeId) : null) || (typeof customRecipesState !== 'undefined' ? customRecipesState.find(r => r.id === pint.recipeId) : null)) : null;
         const shelfCreatorAttrib = shelfRecipe ? getStoryCardAttribution(shelfRecipe) : null;
         const shelfCreatorPills = (shelfCreatorAttrib && shelfCreatorAttrib.isCreator) ? renderSocialLinksPills(shelfCreatorAttrib.socialLinks, true, shelfCreatorAttrib.website) : '';
 
@@ -16161,13 +16218,37 @@
       });
     }
 
-    // Shelf Collapse Toggle button
+    // Shelf Collapse Toggle: Entire header, title area, or button
+    function toggleFreezerShelf() {
+      isShelfCollapsed = !isShelfCollapsed;
+      localStorage.setItem(FREEZER_COLLAPSED_STORAGE_KEY, isShelfCollapsed ? 'true' : 'false');
+      renderFreezerShelfWidget();
+    }
+
+    const shelfHeaderEl = document.getElementById('freezerShelfHeader');
+    if (shelfHeaderEl) {
+      shelfHeaderEl.addEventListener('click', (e) => {
+        // Do not toggle if clicking on action buttons or the upgrade tier badge
+        if (e.target.closest('.shelf-actions') || e.target.closest('#shelfTierBadge')) {
+          return;
+        }
+        toggleFreezerShelf();
+      });
+      shelfHeaderEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          if (e.target === shelfHeaderEl) {
+            e.preventDefault();
+            toggleFreezerShelf();
+          }
+        }
+      });
+    }
+
     const shelfCollapseBtn = document.getElementById('btnShelfToggleCollapse');
     if (shelfCollapseBtn) {
-      shelfCollapseBtn.addEventListener('click', () => {
-        isShelfCollapsed = !isShelfCollapsed;
-        localStorage.setItem(FREEZER_COLLAPSED_STORAGE_KEY, isShelfCollapsed ? 'true' : 'false');
-        renderFreezerShelfWidget();
+      shelfCollapseBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleFreezerShelf();
       });
     }
 
@@ -17985,6 +18066,16 @@
     }
     if (btnDownloadStoryImage) {
       btnDownloadStoryImage.addEventListener('click', triggerStoryDownload);
+    }
+    const storyCardPreviewImg = document.getElementById('storyCardPreviewImg');
+    if (storyCardPreviewImg) {
+      storyCardPreviewImg.addEventListener('click', () => {
+        if (/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) {
+          showToast('📸 Tap & hold image to "Save to Photos"');
+        } else if (navigator.canShare && currentStoryFile && navigator.canShare({ files: [currentStoryFile] })) {
+          shareStoryCardNative();
+        }
+      });
     }
   }
 
