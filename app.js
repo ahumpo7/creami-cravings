@@ -14443,8 +14443,9 @@
             </div>
           </div>
         </div>
-      `;
-    }).join('');
+      </div>
+    `;
+  }).join('');
 
     bindAdminUserCardEvents();
   }
