@@ -108,7 +108,7 @@
   <link rel="icon" type="image/png" sizes="144x144" href="icon-144.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=v3.1">
+  <link rel="stylesheet" href="styles.css?v=v3.2">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -1017,6 +1017,7 @@
             <input type="text" id="slotFillRecipeInput" list="slotFillDatalist" required placeholder="Type or select a recipe...">
             <datalist id="slotFillDatalist"></datalist>
           </div>
+          <div id="slotFillRecipePreview" class="slot-fill-recipe-preview" style="display: none;"></div>
           <div class="form-row">
             <div class="form-group">
               <label for="slotFillPintScale">Pint Size</label>
@@ -1321,6 +1322,9 @@
             <button type="button" class="respin-pill" data-respins="liquid">🥛 Added splash of liquid</button>
           </div>
         </div>
+
+        <!-- Recipe Mix-In Callout -->
+        <div id="spinLogMixinCallout" style="display: none;"></div>
 
         <!-- Mix-Ins Added -->
         <div class="spin-log-field-group">
@@ -3178,7 +3182,7 @@
   <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
   <!-- Scripts -->
-  <script src="recipes-data.js?v=v3.1"></script>
-  <script src="app.js?v=v3.1"></script>
+  <script src="recipes-data.js?v=v3.2"></script>
+  <script src="app.js?v=v3.2"></script>
 </body>
 </html>
