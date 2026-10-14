@@ -1000,6 +1000,11 @@
             realAdminUser = JSON.parse(JSON.stringify(currentUser));
             try { localStorage.setItem(REAL_ADMIN_STORAGE_KEY, JSON.stringify(realAdminUser)); } catch (e) {}
           }
+          const userMaxSlots = getUserMaxFreezerSlots(currentUser);
+          if (freezerSlotCapacity < userMaxSlots) {
+            freezerSlotCapacity = userMaxSlots;
+            try { localStorage.setItem(FREEZER_CAPACITY_STORAGE_KEY, freezerSlotCapacity.toString()); } catch (e) {}
+          }
         }
       } catch (e) {
         currentUser = null;
@@ -2178,6 +2183,7 @@
         role: 'creator',
         creatorId: cId,
         creatorVips: [],
+        freezerCapacity: 12,
         subscriptions: cId === 'fitness_product_finder'
           ? ['All-Access', 'Base Flavors', 'Community Legends', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free']
           : ['Community Legends', 'TestContent Sampler', 'Volume Pints', 'TestContent All-Access']
@@ -2190,6 +2196,7 @@
         role: 'user',
         creatorId: null,
         creatorVips: [cId],
+        freezerCapacity: 12,
         subscriptions: ['Community Legends']
       };
     } else if (currentMimicRole === 'multi_sub') {
@@ -2198,7 +2205,7 @@
         role: 'user',
         creatorId: null,
         creatorVips: [],
-        freezerCapacity: mimicPurchasedCap,
+        freezerCapacity: Math.max(8, mimicPurchasedCap),
         subscriptions: ['Community Legends', 'Fan Favorites', 'TestContent Sampler']
       };
     } else if (currentMimicRole === 'user') {
@@ -2217,9 +2224,23 @@
       currentUser.role = 'admin';
       currentUser.creatorId = null;
       currentUser.creatorVips = [];
+      currentUser.freezerCapacity = 12;
       try { localStorage.setItem(MIMIC_ROLE_STORAGE_KEY, 'admin'); } catch (e) {}
       try { localStorage.removeItem('creami_mimic_user_freezer_capacity'); } catch (e) {}
     }
+
+    // Sync active freezer shelf capacity to target role permissions
+    const mimicMaxCap = getUserMaxFreezerSlots(currentUser);
+    if (currentMimicRole === 'creator' || currentMimicRole === 'admin' || currentMimicRole === 'vip') {
+      freezerSlotCapacity = 12;
+    } else if (currentMimicRole === 'multi_sub') {
+      freezerSlotCapacity = Math.max(8, mimicPurchasedCap);
+    } else if (currentMimicRole === 'user') {
+      freezerSlotCapacity = mimicPurchasedCap;
+    } else {
+      freezerSlotCapacity = Math.min(freezerSlotCapacity, mimicMaxCap);
+    }
+    try { localStorage.setItem(FREEZER_CAPACITY_STORAGE_KEY, freezerSlotCapacity.toString()); } catch (e) {}
 
     // Always preserve realAdminUser in USER_AUTH_STORAGE_KEY so refresh never drops session
     if (realAdminUser) {
@@ -7135,6 +7156,10 @@
     const maxAllowed = tierInfo.maxSlots;
     if (freezerSlotCapacity > maxAllowed) {
       freezerSlotCapacity = maxAllowed;
+    }
+    if (freezerSlotCapacity < maxAllowed && (freezerSlotCapacity === 4 || !localStorage.getItem(FREEZER_CAPACITY_STORAGE_KEY))) {
+      freezerSlotCapacity = maxAllowed;
+      try { localStorage.setItem(FREEZER_CAPACITY_STORAGE_KEY, freezerSlotCapacity.toString()); } catch (e) {}
     }
 
     if (tierBadge) {
@@ -13982,7 +14007,7 @@
     const allAccessCount = adminUsersState.filter(u => Array.isArray(u.subscriptions) && u.subscriptions.includes('All-Access')).length;
     if (adminTotalAllAccess) adminTotalAllAccess.textContent = allAccessCount;
 
-    const freezerUpgradeCount = adminUsersState.filter(u => u.freezerCapacity && u.freezerCapacity > 4).length;
+    const freezerUpgradeCount = adminUsersState.filter(u => getUserMaxFreezerSlots(u) > 4).length;
     const adminTotalFreezerUpgrades = document.getElementById('adminTotalFreezerUpgrades');
     if (adminTotalFreezerUpgrades) adminTotalFreezerUpgrades.textContent = freezerUpgradeCount;
 
@@ -14020,8 +14045,9 @@
         const emailMatch = (u.email || '').toLowerCase().includes(q);
         const roleMatch = (u.role || '').toLowerCase().includes(q);
         const subMatch = subs.some(s => s.toLowerCase().includes(q));
-        const capStr = `${u.freezerCapacity || 4} slots`;
-        const capMatch = (q === '8' && u.freezerCapacity === 8) || (q === '12' && u.freezerCapacity === 12) || ((q === 'freezer' || q === 'slots') && (u.freezerCapacity || 4) > 4);
+        const effectiveCap = getUserMaxFreezerSlots(u);
+        const capStr = `${effectiveCap} slots`;
+        const capMatch = (q === '8' && effectiveCap === 8) || (q === '12' && effectiveCap === 12) || ((q === 'freezer' || q === 'slots') && effectiveCap > 4);
         if (!nameMatch && !emailMatch && !roleMatch && !subMatch && !capStr.includes(q) && !capMatch) return false;
       }
       return true;
@@ -14044,6 +14070,7 @@
       const isCurrentAdmin = (currentUser && currentUser.email && currentUser.email.toLowerCase() === userEmail);
       const subs = Array.isArray(u.subscriptions) ? u.subscriptions : ['Community Legends'];
       const hasAllAccess = subs.includes('All-Access');
+      const effectiveCap = getUserMaxFreezerSlots(u);
       const avatarUrl = u.picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name || u.username || 'User')}&background=059669&color=fff&bold=true`;
       
       const createdDate = u.created_at ? new Date(u.created_at).toLocaleDateString() : 'N/A';
@@ -14098,10 +14125,10 @@
                   <option value="test_content" ${u.creatorId === 'test_content' ? 'selected' : ''}>🧪 TestContent</option>
                 </select>
               ` : ''}
-              <select class="admin-freezer-select" data-user-id="${u.id}" title="Grant or change freezer shelf container capacity" style="font-size: 0.78rem; background: rgba(15, 23, 42, 0.85); color: ${(u.freezerCapacity >= 12 ? '#fbbf24' : (u.freezerCapacity >= 8 ? '#38bdf8' : '#cbd5e1'))}; border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 6px; padding: 6px 8px; font-weight: 600;">
-                <option value="4" ${(u.freezerCapacity === 4 || !u.freezerCapacity) ? 'selected' : ''}>🧊 4 Slots (Default)</option>
-                <option value="8" ${u.freezerCapacity === 8 ? 'selected' : ''}>🧊 8 Slots (Full Week)</option>
-                <option value="12" ${u.freezerCapacity === 12 ? 'selected' : ''}>👑 12 Slots (Deep Freeze Pro)</option>
+              <select class="admin-freezer-select" data-user-id="${u.id}" title="Grant or change freezer shelf container capacity" style="font-size: 0.78rem; background: rgba(15, 23, 42, 0.85); color: ${(effectiveCap >= 12 ? '#fbbf24' : (effectiveCap >= 8 ? '#38bdf8' : '#cbd5e1'))}; border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 6px; padding: 6px 8px; font-weight: 600;">
+                <option value="4" ${effectiveCap === 4 ? 'selected' : ''}>🧊 4 Slots (Default)</option>
+                <option value="8" ${effectiveCap === 8 ? 'selected' : ''}>🧊 8 Slots (Full Week)</option>
+                <option value="12" ${effectiveCap >= 12 ? 'selected' : ''}>👑 12 Slots (Deep Freeze Pro)</option>
               </select>
               <button class="btn-admin-reset-pw" data-user-id="${u.id}" data-user-email="${u.email}" title="Reset user password directly">
                 🔑
@@ -14117,7 +14144,7 @@
           <div class="admin-user-stats-strip">
             <span>📅 Joined: <strong>${createdDate}</strong></span>
             <span>⚡ Last Active: <strong>${lastActiveDate}</strong></span>
-            <span>🧊 Shelf: <strong style="${(u.freezerCapacity >= 12 ? 'color: #fbbf24;' : (u.freezerCapacity >= 8 ? 'color: #38bdf8;' : 'color: #94a3b8;'))}">${u.freezerCapacity >= 12 ? '👑 12 Slots' : (u.freezerCapacity >= 8 ? '🧊 8 Slots' : '4 Free Slots')}</strong></span>
+            <span>🧊 Shelf: <strong style="${(effectiveCap >= 12 ? 'color: #fbbf24;' : (effectiveCap >= 8 ? 'color: #38bdf8;' : 'color: #94a3b8;'))}">${effectiveCap >= 12 ? '👑 12 Slots' : (effectiveCap >= 8 ? '🧊 8 Slots' : '4 Free Slots')}</strong></span>
             <span>📦 Pantry: <strong>${u.pantryCount || 0}</strong></span>
             <span>💖 Favs: <strong>${u.favoritesCount || 0}</strong></span>
             <span>🍨 Spins: <strong>${u.madeTotal || 0}</strong></span>
@@ -14748,6 +14775,8 @@
           if (newCreatorId) adminUsersState[idx].creatorId = newCreatorId;
           if (newFreezerCapacity !== null && newFreezerCapacity !== undefined) {
             adminUsersState[idx].freezerCapacity = parseInt(newFreezerCapacity, 10);
+          } else if (data.user && data.user.freezerCapacity) {
+            adminUsersState[idx].freezerCapacity = data.user.freezerCapacity;
           }
         }
 
@@ -14759,6 +14788,13 @@
           if (newFreezerCapacity !== null && newFreezerCapacity !== undefined) {
             currentUser.freezerCapacity = parseInt(newFreezerCapacity, 10);
             freezerSlotCapacity = currentUser.freezerCapacity;
+          } else if (data.user && data.user.freezerCapacity) {
+            currentUser.freezerCapacity = data.user.freezerCapacity;
+            const newMax = getUserMaxFreezerSlots(currentUser);
+            if (freezerSlotCapacity < newMax) freezerSlotCapacity = newMax;
+          } else {
+            const newMax = getUserMaxFreezerSlots(currentUser);
+            if (freezerSlotCapacity < newMax) freezerSlotCapacity = newMax;
           }
           saveUserAuth();
           updateAuthUI();

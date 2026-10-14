@@ -331,6 +331,33 @@ def get_user_creator_vips(email):
                 break
     return vips
 
+def get_effective_freezer_capacity(u):
+    if not u or not isinstance(u, dict):
+        return 4
+    role = u.get('role', 'user')
+    subs = u.get('subscriptions', [])
+    if not isinstance(subs, list):
+        subs = []
+    email = u.get('email', '')
+    vips = get_user_creator_vips(email)
+    purchased = u.get('freezerCapacity', 4)
+    try:
+        purchased = int(purchased)
+    except (ValueError, TypeError):
+        purchased = 4
+
+    # 12 Slots: admin, creator, vip, creator VIP circle, any All-Access bundle, or purchased >= 12
+    has_all_access = any(s in subs for s in ['All-Access', 'Eli All-Access', 'TestContent All-Access'])
+    if role in ['admin', 'creator', 'vip'] or len(vips) > 0 or has_all_access or purchased >= 12:
+        return 12
+
+    # 8 Slots: any paid creator cookbook pack or purchased >= 8
+    paid_packs = ['Fan Favorites', 'No Protein', 'Keto', 'Lactose Free', 'TestContent Sampler', 'Volume Pints']
+    if any(p in subs for p in paid_packs) or purchased >= 8:
+        return 8
+
+    return purchased
+
 def format_user_payload(user):
     is_admin = user.get('email', '').lower() in ADMIN_EMAILS or user.get('role') == 'admin'
     fallback_subs = list(ALL_SUBSCRIPTIONS) if is_admin else list(DEFAULT_SUBSCRIPTIONS)
@@ -350,7 +377,7 @@ def format_user_payload(user):
         'customRecipes': user.get('customRecipes', []),
         'shoppingList': user.get('shoppingList', []),
         'freezerPints': user.get('freezerPints', []),
-        'freezerCapacity': user.get('freezerCapacity', 4),
+        'freezerCapacity': get_effective_freezer_capacity(user),
         'subscriptions': user.get('subscriptions', fallback_subs)
     }
 
@@ -932,6 +959,8 @@ if 'admin' not in users_db:
         'ratings': {},
         'customRecipes': [],
         'shoppingList': [],
+        'freezerPints': [],
+        'freezerCapacity': 12,
         'subscriptions': list(ALL_SUBSCRIPTIONS),
         'token': 'token_admin_001'
     }
@@ -956,15 +985,18 @@ if not eli_user:
         'customRecipes': [],
         'shoppingList': [],
         'freezerPints': [],
+        'freezerCapacity': 12,
         'subscriptions': list(ALL_SUBSCRIPTIONS),
         'created_at': datetime.utcnow().isoformat(),
         'last_active': datetime.utcnow().isoformat(),
         'token': 'token_creator_eli_001'
     }
-elif eli_user.get('role') != 'creator' or 'All-Access' not in eli_user.get('subscriptions', []) or not eli_user.get('creatorId'):
+else:
     eli_user['role'] = 'creator'
     eli_user['creatorId'] = 'fitness_product_finder'
-    eli_user['subscriptions'] = list(ALL_SUBSCRIPTIONS)
+    eli_user['freezerCapacity'] = 12
+    if 'All-Access' not in eli_user.get('subscriptions', []):
+        eli_user['subscriptions'] = list(ALL_SUBSCRIPTIONS)
 
 # Ensure official Content Creator account for TestContent exists
 tc_email = 'testcontent@creamicravings.com'
@@ -986,16 +1018,25 @@ if not tc_user:
         'customRecipes': [],
         'shoppingList': [],
         'freezerPints': [],
+        'freezerCapacity': 12,
         'subscriptions': list(ALL_SUBSCRIPTIONS) + ['TestContent Sampler', 'Volume Pints'],
         'created_at': datetime.utcnow().isoformat(),
         'last_active': datetime.utcnow().isoformat(),
         'token': 'token_creator_testcontent_001'
     }
-elif tc_user.get('role') != 'creator' or not tc_user.get('creatorId'):
+else:
     tc_user['role'] = 'creator'
     tc_user['creatorId'] = 'test_content'
+    tc_user['freezerCapacity'] = 12
     if 'All-Access' not in tc_user.get('subscriptions', []):
         tc_user['subscriptions'] = list(ALL_SUBSCRIPTIONS) + ['TestContent Sampler', 'Volume Pints']
+
+# Auto-sync freezer shelf capacity for all creators, admins, and all-access holders across users_db
+for u in users_db.values():
+    if isinstance(u, dict):
+        eff_cap = get_effective_freezer_capacity(u)
+        if eff_cap > u.get('freezerCapacity', 4):
+            u['freezerCapacity'] = eff_cap
 
 save_json_file(USERS_DB_FILE, users_db)
 
@@ -1276,7 +1317,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 'customRecipes': user.get('customRecipes', []),
                 'shoppingList': user.get('shoppingList', []),
                 'freezerPints': user.get('freezerPints', []),
-                'freezerCapacity': user.get('freezerCapacity', 4),
+                'freezerCapacity': get_effective_freezer_capacity(user),
                 'subscriptions': user.get('subscriptions', list(DEFAULT_SUBSCRIPTIONS)),
                 'pendingClaims': [
                     inq.get('pack') for inq in stats_db.get('purchase_inquiries', [])
@@ -1376,7 +1417,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                     'created_at': u.get('created_at', ''),
                     'last_active': u.get('last_active', ''),
                     'subscriptions': u.get('subscriptions', list(DEFAULT_SUBSCRIPTIONS)),
-                    'freezerCapacity': u.get('freezerCapacity', 4),
+                    'freezerCapacity': get_effective_freezer_capacity(u),
                     'pantryCount': len(u.get('pantry', [])),
                     'favoritesCount': len(u.get('favorites', [])),
                     'customCount': len(u.get('customRecipes', [])),
@@ -2586,7 +2627,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                     'id': target_user.get('id'),
                     'email': target_user.get('email'),
                     'role': target_user.get('role', 'user'),
-                    'freezerCapacity': target_user.get('freezerCapacity', 4),
+                    'freezerCapacity': get_effective_freezer_capacity(target_user),
                     'subscriptions': target_user.get('subscriptions', [])
                 }
             })
@@ -2616,17 +2657,18 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
             if target_slots not in [8, 12]:
                 target_slots = 8
 
-            cur_cap = user.get('freezerCapacity', 4)
+            cur_cap = get_effective_freezer_capacity(user)
             if target_slots > cur_cap:
                 user['freezerCapacity'] = target_slots
                 user['last_active'] = datetime.utcnow().isoformat()
                 save_json_file(USERS_DB_FILE, users_db)
 
+            effective_cap = get_effective_freezer_capacity(user)
             self._send_json({
                 'status': 'ok',
                 'success': True,
-                'message': f'Freezer shelf expanded to {user.get("freezerCapacity", 4)} containers!',
-                'freezerCapacity': user.get('freezerCapacity', 4),
+                'message': f'Freezer shelf expanded to {effective_cap} containers!',
+                'freezerCapacity': effective_cap,
                 'user': format_user_payload(user)
             })
             return
