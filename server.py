@@ -2595,6 +2595,15 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
         elif self.path == '/api/user/freezer/upgrade':
             user = self._get_user_from_token(data)
             if not user:
+                user_email = self.headers.get('X-User-Email', '').strip().lower()
+                if not user_email and data and isinstance(data, dict):
+                    user_email = (data.get('email') or data.get('adminEmail') or '').strip().lower()
+                if user_email:
+                    for u in users_db.values():
+                        if u.get('email', '').lower() == user_email:
+                            user = u
+                            break
+            if not user:
                 self._send_json({'error': 'Authentication required to upgrade freezer capacity'}, 401)
                 return
 

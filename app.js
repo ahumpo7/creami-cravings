@@ -2167,6 +2167,7 @@
     }
     try { localStorage.setItem(MIMIC_ROLE_STORAGE_KEY, currentMimicRole); } catch (e) {}
 
+    const mimicPurchasedCap = parseInt(localStorage.getItem('creami_mimic_user_freezer_capacity') || '4', 10);
     if (currentMimicRole === 'guest') {
       currentUser = null;
     } else if (currentMimicRole === 'creator') {
@@ -2197,7 +2198,7 @@
         role: 'user',
         creatorId: null,
         creatorVips: [],
-        freezerCapacity: 4,
+        freezerCapacity: mimicPurchasedCap,
         subscriptions: ['Community Legends', 'Fan Favorites', 'TestContent Sampler']
       };
     } else if (currentMimicRole === 'user') {
@@ -2206,7 +2207,7 @@
         role: 'user',
         creatorId: null,
         creatorVips: [],
-        freezerCapacity: 4,
+        freezerCapacity: mimicPurchasedCap,
         subscriptions: ['Community Legends', 'Base Flavors']
       };
     } else {
@@ -2217,6 +2218,7 @@
       currentUser.creatorId = null;
       currentUser.creatorVips = [];
       try { localStorage.setItem(MIMIC_ROLE_STORAGE_KEY, 'admin'); } catch (e) {}
+      try { localStorage.removeItem('creami_mimic_user_freezer_capacity'); } catch (e) {}
     }
 
     // Always preserve realAdminUser in USER_AUTH_STORAGE_KEY so refresh never drops session
@@ -6928,7 +6930,7 @@
     const slots = parseInt(targetSlots, 10);
     if (slots !== 8 && slots !== 12) return;
 
-    if (!currentUser || !currentUser.token) {
+    if (!currentUser || (!currentUser.token && !currentUser.email)) {
       closeFreezerUpgradeModal();
       openGoogleAuthModal();
       showToast('🔒 Please sign in to your free account first to unlock extra freezer shelf slots!');
@@ -6984,7 +6986,10 @@
     const slots = parseInt(targetSlots, 10);
     if (slots !== 8 && slots !== 12) return;
 
-    if (!currentUser || !currentUser.token) {
+    const userEmail = (currentUser && currentUser.email) || (realAdminUser && realAdminUser.email) || '';
+    const userToken = (currentUser && currentUser.token) || (realAdminUser && realAdminUser.token) || '';
+
+    if (!currentUser || (!userToken && !userEmail)) {
       try {
         localStorage.setItem('pending_freezer_upgrade', slots.toString());
       } catch (e) {}
@@ -7001,11 +7006,16 @@
     }
 
     try {
+      const headers = { 'Content-Type': 'application/json' };
+      if (userToken) headers['Authorization'] = `Bearer ${userToken}`;
+      if (userEmail) headers['X-User-Email'] = userEmail;
+
       const res = await fetch('/api/user/freezer/upgrade', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
-          token: currentUser.token,
+          token: userToken,
+          email: userEmail,
           targetSlots: slots
         })
       });
@@ -7020,8 +7030,11 @@
       }
 
       currentUser.freezerCapacity = Math.max(Number(currentUser.freezerCapacity) || 4, slots);
+      if (currentMimicRole && currentMimicRole !== 'admin') {
+        try { localStorage.setItem('creami_mimic_user_freezer_capacity', slots.toString()); } catch (e) {}
+      }
       if (realAdminUser) {
-        realAdminUser.freezerCapacity = currentUser.freezerCapacity;
+        realAdminUser.freezerCapacity = Math.max(Number(realAdminUser.freezerCapacity) || 4, slots);
         try { localStorage.setItem(REAL_ADMIN_STORAGE_KEY, JSON.stringify(realAdminUser)); } catch (e) {}
       }
       saveUserAuth();
