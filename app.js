@@ -4200,6 +4200,10 @@
       if (creator) {
         tagsHtml += `<span class="creator-badge-tag" title="Recipe by ${creator.name} (${creator.brandName})">📖 ${creator.name} (FPF)</span>`;
       }
+      const creatorAttrib = getStoryCardAttribution(recipe);
+      if (creatorAttrib && creatorAttrib.isCreator) {
+        tagsHtml += renderSocialLinksPills(creatorAttrib.socialLinks, true, creatorAttrib.website);
+      }
       if (!isAccessible) {
         if (isClaimPending) {
           tagsHtml += `<span class="badge-claim-pending" title="Your access request is currently pending verification">⏳ ${requiredTier} Pending</span>`;
@@ -4211,6 +4215,26 @@
         tagsHtml += `<span class="recipe-creaminess-badge" title="Build-A-Pint Creaminess Score">🧪 ${recipe.creaminessScore}/10</span>`;
       }
       bookTags.innerHTML = tagsHtml;
+    }
+
+    // Ensure creator socials bar in collapsible drawer is synced
+    const collWrap = card.querySelector('.recipe-card-collapsible-wrap');
+    if (collWrap) {
+      const creatorAttrib = getStoryCardAttribution(recipe);
+      let socialsBar = collWrap.querySelector('.card-creator-socials-bar');
+      if (creatorAttrib && creatorAttrib.isCreator) {
+        if (!socialsBar) {
+          socialsBar = document.createElement('div');
+          socialsBar.className = 'card-creator-socials-bar';
+          collWrap.prepend(socialsBar);
+        }
+        socialsBar.innerHTML = `
+          <span class="card-creator-socials-label">Creator: <strong>${escapeHtml(creatorAttrib.name)}</strong></span>
+          ${renderSocialLinksPills(creatorAttrib.socialLinks, false, creatorAttrib.website)}
+        `;
+      } else if (socialsBar) {
+        socialsBar.remove();
+      }
     }
 
     // Update Favorite Button
@@ -4354,6 +4378,7 @@
     const userMade = recipeMadeCounts[recipe.id] || 0;
     const commMade = communityStats.madeCounts[recipe.id] || 0;
     const creator = getRecipeCreator(recipe);
+    const creatorAttrib = getStoryCardAttribution(recipe);
     const inBatchPrep = isRecipeInBatchPrep(recipe.id);
 
     const isClaimPending = !isAccessible && (userPendingClaimsState.has(requiredTier) || userPendingClaimsState.has('All-Access'));
@@ -4364,6 +4389,7 @@
           <div class="card-book-tags">
             ${isPersonal ? `<span class="book-tag custom" title="Personal custom recipe saved to your Google account">🔒 Personal Recipe</span>` : accessibleCategories.map(c => `<span class="book-tag ${getCategoryClass(c)}">${c}</span>`).join('')}
             ${creator ? `<span class="creator-badge-tag" title="Recipe by ${creator.name} (${creator.brandName})">📖 ${creator.name} (FPF)</span>` : ''}
+            ${(creatorAttrib && creatorAttrib.isCreator) ? renderSocialLinksPills(creatorAttrib.socialLinks, true, creatorAttrib.website) : ''}
             ${!isAccessible ? (
               isClaimPending 
                 ? `<span class="badge-claim-pending" title="Your access request is currently pending verification">⏳ ${requiredTier} Pending</span>`
@@ -4409,6 +4435,12 @@
         </div>
 
         <div class="recipe-card-collapsible-wrap">
+          ${(creatorAttrib && creatorAttrib.isCreator) ? `
+            <div class="card-creator-socials-bar">
+              <span class="card-creator-socials-label">Creator: <strong>${escapeHtml(creatorAttrib.name)}</strong></span>
+              ${renderSocialLinksPills(creatorAttrib.socialLinks, false, creatorAttrib.website)}
+            </div>
+          ` : ''}
           <div class="macro-pills">
             <div class="macro-pill cal">
               <div class="macro-pill-val">${recipe.macros.calories || '—'}</div>
@@ -5915,6 +5947,67 @@
     };
   }
 
+  function formatSocialUrl(platform, raw) {
+    if (!raw) return '';
+    const clean = String(raw).trim();
+    if (!clean) return '';
+    if (clean.startsWith('http://') || clean.startsWith('https://')) return clean;
+
+    if (platform === 'instagram') {
+      const handle = clean.replace(/^@+/, '');
+      return `https://www.instagram.com/${handle}/`;
+    }
+    if (platform === 'tiktok') {
+      const handle = clean.startsWith('@') ? clean : `@${clean}`;
+      return `https://www.tiktok.com/${handle}`;
+    }
+    if (platform === 'youtube') {
+      if (clean.startsWith('c/') || clean.startsWith('channel/') || clean.startsWith('user/')) {
+        return `https://www.youtube.com/${clean}`;
+      }
+      const handle = clean.startsWith('@') ? clean : `@${clean}`;
+      return `https://www.youtube.com/${handle}`;
+    }
+    if (platform === 'website') {
+      return `https://${clean}`;
+    }
+    return clean;
+  }
+
+  function renderSocialLinksPills(socialLinks, compact = false, extraWebsite = '') {
+    if (!socialLinks && !extraWebsite) return '';
+    const links = socialLinks || {};
+    const website = links.website || extraWebsite;
+    const items = [];
+
+    if (links.instagram) {
+      const url = formatSocialUrl('instagram', links.instagram);
+      const display = compact ? 'IG' : (links.instagram.startsWith('@') ? links.instagram : `@${links.instagram}`);
+      items.push(`<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" class="social-pill-link ig ${compact ? 'compact' : ''}" onclick="event.stopPropagation();" title="Instagram: ${escapeHtml(links.instagram)}"><span class="social-icon">📸</span><span>${escapeHtml(display)}</span></a>`);
+    }
+
+    if (links.tiktok) {
+      const url = formatSocialUrl('tiktok', links.tiktok);
+      const display = compact ? 'TT' : (links.tiktok.startsWith('@') ? links.tiktok : `@${links.tiktok}`);
+      items.push(`<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" class="social-pill-link tt ${compact ? 'compact' : ''}" onclick="event.stopPropagation();" title="TikTok: ${escapeHtml(links.tiktok)}"><span class="social-icon">🎵</span><span>${escapeHtml(display)}</span></a>`);
+    }
+
+    if (links.youtube) {
+      const url = formatSocialUrl('youtube', links.youtube);
+      const display = compact ? 'YT' : 'YouTube';
+      items.push(`<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" class="social-pill-link yt ${compact ? 'compact' : ''}" onclick="event.stopPropagation();" title="YouTube"><span class="social-icon">▶️</span><span>${escapeHtml(display)}</span></a>`);
+    }
+
+    if (website) {
+      const url = formatSocialUrl('website', website);
+      const display = compact ? 'Store' : 'Website';
+      items.push(`<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" class="social-pill-link web ${compact ? 'compact' : ''}" onclick="event.stopPropagation();" title="${escapeHtml(url)}"><span class="social-icon">🌐</span><span>${escapeHtml(display)}</span></a>`);
+    }
+
+    if (items.length === 0) return '';
+    return `<div class="creator-social-pills-wrap ${compact ? 'compact' : ''}">${items.join('')}</div>`;
+  }
+
   // 1-Tap Recipe Sharing & Deep Linking (Roadmap Item 22)
   function shareRecipe(recipe, buttonEl) {
     if (!recipe) return;
@@ -5983,7 +6076,11 @@
   let currentStoryRatio = 'story'; // 'story' (9:16) or 'square' (1:1)
   let currentStoryBlob = null;
 
-  function openStoryCardModal(recipe) {
+  function openStoryCardModal(recipeInput) {
+    if (!recipeInput) return;
+    const recipe = typeof recipeInput === 'string'
+      ? (recipes.find(r => r.id === recipeInput) || (typeof customRecipes !== 'undefined' ? customRecipes.find(r => r.id === recipeInput) : null) || (typeof allRecipes !== 'undefined' ? allRecipes.find(r => r.id === recipeInput) : null))
+      : recipeInput;
     if (!recipe) return;
     currentStoryRecipe = recipe;
     currentStoryRatio = 'story';
@@ -6001,6 +6098,22 @@
     overlay.classList.add('active');
     overlay.setAttribute('aria-hidden', 'false');
     lockBackgroundScroll();
+
+    // Populate clickable creator socials directly in the modal preview
+    const socialsBox = document.getElementById('storyCreatorSocialsBox');
+    const socialsTitle = document.getElementById('storyCreatorSocialsTitle');
+    const socialsLinks = document.getElementById('storyCreatorSocialsLinks');
+    if (socialsBox && socialsTitle && socialsLinks) {
+      const attrib = getStoryCardAttribution(recipe);
+      if (attrib && attrib.isCreator) {
+        socialsTitle.textContent = `🧑‍🍳 Follow ${attrib.name}:`;
+        socialsLinks.innerHTML = renderSocialLinksPills(attrib.socialLinks, false, attrib.website);
+        socialsBox.style.display = 'flex';
+      } else {
+        socialsBox.style.display = 'none';
+        socialsLinks.innerHTML = '';
+      }
+    }
 
     renderStoryCardGraphic();
   }
@@ -7411,6 +7524,9 @@
         const mixinBadgeHtml = mixins.length > 0
           ? `<div class="slot-mixin-badge" title="Mix-in: ${escapeHtml(mixinSummary)}"><span class="mixin-badge-icon">🍪</span><span class="mixin-badge-text"><strong>Mix-in:</strong> ${escapeHtml(mixinSummary)}</span></div>`
           : '';
+        const shelfRecipe = pint.recipeId ? (recipes.find(r => r.id === pint.recipeId) || (typeof allRecipes !== 'undefined' ? allRecipes.find(r => r.id === pint.recipeId) : null) || (typeof customRecipes !== 'undefined' ? customRecipes.find(r => r.id === pint.recipeId) : null)) : null;
+        const shelfCreatorAttrib = shelfRecipe ? getStoryCardAttribution(shelfRecipe) : null;
+        const shelfCreatorPills = (shelfCreatorAttrib && shelfCreatorAttrib.isCreator) ? renderSocialLinksPills(shelfCreatorAttrib.socialLinks, true, shelfCreatorAttrib.website) : '';
 
         if (status.isReady) {
           // Ready Slot
@@ -7424,6 +7540,7 @@
                     <span class="lid-pill-dot" style="background: ${lid.hex};"></span>
                     <span>${lid.name}</span>
                   </button>
+                  ${shelfCreatorPills}
                 </div>
                 <span class="slot-status-pill ready">🟢 READY!</span>
               </div>
@@ -7447,6 +7564,7 @@
                     <span class="lid-pill-dot" style="background: ${lid.hex};"></span>
                     <span>${lid.name}</span>
                   </button>
+                  ${shelfCreatorPills}
                 </div>
                 <span class="slot-status-pill chilling">❄️ ${status.timeRemainingLabel}</span>
               </div>
@@ -8323,6 +8441,8 @@
       const status = computePintStatus(pint);
       const isDeluxe = pint.scale === 1.5 || (pint.sizeLabel && pint.sizeLabel.includes('24 oz'));
       const hasRecipe = Boolean(pint.recipeId && allRecipes.some(r => r.id === pint.recipeId));
+      const rec = hasRecipe ? allRecipes.find(r => r.id === pint.recipeId) : null;
+      const creatorAttrib = rec ? getStoryCardAttribution(rec) : null;
       const lid = getPintLidColor(pint.lidColor || pint.slot || 1);
 
       return `
@@ -8337,6 +8457,7 @@
                 <button type="button" class="freezer-tag lid-color-tag" data-action="cycle-modal-lid" data-pint-id="${pint.id}" style="border-color: ${lid.border}; background: ${lid.bgTint}; color: ${lid.hex};" title="Lid Color: ${lid.name} (Click to change)">
                   <span class="lid-pill-dot" style="background: ${lid.hex};"></span> ${lid.name} Lid
                 </button>
+                ${(creatorAttrib && creatorAttrib.isCreator) ? renderSocialLinksPills(creatorAttrib.socialLinks, true, creatorAttrib.website) : ''}
                 <span class="freezer-tag">Mixed: ${status.mixedLabel}</span>
                 ${pint.notified 
                   ? '<span class="freezer-tag notif-tag sent">🔔 Alert Sent</span>' 
@@ -10416,6 +10537,14 @@
                   From <strong>${book.shortTitle || book.title}</strong>${pageNum ? `<span class="creator-book-page">(Page ${pageNum})</span>` : ''}
                 </div>
                 <div class="creator-attribution-byline">by <strong>${creator.name}</strong> • ${creator.brandName}</div>
+                ${(() => {
+                  const socialAttr = getStoryCardAttribution(recipe);
+                  if (socialAttr && socialAttr.isCreator) {
+                    const pills = renderSocialLinksPills(socialAttr.socialLinks, false, socialAttr.website);
+                    return pills ? `<div class="creator-attribution-socials">${pills}</div>` : '';
+                  }
+                  return '';
+                })()}
               </div>
             </div>
             <div class="creator-attribution-actions">
