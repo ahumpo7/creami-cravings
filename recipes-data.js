@@ -18919,7 +18919,7 @@ const RECIPES_MASTER = [
     "prepTime": "2 MIN",
     "freezeTime": "16+ HOURS",
     "makes": "1 PINT",
-    "proTip": "If the initial spin looks powdery like snow (common with high-protein chocolate bases), add 1 tablespoon of milk and run a RE-SPIN cycle for that iconic velvety thick Frosty soft-serve texture.",
+    "proTip": "If the initial spin looks powdery like snow (common with high-protein chocolate bases), simply run a RE-SPIN cycle for that iconic velvety thick Frosty soft-serve texture.",
     "ingredients": [
       {
         "id": "chocolate_protein_shake",
@@ -18978,7 +18978,7 @@ const RECIPES_MASTER = [
       "FREEZE FOR AT LEAST 16 HOURS",
       "RUN OUTSIDE OF PINT UNDER WARM WATER FOR 60 SECONDS",
       "SPIN ON 'LITE ICE CREAM' SETTING",
-      "ADD 1 TBSP MILK AND RUN 'RE-SPIN' UNTIL VELVETY SMOOTH"
+      "RUN 'RE-SPIN' UNTIL VELVETY SMOOTH"
     ],
     "aliases": [
       "wendys_frosty",
@@ -19291,7 +19291,7 @@ const RECIPES_MASTER = [
       "WHISK TOGETHER WITH OAT MILK, BROWN SUGAR SWEETENER, CINNAMON, VANILLA, AND XANTHAN GUM",
       "FREEZE FOR 16+ HOURS",
       "WARM BATH SIDES FOR 60 SECONDS",
-      "SPIN ON 'LITE ICE CREAM' SETTING (OPTIONAL RE-SPIN WITH 1 TBSP OAT MILK FOR EXTRA SILKY TEXTURE)"
+      "SPIN ON 'LITE ICE CREAM' SETTING (OPTIONAL RE-SPIN FOR EXTRA SILKY TEXTURE)"
     ],
     "aliases": [
       "starbucks_shaken_espresso",
@@ -19393,7 +19393,7 @@ const RECIPES_MASTER = [
       "BLEND MANGO CHUNKS WITH COCONUT WATER, LIME JUICE, AND SWEETENER UNTIL PUREED",
       "POUR INTO PINT AND FREEZE FOR 16+ HOURS",
       "RUN UNDER WARM WATER FOR 60 SECONDS",
-      "SPIN ON 'SORBET' SETTING (RE-SPIN WITH 1 TBSP COCONUT WATER IF ICY)",
+      "SPIN ON 'SORBET' SETTING (RE-SPIN IF ICY)",
       "SWIRL WITH CHAMOY AND DUST WITH TAJÍN BEFORE DIGGING IN"
     ],
     "aliases": [
@@ -26244,7 +26244,7 @@ const RECIPES_MASTER = [
       "BLEND BLUEBERRIES, ALMOND MILK, VANILLA WHEY, LEMON JUICE, SWEETENER, AND GUM",
       "FREEZE FOR 24 HOURS IN CREAMI PINT",
       "SPIN ON SORBET SETTING",
-      "RESPIN ONCE WITH 1 TBSP COLD WATER IF FLUFFY TEXTURE DESIRED"
+      "RESPIN ONCE IF FLUFFY TEXTURE DESIRED"
     ],
     "aliases": [
       "blueberry_lemon_meringue_volume"
