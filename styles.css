@@ -638,6 +638,8 @@ body::before {
   background: var(--bg-item);
   overflow: hidden;
   transition: border-color 0.2s ease;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 120px;
 }
 
 .category-group.open {
@@ -1060,6 +1062,8 @@ body::before {
   max-width: 100%;
   min-width: 0;
   box-sizing: border-box;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 320px;
 }
 
 .recipe-card > div:first-child,
@@ -12093,6 +12097,7 @@ body.modal-open .cookie-consent-banner {
   gap: 14px;
   width: 100%;
   box-sizing: border-box;
+  contain: layout style;
 }
 
 /* Individual Slot Card */
@@ -12111,6 +12116,8 @@ body.modal-open .cookie-consent-banner {
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
   border: 1px solid rgba(255, 255, 255, 0.07);
   overflow: hidden;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 155px;
 }
 
 .shelf-slot-card:hover {
