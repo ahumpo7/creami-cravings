@@ -681,6 +681,9 @@
       }
     } catch (e) {}
 
+    // Check for Stripe Checkout return redirect (Freezer Shelf Standalone Upgrade)
+    checkPaymentReturnRedirect();
+
     // If user is already logged in, immediately fetch latest synchronized cloud data
     if (currentUser && (currentUser.token || currentUser.email)) {
       fetchLatestUserData();
@@ -1977,6 +1980,26 @@
     updateFreezerBadges();
     recipeCardCache.clear();
     renderRecipes();
+
+    // Sync freezer shelf capacity from account permissions
+    const userMaxSlots = getUserMaxFreezerSlots(currentUser);
+    if (freezerSlotCapacity < userMaxSlots) {
+      freezerSlotCapacity = userMaxSlots;
+      try { localStorage.setItem(FREEZER_CAPACITY_STORAGE_KEY, freezerSlotCapacity.toString()); } catch (e) {}
+    }
+    renderFreezerShelfWidget();
+
+    // Check for pending Stripe freezer shelf upgrade from unauthenticated checkout
+    try {
+      const pendingUpgrade = localStorage.getItem('pending_freezer_upgrade');
+      if (pendingUpgrade) {
+        const slotsToUpgrade = parseInt(pendingUpgrade, 10);
+        localStorage.removeItem('pending_freezer_upgrade');
+        setTimeout(() => {
+          executeFreezerUpgradeSuccess(slotsToUpgrade, false);
+        }, 500);
+      }
+    } catch (e) {}
 
     if (!data.isSilent) {
       closeGoogleAuthModal();
@@ -6896,6 +6919,11 @@
     unlockBackgroundScroll();
   }
 
+  const STRIPE_FREEZER_LINKS = {
+    8: 'https://buy.stripe.com/6oU7sL2DZe3d2Bq9pfefC00',
+    12: 'https://buy.stripe.com/6oUfZh0vRgbla3SatjefC01'
+  };
+
   async function handleUpgradeFreezerCapacity(targetSlots) {
     const slots = parseInt(targetSlots, 10);
     if (slots !== 8 && slots !== 12) return;
@@ -6904,6 +6932,64 @@
       closeFreezerUpgradeModal();
       openGoogleAuthModal();
       showToast('🔒 Please sign in to your free account first to unlock extra freezer shelf slots!');
+      return;
+    }
+
+    const currentMax = getUserMaxFreezerSlots(currentUser);
+    if (currentMax >= slots) {
+      showToast(`🧊 You already have ${currentMax} container slots unlocked!`);
+      closeFreezerUpgradeModal();
+      return;
+    }
+
+    // Role Mimic & Super Admin Testing Mode: allow instant simulated unlock or real Stripe checkout
+    const isSuperAdmin = Boolean(realAdminUser || isSuperAdminAccount(currentUser));
+    if (isSuperAdmin) {
+      const proceedRealStripe = window.confirm(
+        `👑 Admin / Testing Mode:\n\nClick OK to open the REAL Stripe Checkout page (${slots} Slots — ${slots === 8 ? '$1.99' : '$3.99'}).\nClick CANCEL for an instant free simulated upgrade (test UI/DB without paying).`
+      );
+      if (!proceedRealStripe) {
+        await executeFreezerUpgradeSuccess(slots, true);
+        return;
+      }
+    }
+
+    const stripeBase = STRIPE_FREEZER_LINKS[slots];
+    if (!stripeBase) {
+      showToast('Stripe checkout link not found.');
+      return;
+    }
+
+    const btn = document.getElementById(slots === 8 ? 'btnFreezerBuy8' : 'btnFreezerBuy12');
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Redirecting to Stripe...';
+    }
+
+    try {
+      localStorage.setItem('pending_stripe_freezer_tier', slots.toString());
+    } catch (e) {}
+
+    const clientRef = encodeURIComponent(currentUser.id || currentUser.email || 'guest');
+    const emailParam = currentUser.email ? `&prefilled_email=${encodeURIComponent(currentUser.email)}` : '';
+    const checkoutUrl = `${stripeBase}?client_reference_id=${clientRef}${emailParam}`;
+
+    showToast('🚀 Redirecting to secure Stripe Checkout...');
+    setTimeout(() => {
+      window.location.href = checkoutUrl;
+    }, 350);
+  }
+
+  async function executeFreezerUpgradeSuccess(targetSlots, isSimulated = false) {
+    const slots = parseInt(targetSlots, 10);
+    if (slots !== 8 && slots !== 12) return;
+
+    if (!currentUser || !currentUser.token) {
+      try {
+        localStorage.setItem('pending_freezer_upgrade', slots.toString());
+      } catch (e) {}
+      showToast('🎉 Upgrade payment recognized! Please sign in to activate your spots.');
+      openGoogleAuthModal();
       return;
     }
 
@@ -6934,20 +7020,33 @@
       }
 
       currentUser.freezerCapacity = Math.max(Number(currentUser.freezerCapacity) || 4, slots);
-      if (realAdminUser && currentMimicRole === 'admin') {
+      if (realAdminUser) {
         realAdminUser.freezerCapacity = currentUser.freezerCapacity;
         try { localStorage.setItem(REAL_ADMIN_STORAGE_KEY, JSON.stringify(realAdminUser)); } catch (e) {}
       }
-      if (!realAdminUser || currentMimicRole === 'admin') {
-        try { localStorage.setItem(USER_AUTH_STORAGE_KEY, JSON.stringify(currentUser)); } catch (e) {}
-      }
+      saveUserAuth();
 
       freezerSlotCapacity = slots;
       try { localStorage.setItem(FREEZER_CAPACITY_STORAGE_KEY, freezerSlotCapacity.toString()); } catch (e) {}
+      try { localStorage.removeItem('pending_stripe_freezer_tier'); } catch (e) {}
+      try { localStorage.removeItem('pending_freezer_upgrade'); } catch (e) {}
 
       closeFreezerUpgradeModal();
       renderFreezerShelfWidget();
-      showToast(`🎉 Unlocked the ${slots}-Container Freezer Shelf! Time to prep more pints! 🧊🍨`);
+      if (freezerModalOverlay && freezerModalOverlay.classList.contains('active')) {
+        renderFreezerModal();
+      }
+
+      playAudioJackpot();
+      if (navigator.vibrate) {
+        try { navigator.vibrate([100, 50, 150]); } catch (e) {}
+      }
+      showToast(
+        isSimulated
+          ? `⚡ [Simulated] Unlocked the ${slots}-Container Freezer Shelf! Database updated.`
+          : `🎉 Payment Confirmed! Unlocked your ${slots}-Container Freezer Shelf! Time to prep more pints! 🧊🍨`,
+        6000
+      );
     } catch (err) {
       console.error('Freezer upgrade error:', err);
       showToast('Network error while upgrading freezer shelf.');
@@ -6955,6 +7054,47 @@
         btn.disabled = false;
         btn.textContent = origText;
       }
+    }
+  }
+
+  function checkPaymentReturnRedirect() {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const paymentStatus = urlParams.get('payment');
+      const hasStripeSession = urlParams.has('session_id');
+      const isFreezerUpgradeSuccess = urlParams.get('freezer_upgrade') === 'success';
+
+      if (paymentStatus === 'cancel') {
+        showToast('Freezer shelf upgrade was cancelled. You can upgrade anytime!', 4000);
+        try { localStorage.removeItem('pending_stripe_freezer_tier'); } catch (e) {}
+        try {
+          const cleanUrl = window.location.pathname;
+          window.history.replaceState({}, document.title, cleanUrl);
+        } catch (e) {}
+        return;
+      }
+
+      if (paymentStatus === 'success' || hasStripeSession || isFreezerUpgradeSuccess) {
+        let tierParam = urlParams.get('tier') || urlParams.get('slots') || urlParams.get('freezer');
+        let targetSlots = parseInt(tierParam, 10);
+        if (!targetSlots || isNaN(targetSlots)) {
+          targetSlots = parseInt(localStorage.getItem('pending_stripe_freezer_tier') || '8', 10);
+        }
+        if (targetSlots !== 8 && targetSlots !== 12) {
+          targetSlots = 8;
+        }
+
+        try {
+          const cleanUrl = window.location.pathname;
+          window.history.replaceState({}, document.title, cleanUrl);
+        } catch (e) {}
+
+        setTimeout(() => {
+          executeFreezerUpgradeSuccess(targetSlots, false);
+        }, 350);
+      }
+    } catch (e) {
+      console.warn('Error checking payment return:', e);
     }
   }
 
