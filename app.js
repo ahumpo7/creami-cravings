@@ -5124,6 +5124,17 @@
     if (brandEl) brandEl.textContent = creatorBrand;
     if (slugEl) slugEl.textContent = `creamicravings.com/@${handleSlug}`;
 
+    // 1b. Social Media & Card Attribution
+    const currentSocials = (currentUser && currentUser.socialLinks) || (creator && creator.socialLinks) || {};
+    const inputIg = document.getElementById('studioSocialInstagram');
+    const inputTiktok = document.getElementById('studioSocialTiktok');
+    const inputYt = document.getElementById('studioSocialYoutube');
+    const inputWeb = document.getElementById('studioSocialWebsite');
+    if (inputIg) inputIg.value = currentSocials.instagram || (creator ? creator.handle : '') || '';
+    if (inputTiktok) inputTiktok.value = currentSocials.tiktok || (creator ? creator.handle : '') || '';
+    if (inputYt) inputYt.value = currentSocials.youtube || '';
+    if (inputWeb) inputWeb.value = currentSocials.website || (creator ? (creator.storeUrl || creator.url) : '') || '';
+
     // 2. Performance Analytics
     let totalSpins = 0;
     let creatorRecipes = [];
@@ -5854,6 +5865,56 @@
     }
   }
 
+  // Helper: Resolve creator and social media attribution for sharing & story cards
+  function getStoryCardAttribution(recipe) {
+    if (!recipe) return { isCreator: false };
+
+    const isCurrentUserCreator = (currentUser && currentUser.role === 'creator');
+    const mimicCreatorId = (typeof currentMimicCreatorId !== 'undefined' && currentMimicCreatorId) ? currentMimicCreatorId : null;
+    const isMimicCreator = (typeof currentMimicRole !== 'undefined' && currentMimicRole === 'creator');
+
+    const recipeCreator = (typeof getRecipeCreator === 'function') ? getRecipeCreator(recipe) : null;
+
+    let creatorObj = null;
+    let socialLinks = null;
+
+    if (isCurrentUserCreator) {
+      const cId = (currentUser && currentUser.creatorId) || 'fitness_product_finder';
+      creatorObj = (typeof CREATORS_MASTER !== 'undefined') ? CREATORS_MASTER.find(c => c.id === cId) : null;
+      socialLinks = (currentUser && currentUser.socialLinks) || (creatorObj && creatorObj.socialLinks) || null;
+    } else if (isMimicCreator && mimicCreatorId) {
+      creatorObj = (typeof CREATORS_MASTER !== 'undefined') ? CREATORS_MASTER.find(c => c.id === mimicCreatorId) : null;
+      socialLinks = (creatorObj && creatorObj.socialLinks) || null;
+    } else if (recipeCreator) {
+      creatorObj = recipeCreator;
+      const creatorUser = (typeof adminUsersState !== 'undefined' && Array.isArray(adminUsersState))
+        ? adminUsersState.find(u => u.creatorId === recipeCreator.id && u.socialLinks)
+        : null;
+      socialLinks = (creatorUser && creatorUser.socialLinks) || recipeCreator.socialLinks || null;
+    }
+
+    if (!creatorObj && !socialLinks) {
+      return { isCreator: false };
+    }
+
+    const name = (creatorObj ? creatorObj.name : null) || (currentUser ? (currentUser.name || currentUser.username) : 'Creator');
+    const brandName = (creatorObj ? creatorObj.brandName : null) || (currentUser ? currentUser.brandName : '') || `${name}'s Kitchen`;
+    const handle = (socialLinks && (socialLinks.instagram || socialLinks.tiktok)) || (creatorObj ? creatorObj.handle : '') || '';
+    const cleanHandle = handle.startsWith('http')
+      ? handle.replace(/https?:\/\/(www\.)?(instagram\.com|tiktok\.com)\/@?/i, '@')
+      : (handle && !handle.startsWith('@') ? `@${handle}` : handle);
+
+    return {
+      isCreator: true,
+      creatorObj,
+      name,
+      brandName,
+      handle: cleanHandle,
+      socialLinks: socialLinks || {},
+      website: (socialLinks && socialLinks.website) || (creatorObj ? (creatorObj.storeUrl || creatorObj.url) : '') || ''
+    };
+  }
+
   // 1-Tap Recipe Sharing & Deep Linking (Roadmap Item 22)
   function shareRecipe(recipe, buttonEl) {
     if (!recipe) return;
@@ -5867,12 +5928,20 @@
       }
     }
 
+    const attrib = getStoryCardAttribution(recipe);
     const macroStr = recipe.macros ? ` (${recipe.macros.protein || ''} protein, ${recipe.macros.calories || ''} cal)` : '';
+    let shareText = '';
+    if (attrib.isCreator) {
+      shareText = `Check out ${recipe.name} by ${attrib.name}!${macroStr} Follow ${attrib.handle || attrib.name}`;
+    } else if (isCustom) {
+      shareText = `Check out my custom Creami creation: ${recipe.name}!${macroStr}`;
+    } else {
+      shareText = `Check out ${recipe.name} on Creami Cravings!${macroStr}`;
+    }
+
     const shareData = {
-      title: `${recipe.name} — Creami Cravings`,
-      text: isCustom
-        ? `Check out my custom Creami creation: ${recipe.name}!${macroStr}`
-        : `Check out ${recipe.name} on Creami Cravings!${macroStr}`,
+      title: attrib.isCreator ? `${recipe.name} by ${attrib.name}` : `${recipe.name} — Creami Cravings`,
+      text: shareText,
       url: shareUrl
     };
 
@@ -5976,11 +6045,19 @@
     const file = new File([currentStoryBlob], filename, { type: 'image/png' });
 
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      const attrib = getStoryCardAttribution(currentStoryRecipe);
+      const shareTitle = attrib.isCreator 
+        ? `${currentStoryRecipe.name} by ${attrib.name}`
+        : `${currentStoryRecipe.name} - Ninja Creami Recipe`;
+      const shareText = attrib.isCreator
+        ? `Check out ${currentStoryRecipe.name} by ${attrib.name}! 🍨 Follow ${attrib.handle || attrib.name}${attrib.website ? ` (${attrib.website})` : ''}`
+        : `Check out this Ninja Creami recipe for ${currentStoryRecipe.name}! 🍨 via CreamiCravings.com`;
+
       try {
         await navigator.share({
           files: [file],
-          title: `${currentStoryRecipe.name} - Ninja Creami Recipe`,
-          text: `Check out this Ninja Creami recipe for ${currentStoryRecipe.name}! 🍨 via CreamiCravings.com`
+          title: shareTitle,
+          text: shareText
         });
         showToast('Shared successfully!');
       } catch (err) {
@@ -6081,8 +6158,15 @@
 
     let curY = ratio === 'story' ? 110 : 65;
 
+    const attrib = getStoryCardAttribution(recipe);
+
     // 3. Header Brand Pill
-    const brandText = '🍨 CREAMICRAVINGS.COM';
+    let brandText = '🍨 CREAMICRAVINGS.COM';
+    if (attrib.isCreator) {
+      brandText = attrib.handle 
+        ? `🧑‍🍳 ${attrib.name.toUpperCase()} • ${attrib.handle.toUpperCase()}`
+        : `🧑‍🍳 ${attrib.name.toUpperCase()} RECIPES`;
+    }
     ctx.font = ratio === 'story' ? '800 32px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' : '800 26px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
     ctx.textAlign = 'center';
     const brandWidth = ctx.measureText(brandText).width + (ratio === 'story' ? 56 : 46);
@@ -6094,7 +6178,20 @@
     curY += ratio === 'story' ? 66 : 44;
     ctx.font = ratio === 'story' ? '700 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' : '700 20px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
     ctx.fillStyle = '#cbd5e1';
-    ctx.fillText('✦ THE ULTIMATE NINJA CREAMI® COMPANION ✦', width / 2, curY);
+    let subheaderText = '✦ THE ULTIMATE NINJA CREAMI® COMPANION ✦';
+    if (attrib.isCreator) {
+      const s = [];
+      const sl = attrib.socialLinks || {};
+      if (sl.instagram) s.push(`IG: ${sl.instagram.replace(/https?:\/\/(www\.)?instagram\.com\/?/i, '@')}`);
+      if (sl.tiktok) s.push(`TikTok: ${sl.tiktok.replace(/https?:\/\/(www\.)?tiktok\.com\/@?/i, '@')}`);
+      if (sl.youtube) s.push(`YT: ${sl.youtube.replace(/https?:\/\/(www\.)?youtube\.com\/(c\/|@)?/i, '@')}`);
+      if (s.length > 0) {
+        subheaderText = `✦ ${s.join(' • ')} ✦`;
+      } else if (attrib.brandName) {
+        subheaderText = `✦ OFFICIAL ${attrib.brandName.toUpperCase()} RECIPE ✦`;
+      }
+    }
+    ctx.fillText(subheaderText, width / 2, curY);
 
     // Habit Streak Badge Banner on Story Card (Path A Item 4)
     if (habitStreakState && habitStreakState.currentStreak > 0) {
@@ -6120,7 +6217,9 @@
 
     ctx.font = ratio === 'story' ? '800 26px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' : '800 22px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
     ctx.textAlign = 'center';
-    const tagText = `${catEmoji} ${cat} • OFFICIAL RECIPE`;
+    const tagText = attrib.isCreator
+      ? `${catEmoji} ${cat} • BY ${attrib.name.toUpperCase()}`
+      : `${catEmoji} ${cat} • OFFICIAL RECIPE`;
     const tagWidth = ctx.measureText(tagText).width + (ratio === 'story' ? 56 : 46);
     const tagH = ratio === 'story' ? 52 : 44;
     drawRoundedRect(ctx, (width - tagWidth) / 2, curY - (tagH / 2), tagWidth, tagH, tagH / 2, 'rgba(236, 72, 153, 0.26)', 'rgba(236, 72, 153, 0.7)', 2);
@@ -6430,7 +6529,19 @@
     const footerY = height - (ratio === 'story' ? 120 : 65);
 
     // Glowing Action Pill
-    const ctaText = '🍨 DISCOVER 200+ RECIPES • CREAMICRAVINGS.COM';
+    let ctaText = '🍨 DISCOVER 200+ RECIPES • CREAMICRAVINGS.COM';
+    if (attrib.isCreator) {
+      const cleanWeb = (attrib.website || '')
+        .replace(/https?:\/\/(www\.)?/i, '')
+        .replace(/\/+$/, '');
+      if (cleanWeb) {
+        ctaText = `🧑‍🍳 FOLLOW ${attrib.handle.toUpperCase() || attrib.name.toUpperCase()} • ${cleanWeb.toUpperCase()}`;
+      } else if (attrib.handle) {
+        ctaText = `🧑‍🍳 FOLLOW ${attrib.handle.toUpperCase()} FOR MORE RECIPES`;
+      } else {
+        ctaText = `🧑‍🍳 CREATED BY ${attrib.name.toUpperCase()}`;
+      }
+    }
     ctx.font = ratio === 'story' ? '800 32px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' : '800 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
     ctx.textAlign = 'center';
     const ctaWidth = ctx.measureText(ctaText).width + (ratio === 'story' ? 60 : 48);
@@ -6444,7 +6555,10 @@
       ctx.fillStyle = '#ffffff';
       ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
       ctx.shadowBlur = 8;
-      ctx.fillText('✦ Match recipes to the exact ingredients in your pantry! ✦', width / 2, footerY + 54);
+      const subFooter = attrib.isCreator 
+        ? `✦ More recipes & guides from ${attrib.name} • Powered by Creami Cravings ✦`
+        : '✦ Match recipes to the exact ingredients in your pantry! ✦';
+      ctx.fillText(subFooter, width / 2, footerY + 54);
       ctx.shadowBlur = 0;
     }
 
@@ -14362,6 +14476,19 @@
               <span>🧑‍🍳 Custom: <strong>${u.customCount || 0}</strong></span>
             </div>
 
+            ${u.role === 'creator' ? `
+              <div class="admin-creator-socials-box" style="background: rgba(15, 23, 42, 0.65); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 8px; padding: 10px 12px; margin-top: 4px;">
+                <div style="font-size: 0.74rem; font-weight: 700; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">📱 Creator Social Links &amp; Card Branding:</div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px;">
+                  <input type="text" class="admin-creator-ig" data-user-id="${u.id}" placeholder="📸 Instagram (@handle)" value="${escapeHtml((u.socialLinks && u.socialLinks.instagram) || '')}" style="font-size: 0.78rem; padding: 6px 8px; background: rgba(12, 14, 23, 0.85); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff;" />
+                  <input type="text" class="admin-creator-tiktok" data-user-id="${u.id}" placeholder="🎵 TikTok (@handle)" value="${escapeHtml((u.socialLinks && u.socialLinks.tiktok) || '')}" style="font-size: 0.78rem; padding: 6px 8px; background: rgba(12, 14, 23, 0.85); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff;" />
+                  <input type="text" class="admin-creator-yt" data-user-id="${u.id}" placeholder="▶️ YouTube Channel" value="${escapeHtml((u.socialLinks && u.socialLinks.youtube) || '')}" style="font-size: 0.78rem; padding: 6px 8px; background: rgba(12, 14, 23, 0.85); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff;" />
+                  <input type="text" class="admin-creator-web" data-user-id="${u.id}" placeholder="🌐 Website / Shop URL" value="${escapeHtml((u.socialLinks && u.socialLinks.website) || '')}" style="font-size: 0.78rem; padding: 6px 8px; background: rgba(12, 14, 23, 0.85); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff;" />
+                </div>
+                <button type="button" class="btn-secondary btn-save-admin-social" data-user-id="${u.id}" style="margin-top: 8px; font-size: 0.74rem; padding: 5px 12px; font-weight: 700;">💾 Save Socials</button>
+              </div>
+            ` : ''}
+
             <div class="admin-subs-section">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;">
               <div class="admin-subs-title">📦 Recipe Pack Permissions:</div>
@@ -14509,6 +14636,25 @@
         if (!user) return;
         await updateUserPermissions(user.id, user.email, user.subscriptions || ['Community Legends'], user.role || 'user', user.creatorId, newCap);
         showToast(`🧊 Updated ${user.name || user.email}'s freezer shelf to ${newCap} slots!`);
+      });
+    });
+
+    // Save Creator Socials from Admin Card
+    adminUsersList.querySelectorAll('.btn-save-admin-social').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const userId = btn.dataset.userId;
+        const user = adminUsersState.find(u => u.id === userId);
+        if (!user) return;
+        const card = btn.closest('.admin-user-card');
+        if (!card) return;
+        const socialLinks = {
+          instagram: card.querySelector('.admin-creator-ig')?.value.trim() || '',
+          tiktok: card.querySelector('.admin-creator-tiktok')?.value.trim() || '',
+          youtube: card.querySelector('.admin-creator-yt')?.value.trim() || '',
+          website: card.querySelector('.admin-creator-web')?.value.trim() || ''
+        };
+        await updateUserPermissions(user.id, user.email, user.subscriptions || ['Community Legends'], user.role || 'creator', user.creatorId, user.freezerCapacity || 4, socialLinks);
+        showToast(`✅ Saved social links for ${user.name || user.email}!`);
       });
     });
 
@@ -14975,7 +15121,7 @@
     }
   }
 
-  async function updateUserPermissions(userId, email, newSubs, newRole, newCreatorId = null, newFreezerCapacity = null) {
+  async function updateUserPermissions(userId, email, newSubs, newRole, newCreatorId = null, newFreezerCapacity = null, newSocialLinks = null) {
     try {
       showToast('Updating permissions...');
       const payload = {
@@ -14987,6 +15133,7 @@
         role: newRole
       };
       if (newCreatorId) payload.creatorId = newCreatorId;
+      if (newSocialLinks) payload.socialLinks = newSocialLinks;
       if (newFreezerCapacity !== null && newFreezerCapacity !== undefined) {
         payload.freezerCapacity = parseInt(newFreezerCapacity, 10);
       }
@@ -15010,6 +15157,7 @@
           adminUsersState[idx].subscriptions = newSubs;
           adminUsersState[idx].role = newRole;
           if (newCreatorId) adminUsersState[idx].creatorId = newCreatorId;
+          if (newSocialLinks) adminUsersState[idx].socialLinks = newSocialLinks;
           if (newFreezerCapacity !== null && newFreezerCapacity !== undefined) {
             adminUsersState[idx].freezerCapacity = parseInt(newFreezerCapacity, 10);
           } else if (data.user && data.user.freezerCapacity) {
@@ -15022,6 +15170,7 @@
           currentUser.subscriptions = newSubs;
           currentUser.role = newRole;
           if (newCreatorId) currentUser.creatorId = newCreatorId;
+          if (newSocialLinks) currentUser.socialLinks = newSocialLinks;
           if (newFreezerCapacity !== null && newFreezerCapacity !== undefined) {
             currentUser.freezerCapacity = parseInt(newFreezerCapacity, 10);
             freezerSlotCapacity = currentUser.freezerCapacity;
@@ -16188,6 +16337,60 @@
     if (creatorPortalModalOverlay) {
       creatorPortalModalOverlay.addEventListener('click', (e) => {
         if (e.target === creatorPortalModalOverlay) closeCreatorPortalModal();
+      });
+    }
+
+    const btnStudioSaveSocial = document.getElementById('btnStudioSaveSocial');
+    if (btnStudioSaveSocial) {
+      btnStudioSaveSocial.addEventListener('click', async () => {
+        const inputIg = document.getElementById('studioSocialInstagram');
+        const inputTiktok = document.getElementById('studioSocialTiktok');
+        const inputYt = document.getElementById('studioSocialYoutube');
+        const inputWeb = document.getElementById('studioSocialWebsite');
+
+        const socialLinks = {
+          instagram: (inputIg ? inputIg.value.trim() : ''),
+          tiktok: (inputTiktok ? inputTiktok.value.trim() : ''),
+          youtube: (inputYt ? inputYt.value.trim() : ''),
+          website: (inputWeb ? inputWeb.value.trim() : '')
+        };
+
+        const origHtml = btnStudioSaveSocial.innerHTML;
+        btnStudioSaveSocial.innerHTML = '<span>Saving...</span>';
+        btnStudioSaveSocial.disabled = true;
+
+        try {
+          const res = await fetch('/api/creator/profile', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': currentUser.token ? `Bearer ${currentUser.token}` : '',
+              'X-User-Email': currentUser.email || ''
+            },
+            body: JSON.stringify({ socialLinks })
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            if (!currentUser.socialLinks) currentUser.socialLinks = {};
+            currentUser.socialLinks = data.socialLinks || socialLinks;
+            saveAuthSession();
+            showToast('✅ Social media links saved! Your shared cards now feature your personal branding.');
+          } else {
+            if (!currentUser.socialLinks) currentUser.socialLinks = {};
+            currentUser.socialLinks = socialLinks;
+            saveAuthSession();
+            showToast('✅ Social links saved to active profile.');
+          }
+        } catch (err) {
+          console.warn('Save creator profile error:', err);
+          if (!currentUser.socialLinks) currentUser.socialLinks = {};
+          currentUser.socialLinks = socialLinks;
+          saveAuthSession();
+          showToast('✅ Social links saved.');
+        } finally {
+          btnStudioSaveSocial.innerHTML = origHtml;
+          btnStudioSaveSocial.disabled = false;
+        }
       });
     }
 

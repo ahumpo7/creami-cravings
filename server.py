@@ -378,7 +378,8 @@ def format_user_payload(user):
         'shoppingList': user.get('shoppingList', []),
         'freezerPints': user.get('freezerPints', []),
         'freezerCapacity': get_effective_freezer_capacity(user),
-        'subscriptions': user.get('subscriptions', fallback_subs)
+        'subscriptions': user.get('subscriptions', fallback_subs),
+        'socialLinks': user.get('socialLinks', {})
     }
 
 RECIPES_MASTER = []
@@ -1319,6 +1320,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 'freezerPints': user.get('freezerPints', []),
                 'freezerCapacity': get_effective_freezer_capacity(user),
                 'subscriptions': user.get('subscriptions', list(DEFAULT_SUBSCRIPTIONS)),
+                'socialLinks': user.get('socialLinks', {}),
                 'pendingClaims': [
                     inq.get('pack') for inq in stats_db.get('purchase_inquiries', [])
                     if inq.get('status') == 'pending' and (
@@ -1418,6 +1420,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                     'last_active': u.get('last_active', ''),
                     'subscriptions': u.get('subscriptions', list(DEFAULT_SUBSCRIPTIONS)),
                     'freezerCapacity': get_effective_freezer_capacity(u),
+                    'socialLinks': u.get('socialLinks', {}),
                     'pantryCount': len(u.get('pantry', [])),
                     'favoritesCount': len(u.get('favorites', [])),
                     'customCount': len(u.get('customRecipes', [])),
@@ -1982,6 +1985,8 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 user['shoppingList'] = data['shoppingList']
             if 'freezerPints' in data and isinstance(data['freezerPints'], list):
                 user['freezerPints'] = data['freezerPints']
+            if 'socialLinks' in data and isinstance(data['socialLinks'], dict):
+                user['socialLinks'] = data['socialLinks']
 
             user['last_active'] = datetime.utcnow().isoformat()
             save_json_file(USERS_DB_FILE, users_db)
@@ -2567,6 +2572,28 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
             self._send_json({'status': 'ok', 'message': f'Removed {target_email} from VIP list'})
             return
 
+        # Creator: Update Creator Profile & Social Links
+        elif self.path == '/api/creator/profile':
+            user = self._get_user_from_token(data)
+            if not user or user.get('role') != 'creator':
+                self._send_json({'error': 'Unauthorized: Content creator access required'}, 403)
+                return
+
+            if 'socialLinks' in data and isinstance(data['socialLinks'], dict):
+                user['socialLinks'] = {
+                    'instagram': str(data['socialLinks'].get('instagram', '')).strip(),
+                    'tiktok': str(data['socialLinks'].get('tiktok', '')).strip(),
+                    'youtube': str(data['socialLinks'].get('youtube', '')).strip(),
+                    'website': str(data['socialLinks'].get('website', '')).strip()
+                }
+            if 'brandName' in data and data['brandName']:
+                user['brandName'] = str(data['brandName']).strip()
+
+            user['last_active'] = datetime.utcnow().isoformat()
+            save_json_file(USERS_DB_FILE, users_db)
+            self._send_json({'status': 'ok', 'success': True, 'socialLinks': user.get('socialLinks', {})})
+            return
+
         # Admin: Update User Permissions / Role / Subscriptions
         elif self.path == '/api/admin/user/permissions':
             admin_user = self._get_user_from_token(data)
@@ -2616,6 +2643,15 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                     target_user['freezerCapacity'] = int(data['freezerCapacity'])
                 except (ValueError, TypeError):
                     pass
+
+            # Update social media links if provided
+            if 'socialLinks' in data and isinstance(data['socialLinks'], dict):
+                target_user['socialLinks'] = {
+                    'instagram': str(data['socialLinks'].get('instagram', '')).strip(),
+                    'tiktok': str(data['socialLinks'].get('tiktok', '')).strip(),
+                    'youtube': str(data['socialLinks'].get('youtube', '')).strip(),
+                    'website': str(data['socialLinks'].get('website', '')).strip()
+                }
 
             target_user['last_active'] = datetime.utcnow().isoformat()
             save_json_file(USERS_DB_FILE, users_db)
