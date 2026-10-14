@@ -598,6 +598,7 @@
   const recipePacksModalOverlay = document.getElementById('recipePacksModalOverlay');
   const closeRecipePacksModalBtn = document.getElementById('closeRecipePacksModalBtn');
   let adminUsersState = [];
+  let expandedAdminUserIds = new Set();
   let adminClaimsState = [];
   let userPendingClaimsState = new Set();
   let adminActiveTab = 'users';
@@ -4167,7 +4168,8 @@
 
   function updateRecipeCard(card, recipe, match) {
     const isAccessible = isRecipeAccessible(recipe);
-    card.className = `recipe-card ${match.isReady ? 'ready-to-make' : ''} ${!isAccessible ? 'locked' : ''}`;
+    const wasExpanded = card.classList.contains('mobile-expanded');
+    card.className = `recipe-card ${match.isReady ? 'ready-to-make' : ''} ${!isAccessible ? 'locked' : ''} ${wasExpanded ? 'mobile-expanded' : ''}`;
 
     const requiredTier = getRecipeRequiredTier(recipe);
     const isClaimPending = !isAccessible && (userPendingClaimsState.has(requiredTier) || userPendingClaimsState.has('All-Access'));
@@ -4175,6 +4177,11 @@
     const viewBtn = card.querySelector('.btn-view-recipe');
     if (viewBtn) {
       viewBtn.textContent = isAccessible ? 'View Recipe' : (isClaimPending ? '⏳ Pending Verification' : '🔒 Locked Preview');
+    }
+
+    const previewMacros = card.querySelector('.mobile-preview-macros');
+    if (previewMacros) {
+      previewMacros.textContent = `🔥 ${recipe.macros.calories || '—'} cal • 💪 ${recipe.macros.protein || '—'} pro • 🥑 ${recipe.macros.fat || '—'} fat`;
     }
 
     // Update Locked Badge and Book Tags
@@ -4395,42 +4402,50 @@
           </div>
         </div>
 
-        <div class="macro-pills">
-          <div class="macro-pill cal">
-            <div class="macro-pill-val">${recipe.macros.calories || '—'}</div>
-            <div class="macro-pill-label">Cal</div>
-          </div>
-          <div class="macro-pill pro">
-            <div class="macro-pill-val">${recipe.macros.protein || '—'}</div>
-            <div class="macro-pill-label">Pro</div>
-          </div>
-          <div class="macro-pill carb">
-            <div class="macro-pill-val">${recipe.macros.carbs || '—'}</div>
-            <div class="macro-pill-label">Carb</div>
-          </div>
-          <div class="macro-pill fat">
-            <div class="macro-pill-val">${recipe.macros.fat || '—'}</div>
-            <div class="macro-pill-label">Fat</div>
-          </div>
+        <!-- Mobile Collapsed Quick Info Strip (Visible only on mobile when collapsed) -->
+        <div class="card-mobile-preview-strip">
+          <span class="mobile-preview-macros">🔥 ${recipe.macros.calories || '—'} cal • 💪 ${recipe.macros.protein || '—'} pro • 🥑 ${recipe.macros.fat || '—'} fat</span>
+          <span class="card-expand-cue">Details <span class="cue-arrow">▾</span></span>
         </div>
 
-        <!-- Recipe Made & Batch Tracker Pills -->
-        <div class="card-made-row" style="${(userMade === 0 && (!commMade || isPersonal)) ? 'display: none;' : ''}">
-          ${userMade > 0 ? `<span class="made-pill personal" title="You have spun this ${userMade} times">🍨 You spun ${userMade}×</span>` : ''}
-          ${(!isPersonal && commMade > 0) ? `<span class="made-pill community" title="Spun ${commMade} times across all users">🔥 ${commMade} community spin${commMade === 1 ? '' : 's'}</span>` : ''}
-        </div>
+        <div class="recipe-card-collapsible-wrap">
+          <div class="macro-pills">
+            <div class="macro-pill cal">
+              <div class="macro-pill-val">${recipe.macros.calories || '—'}</div>
+              <div class="macro-pill-label">Cal</div>
+            </div>
+            <div class="macro-pill pro">
+              <div class="macro-pill-val">${recipe.macros.protein || '—'}</div>
+              <div class="macro-pill-label">Pro</div>
+            </div>
+            <div class="macro-pill carb">
+              <div class="macro-pill-val">${recipe.macros.carbs || '—'}</div>
+              <div class="macro-pill-label">Carb</div>
+            </div>
+            <div class="macro-pill fat">
+              <div class="macro-pill-val">${recipe.macros.fat || '—'}</div>
+              <div class="macro-pill-label">Fat</div>
+            </div>
+          </div>
 
-        <div class="card-ingredients-preview">
-          ${previewIngs.map(ing => {
-            const has = isItemInPantry(ing);
-            return `
-              <div class="card-ing-item ${has ? 'has' : 'miss'}">
-                <span class="card-ing-status ${has ? 'has' : 'miss'}">${has ? '✓' : '○'}</span>
-                <span class="card-ing-text">${ing.name}</span>
-              </div>
-            `;
-          }).join('')}
-          ${remainingCount > 0 ? `<div class="card-more-ings">+ ${remainingCount} more ingredient${remainingCount > 1 ? 's' : ''}</div>` : ''}
+          <!-- Recipe Made & Batch Tracker Pills -->
+          <div class="card-made-row" style="${(userMade === 0 && (!commMade || isPersonal)) ? 'display: none;' : ''}">
+            ${userMade > 0 ? `<span class="made-pill personal" title="You have spun this ${userMade} times">🍨 You spun ${userMade}×</span>` : ''}
+            ${(!isPersonal && commMade > 0) ? `<span class="made-pill community" title="Spun ${commMade} times across all users">🔥 ${commMade} community spin${commMade === 1 ? '' : 's'}</span>` : ''}
+          </div>
+
+          <div class="card-ingredients-preview">
+            ${previewIngs.map(ing => {
+              const has = isItemInPantry(ing);
+              return `
+                <div class="card-ing-item ${has ? 'has' : 'miss'}">
+                  <span class="card-ing-status ${has ? 'has' : 'miss'}">${has ? '✓' : '○'}</span>
+                  <span class="card-ing-text">${ing.name}</span>
+                </div>
+              `;
+            }).join('')}
+            ${remainingCount > 0 ? `<div class="card-more-ings">+ ${remainingCount} more ingredient${remainingCount > 1 ? 's' : ''}</div>` : ''}
+          </div>
         </div>
       </div>
 
@@ -4533,6 +4548,14 @@
     const titleLink = card.querySelector('.recipe-title-link');
     if (titleLink) {
       titleLink.addEventListener('click', (e) => {
+        if (window.innerWidth <= 768 && !card.classList.contains('mobile-expanded')) {
+          e.preventDefault();
+          e.stopPropagation();
+          card.classList.add('mobile-expanded');
+          const cue = card.querySelector('.card-expand-cue');
+          if (cue) cue.innerHTML = 'Collapse <span class="cue-arrow">▴</span>';
+          return;
+        }
         if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
           e.preventDefault();
         }
@@ -4541,7 +4564,24 @@
       });
     }
 
-    card.addEventListener('click', () => {
+    card.addEventListener('click', (e) => {
+      // On mobile (<= 768px), clicking the card toggles expansion
+      if (window.innerWidth <= 768) {
+        if (e.target.closest('button, .favorite-btn, .card-share-btn, .card-delete-recipe-btn')) {
+          return;
+        }
+        if (e.target.closest('.btn-view-recipe')) {
+          openRecipeModal(recipe);
+          return;
+        }
+        const willExpand = !card.classList.contains('mobile-expanded');
+        card.classList.toggle('mobile-expanded');
+        const cue = card.querySelector('.card-expand-cue');
+        if (cue) {
+          cue.innerHTML = willExpand ? 'Collapse <span class="cue-arrow">▴</span>' : 'Details <span class="cue-arrow">▾</span>';
+        }
+        return;
+      }
       openRecipeModal(recipe);
     });
 
@@ -14237,9 +14277,12 @@
         roleBadge = '⭐ VIP';
       }
 
+      const isExpanded = expandedAdminUserIds.has(u.id);
+
       return `
-        <div class="admin-user-card" data-user-id="${u.id}" data-user-email="${u.email}">
-          <div class="admin-user-top">
+        <div class="admin-user-card ${isExpanded ? 'expanded' : ''}" data-user-id="${u.id}" data-user-email="${u.email}">
+          <!-- Compact Summary Bar (Always Visible, Click to Toggle) -->
+          <div class="admin-user-summary-bar" title="Click to ${isExpanded ? 'collapse' : 'expand user details & permissions'}">
             <div class="admin-user-info-cluster">
               <img src="${avatarUrl}" alt="${u.name || 'User'}" class="admin-user-avatar" onerror="this.src='https://ui-avatars.com/api/?name=U&background=059669&color=fff'">
               <div>
@@ -14247,8 +14290,15 @@
                   <span class="admin-user-name">${u.name || u.username || 'Unnamed User'}</span>
                   <span class="admin-user-badge ${u.role || 'user'}">${roleBadge}</span>
                   ${isCurrentAdmin ? `<span class="badge" style="font-size: 0.68rem; background: rgba(5, 150, 105, 0.2); color: #34d399; padding: 2px 6px; border-radius: 4px; font-weight: 700;">You</span>` : ''}
+                  <span class="admin-shelf-pill" style="font-size: 0.72rem; padding: 2px 7px; border-radius: 4px; font-weight: 700; background: ${(effectiveCap >= 12 ? 'rgba(245, 158, 11, 0.2)' : (effectiveCap >= 8 ? 'rgba(56, 189, 248, 0.2)' : 'rgba(148, 163, 184, 0.15)'))}; color: ${(effectiveCap >= 12 ? '#fbbf24' : (effectiveCap >= 8 ? '#38bdf8' : '#94a3b8'))}; border: 1px solid ${(effectiveCap >= 12 ? 'rgba(245, 158, 11, 0.35)' : (effectiveCap >= 8 ? 'rgba(56, 189, 248, 0.35)' : 'rgba(148, 163, 184, 0.25)'))};">
+                    ${effectiveCap >= 12 ? '👑 12 Slots' : (effectiveCap >= 8 ? '🧊 8 Slots' : '4 Free Slots')}
+                  </span>
                 </div>
-                <div class="admin-user-email">${escapeHtml(u.email || 'No email attached')}${u.creatorId ? ` • <span style="color: #38bdf8; font-size: 0.76rem; font-weight: 600;">Creator ID: ${escapeHtml(u.creatorId)}</span>` : ''}</div>
+                <div class="admin-user-email">
+                  ${escapeHtml(u.email || 'No email attached')}
+                  ${u.creatorId ? ` • <span style="color: #38bdf8; font-size: 0.76rem; font-weight: 600;">Creator ID: ${escapeHtml(u.creatorId)}</span>` : ''}
+                  <span style="color: #64748b; font-size: 0.74rem; margin-left: 6px;">• Joined: ${createdDate}</span>
+                </div>
                 ${(u.creatorVips && u.creatorVips.length > 0) ? `
                   <div style="margin-top: 4px; display: flex; gap: 4px; flex-wrap: wrap;">
                     ${u.creatorVips.map(cv => {
@@ -14261,46 +14311,56 @@
               </div>
             </div>
 
-            <div class="admin-user-actions" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-              <select class="admin-role-select" data-user-id="${u.id}" ${isRootAdmin ? 'disabled title="Root administrator role cannot be changed"' : 'title="Change user system role"'}>
-                <option value="user" ${(!u.role || u.role === 'user') ? 'selected' : ''}>👤 Standard User</option>
-                <option value="creator" ${u.role === 'creator' ? 'selected' : ''}>🧑‍🍳 Content Creator</option>
-                <option value="vip" ${u.role === 'vip' ? 'selected' : ''}>⭐ Legacy VIP / QA</option>
-                <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>👑 Administrator</option>
-              </select>
-              ${u.role === 'creator' ? `
-                <select class="admin-creator-select" data-user-id="${u.id}" title="Assign Creator Storefront Profile" style="font-size: 0.78rem; background: rgba(15, 23, 42, 0.85); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 6px; padding: 6px 8px; font-weight: 600;">
-                  <option value="fitness_product_finder" ${(u.creatorId === 'fitness_product_finder' || !u.creatorId) ? 'selected' : ''}>🧑‍🍳 Eli (FPF)</option>
-                  <option value="test_content" ${u.creatorId === 'test_content' ? 'selected' : ''}>🧪 TestContent</option>
-                </select>
-              ` : ''}
-              <select class="admin-freezer-select" data-user-id="${u.id}" title="Grant or change freezer shelf container capacity" style="font-size: 0.78rem; background: rgba(15, 23, 42, 0.85); color: ${(effectiveCap >= 12 ? '#fbbf24' : (effectiveCap >= 8 ? '#38bdf8' : '#cbd5e1'))}; border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 6px; padding: 6px 8px; font-weight: 600;">
-                <option value="4" ${effectiveCap === 4 ? 'selected' : ''}>🧊 4 Slots (Default)</option>
-                <option value="8" ${effectiveCap === 8 ? 'selected' : ''}>🧊 8 Slots (Full Week)</option>
-                <option value="12" ${effectiveCap >= 12 ? 'selected' : ''}>👑 12 Slots (Deep Freeze Pro)</option>
-              </select>
-              <button class="btn-admin-reset-pw" data-user-id="${u.id}" data-user-email="${u.email}" title="Reset user password directly">
-                🔑
-              </button>
-              ${(!isRootAdmin && !isCurrentAdmin) ? `
-                <button class="btn-admin-del-user" data-user-id="${u.id}" data-user-email="${u.email}" title="Delete user account">
-                  🗑️
-                </button>
-              ` : ''}
+            <div class="admin-card-expand-toggle">
+              <span class="admin-expand-label">${isExpanded ? 'Collapse' : 'Manage &amp; Packs'}</span>
+              <span class="admin-expand-chevron">${isExpanded ? '▴' : '▾'}</span>
             </div>
           </div>
 
-          <div class="admin-user-stats-strip">
-            <span>📅 Joined: <strong>${createdDate}</strong></span>
-            <span>⚡ Last Active: <strong>${lastActiveDate}</strong></span>
-            <span>🧊 Shelf: <strong style="${(effectiveCap >= 12 ? 'color: #fbbf24;' : (effectiveCap >= 8 ? 'color: #38bdf8;' : 'color: #94a3b8;'))}">${effectiveCap >= 12 ? '👑 12 Slots' : (effectiveCap >= 8 ? '🧊 8 Slots' : '4 Free Slots')}</strong></span>
-            <span>📦 Pantry: <strong>${u.pantryCount || 0}</strong></span>
-            <span>💖 Favs: <strong>${u.favoritesCount || 0}</strong></span>
-            <span>🍨 Spins: <strong>${u.madeTotal || 0}</strong></span>
-            <span>🧑‍🍳 Custom: <strong>${u.customCount || 0}</strong></span>
-          </div>
+          <!-- Collapsible Details Drawer -->
+          <div class="admin-user-details-drawer">
+            <div class="admin-user-top" style="margin-bottom: 4px;">
+              <div style="font-size: 0.78rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">Account Role &amp; Shelf Capacity:</div>
+              <div class="admin-user-actions" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <select class="admin-role-select" data-user-id="${u.id}" ${isRootAdmin ? 'disabled title="Root administrator role cannot be changed"' : 'title="Change user system role"'}>
+                  <option value="user" ${(!u.role || u.role === 'user') ? 'selected' : ''}>👤 Standard User</option>
+                  <option value="creator" ${u.role === 'creator' ? 'selected' : ''}>🧑‍🍳 Content Creator</option>
+                  <option value="vip" ${u.role === 'vip' ? 'selected' : ''}>⭐ Legacy VIP / QA</option>
+                  <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>👑 Administrator</option>
+                </select>
+                ${u.role === 'creator' ? `
+                  <select class="admin-creator-select" data-user-id="${u.id}" title="Assign Creator Storefront Profile" style="font-size: 0.78rem; background: rgba(15, 23, 42, 0.85); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 6px; padding: 6px 8px; font-weight: 600;">
+                    <option value="fitness_product_finder" ${(u.creatorId === 'fitness_product_finder' || !u.creatorId) ? 'selected' : ''}>🧑‍🍳 Eli (FPF)</option>
+                    <option value="test_content" ${u.creatorId === 'test_content' ? 'selected' : ''}>🧪 TestContent</option>
+                  </select>
+                ` : ''}
+                <select class="admin-freezer-select" data-user-id="${u.id}" title="Grant or change freezer shelf container capacity" style="font-size: 0.78rem; background: rgba(15, 23, 42, 0.85); color: ${(effectiveCap >= 12 ? '#fbbf24' : (effectiveCap >= 8 ? '#38bdf8' : '#cbd5e1'))}; border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 6px; padding: 6px 8px; font-weight: 600;">
+                  <option value="4" ${effectiveCap === 4 ? 'selected' : ''}>🧊 4 Slots (Default)</option>
+                  <option value="8" ${effectiveCap === 8 ? 'selected' : ''}>🧊 8 Slots (Full Week)</option>
+                  <option value="12" ${effectiveCap >= 12 ? 'selected' : ''}>👑 12 Slots (Deep Freeze Pro)</option>
+                </select>
+                <button class="btn-admin-reset-pw" data-user-id="${u.id}" data-user-email="${u.email}" title="Reset user password directly">
+                  🔑 Reset PW
+                </button>
+                ${(!isRootAdmin && !isCurrentAdmin) ? `
+                  <button class="btn-admin-del-user" data-user-id="${u.id}" data-user-email="${u.email}" title="Delete user account">
+                    🗑️ Delete
+                  </button>
+                ` : ''}
+              </div>
+            </div>
 
-          <div class="admin-subs-section">
+            <div class="admin-user-stats-strip">
+              <span>📅 Joined: <strong>${createdDate}</strong></span>
+              <span>⚡ Last Active: <strong>${lastActiveDate}</strong></span>
+              <span>🧊 Shelf: <strong style="${(effectiveCap >= 12 ? 'color: #fbbf24;' : (effectiveCap >= 8 ? 'color: #38bdf8;' : 'color: #94a3b8;'))}">${effectiveCap >= 12 ? '👑 12 Slots' : (effectiveCap >= 8 ? '🧊 8 Slots' : '4 Free Slots')}</strong></span>
+              <span>📦 Pantry: <strong>${u.pantryCount || 0}</strong></span>
+              <span>💖 Favs: <strong>${u.favoritesCount || 0}</strong></span>
+              <span>🍨 Spins: <strong>${u.madeTotal || 0}</strong></span>
+              <span>🧑‍🍳 Custom: <strong>${u.customCount || 0}</strong></span>
+            </div>
+
+            <div class="admin-subs-section">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;">
               <div class="admin-subs-title">📦 Recipe Pack Permissions:</div>
               <div class="admin-presets-row" style="display: flex; gap: 6px; flex-wrap: wrap;">
@@ -14389,6 +14449,27 @@
 
   function bindAdminUserCardEvents() {
     if (!adminUsersList) return;
+
+    // Toggle expand/collapse when clicking user summary bar
+    adminUsersList.querySelectorAll('.admin-user-summary-bar').forEach(bar => {
+      bar.addEventListener('click', (e) => {
+        if (e.target.closest('button, select, input, a')) return;
+        const card = bar.closest('.admin-user-card');
+        if (!card) return;
+        const userId = card.dataset.userId;
+        const willExpand = !card.classList.contains('expanded');
+        card.classList.toggle('expanded');
+        if (willExpand) {
+          expandedAdminUserIds.add(userId);
+        } else {
+          expandedAdminUserIds.delete(userId);
+        }
+        const label = card.querySelector('.admin-expand-label');
+        const chevron = card.querySelector('.admin-expand-chevron');
+        if (label) label.textContent = willExpand ? 'Collapse' : 'Manage & Packs';
+        if (chevron) chevron.textContent = willExpand ? '▴' : '▾';
+      });
+    });
 
     // Role Dropdown Select
     adminUsersList.querySelectorAll('.admin-role-select').forEach(sel => {
@@ -15944,6 +16025,35 @@
         btn.classList.add('active');
         adminFilterRole = btn.dataset.role;
         renderAdminUsers();
+      });
+    }
+
+    const btnAdminToggleAllUsers = document.getElementById('btnAdminToggleAllUsers');
+    if (btnAdminToggleAllUsers) {
+      btnAdminToggleAllUsers.addEventListener('click', () => {
+        const allCards = adminUsersList ? adminUsersList.querySelectorAll('.admin-user-card') : [];
+        const anyCollapsed = Array.from(allCards).some(c => !c.classList.contains('expanded'));
+        if (anyCollapsed) {
+          allCards.forEach(c => {
+            c.classList.add('expanded');
+            if (c.dataset.userId) expandedAdminUserIds.add(c.dataset.userId);
+            const label = c.querySelector('.admin-expand-label');
+            const chevron = c.querySelector('.admin-expand-chevron');
+            if (label) label.textContent = 'Collapse';
+            if (chevron) chevron.textContent = '▴';
+          });
+          btnAdminToggleAllUsers.textContent = '▴ Collapse All';
+        } else {
+          allCards.forEach(c => {
+            c.classList.remove('expanded');
+            if (c.dataset.userId) expandedAdminUserIds.delete(c.dataset.userId);
+            const label = c.querySelector('.admin-expand-label');
+            const chevron = c.querySelector('.admin-expand-chevron');
+            if (label) label.textContent = 'Manage & Packs';
+            if (chevron) chevron.textContent = '▾';
+          });
+          btnAdminToggleAllUsers.textContent = '▾ Expand All';
+        }
       });
     }
 
