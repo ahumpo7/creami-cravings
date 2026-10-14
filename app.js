@@ -798,15 +798,31 @@
       }
     }
 
-    // Handle browser back / forward buttons
+    // Handle browser back / forward buttons (Android back button, iOS swipe back, desktop back)
     window.addEventListener('popstate', (e) => {
+      // 1. If Story Card / Image Download modal is open, close it first!
+      const storyModal = document.getElementById('storyCardModalOverlay');
+      if (storyModal && storyModal.classList.contains('active')) {
+        closeStoryCardModal(true);
+        return;
+      }
+
+      // 2. If Recipe Modal is open, close it!
       if (recipeModalOverlay && recipeModalOverlay.classList.contains('active')) {
         closeRecipeModal(false);
-      } else if (recipePacksModalOverlay && recipePacksModalOverlay.classList.contains('active')) {
+        return;
+      }
+
+      // 3. Other modals
+      if (recipePacksModalOverlay && recipePacksModalOverlay.classList.contains('active')) {
         closeRecipePacksModal(false);
-      } else if (e.state && e.state.modal === 'creator' && e.state.creatorId) {
+        return;
+      }
+
+      // 4. Forward navigation or direct pop to modal states
+      if (e.state && e.state.modal === 'creator' && e.state.creatorId) {
         openRecipePacksModal(e.state.creatorId, false, false);
-      } else if (e.state && e.state.recipeId) {
+      } else if (e.state && e.state.modal === 'recipe' && e.state.recipeId) {
         const rec = allRecipes.find(r => r.id === e.state.recipeId);
         if (rec) openRecipeModal(rec, false, false);
       }
@@ -4207,10 +4223,6 @@
       if (creator) {
         tagsHtml += `<span class="creator-badge-tag" title="Recipe by ${creator.name} (${creator.brandName})">📖 ${creator.name} (FPF)</span>`;
       }
-      const creatorAttrib = getStoryCardAttribution(recipe);
-      if (creatorAttrib && creatorAttrib.isCreator) {
-        tagsHtml += renderSocialLinksPills(creatorAttrib.socialLinks, true, creatorAttrib.website);
-      }
       if (!isAccessible) {
         if (isClaimPending) {
           tagsHtml += `<span class="badge-claim-pending" title="Your access request is currently pending verification">⏳ ${requiredTier} Pending</span>`;
@@ -4222,26 +4234,6 @@
         tagsHtml += `<span class="recipe-creaminess-badge" title="Build-A-Pint Creaminess Score">🧪 ${recipe.creaminessScore}/10</span>`;
       }
       bookTags.innerHTML = tagsHtml;
-    }
-
-    // Ensure creator socials bar in collapsible drawer is synced
-    const collWrap = card.querySelector('.recipe-card-collapsible-wrap');
-    if (collWrap) {
-      const creatorAttrib = getStoryCardAttribution(recipe);
-      let socialsBar = collWrap.querySelector('.card-creator-socials-bar');
-      if (creatorAttrib && creatorAttrib.isCreator) {
-        if (!socialsBar) {
-          socialsBar = document.createElement('div');
-          socialsBar.className = 'card-creator-socials-bar';
-          collWrap.prepend(socialsBar);
-        }
-        socialsBar.innerHTML = `
-          <span class="card-creator-socials-label">Creator: <strong>${escapeHtml(creatorAttrib.name)}</strong></span>
-          ${renderSocialLinksPills(creatorAttrib.socialLinks, false, creatorAttrib.website)}
-        `;
-      } else if (socialsBar) {
-        socialsBar.remove();
-      }
     }
 
     // Update Favorite Button
@@ -4396,7 +4388,6 @@
           <div class="card-book-tags">
             ${isPersonal ? `<span class="book-tag custom" title="Personal custom recipe saved to your Google account">🔒 Personal Recipe</span>` : accessibleCategories.map(c => `<span class="book-tag ${getCategoryClass(c)}">${c}</span>`).join('')}
             ${creator ? `<span class="creator-badge-tag" title="Recipe by ${creator.name} (${creator.brandName})">📖 ${creator.name} (FPF)</span>` : ''}
-            ${(creatorAttrib && creatorAttrib.isCreator) ? renderSocialLinksPills(creatorAttrib.socialLinks, true, creatorAttrib.website) : ''}
             ${!isAccessible ? (
               isClaimPending 
                 ? `<span class="badge-claim-pending" title="Your access request is currently pending verification">⏳ ${requiredTier} Pending</span>`
@@ -4442,12 +4433,6 @@
         </div>
 
         <div class="recipe-card-collapsible-wrap">
-          ${(creatorAttrib && creatorAttrib.isCreator) ? `
-            <div class="card-creator-socials-bar">
-              <span class="card-creator-socials-label">Creator: <strong>${escapeHtml(creatorAttrib.name)}</strong></span>
-              ${renderSocialLinksPills(creatorAttrib.socialLinks, false, creatorAttrib.website)}
-            </div>
-          ` : ''}
           <div class="macro-pills">
             <div class="macro-pill cal">
               <div class="macro-pill-val">${recipe.macros.calories || '—'}</div>
@@ -6112,6 +6097,11 @@
     overlay.setAttribute('aria-hidden', 'false');
     lockBackgroundScroll();
 
+    // Push history state so Android & browser back buttons close the story card modal
+    try {
+      history.pushState({ modal: 'story_card', recipeId: recipe.id }, '', window.location.href);
+    } catch (e) {}
+
     // Populate clickable creator socials directly in the modal preview
     const socialsBox = document.getElementById('storyCreatorSocialsBox');
     const socialsTitle = document.getElementById('storyCreatorSocialsTitle');
@@ -6134,12 +6124,21 @@
   window.triggerStoryDownload = triggerStoryDownload;
   window.shareStoryCardNative = shareStoryCardNative;
 
-  function closeStoryCardModal() {
+  function closeStoryCardModal(fromPopState = false) {
     const overlay = document.getElementById('storyCardModalOverlay');
     if (overlay) {
       overlay.classList.remove('active');
       overlay.setAttribute('aria-hidden', 'true');
-      unlockBackgroundScroll();
+      // If recipe modal is still open behind it, keep scroll locked
+      if (!recipeModalOverlay || !recipeModalOverlay.classList.contains('active')) {
+        unlockBackgroundScroll();
+      }
+    }
+    // If closed via UI (X button, overlay tap, escape key), pop the history entry
+    if (!fromPopState) {
+      if (history.state && history.state.modal === 'story_card') {
+        history.back();
+      }
     }
   }
 
@@ -10579,7 +10578,7 @@
     // Sync browser URL with recipe deep-link
     if (updateHistory && recipe && recipe.id && !recipe.isSharedPortable) {
       const targetPath = (IS_BETA ? '/beta' : '') + `/recipe/${encodeURIComponent(recipe.id)}`;
-      if (window.location.pathname !== targetPath) {
+      if (window.location.pathname !== targetPath || !history.state || history.state.modal !== 'recipe') {
         try {
           history.pushState({ modal: 'recipe', recipeId: recipe.id }, '', targetPath);
         } catch (e) {}
@@ -10707,14 +10706,6 @@
                   From <strong>${book.shortTitle || book.title}</strong>${pageNum ? `<span class="creator-book-page">(Page ${pageNum})</span>` : ''}
                 </div>
                 <div class="creator-attribution-byline">by <strong>${creator.name}</strong> • ${creator.brandName}</div>
-                ${(() => {
-                  const socialAttr = getStoryCardAttribution(recipe);
-                  if (socialAttr && socialAttr.isCreator) {
-                    const pills = renderSocialLinksPills(socialAttr.socialLinks, false, socialAttr.website);
-                    return pills ? `<div class="creator-attribution-socials">${pills}</div>` : '';
-                  }
-                  return '';
-                })()}
               </div>
             </div>
             <div class="creator-attribution-actions">
@@ -11853,10 +11844,21 @@
     if (recipeModalBody) recipeModalBody.scrollTop = 0;
     currentModalRecipe = null;
 
-    if (updateHistory && (window.location.pathname.startsWith('/recipe/') || window.location.pathname.startsWith('/beta/recipe/'))) {
-      try {
-        history.pushState({ modal: null }, '', IS_BETA ? '/beta/' : '/');
-      } catch (e) {}
+    if (updateHistory) {
+      if (history.state && history.state.modal === 'recipe') {
+        history.back();
+      } else if (window.location.pathname.startsWith('/recipe/') || window.location.pathname.startsWith('/beta/recipe/')) {
+        try {
+          history.replaceState({ modal: null }, '', IS_BETA ? '/beta/' : '/');
+        } catch (e) {}
+        document.title = 'Creami Cravings';
+      }
+    } else {
+      if (window.location.pathname.startsWith('/recipe/') || window.location.pathname.startsWith('/beta/recipe/')) {
+        try {
+          history.replaceState({ modal: null }, '', IS_BETA ? '/beta/' : '/');
+        } catch (e) {}
+      }
       document.title = 'Creami Cravings';
     }
   }
@@ -16344,6 +16346,11 @@
     // Escape Key to Close Modals & Prevent Keyboard Background Scroll
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
+        const storyModal = document.getElementById('storyCardModalOverlay');
+        if (storyModal && storyModal.classList.contains('active')) {
+          closeStoryCardModal();
+          return;
+        }
         closeSwapInspector();
         closeRecipeModal();
         closeRouletteModal();
