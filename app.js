@@ -7063,11 +7063,13 @@
             <div class="shelf-slot-card ready" data-slot="${slotNum}" data-pint-id="${pint.id}">
               <div class="slot-lid-bar" style="background: ${lid.hex}; box-shadow: 0 0 10px ${lid.hex}55;"></div>
               <div class="slot-header-row">
-                <span class="slot-number-badge">Slot ${slotNum}</span>
-                <button type="button" class="slot-lid-pill" data-action="cycle-lid-color" data-pint-id="${pint.id}" style="border-color: ${lid.border}; color: ${lid.hex};" title="Lid: ${lid.name} (Click to change)">
-                  <span class="lid-pill-dot" style="background: ${lid.hex};"></span>
-                  <span>${lid.name}</span>
-                </button>
+                <div class="slot-header-left">
+                  <span class="slot-number-badge">Slot ${slotNum}</span>
+                  <button type="button" class="slot-lid-pill" data-action="cycle-lid-color" data-pint-id="${pint.id}" style="border-color: ${lid.border}; color: ${lid.hex};" title="Lid: ${lid.name} (Click to change)">
+                    <span class="lid-pill-dot" style="background: ${lid.hex};"></span>
+                    <span>${lid.name}</span>
+                  </button>
+                </div>
                 <span class="slot-status-pill ready">🟢 READY!</span>
               </div>
               <div class="slot-recipe-name" title="${escapeHtml(pint.recipeName)}">${escapeHtml(pint.recipeName)}</div>
@@ -7083,11 +7085,13 @@
             <div class="shelf-slot-card chilling" data-slot="${slotNum}" data-pint-id="${pint.id}">
               <div class="slot-lid-bar" style="background: ${lid.hex}; box-shadow: 0 0 10px ${lid.hex}55;"></div>
               <div class="slot-header-row">
-                <span class="slot-number-badge">Slot ${slotNum}</span>
-                <button type="button" class="slot-lid-pill" data-action="cycle-lid-color" data-pint-id="${pint.id}" style="border-color: ${lid.border}; color: ${lid.hex};" title="Lid: ${lid.name} (Click to change)">
-                  <span class="lid-pill-dot" style="background: ${lid.hex};"></span>
-                  <span>${lid.name}</span>
-                </button>
+                <div class="slot-header-left">
+                  <span class="slot-number-badge">Slot ${slotNum}</span>
+                  <button type="button" class="slot-lid-pill" data-action="cycle-lid-color" data-pint-id="${pint.id}" style="border-color: ${lid.border}; color: ${lid.hex};" title="Lid: ${lid.name} (Click to change)">
+                    <span class="lid-pill-dot" style="background: ${lid.hex};"></span>
+                    <span>${lid.name}</span>
+                  </button>
+                </div>
                 <span class="slot-status-pill chilling">❄️ ${status.timeRemainingLabel}</span>
               </div>
               <div class="slot-recipe-name" title="${escapeHtml(pint.recipeName)}">${escapeHtml(pint.recipeName)}</div>
