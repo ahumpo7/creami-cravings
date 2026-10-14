@@ -108,7 +108,7 @@
   <link rel="icon" type="image/png" sizes="144x144" href="icon-144.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=beta23">
+  <link rel="stylesheet" href="styles.css?v=beta24">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -899,6 +899,18 @@
         <button type="button" class="btn-primary btn-batch-banner-action" id="btnFreezerModalOpenBatchPrep">Open Batch Planner →</button>
       </div>
 
+      <!-- Freezer Capacity Paywall / Upgrade Banner -->
+      <div class="freezer-upgrade-banner" id="freezerModalUpgradeBanner" style="display: none;">
+        <div class="freezer-upgrade-banner-info">
+          <span class="freezer-upgrade-banner-icon">🧊</span>
+          <div>
+            <strong>Need More Freezer Shelf Space? (4 Free Slots Active)</strong>
+            <p>Purchase 8 or 12 container spots separately without buying creator packs.</p>
+          </div>
+        </div>
+        <button type="button" class="btn-primary btn-freezer-upgrade-action" id="btnFreezerModalUpgrade">⚡ Expand to 8 or 12 Slots →</button>
+      </div>
+
       <!-- Quick Add / Log a Chilling Pint Card -->
       <div class="freezer-add-section">
         <button class="freezer-toggle-add-btn" id="freezerToggleAddBtn" type="button">
@@ -1046,8 +1058,8 @@
     </div>
   </div>
 
-  <!-- Freezer Shelf Expansion Modal (Model B Standalone + Model C Cookbook Bonus) -->
-  <div class="modal-overlay" id="freezerUpgradeModalOverlay" role="dialog" aria-modal="true" aria-hidden="true" style="display: none;">
+  <!-- Freezer Shelf Expansion Modal (Standalone Purchase or Cookbook Bonus) -->
+  <div class="modal-overlay" id="freezerUpgradeModalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="modal-content" style="max-width: 680px; width: 95%; padding: 24px;">
       <button class="modal-close" id="freezerUpgradeModalCloseBtn" aria-label="Close modal">&times;</button>
       
@@ -1057,8 +1069,11 @@
             🧊
           </div>
           <div>
-            <h2 class="modal-title" style="margin: 0; font-size: 1.35rem;">Expand Your Virtual Freezer Shelf</h2>
-            <p class="modal-subtitle" style="margin: 4px 0 0 0; color: #94a3b8; font-size: 0.88rem;">Never run out of chilling space. Prep pints for the full week or get free shelf expansions with Creator Cookbooks.</p>
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <h2 class="modal-title" style="margin: 0; font-size: 1.35rem;">Expand Your Freezer Shelf</h2>
+              <span style="background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.4); border-radius: 999px; padding: 2px 8px; font-size: 0.72rem; font-weight: 800; color: #4ade80;">🛒 Standalone Purchase</span>
+            </div>
+            <p class="modal-subtitle" style="margin: 4px 0 0 0; color: #94a3b8; font-size: 0.88rem;">Spots after 4 are behind a paywall. Purchase extra container slots separately below (no cookbook purchase required), or unlock them free with creator packs.</p>
           </div>
         </div>
       </div>
@@ -3160,6 +3175,6 @@
 
   <!-- Scripts -->
   <script src="recipes-data.js?v=beta9"></script>
-  <script src="app.js?v=beta25"></script>
+  <script src="app.js?v=beta26"></script>
 </body>
 </html>
