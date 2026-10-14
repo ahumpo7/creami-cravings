@@ -14284,27 +14284,29 @@
           <!-- Compact Summary Bar (Always Visible, Click to Toggle) -->
           <div class="admin-user-summary-bar" title="Click to ${isExpanded ? 'collapse' : 'expand user details & permissions'}">
             <div class="admin-user-info-cluster">
-              <img src="${avatarUrl}" alt="${u.name || 'User'}" class="admin-user-avatar" onerror="this.src='https://ui-avatars.com/api/?name=U&background=059669&color=fff'">
-              <div>
+              <img src="${avatarUrl}" alt="${escapeHtml(u.name || 'User')}" class="admin-user-avatar" onerror="this.src='https://ui-avatars.com/api/?name=U&background=059669&color=fff'">
+              <div class="admin-user-summary-text">
                 <div class="admin-user-name-row">
-                  <span class="admin-user-name">${u.name || u.username || 'Unnamed User'}</span>
+                  <span class="admin-user-name">${escapeHtml(u.name || u.username || 'Unnamed User')}</span>
+                  ${isCurrentAdmin ? `<span class="badge" style="font-size: 0.68rem; background: rgba(5, 150, 105, 0.25); color: #34d399; padding: 1px 6px; border-radius: 4px; font-weight: 700; flex-shrink: 0;">You</span>` : ''}
+                </div>
+                <div class="admin-user-badges-row">
                   <span class="admin-user-badge ${u.role || 'user'}">${roleBadge}</span>
-                  ${isCurrentAdmin ? `<span class="badge" style="font-size: 0.68rem; background: rgba(5, 150, 105, 0.2); color: #34d399; padding: 2px 6px; border-radius: 4px; font-weight: 700;">You</span>` : ''}
                   <span class="admin-shelf-pill" style="font-size: 0.72rem; padding: 2px 7px; border-radius: 4px; font-weight: 700; background: ${(effectiveCap >= 12 ? 'rgba(245, 158, 11, 0.2)' : (effectiveCap >= 8 ? 'rgba(56, 189, 248, 0.2)' : 'rgba(148, 163, 184, 0.15)'))}; color: ${(effectiveCap >= 12 ? '#fbbf24' : (effectiveCap >= 8 ? '#38bdf8' : '#94a3b8'))}; border: 1px solid ${(effectiveCap >= 12 ? 'rgba(245, 158, 11, 0.35)' : (effectiveCap >= 8 ? 'rgba(56, 189, 248, 0.35)' : 'rgba(148, 163, 184, 0.25)'))};">
                     ${effectiveCap >= 12 ? '👑 12 Slots' : (effectiveCap >= 8 ? '🧊 8 Slots' : '4 Free Slots')}
                   </span>
                 </div>
                 <div class="admin-user-email">
-                  ${escapeHtml(u.email || 'No email attached')}
-                  ${u.creatorId ? ` • <span style="color: #38bdf8; font-size: 0.76rem; font-weight: 600;">Creator ID: ${escapeHtml(u.creatorId)}</span>` : ''}
-                  <span style="color: #64748b; font-size: 0.74rem; margin-left: 6px;">• Joined: ${createdDate}</span>
+                  <span class="admin-email-text" title="${escapeHtml(u.email || '')}">${escapeHtml(u.email || 'No email attached')}</span>
+                  ${u.creatorId ? ` • <span style="color: #38bdf8; font-weight: 600;">Creator: ${escapeHtml(u.creatorId)}</span>` : ''}
+                  <span class="admin-joined-text">• Joined: ${createdDate}</span>
                 </div>
                 ${(u.creatorVips && u.creatorVips.length > 0) ? `
-                  <div style="margin-top: 4px; display: flex; gap: 4px; flex-wrap: wrap;">
+                  <div class="admin-creator-vips-row" style="margin-top: 2px; display: flex; gap: 4px; flex-wrap: wrap;">
                     ${u.creatorVips.map(cv => {
                       const crObj = (typeof CREATORS_MASTER !== 'undefined') ? CREATORS_MASTER.find(c => c.id === cv) : null;
                       const crName = crObj ? crObj.name : cv;
-                      return `<span style="font-size: 0.72rem; background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); border-radius: 4px; padding: 2px 6px; font-weight: 600;">⭐ VIP of: ${escapeHtml(crName)}</span>`;
+                      return `<span style="font-size: 0.7rem; background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); border-radius: 4px; padding: 1px 6px; font-weight: 600;">⭐ VIP: ${escapeHtml(crName)}</span>`;
                     }).join('')}
                   </div>
                 ` : ''}
@@ -14312,7 +14314,7 @@
             </div>
 
             <div class="admin-card-expand-toggle">
-              <span class="admin-expand-label">${isExpanded ? 'Collapse' : 'Manage &amp; Packs'}</span>
+              <span class="admin-expand-label">${isExpanded ? 'Collapse' : '<span class="label-full">Manage &amp; Packs</span><span class="label-short">Manage</span>'}</span>
               <span class="admin-expand-chevron">${isExpanded ? '▴' : '▾'}</span>
             </div>
           </div>
@@ -14466,7 +14468,11 @@
         }
         const label = card.querySelector('.admin-expand-label');
         const chevron = card.querySelector('.admin-expand-chevron');
-        if (label) label.textContent = willExpand ? 'Collapse' : 'Manage & Packs';
+        if (label) {
+          label.innerHTML = willExpand 
+            ? 'Collapse' 
+            : '<span class="label-full">Manage &amp; Packs</span><span class="label-short">Manage</span>';
+        }
         if (chevron) chevron.textContent = willExpand ? '▴' : '▾';
       });
     });
@@ -16049,7 +16055,9 @@
             if (c.dataset.userId) expandedAdminUserIds.delete(c.dataset.userId);
             const label = c.querySelector('.admin-expand-label');
             const chevron = c.querySelector('.admin-expand-chevron');
-            if (label) label.textContent = 'Manage & Packs';
+            if (label) {
+              label.innerHTML = '<span class="label-full">Manage &amp; Packs</span><span class="label-short">Manage</span>';
+            }
             if (chevron) chevron.textContent = '▾';
           });
           btnAdminToggleAllUsers.textContent = '▾ Expand All';
