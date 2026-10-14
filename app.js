@@ -1384,16 +1384,22 @@
     }
   }
 
+  let isGoogleIdentityInitialized = false;
+  let isGoogleOneTapPrompted = false;
+
   function initGoogleAuth() {
     if (window.google && window.google.accounts && window.google.accounts.id) {
       try {
         const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-        window.google.accounts.id.initialize({
-          client_id: GOOGLE_CLIENT_ID,
-          callback: handleGoogleCredentialResponse,
-          auto_select: false,
-          cancel_on_tap_outside: true
-        });
+        if (!isGoogleIdentityInitialized) {
+          window.google.accounts.id.initialize({
+            client_id: GOOGLE_CLIENT_ID,
+            callback: handleGoogleCredentialResponse,
+            auto_select: false,
+            cancel_on_tap_outside: true
+          });
+          isGoogleIdentityInitialized = true;
+        }
 
         const gsiContainer = document.getElementById('gsiButtonContainer');
         if (gsiContainer) {
@@ -1409,7 +1415,8 @@
         }
 
         // Trigger Google One-Tap prompt if not signed in and using a configured production client ID
-        if (!currentUser && GOOGLE_CLIENT_ID && !GOOGLE_CLIENT_ID.startsWith('992837461234')) {
+        if (!currentUser && GOOGLE_CLIENT_ID && !GOOGLE_CLIENT_ID.startsWith('992837461234') && !isGoogleOneTapPrompted) {
+          isGoogleOneTapPrompted = true;
           window.google.accounts.id.prompt();
         }
       } catch (err) {
@@ -7693,10 +7700,6 @@
         const mixinBadgeHtml = mixins.length > 0
           ? `<div class="slot-mixin-badge" title="Mix-in: ${escapeHtml(mixinSummary)}"><span class="mixin-badge-icon">🍪</span><span class="mixin-badge-text"><strong>Mix-in:</strong> ${escapeHtml(mixinSummary)}</span></div>`
           : '';
-        const shelfRecipe = pint.recipeId ? ((typeof allRecipes !== 'undefined' ? allRecipes.find(r => r.id === pint.recipeId) : null) || (typeof customRecipesState !== 'undefined' ? customRecipesState.find(r => r.id === pint.recipeId) : null)) : null;
-        const shelfCreatorAttrib = shelfRecipe ? getStoryCardAttribution(shelfRecipe) : null;
-        const shelfCreatorPills = (shelfCreatorAttrib && shelfCreatorAttrib.isCreator) ? renderSocialLinksPills(shelfCreatorAttrib.socialLinks, true, shelfCreatorAttrib.website) : '';
-
         if (status.isReady) {
           // Ready Slot
           html += `
@@ -7709,7 +7712,6 @@
                     <span class="lid-pill-dot" style="background: ${lid.hex};"></span>
                     <span>${lid.name}</span>
                   </button>
-                  ${shelfCreatorPills}
                 </div>
                 <span class="slot-status-pill ready">🟢 READY!</span>
               </div>
@@ -7733,7 +7735,6 @@
                     <span class="lid-pill-dot" style="background: ${lid.hex};"></span>
                     <span>${lid.name}</span>
                   </button>
-                  ${shelfCreatorPills}
                 </div>
                 <span class="slot-status-pill chilling">❄️ ${status.timeRemainingLabel}</span>
               </div>
@@ -8611,7 +8612,6 @@
       const isDeluxe = pint.scale === 1.5 || (pint.sizeLabel && pint.sizeLabel.includes('24 oz'));
       const hasRecipe = Boolean(pint.recipeId && allRecipes.some(r => r.id === pint.recipeId));
       const rec = hasRecipe ? allRecipes.find(r => r.id === pint.recipeId) : null;
-      const creatorAttrib = rec ? getStoryCardAttribution(rec) : null;
       const lid = getPintLidColor(pint.lidColor || pint.slot || 1);
 
       return `
@@ -8626,7 +8626,6 @@
                 <button type="button" class="freezer-tag lid-color-tag" data-action="cycle-modal-lid" data-pint-id="${pint.id}" style="border-color: ${lid.border}; background: ${lid.bgTint}; color: ${lid.hex};" title="Lid Color: ${lid.name} (Click to change)">
                   <span class="lid-pill-dot" style="background: ${lid.hex};"></span> ${lid.name} Lid
                 </button>
-                ${(creatorAttrib && creatorAttrib.isCreator) ? renderSocialLinksPills(creatorAttrib.socialLinks, true, creatorAttrib.website) : ''}
                 <span class="freezer-tag">Mixed: ${status.mixedLabel}</span>
                 ${pint.notified 
                   ? '<span class="freezer-tag notif-tag sent">🔔 Alert Sent</span>' 
@@ -15736,14 +15735,18 @@
       });
     });
 
-    // Recipe Search
+    // Recipe Search (Debounced for silky-smooth typing performance)
+    let recipeSearchDebounceTimer = null;
     if (recipeSearch) {
       recipeSearch.addEventListener('input', (e) => {
         recipeSearchQuery = e.target.value;
         if (clearRecipeSearchBtn) {
           clearRecipeSearchBtn.style.display = recipeSearchQuery ? 'block' : 'none';
         }
-        renderRecipes();
+        if (recipeSearchDebounceTimer) clearTimeout(recipeSearchDebounceTimer);
+        recipeSearchDebounceTimer = setTimeout(() => {
+          renderRecipes();
+        }, 120);
       });
     }
 
@@ -15752,6 +15755,7 @@
         recipeSearch.value = '';
         recipeSearchQuery = '';
         clearRecipeSearchBtn.style.display = 'none';
+        if (recipeSearchDebounceTimer) clearTimeout(recipeSearchDebounceTimer);
         renderRecipes();
       });
     }
