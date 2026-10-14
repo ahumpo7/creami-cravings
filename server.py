@@ -500,7 +500,7 @@ def render_recipe_seo_html(recipe, req_slug, index_html):
         instructions_list = [
             {"@type": "HowToStep", "position": 1, "text": f"Blend or mix all ingredients until smooth, pour into pint container, and freeze solid on a level surface for at least {freeze}."},
             {"@type": "HowToStep", "position": 2, "text": f"Remove lid, place into outer bowl, and process on the '{spin}' setting."},
-            {"@type": "HowToStep", "position": 3, "text": "If texture appears crumbly or powdery, add 1 tablespoon of milk and run a Re-Spin cycle until creamy."},
+            {"@type": "HowToStep", "position": 3, "text": "If texture appears crumbly or powdery, run pint sides under warm water for 60 seconds and run a Re-Spin cycle until creamy."},
             {"@type": "HowToStep", "position": 4, "text": "Add any desired mix-ins, tunnel a hole in the center, and run the Mix-In cycle."}
         ]
         inst_li = [f"<li>{html.escape(s['text'])}</li>" for s in instructions_list]

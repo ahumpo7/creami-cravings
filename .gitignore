@@ -29,3 +29,5 @@ scratch*
 backups/
 *.tar.gz
 *.zip
+*.mp4
+generate_screencast.js

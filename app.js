@@ -5860,7 +5860,7 @@
             `Add all base ingredients to your ${compact.m || 'Ninja Creami'} pint container.`,
             `Smooth the top surface flat, freeze on a level shelf for ${compact.ft || '16+ hours'}.`,
             `Spin on the "${compact.s || 'Lite Ice Cream'}" program.`,
-            ...(compact.ing && compact.ing.some(i => i.m) ? ['Make a 1.5-inch core down the center, add mix-ins, and press Mix-In program.'] : ['Respin if needed with 1 tbsp liquid. Enjoy!'])
+            ...(compact.ing && compact.ing.some(i => i.m) ? ['Make a 1.5-inch core down the center, add mix-ins, and press Mix-In program.'] : ['Respin if needed for silky texture. Enjoy!'])
           ];
 
       const recipe = {
@@ -6075,6 +6075,8 @@
   let currentStoryRecipe = null;
   let currentStoryRatio = 'story'; // 'story' (9:16) or 'square' (1:1)
   let currentStoryBlob = null;
+  let currentStoryDataUrl = null;
+  let storyRenderingPromise = null;
 
   function openStoryCardModal(recipeInput) {
     if (!recipeInput) return;
@@ -6085,6 +6087,8 @@
     currentStoryRecipe = recipe;
     currentStoryRatio = 'story';
     currentStoryBlob = null;
+    currentStoryDataUrl = null;
+    storyRenderingPromise = null;
 
     const overlay = document.getElementById('storyCardModalOverlay');
     if (!overlay) return;
@@ -6117,6 +6121,9 @@
 
     renderStoryCardGraphic();
   }
+  window.openStoryCardModal = openStoryCardModal;
+  window.triggerStoryDownload = triggerStoryDownload;
+  window.shareStoryCardNative = shareStoryCardNative;
 
   function closeStoryCardModal() {
     const overlay = document.getElementById('storyCardModalOverlay');
@@ -6127,60 +6134,124 @@
     }
   }
 
-  function triggerStoryDownload() {
-    if (!currentStoryBlob || !currentStoryRecipe) {
-      showToast('Rendering card... please try again in a second.');
-      return;
+  async function triggerStoryDownload() {
+    const btn = document.getElementById('btnDownloadStoryImage');
+    const origHtml = btn ? btn.innerHTML : '';
+    if (btn) {
+      btn.innerHTML = '<span>⏳ Preparing...</span>';
+      btn.disabled = true;
     }
-    const slug = (currentStoryRecipe.id || currentStoryRecipe.name || 'creami-recipe')
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-');
-    const filename = `${slug}-${currentStoryRatio}-card.png`;
 
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(currentStoryBlob);
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    showToast(`⬇️ Downloaded ${filename}!`);
+    try {
+      if (!currentStoryBlob && storyRenderingPromise) {
+        await storyRenderingPromise;
+      }
+      if (!currentStoryBlob && !currentStoryDataUrl) {
+        showToast('Please wait a moment, card is still rendering...');
+        return;
+      }
+
+      const slug = (currentStoryRecipe?.id || currentStoryRecipe?.name || 'creami-recipe')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-');
+      const filename = `${slug}-${currentStoryRatio}-card.png`;
+
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+      // On iOS Safari, a[download] on blob URLs is not permitted by WebKit; open image in new tab for direct long-press save
+      if (isIOS) {
+        const targetUrl = currentStoryDataUrl || (currentStoryBlob ? URL.createObjectURL(currentStoryBlob) : null);
+        if (targetUrl) {
+          const win = window.open(targetUrl, '_blank');
+          if (!win) {
+            window.location.href = targetUrl;
+          }
+          showToast('📸 Card opened! Tap & hold image to "Save to Photos"');
+        }
+        return;
+      }
+
+      // Standard Desktop & Android download via data URL or blob URL
+      const downloadUrl = currentStoryDataUrl || (currentStoryBlob ? URL.createObjectURL(currentStoryBlob) : null);
+      if (downloadUrl) {
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = downloadUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          if (a.parentNode) document.body.removeChild(a);
+        }, 1500);
+        showToast(`⬇️ Downloaded ${filename}!`);
+      }
+    } catch (err) {
+      console.error('Download error:', err);
+      // Fallback: open in new tab
+      if (currentStoryDataUrl || currentStoryBlob) {
+        const fallbackUrl = currentStoryDataUrl || URL.createObjectURL(currentStoryBlob);
+        window.open(fallbackUrl, '_blank');
+        showToast('Card opened in new window. Right-click or long-press to save!');
+      } else {
+        showToast('Could not download image. Please try again.');
+      }
+    } finally {
+      if (btn) {
+        btn.innerHTML = origHtml;
+        btn.disabled = false;
+      }
+    }
   }
 
   async function shareStoryCardNative() {
-    if (!currentStoryBlob || !currentStoryRecipe) {
-      showToast('Rendering card... please wait a moment.');
-      return;
+    const btn = document.getElementById('btnShareStoryNative');
+    const origHtml = btn ? btn.innerHTML : '';
+    if (btn) {
+      btn.innerHTML = '<span>⏳ Preparing...</span>';
+      btn.disabled = true;
     }
-    const slug = (currentStoryRecipe.id || currentStoryRecipe.name || 'creami-recipe')
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-');
-    const filename = `${slug}-${currentStoryRatio}-card.png`;
-    const file = new File([currentStoryBlob], filename, { type: 'image/png' });
 
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      const attrib = getStoryCardAttribution(currentStoryRecipe);
-      const shareTitle = attrib.isCreator 
-        ? `${currentStoryRecipe.name} by ${attrib.name}`
-        : `${currentStoryRecipe.name} - Ninja Creami Recipe`;
-      const shareText = attrib.isCreator
-        ? `Check out ${currentStoryRecipe.name} by ${attrib.name}! 🍨 Follow ${attrib.handle || attrib.name}${attrib.website ? ` (${attrib.website})` : ''}`
-        : `Check out this Ninja Creami recipe for ${currentStoryRecipe.name}! 🍨 via CreamiCravings.com`;
+    try {
+      if (!currentStoryBlob && storyRenderingPromise) {
+        await storyRenderingPromise;
+      }
+      if (!currentStoryBlob && !currentStoryDataUrl) {
+        showToast('Please wait a moment, card is still rendering...');
+        return;
+      }
 
-      try {
-        await navigator.share({
-          files: [file],
-          title: shareTitle,
-          text: shareText
-        });
-        showToast('Shared successfully!');
-      } catch (err) {
-        if (err.name !== 'AbortError') {
-          console.warn('Native share failed, downloading card instead:', err);
-          triggerStoryDownload();
+      const slug = (currentStoryRecipe?.id || currentStoryRecipe?.name || 'creami-recipe')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-');
+      const filename = `${slug}-${currentStoryRatio}-card.png`;
+
+      // Try Web Share API Level 2 (files alone has best cross-platform mobile support)
+      if (currentStoryBlob && navigator.canShare) {
+        try {
+          const file = new File([currentStoryBlob], filename, { type: 'image/png' });
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              files: [file]
+            });
+            showToast('Shared successfully!');
+            return;
+          }
+        } catch (shareErr) {
+          if (shareErr.name === 'AbortError') return; // User simply closed the share sheet
+          console.warn('Native file share failed:', shareErr);
         }
       }
-    } else {
-      triggerStoryDownload();
+
+      // If native file share is not supported or rejected, fall back to download seamlessly
+      await triggerStoryDownload();
+    } catch (err) {
+      console.error('Share error:', err);
+      await triggerStoryDownload();
+    } finally {
+      if (btn) {
+        btn.innerHTML = origHtml;
+        btn.disabled = false;
+      }
     }
   }
 
@@ -6459,7 +6530,7 @@
     const colW = specW / 3;
     const spinSetting = recipe.spinSetting || 'Lite Ice Cream';
     const freezeTime = recipe.freezeTime || '16+ Hours';
-    const respinTip = '+1 Splash Milk';
+    const respinTip = 'Respin If Needed';
 
     const colItems = [
       { label: 'SPIN PROGRAM', val: spinSetting, color: '#ffffff' },
@@ -6498,10 +6569,13 @@
     // 9. Key Ingredients & Pro Tip (Story Mode vs Square Mode)
     if (ratio === 'story') {
       // Ingredients Card
-      const ings = (recipe.ingredients || []).slice(0, 5);
+      const ings = (recipe.ingredients || []);
       if (ings.length > 0) {
         const boxW = width - 120; // 960px
-        const boxH = 470;
+        const maxItems = 7;
+        const displayIngs = ings.slice(0, maxItems);
+        const rowH = displayIngs.length <= 5 ? 70 : Math.floor(360 / displayIngs.length);
+        const boxH = Math.min(500, 90 + displayIngs.length * rowH);
         const boxX = 60;
 
         ctx.save();
@@ -6514,16 +6588,16 @@
         ctx.textAlign = 'center';
         ctx.font = '800 26px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
         ctx.fillStyle = '#e879f9';
-        ctx.fillText(`🥣 PINT INGREDIENTS LIST (${ings.length} ITEMS)`, width / 2, curY + 46);
+        ctx.fillText(`🥣 PINT INGREDIENTS LIST (${ings.length} ITEMS)`, width / 2, curY + 44);
 
-        let ingY = curY + 108;
-        for (let j = 0; j < ings.length; j++) {
-          const ing = ings[j];
+        let ingY = curY + 98;
+        for (let j = 0; j < displayIngs.length; j++) {
+          const ing = displayIngs[j];
           const ingName = ing.name || ing.raw || '';
           const ingQty = formatCardIngredientAmount(ing);
 
           // Diamond icon
-          ctx.font = '700 22px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+          ctx.font = rowH >= 65 ? '700 22px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' : '700 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
           ctx.fillStyle = '#f472b6';
           ctx.textAlign = 'left';
           ctx.fillText('✦', boxX + 32, ingY);
@@ -6531,16 +6605,17 @@
           // Qty Pill on right with explicit unit
           let qW = 0;
           if (ingQty) {
-            ctx.font = '800 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+            ctx.font = rowH >= 65 ? '800 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' : '800 20px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
             qW = ctx.measureText(ingQty).width + 36;
             const qX = boxX + boxW - 32 - qW;
-            drawRoundedRect(ctx, qX, ingY - 28, qW, 42, 21, 'rgba(255, 255, 255, 0.12)', 'rgba(255, 255, 255, 0.3)', 1.5);
+            const pillH = rowH >= 65 ? 42 : 36;
+            drawRoundedRect(ctx, qX, ingY - (pillH * 0.65), qW, pillH, pillH / 2, 'rgba(255, 255, 255, 0.12)', 'rgba(255, 255, 255, 0.3)', 1.5);
             ctx.fillStyle = '#ffffff';
-            ctx.fillText(ingQty, qX + 18, ingY + 2);
+            ctx.fillText(ingQty, qX + 18, ingY + (rowH >= 65 ? 2 : 1));
           }
 
           // Name with guaranteed clearance from Qty Pill
-          ctx.font = '700 28px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+          ctx.font = rowH >= 65 ? '700 28px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' : '700 22px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
           ctx.fillStyle = '#f8fafc';
           const maxNameWidth = boxW - 64 - qW - 30; // 30px clear gap
           let displayName = ingName;
@@ -6553,16 +6628,16 @@
           ctx.fillText(displayName, boxX + 68, ingY);
 
           // Row divider
-          if (j < ings.length - 1) {
+          if (j < displayIngs.length - 1) {
             ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
             ctx.lineWidth = 1;
             ctx.beginPath();
-            ctx.moveTo(boxX + 32, ingY + 26);
-            ctx.lineTo(boxX + boxW - 32, ingY + 26);
+            ctx.moveTo(boxX + 32, ingY + Math.floor(rowH * 0.38));
+            ctx.lineTo(boxX + boxW - 32, ingY + Math.floor(rowH * 0.38));
             ctx.stroke();
           }
 
-          ingY += 70;
+          ingY += rowH;
         }
         ctx.textAlign = 'center';
         curY += boxH + Math.max(28, 42 - multiLineAdj);
@@ -6588,54 +6663,84 @@
       ctx.font = '600 26px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
       ctx.fillStyle = '#f8fafc';
       ctx.fillText('If pint looks crumbly or powdery on the first spin, don\'t worry!', width / 2, curY + 92);
-      ctx.fillText('Add 1 tbsp of milk and hit RESPIN for ultra-creamy soft-serve texture.', width / 2, curY + 134);
+      ctx.fillText('Run outer sides under warm water for 60s & hit RESPIN for silky texture.', width / 2, curY + 134);
     } else {
-      // Square Mode (1:1): Key Ingredients 2x2 Grid + Pro Tip
-      const ings = (recipe.ingredients || []).slice(0, 4);
+      // Square Mode (1:1): Key Ingredients Grid (Rendering ALL Ingredients) + Pro Tip
+      const ings = recipe.ingredients || [];
       if (ings.length > 0) {
-        const gridW = width - 120;
-        const cellW = (gridW - 16) / 2;
-        const cellH = 58;
+        const gridW = width - 120; // 960px
         const gridX = 60;
+        const totalIngs = ings.length;
 
-        for (let j = 0; j < ings.length; j++) {
-          const row = Math.floor(j / 2);
-          const col = j % 2;
-          const gx = gridX + col * (cellW + 16);
-          const gy = curY + row * (cellH + 12);
+        // Dynamically choose 2 columns (up to 8 items) or 3 columns (9+ items) so ALL ingredients fit!
+        const numCols = totalIngs > 8 ? 3 : 2;
+        const colGap = numCols === 3 ? 12 : 16;
+        const cellW = (gridW - (numCols - 1) * colGap) / numCols;
+        const numRows = Math.ceil(totalIngs / numCols);
 
-          drawRoundedRect(ctx, gx, gy, cellW, cellH, 18, 'rgba(15, 23, 42, 0.90)', 'rgba(255, 255, 255, 0.16)', 1);
+        let cellH = 54;
+        let gapY = 10;
+        let fontSize = 20;
+        let textOffsetY = 34;
+
+        if (numCols === 2) {
+          if (totalIngs > 6) {
+            cellH = 40;
+            gapY = 6;
+            fontSize = 17;
+            textOffsetY = 26;
+          } else if (totalIngs > 4) {
+            cellH = 46;
+            gapY = 8;
+            fontSize = 18;
+            textOffsetY = 29;
+          }
+        } else {
+          // 3 Columns for 9+ ingredients
+          cellH = 38;
+          gapY = 6;
+          fontSize = 15;
+          textOffsetY = 24;
+        }
+
+        for (let j = 0; j < totalIngs; j++) {
+          const row = Math.floor(j / numCols);
+          const col = j % numCols;
+          const gx = gridX + col * (cellW + colGap);
+          const gy = curY + row * (cellH + gapY);
+
+          drawRoundedRect(ctx, gx, gy, cellW, cellH, 16, 'rgba(15, 23, 42, 0.90)', 'rgba(255, 255, 255, 0.16)', 1);
 
           const ing = ings[j];
           const ingName = ing.name || ing.raw || '';
           const ingQty = formatCardIngredientAmount(ing);
           const displayText = ingQty ? `🥣 ${ingQty} ${ingName}` : `🥣 ${ingName}`;
 
-          ctx.font = '700 21px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+          ctx.font = `700 ${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
           ctx.fillStyle = '#f8fafc';
           ctx.textAlign = 'center';
 
           let displayTrimmed = displayText;
-          const maxCellTextWidth = cellW - 24;
+          const maxCellTextWidth = cellW - 20;
           while (displayTrimmed.length > 4 && ctx.measureText(displayTrimmed).width > maxCellTextWidth) {
             displayTrimmed = displayTrimmed.slice(0, -1);
           }
           if (displayTrimmed !== displayText) {
             displayTrimmed = displayTrimmed.trim() + '...';
           }
-          ctx.fillText(displayTrimmed, gx + cellW / 2, gy + 37);
+          ctx.fillText(displayTrimmed, gx + cellW / 2, gy + textOffsetY);
         }
-        curY += (Math.ceil(ings.length / 2)) * (cellH + 12) + 20;
+        curY += numRows * (cellH + gapY) + (totalIngs > 6 ? 12 : 18);
       }
 
       // Pro Tip Pill for Square
-      const tipText = '💡 Pro Tip: Spin on Lite Ice Cream + 1 Respin for silky texture!';
-      ctx.font = '700 22px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      const tipText = '💡 Pro Tip: Spin on Lite Ice Cream + Respin if needed for silky texture!';
+      ctx.font = '700 21px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
       ctx.textAlign = 'center';
-      const tipWidth = ctx.measureText(tipText).width + 50;
-      drawRoundedRect(ctx, (width - tipWidth) / 2, curY, tipWidth, 48, 24, 'rgba(15, 23, 42, 0.85)', 'rgba(251, 191, 36, 0.6)', 1);
+      const tipWidth = ctx.measureText(tipText).width + 46;
+      drawRoundedRect(ctx, (width - tipWidth) / 2, curY, tipWidth, 44, 22, 'rgba(15, 23, 42, 0.85)', 'rgba(251, 191, 36, 0.6)', 1);
       ctx.fillStyle = '#fbbf24';
-      ctx.fillText(tipText, width / 2, curY + 31);
+      ctx.fillText(tipText, width / 2, curY + 28);
     }
 
     // 10. Footer Callout & Link
@@ -6676,14 +6781,22 @@
     }
 
     // Export image to preview
-    canvas.toBlob((blob) => {
-      currentStoryBlob = blob;
-      if (previewImg && blob) {
-        previewImg.style.aspectRatio = ratio === 'story' ? '9 / 16' : '1 / 1';
-        previewImg.src = URL.createObjectURL(blob);
+    storyRenderingPromise = new Promise((resolve) => {
+      try {
+        currentStoryDataUrl = canvas.toDataURL('image/png');
+      } catch (e) {
+        console.warn('Canvas toDataURL failed:', e);
       }
-      if (loadingInd) loadingInd.style.display = 'none';
-    }, 'image/png');
+      canvas.toBlob((blob) => {
+        currentStoryBlob = blob;
+        if (previewImg && blob) {
+          previewImg.style.aspectRatio = ratio === 'story' ? '9 / 16' : '1 / 1';
+          previewImg.src = URL.createObjectURL(blob);
+        }
+        if (loadingInd) loadingInd.style.display = 'none';
+        resolve(blob);
+      }, 'image/png');
+    });
   }
 
   function drawRoundedRect(ctx, x, y, width, height, radius, fill, stroke, strokeWidth = 1) {
@@ -9867,7 +9980,7 @@
           ratio: '1 scoop whey + 30g (2 tbsp) plain Greek yogurt',
           textureImpact: 'Lactic moisture from Greek yogurt counteracts whey isolate dryness, preventing icy crumbling.',
           macroDelta: '+18 kcal, +3g protein, 0g fat.',
-          spinTip: '1st spin Lite Ice Cream → add 1 tbsp splash of milk → 1 Respin for maximum velvet whip.',
+          spinTip: '1st spin Lite Ice Cream → 1 Respin cycle for maximum velvet whip.',
           proTip: 'Ideal quick fix if you only have standard whey isolate tubs in your pantry.'
         },
         {
@@ -9900,7 +10013,7 @@
           textureImpact: 'Clean, neutral sweetness profile. Freezes harder than sugar/allulose, so always pair with a stabilizer.',
           macroDelta: '0 calories, 0 net carbs.',
           spinTip: 'Give pint a 60-second hot water bath around the sides to prevent outer icy ring.',
-          proTip: 'If the texture looks powdery like snow after the initial spin, add 1 tbsp of milk and hit Respin!'
+          proTip: 'If the texture looks powdery like snow after the initial spin, run the pint sides under warm water for 60 seconds and hit Respin!'
         },
         {
           name: 'Pure Maple Syrup or Raw Honey',
@@ -10043,7 +10156,7 @@
           ratio: '1:1 fruit swap',
           textureImpact: 'High skin-to-pulp ratio yields jewel-toned sorbets with vibrant natural tartness.',
           macroDelta: '-30 kcal compared to tropical fruits (mango/banana), packed with antioxidant anthocyanins.',
-          spinTip: 'Sorbet cycle. Add 1 tbsp lemon juice or almond milk for smooth cutting.',
+          spinTip: 'Sorbet cycle. Warm outer rim for 60s or run a Respin for smooth cutting.',
           proTip: 'Microwave frozen berries for 15 seconds to release natural juices before blending base.'
         },
         {
