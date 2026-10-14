@@ -9626,6 +9626,146 @@ body.modal-open .cookie-consent-banner {
   letter-spacing: 0.01em;
 }
 
+/* Clickable Social Links on Cards & Modals */
+.creator-social-pills-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.creator-social-pills-wrap.compact {
+  gap: 3px;
+}
+
+.social-pill-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-decoration: none !important;
+  line-height: 1.2;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.social-pill-link.compact {
+  padding: 2px 6px;
+  font-size: 0.68rem;
+}
+
+.social-pill-link .social-icon {
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+.social-pill-link.ig {
+  background: linear-gradient(135deg, rgba(225, 48, 108, 0.18), rgba(253, 29, 29, 0.15));
+  border: 1px solid rgba(225, 48, 108, 0.45);
+  color: #f472b6;
+}
+.social-pill-link.ig:hover {
+  background: linear-gradient(135deg, rgba(225, 48, 108, 0.35), rgba(253, 29, 29, 0.3));
+  border-color: #f472b6;
+  transform: translateY(-1px);
+  color: #fff;
+}
+
+.social-pill-link.tt {
+  background: rgba(14, 165, 233, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.45);
+  color: #38bdf8;
+}
+.social-pill-link.tt:hover {
+  background: rgba(14, 165, 233, 0.3);
+  border-color: #38bdf8;
+  transform: translateY(-1px);
+  color: #fff;
+}
+
+.social-pill-link.yt {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.45);
+  color: #f87171;
+}
+.social-pill-link.yt:hover {
+  background: rgba(239, 68, 68, 0.3);
+  border-color: #f87171;
+  transform: translateY(-1px);
+  color: #fff;
+}
+
+.social-pill-link.web {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  color: #fbbf24;
+}
+.social-pill-link.web:hover {
+  background: rgba(245, 158, 11, 0.3);
+  border-color: #fbbf24;
+  transform: translateY(-1px);
+  color: #fff;
+}
+
+.card-creator-socials-bar {
+  margin: 10px 0 6px;
+  padding: 8px 12px;
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.card-creator-socials-label {
+  font-size: 0.74rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+.card-creator-socials-label strong {
+  color: #fbbf24;
+}
+
+.creator-attribution-socials {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.story-creator-socials-box {
+  margin: 14px 0 16px;
+  padding: 10px 14px;
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.story-creator-socials-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fbbf24;
+}
+
+.story-creator-socials-links {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
 /* Locked card store links */
 .locked-creator-store-box {
   margin: 18px 0 14px;
