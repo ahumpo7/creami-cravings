@@ -7647,18 +7647,28 @@ body.modal-open .cookie-consent-banner {
 
 /* Admin Portal Modal */
 .admin-modal-content {
-  max-width: 860px;
+  max-width: min(980px, 94vw);
+  width: 100%;
   padding: 28px 24px;
+  box-sizing: border-box;
+  overflow-x: hidden !important;
+}
+
+.admin-modal-content * {
+  box-sizing: border-box;
 }
 
 .admin-modal-header {
   margin-bottom: 20px;
+  width: 100%;
 }
 
 .admin-title-row {
   display: flex;
   align-items: center;
   gap: 14px;
+  flex-wrap: wrap;
+  width: 100%;
 }
 
 .admin-icon-badge {
@@ -7677,33 +7687,40 @@ body.modal-open .cookie-consent-banner {
 /* Admin Quick Stats */
 .admin-stats-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 115px), 1fr));
+  gap: 10px;
   margin-bottom: 20px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .admin-stat-card {
   background: var(--bg-item);
   border: 1px solid var(--border-glass);
   border-radius: var(--radius-md);
-  padding: 14px 16px;
+  padding: 12px 10px;
   text-align: center;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .admin-stat-num {
   display: block;
   font-family: var(--font-heading);
-  font-size: 1.6rem;
+  font-size: 1.45rem;
   font-weight: 800;
   color: #fbbf24;
 }
 
 .admin-stat-label {
-  font-size: 0.76rem;
+  font-size: 0.72rem;
   font-weight: 600;
   color: var(--text-dim);
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Admin Toolbar */
@@ -7713,11 +7730,12 @@ body.modal-open .cookie-consent-banner {
   margin-bottom: 18px;
   align-items: center;
   flex-wrap: wrap;
+  width: 100%;
 }
 
 .admin-search-wrap {
-  flex: 1;
-  min-width: 220px;
+  flex: 1 1 200px;
+  min-width: 0;
 }
 
 .admin-search-input {
@@ -7730,6 +7748,7 @@ body.modal-open .cookie-consent-banner {
   font-size: 0.88rem;
   outline: none;
   transition: border-color 0.2s ease;
+  box-sizing: border-box;
 }
 
 .admin-search-input:focus {
@@ -7739,6 +7758,13 @@ body.modal-open .cookie-consent-banner {
 .admin-filter-pills {
   display: flex;
   gap: 6px;
+  flex-wrap: wrap;
+}
+
+.admin-toolbar-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 /* Admin User Directory List */
@@ -7746,6 +7772,8 @@ body.modal-open .cookie-consent-banner {
   display: flex;
   flex-direction: column;
   gap: 14px;
+  width: 100%;
+  max-width: 100%;
 }
 
 .admin-user-card {
@@ -7757,6 +7785,10 @@ body.modal-open .cookie-consent-banner {
   flex-direction: column;
   gap: 12px;
   transition: all 0.2s ease;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .admin-user-card:hover {
@@ -7767,14 +7799,19 @@ body.modal-open .cookie-consent-banner {
 .admin-user-top {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   gap: 12px;
+  flex-wrap: wrap;
+  width: 100%;
 }
 
 .admin-user-info-cluster {
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
+  flex: 1 1 220px;
+  overflow: hidden;
 }
 
 .admin-user-avatar {
@@ -7783,6 +7820,7 @@ body.modal-open .cookie-consent-banner {
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid rgba(245, 158, 11, 0.4);
+  flex-shrink: 0;
 }
 
 .admin-user-avatar-initials {
@@ -7797,6 +7835,7 @@ body.modal-open .cookie-consent-banner {
   color: #fff;
   font-size: 1.1rem;
   border: 2px solid rgba(245, 158, 11, 0.4);
+  flex-shrink: 0;
 }
 
 .admin-user-name-row {
@@ -7804,6 +7843,7 @@ body.modal-open .cookie-consent-banner {
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
+  min-width: 0;
 }
 
 .admin-user-name {
@@ -7811,11 +7851,34 @@ body.modal-open .cookie-consent-banner {
   font-size: 1.05rem;
   font-weight: 800;
   color: var(--text-main);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 220px;
 }
 
 .admin-user-email {
   font-size: 0.82rem;
   color: var(--text-muted);
+  overflow-wrap: anywhere;
+  word-break: break-all;
+}
+
+.admin-user-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex: 1 1 auto;
+  justify-content: flex-end;
+  max-width: 100%;
+}
+
+.admin-role-select,
+.admin-creator-select,
+.admin-freezer-select {
+  max-width: 100%;
+  flex-shrink: 0;
 }
 
 .admin-user-badge {
@@ -7824,6 +7887,7 @@ body.modal-open .cookie-consent-banner {
   padding: 2px 8px;
   border-radius: 999px;
   text-transform: uppercase;
+  flex-shrink: 0;
 }
 
 .admin-user-badge.admin {
@@ -7848,17 +7912,19 @@ body.modal-open .cookie-consent-banner {
   padding: 6px 10px;
   background: var(--bg-item);
   border-radius: var(--radius-sm);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Subscriptions & Category Access Section */
 .admin-subs-section {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 8px;
   border-top: 1px solid var(--border-item);
   padding-top: 10px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .admin-subs-title {
@@ -9923,6 +9989,9 @@ body.modal-open .cookie-consent-banner {
   margin: 12px 0 16px;
   border-bottom: 1px solid var(--border-item);
   padding-bottom: 8px;
+  flex-wrap: wrap;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .admin-tab-btn {
@@ -10509,6 +10578,8 @@ body.modal-open .cookie-consent-banner {
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .admin-mimic-card-left {
