@@ -1302,33 +1302,15 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 self._send_json({'error': 'Unauthorized'}, 401)
                 return
             
-            self._send_json({
-                'id': user.get('id'),
-                'username': user.get('username'),
-                'name': user.get('name') or user.get('username'),
-                'email': user.get('email', ''),
-                'picture': user.get('picture', ''),
-                'role': user.get('role', 'user'),
-                'creatorId': user.get('creatorId', ''),
-                'creatorVips': get_user_creator_vips(user.get('email')),
-                'pantry': user.get('pantry') if user.get('pantry') is not None else list(DEFAULT_STAPLES),
-                'favorites': user.get('favorites', []),
-                'madeCounts': user.get('madeCounts', {}),
-                'ratings': user.get('ratings', {}),
-                'customRecipes': user.get('customRecipes', []),
-                'shoppingList': user.get('shoppingList', []),
-                'freezerPints': user.get('freezerPints', []),
-                'freezerCapacity': get_effective_freezer_capacity(user),
-                'subscriptions': user.get('subscriptions', list(DEFAULT_SUBSCRIPTIONS)),
-                'socialLinks': user.get('socialLinks', {}),
-                'pendingClaims': [
-                    inq.get('pack') for inq in stats_db.get('purchase_inquiries', [])
-                    if inq.get('status') == 'pending' and (
-                        inq.get('email', '').lower() == user.get('email', '').lower() or
-                        (inq.get('userId') and inq.get('userId') == user.get('id'))
-                    )
-                ]
-            })
+            payload = format_user_payload(user)
+            payload['pendingClaims'] = [
+                inq.get('pack') for inq in stats_db.get('purchase_inquiries', [])
+                if inq.get('status') == 'pending' and (
+                    inq.get('email', '').lower() == user.get('email', '').lower() or
+                    (inq.get('userId') and inq.get('userId') == user.get('id'))
+                )
+            ]
+            self._send_json(payload)
 
         elif clean_path == '/api/creator/analytics':
             qs = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
