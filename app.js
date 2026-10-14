@@ -7252,6 +7252,11 @@
         const isDeluxe = pint.scale === 1.5 || (pint.sizeLabel && pint.sizeLabel.includes('24 oz'));
         const sizeTag = isDeluxe ? '24 oz' : '16 oz';
         const lid = getPintLidColor(pint.lidColor || slotNum);
+        const mixins = getPintMixins(pint);
+        const mixinSummary = mixins.map(m => (m.qty ? `${m.qty} ${m.name}` : m.name)).join(', ');
+        const mixinBadgeHtml = mixins.length > 0
+          ? `<div class="slot-mixin-badge" title="Mix-in: ${escapeHtml(mixinSummary)}"><span class="mixin-badge-icon">🍪</span><span class="mixin-badge-text"><strong>Mix-in:</strong> ${escapeHtml(mixinSummary)}</span></div>`
+          : '';
 
         if (status.isReady) {
           // Ready Slot
@@ -7270,6 +7275,7 @@
               </div>
               <div class="slot-recipe-name" title="${escapeHtml(pint.recipeName)}">${escapeHtml(pint.recipeName)}</div>
               <div class="slot-meta-info">🍨 ${sizeTag} • 100% Solid &amp; Ready</div>
+              ${mixinBadgeHtml}
               <button type="button" class="btn-slot-spin-ready" data-action="spin-slot" data-pint-id="${pint.id}">
                 <span>🍨 Spin &amp; Enjoy (+1)</span>
               </button>
@@ -7292,6 +7298,7 @@
               </div>
               <div class="slot-recipe-name" title="${escapeHtml(pint.recipeName)}">${escapeHtml(pint.recipeName)}</div>
               <div class="slot-meta-info">${sizeTag} • ${status.percent}% Solid</div>
+              ${mixinBadgeHtml}
               <div class="slot-progress-container">
                 <div class="slot-progress-track">
                   <div class="slot-progress-bar" style="width: ${status.percent}%;"></div>
@@ -7381,6 +7388,101 @@
     });
   }
 
+  function getPintMixins(pint) {
+    if (!pint) return [];
+    if (Array.isArray(pint.mixins) && pint.mixins.length > 0) {
+      return pint.mixins;
+    }
+    const rec = allRecipes.find(r => (pint.recipeId && r.id === pint.recipeId) || (pint.recipeName && r.name && r.name.toLowerCase() === pint.recipeName.toLowerCase()));
+    if (!rec || !Array.isArray(rec.ingredients)) return [];
+    const scale = pint.scale || 1.0;
+    return rec.ingredients.filter(isMixinIngredient).map(ing => {
+      const scaledQty = ing.amount ? scaleQuantity(ing.amount, scale) : '';
+      const unit = ing.unit ? ing.unit.trim() : '';
+      const qtyStr = [scaledQty, unit].filter(Boolean).join(' ');
+      return {
+        name: ing.name || ing.raw || 'Mix-in',
+        qty: qtyStr
+      };
+    });
+  }
+
+  function updateSlotFillPreview() {
+    const previewEl = document.getElementById('slotFillRecipePreview');
+    const recipeInput = document.getElementById('slotFillRecipeInput');
+    const scaleSelect = document.getElementById('slotFillPintScale');
+    if (!previewEl || !recipeInput) return;
+
+    const val = recipeInput.value.trim();
+    if (!val) {
+      previewEl.style.display = 'none';
+      previewEl.innerHTML = '';
+      return;
+    }
+
+    const scale = parseFloat(scaleSelect ? scaleSelect.value : '1.0') || 1.0;
+    const recipeIdInput = document.getElementById('slotFillRecipeId');
+    const recId = recipeIdInput ? recipeIdInput.value : '';
+
+    const rec = allRecipes.find(r => (recId && r.id === recId) || (r.name && r.name.toLowerCase() === val.toLowerCase()));
+
+    if (!rec) {
+      previewEl.style.display = 'block';
+      previewEl.innerHTML = `
+        <div class="slot-fill-custom-hint">
+          <span>✨ <strong>Custom Creation:</strong> Freeze base now. Add any mix-ins after your initial spin!</span>
+          <span style="font-size: 0.75rem; color: #94a3b8;">Lite Ice Cream Cycle</span>
+        </div>
+      `;
+      return;
+    }
+
+    const mixins = Array.isArray(rec.ingredients) ? rec.ingredients.filter(isMixinIngredient) : [];
+    const spinSetting = rec.spinSetting || 'Lite Ice Cream';
+
+    if (mixins.length > 0) {
+      const itemsHtml = mixins.map(ing => {
+        const scaledQty = ing.amount ? scaleQuantity(ing.amount, scale) : '';
+        const unit = ing.unit ? ing.unit.trim() : '';
+        const qtyDisplay = [scaledQty, unit].filter(Boolean).join(' ');
+        const nameDisplay = ing.name || ing.raw || 'Mix-in';
+        return `
+          <div class="slot-fill-mixin-item">
+            ${qtyDisplay ? `<span class="mixin-item-qty">${escapeHtml(qtyDisplay)}</span>` : ''}
+            <span class="mixin-item-name">${escapeHtml(nameDisplay)}</span>
+          </div>
+        `;
+      }).join('');
+
+      previewEl.style.display = 'block';
+      previewEl.innerHTML = `
+        <div class="slot-fill-mixin-alert">
+          <div class="slot-fill-mixin-header">
+            <span class="slot-fill-mixin-icon">🍪</span>
+            <div class="slot-fill-mixin-title-wrap">
+              <span class="slot-fill-mixin-title">Mix-In Alert: Keep at Room Temp</span>
+              <span class="slot-fill-mixin-sub">Do NOT freeze mix-ins with your liquid base!</span>
+            </div>
+          </div>
+          <div class="slot-fill-mixin-list">
+            ${itemsHtml}
+          </div>
+          <div class="slot-fill-mixin-instructions">
+            💡 <strong>Prep Guide:</strong> Freeze only the blended base now. After your 16–24 hour freeze, do your primary spin on <strong>${escapeHtml(spinSetting)}</strong>, dig a 1.5" hole in the center to the bottom, drop in your mix-ins, and press the <strong>Mix-In</strong> button!
+          </div>
+        </div>
+      `;
+    } else {
+      previewEl.style.display = 'block';
+      previewEl.innerHTML = `
+        <div class="slot-fill-nomixin-banner">
+          <span style="color: #6ee7b7; font-size: 0.82rem; font-weight: 600;">✅ Pure Base Pint • No mix-ins required</span>
+          <span class="slot-fill-cycle-badge">Spin: ${escapeHtml(spinSetting)}</span>
+        </div>
+      `;
+    }
+  }
+
   function openSlotFillModal(slotNum = 1, preselectedRecipe = null) {
     const modal = document.getElementById('slotFillModalOverlay');
     const slotInput = document.getElementById('slotFillTargetSlotNumber');
@@ -7420,6 +7522,8 @@
     const chosenLid = existingPint ? (existingPint.lidColor || getPintLidColor(slotNum).id) : getPintLidColor(slotNum).id;
     renderLidColorSwatches('slotFillLidSwatches', 'slotFillLidColor', chosenLid);
 
+    updateSlotFillPreview();
+
     modal.classList.add('active');
     modal.setAttribute('aria-hidden', 'false');
     lockBackgroundScroll();
@@ -7432,6 +7536,11 @@
     modal.classList.remove('active');
     modal.setAttribute('aria-hidden', 'true');
     unlockBackgroundScroll();
+    const previewEl = document.getElementById('slotFillRecipePreview');
+    if (previewEl) {
+      previewEl.style.display = 'none';
+      previewEl.innerHTML = '';
+    }
   }
 
   // --- Freezer Notification Engine (Roadmap Item 17) ---
@@ -9230,8 +9339,12 @@
     spinLogSelectedRespins = '0';
     spinLogSelectedRating = 5;
 
-    const rec = allRecipes.find(r => r.id === pint.recipeId);
-    if (rec) {
+    const rec = allRecipes.find(r => (pint.recipeId && r.id === pint.recipeId) || (pint.recipeName && r.name && r.name.toLowerCase() === pint.recipeName.toLowerCase()));
+    if (pint.spinSetting) {
+      spinLogSelectedCycle = pint.spinSetting;
+    } else if (rec && rec.spinSetting) {
+      spinLogSelectedCycle = rec.spinSetting;
+    } else if (rec) {
       const cat = (rec.category || '').toLowerCase();
       if (cat.includes('sorbet') || cat.includes('fruit')) spinLogSelectedCycle = 'Sorbet';
       else if (cat.includes('gelato')) spinLogSelectedCycle = 'Gelato';
@@ -9267,9 +9380,36 @@
     // Update star ratings
     updateSpinStarRatingUI(spinLogSelectedRating);
 
-    // Reset mix-ins input
+    // Mix-ins display & pre-population
+    const mixins = getPintMixins(pint);
     const mixInsInput = document.getElementById('spinMixInsInput');
-    if (mixInsInput) mixInsInput.value = '';
+    const mixinCalloutEl = document.getElementById('spinLogMixinCallout');
+
+    if (mixins.length > 0) {
+      const mixinText = mixins.map(m => (m.qty ? `${m.qty} ${m.name}` : m.name)).join(', ');
+      if (mixInsInput) mixInsInput.value = mixinText;
+      if (mixinCalloutEl) {
+        mixinCalloutEl.style.display = 'block';
+        mixinCalloutEl.innerHTML = `
+          <div class="spin-recipe-mixin-callout">
+            <div class="spin-mixin-header">
+              <span style="font-size: 1.25rem;">🍪</span>
+              <span class="spin-mixin-title">Required Recipe Mix-In:</span>
+              <span class="spin-mixin-name">${escapeHtml(mixinText)}</span>
+            </div>
+            <p class="spin-mixin-instruction">
+              💡 <strong>Mix-In Prep Tip:</strong> After your initial <em>${escapeHtml(spinLogSelectedCycle)}</em> spin, dig a 1.5-inch hole in the center down to the bottom of the pint. Drop in your mix-ins, place container back in the machine, and press the <strong>Mix-In</strong> button!
+            </p>
+          </div>
+        `;
+      }
+    } else {
+      if (mixInsInput) mixInsInput.value = '';
+      if (mixinCalloutEl) {
+        mixinCalloutEl.style.display = 'none';
+        mixinCalloutEl.innerHTML = '';
+      }
+    }
 
     // Update streak banner
     const currentWeek = getISOWeekString();
@@ -9307,6 +9447,11 @@
     modal.classList.remove('active');
     modal.setAttribute('aria-hidden', 'true');
     unlockBackgroundScroll();
+    const mixinCalloutEl = document.getElementById('spinLogMixinCallout');
+    if (mixinCalloutEl) {
+      mixinCalloutEl.style.display = 'none';
+      mixinCalloutEl.innerHTML = '';
+    }
     spinLogActivePint = null;
   }
 
@@ -15384,6 +15529,32 @@
       });
     }
 
+    const slotFillRecipeInput = document.getElementById('slotFillRecipeInput');
+    const slotFillPintScale = document.getElementById('slotFillPintScale');
+    if (slotFillRecipeInput) {
+      slotFillRecipeInput.addEventListener('input', () => {
+        const val = slotFillRecipeInput.value.trim().toLowerCase();
+        const match = allRecipes.find(r => r.name.toLowerCase() === val);
+        const recipeIdInput = document.getElementById('slotFillRecipeId');
+        if (match && recipeIdInput) {
+          recipeIdInput.value = match.id;
+        }
+        updateSlotFillPreview();
+      });
+      slotFillRecipeInput.addEventListener('change', () => {
+        const val = slotFillRecipeInput.value.trim().toLowerCase();
+        const match = allRecipes.find(r => r.name.toLowerCase() === val);
+        const recipeIdInput = document.getElementById('slotFillRecipeId');
+        if (match && recipeIdInput) {
+          recipeIdInput.value = match.id;
+        }
+        updateSlotFillPreview();
+      });
+    }
+    if (slotFillPintScale) {
+      slotFillPintScale.addEventListener('change', updateSlotFillPreview);
+    }
+
     if (slotFillForm) {
       slotFillForm.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -15399,6 +15570,19 @@
         const notes = document.getElementById('slotFillNotes').value.trim();
         const lidColor = document.getElementById('slotFillLidColor') ? document.getElementById('slotFillLidColor').value : getPintLidColor(slotNum).id;
 
+        const recMatch = allRecipes.find(r => (recId && r.id === recId) || (r.name && r.name.toLowerCase() === recName.toLowerCase()));
+        const detectedMixins = recMatch && Array.isArray(recMatch.ingredients)
+          ? recMatch.ingredients.filter(isMixinIngredient).map(ing => {
+              const scaledQty = ing.amount ? scaleQuantity(ing.amount, scale) : '';
+              const unit = ing.unit ? ing.unit.trim() : '';
+              return {
+                name: ing.name || ing.raw || 'Mix-in',
+                qty: [scaledQty, unit].filter(Boolean).join(' ')
+              };
+            })
+          : [];
+        const recommendedCycle = (recMatch && recMatch.spinSetting) || 'Lite Ice Cream';
+
         // Remove any pint currently occupying this slot
         freezerPintsState = freezerPintsState.filter(p => p.slot !== slotNum);
 
@@ -15413,6 +15597,8 @@
           freezeHours: hours,
           lidColor: lidColor,
           notes: notes,
+          mixins: detectedMixins,
+          spinSetting: recommendedCycle,
           notified: false
         };
 

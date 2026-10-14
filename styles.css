@@ -11990,6 +11990,192 @@ body.modal-open .cookie-consent-banner {
   margin-top: 20px;
 }
 
+/* Slot Fill Recipe & Mix-In Preview Area */
+.slot-fill-recipe-preview {
+  margin-top: 8px;
+  margin-bottom: 14px;
+}
+
+.slot-fill-mixin-alert {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.16) 0%, rgba(217, 119, 6, 0.08) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.slot-fill-mixin-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.slot-fill-mixin-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.slot-fill-mixin-title-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.slot-fill-mixin-title {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #fbbf24;
+  letter-spacing: 0.02em;
+}
+
+.slot-fill-mixin-sub {
+  font-size: 0.72rem;
+  color: #fde68a;
+  font-weight: 600;
+}
+
+.slot-fill-mixin-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 8px 0;
+}
+
+.slot-fill-mixin-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(245, 158, 11, 0.28);
+  border-radius: 6px;
+  padding: 5px 8px;
+}
+
+.slot-fill-mixin-item .mixin-item-qty {
+  background: rgba(245, 158, 11, 0.22);
+  color: #fbbf24;
+  font-weight: 800;
+  font-size: 0.76rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.slot-fill-mixin-item .mixin-item-name {
+  color: #f8fafc;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.slot-fill-mixin-instructions {
+  font-size: 0.76rem;
+  color: #cbd5e1;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin-top: 8px;
+  line-height: 1.35;
+}
+
+.slot-fill-nomixin-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 8px;
+  padding: 8px 12px;
+  flex-wrap: wrap;
+}
+
+.slot-fill-cycle-badge {
+  font-size: 0.72rem;
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.slot-fill-custom-hint {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+  background: rgba(148, 163, 184, 0.1);
+  border: 1px dashed rgba(148, 163, 184, 0.3);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  color: #e2e8f0;
+}
+
+/* Shelf Slot Card Mix-In Badge */
+.slot-mixin-badge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.32);
+  border-radius: 6px;
+  padding: 3px 6px;
+  margin-bottom: 8px;
+  font-size: 0.72rem;
+  color: #fde68a;
+  line-height: 1.25;
+}
+
+.slot-mixin-badge .mixin-badge-icon {
+  font-size: 0.82rem;
+  flex-shrink: 0;
+}
+
+.slot-mixin-badge .mixin-badge-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.slot-mixin-badge .mixin-badge-text strong {
+  color: #fbbf24;
+  font-weight: 700;
+}
+
+/* Spin Log Modal Mix-in Callout */
+.spin-recipe-mixin-callout {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.16) 0%, rgba(217, 119, 6, 0.1) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+}
+
+.spin-recipe-mixin-callout .spin-mixin-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.spin-recipe-mixin-callout .spin-mixin-title {
+  color: #f8fafc;
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+
+.spin-recipe-mixin-callout .spin-mixin-name {
+  color: #fbbf24;
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+
+.spin-recipe-mixin-callout .spin-mixin-instruction {
+  margin: 5px 0 0 0;
+  font-size: 0.76rem;
+  color: #cbd5e1;
+  line-height: 1.35;
+}
+
 @media (max-width: 640px) {
   .freezer-shelf-widget {
     padding: 14px 12px;
