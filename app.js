@@ -13982,6 +13982,10 @@
     const allAccessCount = adminUsersState.filter(u => Array.isArray(u.subscriptions) && u.subscriptions.includes('All-Access')).length;
     if (adminTotalAllAccess) adminTotalAllAccess.textContent = allAccessCount;
 
+    const freezerUpgradeCount = adminUsersState.filter(u => u.freezerCapacity && u.freezerCapacity > 4).length;
+    const adminTotalFreezerUpgrades = document.getElementById('adminTotalFreezerUpgrades');
+    if (adminTotalFreezerUpgrades) adminTotalFreezerUpgrades.textContent = freezerUpgradeCount;
+
     const pendingClaimsCount = adminClaimsState.filter(c => !c.status || c.status === 'pending').length;
     const adminTotalClaims = document.getElementById('adminTotalClaims');
     if (adminTotalClaims) adminTotalClaims.textContent = pendingClaimsCount;
@@ -14016,7 +14020,9 @@
         const emailMatch = (u.email || '').toLowerCase().includes(q);
         const roleMatch = (u.role || '').toLowerCase().includes(q);
         const subMatch = subs.some(s => s.toLowerCase().includes(q));
-        if (!nameMatch && !emailMatch && !roleMatch && !subMatch) return false;
+        const capStr = `${u.freezerCapacity || 4} slots`;
+        const capMatch = (q === '8' && u.freezerCapacity === 8) || (q === '12' && u.freezerCapacity === 12) || ((q === 'freezer' || q === 'slots') && (u.freezerCapacity || 4) > 4);
+        if (!nameMatch && !emailMatch && !roleMatch && !subMatch && !capStr.includes(q) && !capMatch) return false;
       }
       return true;
     });
@@ -14092,6 +14098,11 @@
                   <option value="test_content" ${u.creatorId === 'test_content' ? 'selected' : ''}>🧪 TestContent</option>
                 </select>
               ` : ''}
+              <select class="admin-freezer-select" data-user-id="${u.id}" title="Grant or change freezer shelf container capacity" style="font-size: 0.78rem; background: rgba(15, 23, 42, 0.85); color: ${(u.freezerCapacity >= 12 ? '#fbbf24' : (u.freezerCapacity >= 8 ? '#38bdf8' : '#cbd5e1'))}; border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 6px; padding: 6px 8px; font-weight: 600;">
+                <option value="4" ${(u.freezerCapacity === 4 || !u.freezerCapacity) ? 'selected' : ''}>🧊 4 Slots (Default)</option>
+                <option value="8" ${u.freezerCapacity === 8 ? 'selected' : ''}>🧊 8 Slots (Full Week)</option>
+                <option value="12" ${u.freezerCapacity === 12 ? 'selected' : ''}>👑 12 Slots (Deep Freeze Pro)</option>
+              </select>
               <button class="btn-admin-reset-pw" data-user-id="${u.id}" data-user-email="${u.email}" title="Reset user password directly">
                 🔑
               </button>
@@ -14106,6 +14117,7 @@
           <div class="admin-user-stats-strip">
             <span>📅 Joined: <strong>${createdDate}</strong></span>
             <span>⚡ Last Active: <strong>${lastActiveDate}</strong></span>
+            <span>🧊 Shelf: <strong style="${(u.freezerCapacity >= 12 ? 'color: #fbbf24;' : (u.freezerCapacity >= 8 ? 'color: #38bdf8;' : 'color: #94a3b8;'))}">${u.freezerCapacity >= 12 ? '👑 12 Slots' : (u.freezerCapacity >= 8 ? '🧊 8 Slots' : '4 Free Slots')}</strong></span>
             <span>📦 Pantry: <strong>${u.pantryCount || 0}</strong></span>
             <span>💖 Favs: <strong>${u.favoritesCount || 0}</strong></span>
             <span>🍨 Spins: <strong>${u.madeTotal || 0}</strong></span>
@@ -14220,7 +14232,19 @@
         const newCreatorId = sel.value;
         const user = adminUsersState.find(u => u.id === userId);
         if (!user) return;
-        await updateUserPermissions(user.id, user.email, user.subscriptions || ['Community Legends'], user.role || 'creator', newCreatorId);
+        await updateUserPermissions(user.id, user.email, user.subscriptions || ['Community Legends'], user.role || 'creator', newCreatorId, user.freezerCapacity || 4);
+      });
+    });
+
+    // Freezer Shelf Capacity Select
+    adminUsersList.querySelectorAll('.admin-freezer-select').forEach(sel => {
+      sel.addEventListener('change', async () => {
+        const userId = sel.dataset.userId;
+        const newCap = parseInt(sel.value, 10);
+        const user = adminUsersState.find(u => u.id === userId);
+        if (!user) return;
+        await updateUserPermissions(user.id, user.email, user.subscriptions || ['Community Legends'], user.role || 'user', user.creatorId, newCap);
+        showToast(`🧊 Updated ${user.name || user.email}'s freezer shelf to ${newCap} slots!`);
       });
     });
 
@@ -14687,7 +14711,7 @@
     }
   }
 
-  async function updateUserPermissions(userId, email, newSubs, newRole, newCreatorId = null) {
+  async function updateUserPermissions(userId, email, newSubs, newRole, newCreatorId = null, newFreezerCapacity = null) {
     try {
       showToast('Updating permissions...');
       const payload = {
@@ -14699,6 +14723,9 @@
         role: newRole
       };
       if (newCreatorId) payload.creatorId = newCreatorId;
+      if (newFreezerCapacity !== null && newFreezerCapacity !== undefined) {
+        payload.freezerCapacity = parseInt(newFreezerCapacity, 10);
+      }
 
       const res = await fetch('/api/admin/user/permissions', {
         method: 'POST',
@@ -14719,6 +14746,9 @@
           adminUsersState[idx].subscriptions = newSubs;
           adminUsersState[idx].role = newRole;
           if (newCreatorId) adminUsersState[idx].creatorId = newCreatorId;
+          if (newFreezerCapacity !== null && newFreezerCapacity !== undefined) {
+            adminUsersState[idx].freezerCapacity = parseInt(newFreezerCapacity, 10);
+          }
         }
 
         // If updating the currently signed in user, refresh their session
@@ -14726,9 +14756,14 @@
           currentUser.subscriptions = newSubs;
           currentUser.role = newRole;
           if (newCreatorId) currentUser.creatorId = newCreatorId;
+          if (newFreezerCapacity !== null && newFreezerCapacity !== undefined) {
+            currentUser.freezerCapacity = parseInt(newFreezerCapacity, 10);
+            freezerSlotCapacity = currentUser.freezerCapacity;
+          }
           saveUserAuth();
           updateAuthUI();
           renderRecipes();
+          renderFreezerShelfWidget();
         }
 
         updateAdminStats();
