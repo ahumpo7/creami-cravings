@@ -7665,8 +7665,6 @@
     if (freezerPintsCount) {
       freezerPintsCount.textContent = `${total} Pint${total === 1 ? '' : 's'}`;
     }
-
-    renderFreezerShelfWidget();
   }
 
   // --- Hybrid Freezer Shelf Capacity Expansion Engine (Model B + Model C) ---
@@ -8857,6 +8855,99 @@
     }
   }
 
+  function updateFreezerCountdownsInPlace() {
+    // 1. In-place updates for Virtual Freezer Shelf (shelfSlotsGrid)
+    const grid = document.getElementById('shelfSlotsGrid');
+    if (grid && freezerPintsState.length > 0) {
+      let stateChanged = false;
+      freezerPintsState.forEach(pint => {
+        const slotCard = grid.querySelector(`.shelf-slot-card[data-pint-id="${pint.id}"]`);
+        if (!slotCard) return;
+        const status = computePintStatus(pint);
+        const isCurrentlyReady = slotCard.classList.contains('ready');
+
+        // Transition from chilling to ready requires full structural re-render
+        if (status.isReady !== isCurrentlyReady) {
+          stateChanged = true;
+          return;
+        }
+
+        if (!status.isReady) {
+          const isDeluxe = pint.scale === 1.5 || (pint.sizeLabel && pint.sizeLabel.includes('24 oz'));
+          const sizeTag = isDeluxe ? '24 oz' : '16 oz';
+
+          const pill = slotCard.querySelector('.slot-status-pill.chilling');
+          const pillText = `❄️ ${status.timeRemainingLabel}`;
+          if (pill && pill.textContent !== pillText) {
+            pill.textContent = pillText;
+          }
+
+          const meta = slotCard.querySelector('.slot-meta-info');
+          const metaText = `${sizeTag} • ${status.percent}% Solid`;
+          if (meta && meta.textContent !== metaText) {
+            meta.textContent = metaText;
+          }
+
+          const progressBar = slotCard.querySelector('.slot-progress-bar');
+          const widthStr = `${status.percent}%`;
+          if (progressBar && progressBar.style.width !== widthStr) {
+            progressBar.style.width = widthStr;
+          }
+        }
+      });
+
+      if (stateChanged) {
+        renderFreezerShelfWidget();
+      }
+    }
+
+    // 2. In-place updates for Freezer Modal (#freezerPintsList)
+    if (freezerModalOverlay && freezerModalOverlay.classList.contains('active') && freezerPintsList && freezerPintsState.length > 0) {
+      let modalStateChanged = false;
+      freezerPintsState.forEach(pint => {
+        const card = freezerPintsList.querySelector(`.freezer-pint-card[data-id="${pint.id}"]`);
+        if (!card) return;
+        const status = computePintStatus(pint);
+        const isCurrentlyReady = card.classList.contains('ready');
+
+        // Transition between chilling and ready requires re-render for buttons
+        if (status.isReady !== isCurrentlyReady) {
+          modalStateChanged = true;
+          return;
+        }
+
+        if (!status.isReady) {
+          const badge = card.querySelector('.freezer-status-badge.chilling');
+          const badgeText = `❄️ Chilling (${status.timeRemainingLabel})`;
+          if (badge && badge.textContent.trim() !== badgeText) {
+            badge.textContent = badgeText;
+          }
+
+          const progressInfo = card.querySelector('.freezer-progress-info');
+          if (progressInfo) {
+            const spans = progressInfo.querySelectorAll('span');
+            if (spans.length >= 2) {
+              const span0Text = `${status.percent}% Frozen`;
+              const span1Text = `${status.hoursLeft}h ${status.minsLeft}m until ready`;
+              if (spans[0].textContent !== span0Text) spans[0].textContent = span0Text;
+              if (spans[1].textContent !== span1Text) spans[1].textContent = span1Text;
+            }
+          }
+
+          const fill = card.querySelector('.freezer-progress-fill');
+          const fillWidth = `${status.percent}%`;
+          if (fill && fill.style.width !== fillWidth) {
+            fill.style.width = fillWidth;
+          }
+        }
+      });
+
+      if (modalStateChanged) {
+        renderFreezerModal();
+      }
+    }
+  }
+
   function startFreezerTicker() {
     if (freezerTickerInterval) clearInterval(freezerTickerInterval);
     // Immediately check upon startup / ticker initialization
@@ -8864,13 +8955,11 @@
     scheduleAllPendingPintAlerts();
     updateFreezerBadges();
 
-    // High-precision 1-second interval: guarantees instantaneous ready alerts and responsive countdowns
+    // High-precision interval: checks notifications, updates badges, and updates countdown labels in-place without destroying DOM
     freezerTickerInterval = setInterval(() => {
       checkAndNotifyReadyPints();
       updateFreezerBadges();
-      if (freezerModalOverlay && freezerModalOverlay.classList.contains('active')) {
-        renderFreezerModal();
-      }
+      updateFreezerCountdownsInPlace();
     }, 1000);
   }
 
