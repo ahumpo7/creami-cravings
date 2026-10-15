@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <base href="/beta/">
+  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="description" content="Discover 200+ tested Ninja Creami recipes matched to your kitchen pantry! High-protein, low-calorie, keto &amp; fruit sorbet pints with complete macros, spin settings &amp; freeze guides.">
   <title>200+ Best Ninja Creami Recipes — High Protein, Low Calorie &amp; Keto Pints | Creami Cravings</title>
@@ -108,7 +109,7 @@
   <link rel="icon" type="image/png" sizes="144x144" href="icon-144.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=v4.8">
+  <link rel="stylesheet" href="styles.css?v=v4.9">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -1297,6 +1298,7 @@
   <!-- Interactive Spin Log & Habit Streak Modal (Beta Staging) -->
   <div class="modal-overlay" id="spinLogModalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="modal-content spin-log-modal-content">
+      <div class="modal-handle-bar" aria-hidden="true"></div>
       <button class="modal-close" id="spinLogModalCloseBtn" aria-label="Close modal">&times;</button>
       
       <div class="modal-header">
@@ -1369,6 +1371,7 @@
       </div>
 
       <div class="modal-footer spin-log-footer">
+        <button type="button" class="btn-secondary btn-cancel-spin-modal" id="btnCancelSpinLogModal">Cancel</button>
         <button type="button" class="btn-secondary" id="btnShareStoryCardFromLog">📸 Share Story Card</button>
         <button type="button" class="btn-primary" id="btnConfirmLogSpin">🎉 Finish &amp; Log Batch (+1)</button>
       </div>
@@ -3300,6 +3303,6 @@
 
   <!-- Scripts -->
   <script src="recipes-data.js?v=v4.3"></script>
-  <script src="app.js?v=v4.8"></script>
+  <script src="app.js?v=v4.9"></script>
 </body>
 </html>
