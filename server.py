@@ -407,6 +407,7 @@ def format_user_payload(user):
         'creatorId': user.get('creatorId', ''),
         'creatorVips': get_user_creator_vips(user.get('email')),
         'pantry': user.get('pantry') if user.get('pantry') is not None else list(DEFAULT_STAPLES),
+        'pantryQuantities': user.get('pantryQuantities', {}),
         'favorites': user.get('favorites', []),
         'madeCounts': user.get('madeCounts', {}),
         'ratings': user.get('ratings', {}),
@@ -1993,6 +1994,8 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
 
             if 'pantry' in data and isinstance(data['pantry'], list):
                 user['pantry'] = data['pantry']
+            if 'pantryQuantities' in data and isinstance(data['pantryQuantities'], dict):
+                user['pantryQuantities'] = data['pantryQuantities']
             if 'favorites' in data and isinstance(data['favorites'], list):
                 user['favorites'] = data['favorites']
             if 'madeCounts' in data and isinstance(data['madeCounts'], dict):

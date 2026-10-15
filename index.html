@@ -115,7 +115,7 @@
   <link rel="icon" type="image/png" sizes="144x144" href="icon-144.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=v5.5">
+  <link rel="stylesheet" href="styles.css?v=v5.7">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -1171,6 +1171,49 @@
       <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; padding-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.78rem; color: #64748b;">
         <span>💡 One-time account upgrade • Syncs across all your devices</span>
         <button type="button" class="btn-secondary btn-sm" id="btnFreezerUpgradeCloseBottom">Maybe Later</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pantry Item Quantity Modal -->
+  <div class="modal-overlay" id="pantryQtyModalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-content pantry-qty-modal-content" style="max-width: 440px; width: 92%; padding: 22px;">
+      <div class="modal-handle-bar" aria-hidden="true"></div>
+      <button class="modal-close" id="pantryQtyModalCloseBtn" aria-label="Close modal">&times;</button>
+      
+      <div class="modal-header" style="margin-bottom: 16px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 1.6rem;">📦</span>
+          <div>
+            <h2 class="modal-title" id="pantryQtyModalTitle" style="font-size: 1.15rem; margin: 0;">Set In-Stock Quantity</h2>
+            <p class="modal-subtitle" id="pantryQtyModalSubtitle" style="font-size: 0.85rem; margin: 2px 0 0 0; color: var(--text-dim);">How many do you currently have in your pantry/fridge?</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="pantry-qty-modal-body">
+        <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">Quick Presets</label>
+        <div class="pantry-qty-presets-strip" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px;">
+          <button type="button" class="chip pantry-preset-chip" data-qty="1">1</button>
+          <button type="button" class="chip pantry-preset-chip" data-qty="2">2</button>
+          <button type="button" class="chip pantry-preset-chip" data-qty="3">3</button>
+          <button type="button" class="chip pantry-preset-chip" data-qty="4">4 (Pack)</button>
+          <button type="button" class="chip pantry-preset-chip" data-qty="6">6</button>
+          <button type="button" class="chip pantry-preset-chip" data-qty="8">8</button>
+          <button type="button" class="chip pantry-preset-chip" data-qty="12">12 (Case)</button>
+        </div>
+
+        <label for="pantryQtyModalInput" style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">Exact In-Stock Count</label>
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+          <button type="button" class="btn-secondary" id="btnModalQtyDec" style="width: 44px; height: 44px; font-size: 1.3rem; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--radius-sm);">−</button>
+          <input type="number" id="pantryQtyModalInput" min="0" max="999" step="1" class="search-input" style="flex: 1; height: 44px; text-align: center; font-size: 1.25rem; font-weight: 800; color: #10b981; border: 1.5px solid rgba(16, 185, 129, 0.4);" />
+          <button type="button" class="btn-secondary" id="btnModalQtyInc" style="width: 44px; height: 44px; font-size: 1.3rem; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--radius-sm);">+</button>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+          <button type="button" class="btn-secondary" id="btnModalQtyRemove" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.3);">Remove from Pantry</button>
+          <button type="button" class="btn-primary" id="btnModalQtySave" style="flex: 1;">✓ Save Quantity</button>
+        </div>
       </div>
     </div>
   </div>
@@ -3300,6 +3343,6 @@
 
   <!-- Scripts -->
   <script src="recipes-data.js?v=v4.3"></script>
-  <script src="app.js?v=v5.6"></script>
+  <script src="app.js?v=v5.7"></script>
 </body>
 </html>
