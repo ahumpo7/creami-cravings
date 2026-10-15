@@ -664,8 +664,6 @@
     renderRecipes();
     fetchCommunityStats();
     fetchServerConfig();
-    initGoogleAuth();
-    populateFreezerRecipeDatalist();
     updateFreezerBadges();
     renderFreezerShelfWidget();
     updateBatchPrepDockUI();
@@ -1358,15 +1356,23 @@
             totalSpins: data.totalSpins || 0,
             totalUsers: data.totalUsers || 1
           };
-          if (Array.isArray(data.publishedRecipes)) {
+          let needsGridReRender = false;
+          if (Array.isArray(data.publishedRecipes) && data.publishedRecipes.length > 0) {
+            const prevLen = serverPublishedRecipes.length;
             serverPublishedRecipes = data.publishedRecipes;
             mergeRecipes();
+            if (serverPublishedRecipes.length !== prevLen) {
+              needsGridReRender = true;
+            }
           }
           if (data.creatorProfiles && typeof data.creatorProfiles === 'object') {
             serverCreatorProfiles = data.creatorProfiles;
           }
           saveCommunityStats();
-          renderRecipes();
+          updateCommunityStatsUI();
+          if (needsGridReRender) {
+            renderRecipes();
+          }
         }
       }
     } catch (e) {
@@ -4237,6 +4243,7 @@
         emptyState.style.display = 'block';
       }
       recipeGrid.style.display = 'none';
+      cleanupRecipeGridObserver();
       recipeGrid.replaceChildren();
       return;
     }
@@ -4244,8 +4251,107 @@
     emptyState.style.display = 'none';
     recipeGrid.style.display = 'grid';
 
-    const cardsToDisplay = filtered.map(({ recipe, match }) => getOrCreateRecipeCard(recipe, match));
-    recipeGrid.replaceChildren(...cardsToDisplay);
+    // Progressive Batch Card Rendering (Instant Load & Fluid Resizing)
+    activeFilteredRecipes = filtered;
+    renderedRecipeCount = Math.min(filtered.length, RECIPES_INITIAL_BATCH);
+
+    const initialCards = activeFilteredRecipes
+      .slice(0, renderedRecipeCount)
+      .map(({ recipe, match }) => getOrCreateRecipeCard(recipe, match));
+
+    recipeGrid.replaceChildren(...initialCards);
+
+    if (renderedRecipeCount < activeFilteredRecipes.length) {
+      setupRecipeGridObserver();
+    } else {
+      cleanupRecipeGridObserver();
+    }
+  }
+
+  // Progressive Recipe Grid Batch Configuration & Observers
+  const RECIPES_INITIAL_BATCH = 24;
+  const RECIPES_CHUNK_SIZE = 24;
+  let activeFilteredRecipes = [];
+  let renderedRecipeCount = 0;
+  let recipeGridObserver = null;
+  let recipeGridSentinel = null;
+
+  function appendNextRecipeBatch() {
+    if (!recipeGrid || renderedRecipeCount >= activeFilteredRecipes.length) {
+      cleanupRecipeGridObserver();
+      return;
+    }
+
+    const nextBatch = activeFilteredRecipes.slice(renderedRecipeCount, renderedRecipeCount + RECIPES_CHUNK_SIZE);
+    const newCards = nextBatch.map(({ recipe, match }) => getOrCreateRecipeCard(recipe, match));
+
+    if (recipeGridSentinel && recipeGridSentinel.parentNode === recipeGrid) {
+      newCards.forEach(c => recipeGrid.insertBefore(c, recipeGridSentinel));
+    } else {
+      newCards.forEach(c => recipeGrid.appendChild(c));
+    }
+
+    renderedRecipeCount += nextBatch.length;
+
+    if (renderedRecipeCount >= activeFilteredRecipes.length) {
+      cleanupRecipeGridObserver();
+    } else if (recipeGridSentinel) {
+      const btnText = recipeGridSentinel.querySelector('button span');
+      if (btnText) {
+        btnText.textContent = `Load more recipes (${activeFilteredRecipes.length - renderedRecipeCount} remaining)...`;
+      }
+    }
+  }
+
+  function cleanupRecipeGridObserver() {
+    if (recipeGridObserver) {
+      recipeGridObserver.disconnect();
+    }
+    if (recipeGridSentinel && recipeGridSentinel.parentNode) {
+      recipeGridSentinel.remove();
+    }
+  }
+
+  function setupRecipeGridObserver() {
+    if (!recipeGrid) return;
+    if (!recipeGridSentinel) {
+      recipeGridSentinel = document.createElement('div');
+      recipeGridSentinel.id = 'recipeGridSentinel';
+      recipeGridSentinel.className = 'recipe-grid-sentinel';
+      recipeGridSentinel.style.cssText = 'grid-column: 1 / -1; display: flex; justify-content: center; align-items: center; padding: 24px 16px; min-height: 52px;';
+      recipeGridSentinel.innerHTML = `
+        <button type="button" class="btn-secondary btn-sm" id="btnLoadMoreSentinel" style="font-size: 0.82rem; padding: 8px 24px; border-radius: 999px; background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255, 255, 255, 0.15); color: #cbd5e1; cursor: pointer;">
+          <span>Load more recipes (${activeFilteredRecipes.length - renderedRecipeCount} remaining)...</span>
+        </button>
+      `;
+      recipeGridSentinel.addEventListener('click', (e) => {
+        e.preventDefault();
+        appendNextRecipeBatch();
+      });
+    } else {
+      const btnText = recipeGridSentinel.querySelector('button span');
+      if (btnText) {
+        btnText.textContent = `Load more recipes (${activeFilteredRecipes.length - renderedRecipeCount} remaining)...`;
+      }
+    }
+
+    if (recipeGridSentinel.parentNode !== recipeGrid) {
+      recipeGrid.appendChild(recipeGridSentinel);
+    }
+
+    if ('IntersectionObserver' in window) {
+      if (recipeGridObserver) recipeGridObserver.disconnect();
+      recipeGridObserver = new IntersectionObserver((entries) => {
+        if (entries[0] && entries[0].isIntersecting) {
+          appendNextRecipeBatch();
+        }
+      }, {
+        root: null,
+        rootMargin: '500px',
+        threshold: 0.01
+      });
+      recipeGridObserver.observe(recipeGridSentinel);
+    }
   }
 
   // Card DOM Node Cache for zero layout-shift & instant rendering
@@ -16856,11 +16962,42 @@
       });
     }
 
-    window.addEventListener('resize', () => {
-      if (window.innerWidth <= 768) {
-        setMobileView(activeMobileView);
+    // Optimized & Fluid Screen Size Adapter (Instant breakpoint updates & 60fps passive scrolling)
+    let lastIsMobile = (window.innerWidth <= 768);
+    let resizeRafId = null;
+
+    const handleResponsiveLayout = () => {
+      const isMobile = (window.innerWidth <= 768);
+      if (isMobile) {
+        setMobileView(activeMobileView || 'recipes');
+      } else {
+        const pantryPanel = document.getElementById('pantryPanel');
+        const recipesPanel = document.querySelector('.recipes-panel');
+        if (pantryPanel) pantryPanel.classList.remove('mobile-panel-hidden');
+        if (recipesPanel) recipesPanel.classList.remove('mobile-panel-hidden');
       }
-    });
+      lastIsMobile = isMobile;
+    };
+
+    window.addEventListener('resize', () => {
+      const isMobile = (window.innerWidth <= 768);
+      // When crossing the mobile/desktop boundary, update layout immediately!
+      if (isMobile !== lastIsMobile) {
+        handleResponsiveLayout();
+        return;
+      }
+      // When resizing within the same breakpoint, throttle via requestAnimationFrame
+      if (!resizeRafId) {
+        resizeRafId = requestAnimationFrame(() => {
+          resizeRafId = null;
+          handleResponsiveLayout();
+        });
+      }
+    }, { passive: true });
+
+    window.addEventListener('orientationchange', () => {
+      setTimeout(handleResponsiveLayout, 80);
+    }, { passive: true });
 
     // Admin Portal & Gated Access Bindings (Roadmap Item 15)
     if (openAdminPortalBtn) {
