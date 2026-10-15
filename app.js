@@ -27,6 +27,7 @@
 
   // LocalStorage Keys (Namespaced on beta sandbox to prevent collisions with production)
   const PANTRY_STORAGE_KEY = STORAGE_PREFIX + 'creami_pantry_v2';
+  const PANTRY_QUANTITIES_STORAGE_KEY = STORAGE_PREFIX + 'creami_pantry_quantities_v1';
   const THEME_STORAGE_KEY = STORAGE_PREFIX + 'creami_theme_mode';
   const FAVORITES_STORAGE_KEY = STORAGE_PREFIX + 'creami_favorites_v2';
   const CUSTOM_RECIPES_STORAGE_KEY = STORAGE_PREFIX + 'creami_custom_recipes_v2';
@@ -371,6 +372,7 @@
 
   // State
   let pantryState = new Set();
+  let pantryItemQuantities = {};
   let favoritesState = new Set();
   let customRecipesState = [];
   let serverPublishedRecipes = [];
@@ -857,6 +859,15 @@
       : `${PANTRY_STORAGE_KEY}_guest_web`;
   }
 
+  function getPantryQuantitiesStorageKey() {
+    if (currentUser && currentUser.id) {
+      return `${PANTRY_QUANTITIES_STORAGE_KEY}_${currentUser.id}`;
+    }
+    return isPwaStandalone() 
+      ? `${PANTRY_QUANTITIES_STORAGE_KEY}_guest_pwa` 
+      : `${PANTRY_QUANTITIES_STORAGE_KEY}_guest_web`;
+  }
+
   function getShoppingStorageKey() {
     if (currentUser && currentUser.id) {
       return `${MANUAL_SHOPPING_STORAGE_KEY}_${currentUser.id}`;
@@ -920,6 +931,18 @@
         pantryState = new Set(DEFAULT_STAPLES);
       }
       localStorage.setItem(key, JSON.stringify(Array.from(pantryState)));
+    }
+
+    const qKey = getPantryQuantitiesStorageKey();
+    const savedQuantities = localStorage.getItem(qKey);
+    if (savedQuantities !== null) {
+      try {
+        pantryItemQuantities = JSON.parse(savedQuantities) || {};
+      } catch (e) {
+        pantryItemQuantities = {};
+      }
+    } else {
+      pantryItemQuantities = {};
     }
   }
 
@@ -1181,8 +1204,11 @@
     lastLocalMutationTime = Date.now();
     const key = getPantryStorageKey();
     localStorage.setItem(key, JSON.stringify(Array.from(pantryState)));
+    const qKey = getPantryQuantitiesStorageKey();
+    localStorage.setItem(qKey, JSON.stringify(pantryItemQuantities));
     if (currentUser) {
       localStorage.removeItem(PANTRY_STORAGE_KEY);
+      localStorage.removeItem(PANTRY_QUANTITIES_STORAGE_KEY);
     }
     updateStats();
     triggerCloudSync();
@@ -1283,6 +1309,7 @@
           token: currentUser.token || '',
           email: currentUser.email || '',
           pantry: Array.from(pantryState),
+          pantryQuantities: pantryItemQuantities,
           favorites: Array.from(favoritesState),
           madeCounts: recipeMadeCounts,
           ratings: userRecipeData,
@@ -1956,6 +1983,17 @@
       if (currentUser) {
         localStorage.removeItem(PANTRY_STORAGE_KEY);
       }
+
+      if (data.user && data.user.pantryQuantities && typeof data.user.pantryQuantities === 'object') {
+        pantryItemQuantities = { ...data.user.pantryQuantities };
+        localStorage.setItem(getPantryQuantitiesStorageKey(), JSON.stringify(pantryItemQuantities));
+      } else {
+        const savedQ = localStorage.getItem(getPantryQuantitiesStorageKey());
+        if (savedQ) {
+          try { pantryItemQuantities = JSON.parse(savedQ) || {}; } catch (e) { pantryItemQuantities = {}; }
+        }
+      }
+
       updateStats();
       updatePantryCheckboxVisuals();
       renderPantryList();
@@ -3747,6 +3785,158 @@
     });
   }
 
+  // --- Single-Use Pantry Quantities & Helpers ---
+  function isSingleUseItem(itemOrId) {
+    if (!itemOrId) return false;
+    let id = '';
+    let name = '';
+    let cat = '';
+
+    if (typeof itemOrId === 'string') {
+      id = itemOrId;
+      const found = (typeof INGREDIENTS_MASTER !== 'undefined' && Array.isArray(INGREDIENTS_MASTER))
+        ? INGREDIENTS_MASTER.find(m => m.id === id)
+        : null;
+      if (found) {
+        name = found.name;
+        cat = found.category || '';
+      } else {
+        name = id.replace(/_/g, ' ');
+      }
+    } else if (typeof itemOrId === 'object') {
+      id = itemOrId.id || '';
+      name = itemOrId.name || '';
+      cat = itemOrId.category || '';
+    }
+
+    const cleanId = id.toLowerCase();
+    const cleanName = name.toLowerCase();
+
+    // If a custom quantity has been manually set, treat it as countable
+    if (pantryItemQuantities && typeof pantryItemQuantities[id] === 'number') {
+      return true;
+    }
+
+    // Exclude continuous bulk liquids, powders, flavorings, emulsions, spices
+    if (/\b(powder|flavor|flavoring|extract|emulsion|milk|creamer|syrup|butter|spread|seasoning|spice)\b/i.test(cleanName)) {
+      if (!cleanName.includes('shake')) return false;
+    }
+
+    // Single-use keywords
+    if (/\b(shake|shakes|protein shake|cookie|cookies|biscuit|biscuits|wafer|wafers|oreo|oreos|brownie|brownies|blondie|blondies|pastry|pastries|muffin|muffins|bites|dough|cups|pie|pop-tart)\b/i.test(cleanName)) {
+      return true;
+    }
+    if (/\bbar\b/i.test(cleanName) && !cleanName.includes('bark')) return true;
+    if (/\b(can|soda|tea bags|mini muffins|snack pack)\b/i.test(cleanName)) return true;
+    if (cleanId.includes('protein_shake') || cleanId.includes('prime_bites') || cleanId.includes('legendary_foods')) return true;
+
+    return false;
+  }
+
+  function getPantryItemQuantity(itemId, itemName = '') {
+    if (itemId && pantryItemQuantities && typeof pantryItemQuantities[itemId] === 'number') {
+      return pantryItemQuantities[itemId];
+    }
+    if (itemId && INGREDIENT_EQUIVALENTS && INGREDIENT_EQUIVALENTS[itemId]) {
+      for (const eqId of INGREDIENT_EQUIVALENTS[itemId]) {
+        if (pantryItemQuantities && typeof pantryItemQuantities[eqId] === 'number') {
+          return pantryItemQuantities[eqId];
+        }
+      }
+    }
+    if (itemName) {
+      const clean = sanitizeShoppingItemName(itemName);
+      const slug = clean.toLowerCase().replace(/[^a-z0-9]+/g, '_').trim();
+      if (slug && pantryItemQuantities && typeof pantryItemQuantities[slug] === 'number') {
+        return pantryItemQuantities[slug];
+      }
+      if (typeof INGREDIENTS_MASTER !== 'undefined' && Array.isArray(INGREDIENTS_MASTER)) {
+        const masterMatch = INGREDIENTS_MASTER.find(m => 
+          m.id === slug || m.name.toLowerCase() === clean.toLowerCase()
+        );
+        if (masterMatch && pantryItemQuantities && typeof pantryItemQuantities[masterMatch.id] === 'number') {
+          return pantryItemQuantities[masterMatch.id];
+        }
+      }
+    }
+    // If in pantry without count, consider unlimited
+    if (isItemInPantry(itemId || itemName)) {
+      return Infinity;
+    }
+    return 0;
+  }
+
+  function getPantryItemDisplayName(id) {
+    if (typeof INGREDIENTS_MASTER !== 'undefined' && Array.isArray(INGREDIENTS_MASTER)) {
+      const found = INGREDIENTS_MASTER.find(m => m.id === id);
+      if (found) return found.name;
+    }
+    return id ? id.replace(/_/g, ' ') : 'Item';
+  }
+
+  function incrementPantryQuantity(id) {
+    if (!pantryState.has(id)) pantryState.add(id);
+    const cur = (typeof pantryItemQuantities[id] === 'number' && pantryItemQuantities[id] > 0)
+      ? pantryItemQuantities[id]
+      : 1;
+    pantryItemQuantities[id] = cur + 1;
+    savePantry();
+    updatePantryCheckboxVisuals();
+    renderRecipes();
+    showToast(`${getPantryItemDisplayName(id)}: x${pantryItemQuantities[id]} in pantry`);
+  }
+
+  function decrementPantryQuantity(id) {
+    const cur = (typeof pantryItemQuantities[id] === 'number') ? pantryItemQuantities[id] : 1;
+    if (cur > 1) {
+      pantryItemQuantities[id] = cur - 1;
+      savePantry();
+      updatePantryCheckboxVisuals();
+      renderRecipes();
+      showToast(`${getPantryItemDisplayName(id)}: x${pantryItemQuantities[id]} in pantry`);
+    } else {
+      pantryState.delete(id);
+      delete pantryItemQuantities[id];
+      savePantry();
+      updatePantryCheckboxVisuals();
+      renderRecipes();
+      showToast(`Removed ${getPantryItemDisplayName(id)} from pantry`);
+    }
+  }
+
+  let activePantryQtyId = null;
+
+  function openPantryQuantityModal(id) {
+    activePantryQtyId = id;
+    const modal = document.getElementById('pantryQtyModalOverlay');
+    const title = document.getElementById('pantryQtyModalTitle');
+    const input = document.getElementById('pantryQtyModalInput');
+    if (!modal || !input) return;
+
+    const name = getPantryItemDisplayName(id);
+    if (title) title.textContent = `Set Quantity: ${name}`;
+
+    const cur = (typeof pantryItemQuantities[id] === 'number') ? pantryItemQuantities[id] : 1;
+    input.value = cur;
+
+    modal.classList.add('active');
+    modal.setAttribute('aria-hidden', 'false');
+    lockBackgroundScroll();
+    setTimeout(() => {
+      input.focus();
+      input.select();
+    }, 100);
+  }
+
+  function closePantryQuantityModal() {
+    activePantryQtyId = null;
+    const modal = document.getElementById('pantryQtyModalOverlay');
+    if (!modal) return;
+    modal.classList.remove('active');
+    modal.setAttribute('aria-hidden', 'true');
+    unlockBackgroundScroll();
+  }
+
   // --- Pantry List Rendering ---
   function renderPantryList() {
     if (!ingredientListContainer || typeof INGREDIENTS_MASTER === 'undefined') return;
@@ -3783,10 +3973,24 @@
       const itemsHtml = items.map(item => {
         const isChecked = pantryState.has(item.id);
         const count = ingredientRecipeCount[item.id] || 0;
+        const isSingle = isSingleUseItem(item);
+        const qty = (pantryItemQuantities && typeof pantryItemQuantities[item.id] === 'number') 
+          ? pantryItemQuantities[item.id] 
+          : 1;
+
+        const stepperHtml = (isSingle && isChecked) ? `
+          <div class="pantry-qty-stepper" data-action="stop-prop" title="Pantry quantity">
+            <button type="button" class="btn-pantry-qty-step dec" data-action="dec-pantry-qty" data-id="${item.id}" title="Decrease quantity">−</button>
+            <button type="button" class="pantry-qty-val" data-action="edit-pantry-qty" data-id="${item.id}" title="Tap to set exact quantity">x${qty}</button>
+            <button type="button" class="btn-pantry-qty-step inc" data-action="inc-pantry-qty" data-id="${item.id}" title="Increase quantity">+</button>
+          </div>
+        ` : '';
+
         return `
           <div class="ingredient-checkbox-item ${isChecked ? 'checked' : ''}" data-id="${item.id}">
             <div class="custom-checkbox"></div>
             <span class="ingredient-name-text">${item.name}</span>
+            ${stepperHtml}
             ${count > 0 ? `<span class="ingredient-recipe-count" title="Used in ${count} recipes">${count}</span>` : ''}
           </div>
         `;
@@ -3825,8 +4029,12 @@
   function togglePantryItem(id) {
     if (pantryState.has(id)) {
       pantryState.delete(id);
+      delete pantryItemQuantities[id];
     } else {
       pantryState.add(id);
+      if (isSingleUseItem(id)) {
+        pantryItemQuantities[id] = 1;
+      }
     }
     savePantry();
     updatePantryCheckboxVisuals();
@@ -3836,10 +4044,38 @@
   function updatePantryCheckboxVisuals() {
     document.querySelectorAll('.ingredient-checkbox-item').forEach(el => {
       const id = el.dataset.id;
-      if (pantryState.has(id)) {
+      const isChecked = pantryState.has(id);
+      if (isChecked) {
         el.classList.add('checked');
       } else {
         el.classList.remove('checked');
+      }
+
+      const isSingle = isSingleUseItem(id);
+      let stepper = el.querySelector('.pantry-qty-stepper');
+      if (isSingle && isChecked) {
+        const qty = (pantryItemQuantities && typeof pantryItemQuantities[id] === 'number')
+          ? pantryItemQuantities[id]
+          : 1;
+        if (!stepper) {
+          stepper = document.createElement('div');
+          stepper.className = 'pantry-qty-stepper';
+          stepper.dataset.action = 'stop-prop';
+          stepper.title = 'Pantry quantity';
+          const countBadge = el.querySelector('.ingredient-recipe-count');
+          if (countBadge) {
+            el.insertBefore(stepper, countBadge);
+          } else {
+            el.appendChild(stepper);
+          }
+        }
+        stepper.innerHTML = `
+          <button type="button" class="btn-pantry-qty-step dec" data-action="dec-pantry-qty" data-id="${id}" title="Decrease quantity">−</button>
+          <button type="button" class="pantry-qty-val" data-action="edit-pantry-qty" data-id="${id}" title="Tap to set exact quantity">x${qty}</button>
+          <button type="button" class="btn-pantry-qty-step inc" data-action="inc-pantry-qty" data-id="${id}" title="Increase quantity">+</button>
+        `;
+      } else if (stepper) {
+        stepper.remove();
       }
     });
 
@@ -9721,13 +9957,41 @@
       entry.rawStrings.forEach(raw => qtyParts.push(raw));
       const totalDisplay = qtyParts.join(' + ') || 'As needed';
 
+      // Check pantry availability with exact single-use item quantities
+      const pantryQty = getPantryItemQuantity(entry.id, entry.name);
+      const isSingle = entry.hasUnitless && entry.unitlessSum > 0;
+
+      let itemInStock = false;
+      let qtyDisplayText = totalDisplay;
+
+      if (isSingle) {
+        if (pantryQty >= entry.unitlessSum) {
+          itemInStock = true;
+          if (pantryQty !== Infinity) {
+            qtyDisplayText = `${totalDisplay} (${pantryQty} in pantry)`;
+          }
+        } else if (pantryQty > 0) {
+          // Partially in stock! Has some, but needs more
+          itemInStock = false;
+          const missingQty = entry.unitlessSum - pantryQty;
+          const missingDesc = getItemUnitDescriptor(entry.name, missingQty, entry.preferredUnit);
+          const formattedMissing = formatScaledNumber(missingQty);
+          const missingText = missingDesc ? `${formattedMissing} ${missingDesc}` : formattedMissing;
+          qtyDisplayText = `Need ${missingText} more (have ${pantryQty} of ${formatScaledNumber(entry.unitlessSum)} in pantry)`;
+        } else {
+          itemInStock = false;
+        }
+      } else {
+        itemInStock = inPantry;
+      }
+
       const itemData = {
         name: entry.name,
-        qtyText: totalDisplay,
+        qtyText: qtyDisplayText,
         recipesCount: entry.usedInRecipes.size
       };
 
-      if (inPantry) {
+      if (itemInStock) {
         inStockItems.push(itemData);
       } else {
         missingItems.push(itemData);
@@ -16683,6 +16947,35 @@
     // Delegated click listener for Pantry items and category headers
     if (ingredientListContainer) {
       ingredientListContainer.addEventListener('click', (e) => {
+        const incBtn = e.target.closest('[data-action="inc-pantry-qty"]');
+        if (incBtn) {
+          e.stopPropagation();
+          const id = incBtn.dataset.id;
+          if (id) incrementPantryQuantity(id);
+          return;
+        }
+
+        const decBtn = e.target.closest('[data-action="dec-pantry-qty"]');
+        if (decBtn) {
+          e.stopPropagation();
+          const id = decBtn.dataset.id;
+          if (id) decrementPantryQuantity(id);
+          return;
+        }
+
+        const editBtn = e.target.closest('[data-action="edit-pantry-qty"]');
+        if (editBtn) {
+          e.stopPropagation();
+          const id = editBtn.dataset.id;
+          if (id) openPantryQuantityModal(id);
+          return;
+        }
+
+        if (e.target.closest('.pantry-qty-stepper')) {
+          e.stopPropagation();
+          return;
+        }
+
         const row = e.target.closest('.ingredient-checkbox-item');
         if (row && row.dataset.id) {
           togglePantryItem(row.dataset.id);
@@ -16693,6 +16986,78 @@
           const group = header.closest('.category-group');
           if (group) group.classList.toggle('open');
         }
+      });
+    }
+
+    // Pantry Item Quantity Modal Listeners
+    const pantryQtyModal = document.getElementById('pantryQtyModalOverlay');
+    const pantryQtyCloseBtn = document.getElementById('pantryQtyModalCloseBtn');
+    const btnModalQtyDec = document.getElementById('btnModalQtyDec');
+    const btnModalQtyInc = document.getElementById('btnModalQtyInc');
+    const btnModalQtySave = document.getElementById('btnModalQtySave');
+    const btnModalQtyRemove = document.getElementById('btnModalQtyRemove');
+    const pantryQtyInput = document.getElementById('pantryQtyModalInput');
+
+    if (pantryQtyCloseBtn) {
+      pantryQtyCloseBtn.addEventListener('click', closePantryQuantityModal);
+    }
+    if (pantryQtyModal) {
+      pantryQtyModal.addEventListener('click', (e) => {
+        if (e.target === pantryQtyModal) closePantryQuantityModal();
+      });
+    }
+    if (btnModalQtyDec && pantryQtyInput) {
+      btnModalQtyDec.addEventListener('click', () => {
+        let val = parseInt(pantryQtyInput.value, 10) || 1;
+        if (val > 1) pantryQtyInput.value = val - 1;
+      });
+    }
+    if (btnModalQtyInc && pantryQtyInput) {
+      btnModalQtyInc.addEventListener('click', () => {
+        let val = parseInt(pantryQtyInput.value, 10) || 0;
+        pantryQtyInput.value = val + 1;
+      });
+    }
+    document.querySelectorAll('.pantry-preset-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const q = parseInt(chip.dataset.qty, 10);
+        if (!isNaN(q) && pantryQtyInput) {
+          pantryQtyInput.value = q;
+        }
+      });
+    });
+    if (btnModalQtySave && pantryQtyInput) {
+      btnModalQtySave.addEventListener('click', () => {
+        if (!activePantryQtyId) return;
+        const val = parseInt(pantryQtyInput.value, 10);
+        if (!isNaN(val) && val > 0) {
+          pantryState.add(activePantryQtyId);
+          pantryItemQuantities[activePantryQtyId] = val;
+          savePantry();
+          updatePantryCheckboxVisuals();
+          renderRecipes();
+          showToast(`✓ Set ${getPantryItemDisplayName(activePantryQtyId)} to x${val} in pantry`);
+        } else {
+          pantryState.delete(activePantryQtyId);
+          delete pantryItemQuantities[activePantryQtyId];
+          savePantry();
+          updatePantryCheckboxVisuals();
+          renderRecipes();
+          showToast(`Removed ${getPantryItemDisplayName(activePantryQtyId)} from pantry`);
+        }
+        closePantryQuantityModal();
+      });
+    }
+    if (btnModalQtyRemove) {
+      btnModalQtyRemove.addEventListener('click', () => {
+        if (!activePantryQtyId) return;
+        pantryState.delete(activePantryQtyId);
+        delete pantryItemQuantities[activePantryQtyId];
+        savePantry();
+        updatePantryCheckboxVisuals();
+        renderRecipes();
+        showToast(`Removed ${getPantryItemDisplayName(activePantryQtyId)} from pantry`);
+        closePantryQuantityModal();
       });
     }
 
@@ -16720,7 +17085,12 @@
     if (checkAllBtn) {
       checkAllBtn.addEventListener('click', () => {
         const visibleItems = getUserPantryIngredients();
-        visibleItems.forEach(i => pantryState.add(i.id));
+        visibleItems.forEach(i => {
+          pantryState.add(i.id);
+          if (isSingleUseItem(i) && !pantryItemQuantities[i.id]) {
+            pantryItemQuantities[i.id] = 1;
+          }
+        });
         savePantry();
         updatePantryCheckboxVisuals();
         updateStats();
@@ -16732,6 +17102,7 @@
     if (clearAllBtn) {
       clearAllBtn.addEventListener('click', () => {
         pantryState.clear();
+        pantryItemQuantities = {};
         savePantry();
         updatePantryCheckboxVisuals();
         updateStats();
@@ -16745,7 +17116,12 @@
       btn.addEventListener('click', () => {
         const presetKey = btn.dataset.preset;
         const presetItems = PANTRY_PRESETS[presetKey] || [];
-        presetItems.forEach(id => pantryState.add(id));
+        presetItems.forEach(id => {
+          pantryState.add(id);
+          if (isSingleUseItem(id) && !pantryItemQuantities[id]) {
+            pantryItemQuantities[id] = 1;
+          }
+        });
         savePantry();
         updatePantryCheckboxVisuals();
         renderRecipes();
@@ -18712,6 +19088,7 @@
         schemaVersion: '1.2',
         exportedAt: new Date().toISOString(),
         pantry: Array.from(pantryState),
+        pantryQuantities: pantryItemQuantities,
         favorites: Array.from(favoritesState),
         customRecipes: customRecipesState,
         freezerPints: freezerPintsState,
@@ -18763,6 +19140,11 @@
           if (Array.isArray(data.pantry)) {
             pantryState = new Set(data.pantry);
           }
+          if (data.pantryQuantities && typeof data.pantryQuantities === 'object') {
+            pantryItemQuantities = { ...data.pantryQuantities };
+          } else {
+            pantryItemQuantities = {};
+          }
           // Replace favorites
           if (Array.isArray(data.favorites)) {
             favoritesState = new Set(data.favorites);
@@ -18791,6 +19173,9 @@
           // Merge mode
           if (Array.isArray(data.pantry)) {
             data.pantry.forEach(id => pantryState.add(id));
+          }
+          if (data.pantryQuantities && typeof data.pantryQuantities === 'object') {
+            Object.assign(pantryItemQuantities, data.pantryQuantities);
           }
           if (Array.isArray(data.favorites)) {
             data.favorites.forEach(id => favoritesState.add(id));
