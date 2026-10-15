@@ -7747,7 +7747,8 @@
                 </div>
               </div>
               <div class="slot-actions-row">
-                ${pint.recipeId ? `<button type="button" class="btn-slot-action btn-slot-recipe" data-action="view-recipe" data-recipe-id="${pint.recipeId}">📖 Recipe</button>` : '<span></span>'}
+                <button type="button" class="btn-slot-action btn-slot-mark-ready" data-action="mark-slot-ready" data-pint-id="${pint.id}" title="Already froze this pint? Mark it as 100% solid &amp; ready to spin!">🟢 Ready to Spin</button>
+                ${pint.recipeId ? `<button type="button" class="btn-slot-action btn-slot-recipe" data-action="view-recipe" data-recipe-id="${pint.recipeId}">📖 Recipe</button>` : ''}
                 <button type="button" class="btn-slot-action btn-slot-discard" data-action="discard-slot" data-pint-id="${pint.id}" title="Remove container">🗑️</button>
               </div>
             </div>
@@ -7807,6 +7808,14 @@
         e.stopPropagation();
         const pintId = btn.dataset.pintId;
         openSpinLogModal(pintId);
+      });
+    });
+
+    grid.querySelectorAll('[data-action="mark-slot-ready"]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const pintId = btn.dataset.pintId;
+        markPintAsReady(pintId);
       });
     });
 
@@ -7959,6 +7968,10 @@
     }
     if (notesInput) notesInput.value = '';
     if (hoursSelect) hoursSelect.value = '16';
+    const alreadyFrozenCheckbox = document.getElementById('slotFillAlreadyFrozen');
+    if (alreadyFrozenCheckbox) alreadyFrozenCheckbox.checked = false;
+    const submitBtn = document.getElementById('slotFillSubmitBtn');
+    if (submitBtn) submitBtn.textContent = '❄️ Start Freeze Countdown';
 
     const existingPint = freezerPintsState.find(p => p.slot === slotNum);
     const chosenLid = existingPint ? (existingPint.lidColor || getPintLidColor(slotNum).id) : getPintLidColor(slotNum).id;
@@ -8521,6 +8534,20 @@
     }
   }
 
+  function markPintAsReady(pintId) {
+    const pint = freezerPintsState.find(p => p.id === pintId);
+    if (!pint) return;
+    const freezeDurationHours = pint.freezeHours || 16;
+    pint.frozenAt = Date.now() - ((freezeDurationHours + 1) * 3600 * 1000);
+    saveFreezerPints();
+    renderFreezerShelfWidget();
+    if (freezerModalOverlay && freezerModalOverlay.classList.contains('active')) {
+      renderFreezerModal();
+    }
+    showToast(`🟢 "${pint.recipeName}" is now marked as frozen solid & ready to spin! 🍨`);
+  }
+  window.markPintAsReady = markPintAsReady;
+
   function removeFreezerPint(pintId) {
     const pint = freezerPintsState.find(p => p.id === pintId);
     if (pintNotifTimers.has(pintId)) {
@@ -8657,6 +8684,11 @@
           <!-- Card Actions -->
           <div class="freezer-card-actions">
             <div class="freezer-card-actions-left">
+              ${!status.isReady ? `
+                <button class="btn-freezer-mark-ready" data-action="mark-ready" title="Already froze this pint? Mark it as 100% solid &amp; ready to spin!">
+                  <span>🟢 Set as Frozen</span>
+                </button>
+              ` : ''}
               <button class="btn-spin-enjoyed" data-action="spin" title="Mark this pint as spun and add +1 to your batch counter">
                 <span>🍨 Spun &amp; Enjoyed (+1 Made)</span>
               </button>
@@ -8687,6 +8719,11 @@
       const pintId = card.dataset.id;
       const pint = freezerPintsState.find(p => p.id === pintId);
       if (!pint) return;
+
+      const markReadyBtn = card.querySelector('[data-action="mark-ready"]');
+      if (markReadyBtn) {
+        markReadyBtn.addEventListener('click', () => markPintAsReady(pintId));
+      }
 
       const spinBtn = card.querySelector('[data-action="spin"]');
       if (spinBtn) {
@@ -16097,6 +16134,22 @@
       slotFillPintScale.addEventListener('change', updateSlotFillPreview);
     }
 
+    const slotFillAlreadyFrozen = document.getElementById('slotFillAlreadyFrozen');
+    const slotFillFreezeHours = document.getElementById('slotFillFreezeHours');
+    const slotFillSubmitBtn = document.getElementById('slotFillSubmitBtn');
+    function updateSlotFillSubmitText() {
+      if (!slotFillSubmitBtn) return;
+      const slotNum = document.getElementById('slotFillTargetSlotNumber')?.value || '1';
+      const isFrozen = Boolean((slotFillAlreadyFrozen && slotFillAlreadyFrozen.checked) || (slotFillFreezeHours && slotFillFreezeHours.value === '0'));
+      if (isFrozen) {
+        slotFillSubmitBtn.textContent = `🍨 Put in Slot ${slotNum} as Ready to Spin`;
+      } else {
+        slotFillSubmitBtn.textContent = '❄️ Start Freeze Countdown';
+      }
+    }
+    if (slotFillAlreadyFrozen) slotFillAlreadyFrozen.addEventListener('change', updateSlotFillSubmitText);
+    if (slotFillFreezeHours) slotFillFreezeHours.addEventListener('change', updateSlotFillSubmitText);
+
     if (slotFillForm) {
       slotFillForm.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -16108,9 +16161,13 @@
           if (match) recId = match.id;
         }
         const scale = parseFloat(document.getElementById('slotFillPintScale').value) || 1.0;
-        const hours = parseInt(document.getElementById('slotFillFreezeHours').value, 10) || 16;
+        const hours = parseInt(document.getElementById('slotFillFreezeHours').value, 10);
         const notes = document.getElementById('slotFillNotes').value.trim();
         const lidColor = document.getElementById('slotFillLidColor') ? document.getElementById('slotFillLidColor').value : getPintLidColor(slotNum).id;
+
+        const alreadyFrozenCheck = document.getElementById('slotFillAlreadyFrozen');
+        const isAlreadyFrozen = Boolean((alreadyFrozenCheck && alreadyFrozenCheck.checked) || hours === 0);
+        const actualHours = (isNaN(hours) || hours === 0) ? 16 : hours;
 
         const recMatch = allRecipes.find(r => (recId && r.id === recId) || (r.name && r.name.toLowerCase() === recName.toLowerCase()));
         const detectedMixins = recMatch && Array.isArray(recMatch.ingredients)
@@ -16135,8 +16192,8 @@
           recipeName: recName,
           scale: scale,
           sizeLabel: scale === 1.5 ? '24 oz Deluxe' : '16 oz Standard',
-          frozenAt: Date.now(),
-          freezeHours: hours,
+          frozenAt: isAlreadyFrozen ? (Date.now() - ((actualHours + 1) * 3600 * 1000)) : Date.now(),
+          freezeHours: actualHours,
           lidColor: lidColor,
           notes: notes,
           mixins: detectedMixins,
@@ -16148,7 +16205,11 @@
         saveFreezerPints();
         closeSlotFillModal();
         renderFreezerShelfWidget();
-        showToast(`❄️ Slot ${slotNum} filled with "${recName}"! ${hours}h countdown active. 🎉`);
+        if (isAlreadyFrozen) {
+          showToast(`🎉 Slot ${slotNum} filled with "${recName}" — 100% frozen solid & ready to spin! 🍨`);
+        } else {
+          showToast(`❄️ Slot ${slotNum} filled with "${recName}"! ${actualHours}h countdown active. 🎉`);
+        }
       });
     }
 
@@ -16298,6 +16359,18 @@
       });
     }
 
+    const freezerAlreadyFrozen = document.getElementById('freezerAlreadyFrozen');
+    const freezerSubmitAddBtn = document.getElementById('freezerSubmitAddBtn');
+    if (freezerAlreadyFrozen) {
+      freezerAlreadyFrozen.addEventListener('change', () => {
+        if (freezerAlreadyFrozen.checked) {
+          if (freezerSubmitAddBtn) freezerSubmitAddBtn.textContent = '🍨 Log as Frozen & Ready to Spin';
+        } else {
+          if (freezerSubmitAddBtn) freezerSubmitAddBtn.textContent = '🧊 Freeze Pint & Start 16h Timer';
+        }
+      });
+    }
+
     if (freezerAddForm) {
       freezerAddForm.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -16306,8 +16379,13 @@
         const scale = parseFloat(freezerPintScale ? freezerPintScale.value : '1.0') || 1.0;
         const notes = (freezerNotes ? freezerNotes.value : '').trim();
 
+        const alreadyFrozenCheck = document.getElementById('freezerAlreadyFrozen');
+        const isAlreadyFrozen = Boolean(alreadyFrozenCheck && alreadyFrozenCheck.checked);
+
         let frozenAt = Date.now();
-        if (freezerCustomTime && freezerCustomTime.value) {
+        if (isAlreadyFrozen) {
+          frozenAt = Date.now() - (17 * 3600 * 1000);
+        } else if (freezerCustomTime && freezerCustomTime.value) {
           const parsed = new Date(freezerCustomTime.value).getTime();
           if (!isNaN(parsed)) frozenAt = parsed;
         } else if (freezerSelectedTimeOffset > 0) {
@@ -16327,6 +16405,8 @@
         });
 
         freezerAddForm.reset();
+        if (freezerAlreadyFrozen) freezerAlreadyFrozen.checked = false;
+        if (freezerSubmitAddBtn) freezerSubmitAddBtn.textContent = '🧊 Freeze Pint & Start 16h Timer';
         if (freezerNotifyOnReady) freezerNotifyOnReady.checked = true;
         freezerSelectedTimeOffset = 0;
         if (freezerTimePresets) {
