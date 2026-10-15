@@ -364,7 +364,7 @@
         <!-- Ingredient Search -->
         <div class="search-box">
           <span class="search-icon">🔍</span>
-          <input type="text" id="ingredientSearch" placeholder="Search pantry ingredients..." autocomplete="off">
+          <input type="text" id="ingredientSearch" placeholder="Search pantry ingredients..." autocomplete="off" aria-label="Search pantry ingredients">
           <button id="clearIngSearchBtn" class="clear-input-btn" style="display: none;">&times;</button>
         </div>
 
@@ -432,7 +432,7 @@
           <!-- Search Recipes -->
           <div class="search-box recipe-search-box">
             <span class="search-icon">🔍</span>
-            <input type="text" id="recipeSearch" placeholder="Search recipes by name, ingredient, or spin..." autocomplete="off">
+            <input type="text" id="recipeSearch" placeholder="Search recipes by name, ingredient, or spin..." autocomplete="off" aria-label="Search recipes">
             <button id="clearRecipeSearchBtn" class="clear-input-btn" style="display: none;">&times;</button>
           </div>
 
@@ -507,12 +507,12 @@
         <!-- Condensed Secondary Filters Toolbar -->
         <div class="condensed-filter-bar" id="quickFilterChipsBar">
           <label class="toggle-pill" id="readyOnlyPill" title="Show only recipes where you have 100% of all ingredients">
-            <input type="checkbox" id="readyOnlyToggle">
+            <input type="checkbox" id="readyOnlyToggle" aria-label="Show ready only recipes">
             <span>⚡ Ready Only</span>
           </label>
 
           <label class="toggle-pill" id="baseOnlyPill" title="Show recipes where you have all base ingredients">
-            <input type="checkbox" id="baseOnlyToggle">
+            <input type="checkbox" id="baseOnlyToggle" aria-label="Show base ready recipes only">
             <span>🥣 Base Ready</span>
           </label>
 
@@ -569,7 +569,7 @@
                 <span class="slider-title">💪 Min Protein</span>
                 <span class="slider-display" id="minProteinDisplay">Any (≥0g)</span>
               </div>
-              <input type="range" class="macro-range-input" id="minProteinSlider" min="0" max="50" step="5" value="0">
+              <input type="range" class="macro-range-input" id="minProteinSlider" min="0" max="50" step="5" value="0" aria-label="Minimum protein grams">
               <div class="macro-slider-ticks">
                 <span>0g</span>
                 <span>15g</span>
@@ -584,7 +584,7 @@
                 <span class="slider-title">🔥 Max Calories</span>
                 <span class="slider-display" id="maxCaloriesDisplay">Any (≤450)</span>
               </div>
-              <input type="range" class="macro-range-input" id="maxCaloriesSlider" min="150" max="450" step="25" value="450">
+              <input type="range" class="macro-range-input" id="maxCaloriesSlider" min="150" max="450" step="25" value="450" aria-label="Maximum calories">
               <div class="macro-slider-ticks">
                 <span>150</span>
                 <span>250</span>
@@ -599,7 +599,7 @@
                 <span class="slider-title">🧈 Max Fat</span>
                 <span class="slider-display" id="maxFatDisplay">Any (≤20g)</span>
               </div>
-              <input type="range" class="macro-range-input" id="maxFatSlider" min="2" max="20" step="1" value="20">
+              <input type="range" class="macro-range-input" id="maxFatSlider" min="2" max="20" step="1" value="20" aria-label="Maximum fat grams">
               <div class="macro-slider-ticks">
                 <span>2g</span>
                 <span>5g (Low Fat)</span>
@@ -1341,8 +1341,8 @@
 
         <!-- Mix-Ins Added -->
         <div class="spin-log-field-group">
-          <label class="spin-log-label">Mix-Ins Added (Optional)</label>
-          <input type="text" class="spin-log-input" id="spinMixInsInput" placeholder="e.g. 1 Crushed Oreo, 15g Peanut Butter, berries...">
+          <label class="spin-log-label" for="spinMixInsInput">Mix-Ins Added (Optional)</label>
+          <input type="text" class="spin-log-input" id="spinMixInsInput" placeholder="e.g. 1 Crushed Oreo, 15g Peanut Butter, berries..." aria-label="Mix-ins added (optional)">
         </div>
 
         <!-- Star Rating -->
@@ -1554,12 +1554,12 @@
                 <div class="form-row">
                   <div class="form-group flex-2">
                     <label>Liquid Name</label>
-                    <input type="text" class="bap-custom-input-name" placeholder="e.g. Soy Milk, Oat Barista Blend, Chocolate Fairlife..." data-step="1">
+                    <input type="text" class="bap-custom-input-name" placeholder="e.g. Soy Milk, Oat Barista Blend, Chocolate Fairlife..." data-step="1" aria-label="Liquid Base Name">
                   </div>
                   <div class="form-group flex-1">
                     <label>Quantity</label>
                     <div class="bap-custom-qty-wrapper">
-                      <input type="number" class="bap-custom-input-qty" value="380" min="10" max="1000" data-step="1">
+                      <input type="number" class="bap-custom-input-qty" value="380" min="10" max="1000" data-step="1" aria-label="Liquid Base Quantity in grams">
                       <span class="bap-custom-unit-tag">g</span>
                     </div>
                   </div>
@@ -1603,12 +1603,12 @@
                 <div class="form-row">
                   <div class="form-group flex-2">
                     <label>Powder Name</label>
-                    <input type="text" class="bap-custom-input-name" placeholder="e.g. Ghost Cinnabon Protein, Matcha Powder, Black Cocoa..." data-step="2">
+                    <input type="text" class="bap-custom-input-name" placeholder="e.g. Ghost Cinnabon Protein, Matcha Powder, Black Cocoa..." data-step="2" aria-label="Powder Name">
                   </div>
                   <div class="form-group flex-1">
                     <label>Quantity</label>
                     <div class="bap-custom-qty-wrapper">
-                      <input type="number" class="bap-custom-input-qty" value="25" min="1" max="500" data-step="2">
+                      <input type="number" class="bap-custom-input-qty" value="25" min="1" max="500" data-step="2" aria-label="Powder Quantity in grams">
                       <span class="bap-custom-unit-tag">g</span>
                     </div>
                   </div>
@@ -1652,12 +1652,12 @@
                 <div class="form-row">
                   <div class="form-group flex-2">
                     <label>Stabilizer Name</label>
-                    <input type="text" class="bap-custom-input-name" placeholder="e.g. Tara Gum, Unflavored Gelatin, Ricotta Cheese..." data-step="3">
+                    <input type="text" class="bap-custom-input-name" placeholder="e.g. Tara Gum, Unflavored Gelatin, Ricotta Cheese..." data-step="3" aria-label="Stabilizer Name">
                   </div>
                   <div class="form-group flex-1">
                     <label>Quantity</label>
                     <div class="bap-custom-qty-wrapper">
-                      <input type="number" class="bap-custom-input-qty" value="1" min="1" max="100" data-step="3">
+                      <input type="number" class="bap-custom-input-qty" value="1" min="1" max="100" data-step="3" aria-label="Stabilizer Quantity in grams">
                       <span class="bap-custom-unit-tag">g</span>
                     </div>
                   </div>
@@ -1706,12 +1706,12 @@
                 <div class="form-row">
                   <div class="form-group flex-2">
                     <label>Ingredient Name</label>
-                    <input type="text" class="bap-custom-input-name" placeholder="e.g. Boba Pearls, Dragon Fruit Puree, Skinny Caramel Syrup..." data-step="4">
+                    <input type="text" class="bap-custom-input-name" placeholder="e.g. Boba Pearls, Dragon Fruit Puree, Skinny Caramel Syrup..." data-step="4" aria-label="Ingredient Name">
                   </div>
                   <div class="form-group flex-1">
                     <label>Quantity</label>
                     <div class="bap-custom-qty-wrapper">
-                      <input type="number" class="bap-custom-input-qty" value="20" min="1" max="500" data-step="4">
+                      <input type="number" class="bap-custom-input-qty" value="20" min="1" max="500" data-step="4" aria-label="Ingredient Quantity in grams">
                       <span class="bap-custom-unit-tag">g</span>
                     </div>
                   </div>
@@ -2508,7 +2508,7 @@
 
           <!-- Add VIP Member Form -->
           <div class="creator-vip-add-form" style="display: flex; gap: 8px; margin-top: 14px; margin-bottom: 14px; flex-wrap: wrap;">
-            <input type="email" id="studioNewVipEmail" class="form-input" placeholder="Enter supporter's email (e.g. friend@gmail.com)" style="flex: 1; min-width: 240px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; padding: 10px 14px; color: #f8fafc; font-size: 0.88rem;" />
+            <input type="email" id="studioNewVipEmail" class="form-input" placeholder="Enter supporter's email (e.g. friend@gmail.com)" aria-label="Supporter email address for VIP access" style="flex: 1; min-width: 240px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; padding: 10px 14px; color: #f8fafc; font-size: 0.88rem;" />
             <button type="button" class="btn-primary" id="btnStudioAddVip" style="padding: 10px 18px; font-weight: 600;">
               <span>⭐ Grant VIP Access</span>
             </button>
@@ -2622,7 +2622,7 @@
 
         <div class="admin-toolbar">
           <div class="admin-search-wrap">
-            <input type="text" id="adminUserSearchInput" placeholder="Search by name, email, or role..." class="admin-search-input">
+            <input type="text" id="adminUserSearchInput" placeholder="Search by name, email, or role..." class="admin-search-input" aria-label="Search users by name, email, or role">
           </div>
           <div class="admin-filter-pills" id="adminRoleFilterPills">
             <button type="button" class="btn-time-preset active" data-role="all">All Users</button>
@@ -2728,26 +2728,26 @@
           <label class="admin-form-label">Recipe Pack Subscriptions</label>
           <div class="admin-sub-presets-row" style="display: flex; gap: 14px; margin-top: 6px; flex-wrap: wrap;">
             <label class="admin-radio-label" style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; cursor: pointer;">
-              <input type="radio" name="adminNewUserTierPreset" value="free" checked>
+              <input type="radio" name="adminNewUserTierPreset" value="free" checked aria-label="Free Starter Tier (Community Legends)">
               <span>🆓 Free Starter Tier (Community Legends)</span>
             </label>
             <label class="admin-radio-label" style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; cursor: pointer;">
-              <input type="radio" name="adminNewUserTierPreset" value="allaccess">
+              <input type="radio" name="adminNewUserTierPreset" value="allaccess" aria-label="All-Access (All books unlocked)">
               <span>👑 All-Access (All books unlocked)</span>
             </label>
             <label class="admin-radio-label" style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; cursor: pointer;">
-              <input type="radio" name="adminNewUserTierPreset" value="custom">
+              <input type="radio" name="adminNewUserTierPreset" value="custom" aria-label="Custom Selection">
               <span>⚙️ Custom Selection</span>
             </label>
           </div>
 
           <div class="admin-custom-subs-grid" id="adminNewUserCustomSubs" style="display: none; margin-top: 12px; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px;">
-            <label class="admin-checkbox-label" style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--text-dim);"><input type="checkbox" value="Community Legends" checked disabled> Community Legends (Free)</label>
-            <label class="admin-checkbox-label" style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem;"><input type="checkbox" value="Base Flavors" class="chk-custom-sub"> Base Flavors</label>
-            <label class="admin-checkbox-label" style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem;"><input type="checkbox" value="Fan Favorites" class="chk-custom-sub"> Fan Favorites</label>
-            <label class="admin-checkbox-label" style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem;"><input type="checkbox" value="Keto" class="chk-custom-sub"> Keto &amp; Low Carb</label>
-            <label class="admin-checkbox-label" style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem;"><input type="checkbox" value="Lactose Free" class="chk-custom-sub"> Lactose Free</label>
-            <label class="admin-checkbox-label" style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem;"><input type="checkbox" value="No Protein" class="chk-custom-sub"> No Protein</label>
+            <label class="admin-checkbox-label" style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--text-dim);"><input type="checkbox" value="Community Legends" checked disabled aria-label="Community Legends (Free)"> Community Legends (Free)</label>
+            <label class="admin-checkbox-label" style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem;"><input type="checkbox" value="Base Flavors" class="chk-custom-sub" aria-label="Base Flavors"> Base Flavors</label>
+            <label class="admin-checkbox-label" style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem;"><input type="checkbox" value="Fan Favorites" class="chk-custom-sub" aria-label="Fan Favorites"> Fan Favorites</label>
+            <label class="admin-checkbox-label" style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem;"><input type="checkbox" value="Keto" class="chk-custom-sub" aria-label="Keto and Low Carb"> Keto &amp; Low Carb</label>
+            <label class="admin-checkbox-label" style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem;"><input type="checkbox" value="Lactose Free" class="chk-custom-sub" aria-label="Lactose Free"> Lactose Free</label>
+            <label class="admin-checkbox-label" style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem;"><input type="checkbox" value="No Protein" class="chk-custom-sub" aria-label="No Protein"> No Protein</label>
           </div>
         </div>
 
@@ -2842,10 +2842,10 @@
           <div class="backup-card-title">📤 Restore from Backup</div>
           <p class="backup-card-desc">Restore your data from a previously downloaded JSON backup file. Choose whether to merge with your current kitchen data or replace everything.</p>
           <div class="backup-options-row">
-            <label><input type="radio" name="backupRestoreMode" value="merge" checked> Merge with current</label>
-            <label><input type="radio" name="backupRestoreMode" value="replace"> Overwrite / Replace</label>
+            <label><input type="radio" name="backupRestoreMode" value="merge" checked aria-label="Merge backup with current data"> Merge with current</label>
+            <label><input type="radio" name="backupRestoreMode" value="replace" aria-label="Overwrite and replace all kitchen data with backup"> Overwrite / Replace</label>
           </div>
-          <input type="file" id="backupFileInput" class="backup-file-input" accept=".json,application/json">
+          <input type="file" id="backupFileInput" class="backup-file-input" accept=".json,application/json" aria-label="Upload backup JSON file">
           <button type="button" class="btn-secondary" id="btnTriggerRestore">Select Backup File &amp; Restore</button>
         </div>
 
@@ -2979,7 +2979,7 @@
             <p class="cookie-pref-desc">Helps us understand recipe popularity, search trends, and navigation patterns so we can optimize cookbook speed and add top-requested flavors.</p>
           </div>
           <label class="cookie-switch">
-            <input type="checkbox" id="prefAnalyticsToggle" class="cookie-toggle-input">
+            <input type="checkbox" id="prefAnalyticsToggle" class="cookie-toggle-input" aria-label="Allow Performance and Google Analytics cookies">
             <span class="cookie-slider"></span>
           </label>
         </div>
@@ -2993,7 +2993,7 @@
             <p class="cookie-pref-desc">Allows Google and approved ad partners to display relevant ingredient, blender, and fitness product offers to support the free companion cookbook.</p>
           </div>
           <label class="cookie-switch">
-            <input type="checkbox" id="prefMarketingToggle" class="cookie-toggle-input">
+            <input type="checkbox" id="prefMarketingToggle" class="cookie-toggle-input" aria-label="Allow Personalized Advertising and Google AdSense cookies">
             <span class="cookie-slider"></span>
           </label>
         </div>
