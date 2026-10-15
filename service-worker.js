@@ -1,5 +1,5 @@
 // Creami Cravings Service Worker (Roadmap Items 11 & 17 & 19)
-const CACHE_NAME = 'creami-cravings-v4.9';
+const CACHE_NAME = 'creami-cravings-v5.1';
 
 const PRECACHE_ASSETS = [
   '/',
@@ -124,6 +124,22 @@ self.addEventListener('fetch', (event) => {
 
   // 4. Same-origin Static Assets (JS, CSS, Images): Cache-first with background revalidation (Stale-While-Revalidate)
   if (url.origin === self.location.origin) {
+    // If request has version query parameter (?v=), fetch network-first so asset updates are applied immediately
+    if (url.search && url.search.includes('v=')) {
+      event.respondWith(
+        fetch(request)
+          .then((networkResponse) => {
+            if (networkResponse && networkResponse.status === 200) {
+              const clone = networkResponse.clone();
+              caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+            }
+            return networkResponse;
+          })
+          .catch(() => caches.match(request))
+      );
+      return;
+    }
+
     event.respondWith(
       caches.match(request).then((cachedResponse) => {
         const fetchPromise = fetch(request)
@@ -140,6 +156,13 @@ self.addEventListener('fetch', (event) => {
       })
     );
     return;
+  }
+});
+
+// Skip Waiting Message Listener (Forces active state immediately when requested)
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
   }
 });
 

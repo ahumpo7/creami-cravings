@@ -17853,6 +17853,20 @@
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('/service-worker.js')
           .then((registration) => {
+            registration.update();
+            if (registration.waiting) {
+              registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+            }
+            registration.addEventListener('updatefound', () => {
+              const newWorker = registration.installing;
+              if (newWorker) {
+                newWorker.addEventListener('statechange', () => {
+                  if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    newWorker.postMessage({ type: 'SKIP_WAITING' });
+                  }
+                });
+              }
+            });
             console.log('[PWA] Service Worker registered with scope:', registration.scope);
             if (freezeNotifsEnabled && 'Notification' in window && Notification.permission === 'granted') {
               scheduleAllPendingPintAlerts();

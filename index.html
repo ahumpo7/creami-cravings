@@ -115,7 +115,7 @@
   <link rel="icon" type="image/png" sizes="144x144" href="icon-144.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=v5.0">
+  <link rel="stylesheet" href="styles.css?v=v5.1">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -2060,7 +2060,7 @@
               <button type="button" class="btn-primary btn-browse-creator-books" data-creator-id="fitness_product_finder" aria-label="Browse Eli's recipe books">
                 <span>Browse Eli's Books (5) &rarr;</span>
               </button>
-              <a href="https://fitnessproductfinder.com/collections/creami-cravings-recipe-books" target="_blank" rel="noopener noreferrer" class="btn-creator-website-link" role="button" title="Visit Eli's Official Storefront" aria-label="Visit Eli's Storefront">
+              <a href="https://fitnessproductfinder.com/collections/creami-cravings-recipe-books" target="_blank" rel="noopener noreferrer" class="btn-creator-website-link" role="button" title="Visit Eli's Official Storefront" aria-label="Visit Eli's Storefront" onclick="window.open(this.href, '_blank', 'noopener,noreferrer'); event.stopPropagation();">
                 <span>Storefront ↗</span>
               </a>
             </div>
@@ -2094,7 +2094,7 @@
               <button type="button" class="btn-primary btn-browse-creator-books" data-creator-id="test_content" aria-label="Browse TestContent's recipe books">
                 <span>Browse TestContent's Books (2) &rarr;</span>
               </button>
-              <a href="/@testcontent" class="btn-creator-website-link" role="button" title="Visit TestContent Studio Storefront" aria-label="Visit TestContent Studio Storefront">
+              <a href="/@testcontent" class="btn-creator-website-link" role="button" title="Visit TestContent Studio Storefront" aria-label="Visit TestContent Studio Storefront" onclick="window.open(this.href, '_blank', 'noopener,noreferrer'); event.stopPropagation();">
                 <span>Storefront ↗</span>
               </a>
             </div>
@@ -3300,6 +3300,6 @@
 
   <!-- Scripts -->
   <script src="recipes-data.js?v=v4.3"></script>
-  <script src="app.js?v=v5.0"></script>
+  <script src="app.js?v=v5.1"></script>
 </body>
 </html>

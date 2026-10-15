@@ -10106,7 +10106,7 @@ body.modal-open .cookie-consent-banner {
   align-items: center;
   justify-content: center;
   position: relative;
-  z-index: 10;
+  z-index: 25;
   min-height: 42px;
   padding: 10px 18px;
   border-radius: 999px;
@@ -10138,21 +10138,23 @@ body.modal-open .cookie-consent-banner {
 .btn-creator-website-link::before {
   content: '';
   position: absolute;
-  top: -12px;
-  right: -12px;
-  bottom: -8px;
-  left: -8px;
+  top: -14px;
+  right: -14px;
+  bottom: -10px;
+  left: -10px;
   border-radius: 0;
-  background: transparent;
-  pointer-events: auto;
+  background: rgba(0, 0, 0, 0.001);
+  pointer-events: auto !important;
   z-index: 1;
 }
 
-.btn-creator-website-link:hover {
-  background: rgba(245, 158, 11, 0.25) !important;
-  border-color: rgba(245, 158, 11, 0.85) !important;
+.btn-creator-website-link:hover,
+.btn-creator-website-link:focus-visible,
+.btn-creator-website-link:active {
+  background: rgba(245, 158, 11, 0.3) !important;
+  border-color: #f59e0b !important;
   color: #ffffff !important;
-  box-shadow: 0 0 14px rgba(245, 158, 11, 0.45);
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.55) !important;
   transform: translateY(-1px);
 }
 
