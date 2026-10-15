@@ -466,6 +466,7 @@
   let assemblyCurrentStep = 1;
   let assemblyWakeLock = null;
   let assemblyCheckedItems = new Set();
+  let assemblyPintConfigs = [];
 
   // 1-Tap Smart Ingredient Substitutions State (Roadmap Item 16)
   let activeRecipeSwaps = {}; // { [recipeId]: { [originalIngName]: swapObj } }
@@ -9761,7 +9762,12 @@
     renderBatchPrepModal();
   }
 
-  function batchFillFreezerSlots() {
+  function batchFillFreezerSlots(customConfigs = null) {
+    if (!currentUser) {
+      showToast('🔒 Please sign in to save pints to your freezer.');
+      openGoogleAuthModal();
+      return;
+    }
     if (batchPrepQueueState.length === 0) {
       showToast('No pints in batch queue to fill.');
       return;
@@ -9798,10 +9804,39 @@
     }
 
     let filledCount = 0;
-    batchPrepQueueState.forEach(queued => {
+    const filledIndices = [];
+
+    batchPrepQueueState.forEach((queued, idx) => {
       if (emptySlots.length > 0) {
         const slotNum = emptySlots.shift();
-        const lid = getPintLidColor(slotNum);
+        const fallbackLid = getPintLidColor(slotNum);
+        const config = (customConfigs && customConfigs[idx]) || {};
+        const chosenLid = config.lidColor || fallbackLid.id;
+
+        let frozenAt = Date.now();
+        const isAlreadyFrozen = Boolean(config.alreadyFrozen || (config.timeOffset && config.timeOffset >= 16));
+        if (config.customTime) {
+          const parsed = new Date(config.customTime).getTime();
+          if (!isNaN(parsed) && parsed > 0) frozenAt = parsed;
+        } else if (isAlreadyFrozen) {
+          frozenAt = Date.now() - (17 * 3600 * 1000); // 17 hours ago -> ready to spin immediately
+        } else if (config.timeOffset && config.timeOffset > 0) {
+          frozenAt = Date.now() - (config.timeOffset * 3600 * 1000);
+        }
+
+        const recMatch = allRecipes.find(r => (queued.recipeId && r.id === queued.recipeId) || (r.name && r.name.toLowerCase() === queued.recipeName.toLowerCase()));
+        const detectedMixins = recMatch && Array.isArray(recMatch.ingredients)
+          ? recMatch.ingredients.filter(isMixinIngredient).map(ing => {
+              const scaledQty = ing.amount ? scaleQuantity(ing.amount, queued.scale || 1.0) : '';
+              const unit = ing.unit ? ing.unit.trim() : '';
+              return {
+                name: ing.name || ing.raw || 'Mix-in',
+                qty: [scaledQty, unit].filter(Boolean).join(' ')
+              };
+            })
+          : [];
+        const recommendedCycle = (recMatch && recMatch.spinSetting) || 'Lite Ice Cream';
+
         const newPint = {
           id: `freezer_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
           slot: slotNum,
@@ -9809,22 +9844,38 @@
           recipeName: queued.recipeName,
           scale: queued.scale || 1.0,
           sizeLabel: queued.scale === 1.5 ? '24 oz Deluxe' : '16 oz Standard',
-          frozenAt: Date.now(),
+          frozenAt: frozenAt,
           freezeHours: 16,
-          lidColor: lid.id,
+          lidColor: chosenLid,
           notes: 'Prepped during Sunday batch session',
+          mixins: detectedMixins,
+          spinSetting: recommendedCycle,
           notified: false
         };
         freezerPintsState.unshift(newPint);
         filledCount++;
+        filledIndices.push(idx);
       }
     });
+
+    // Clear filled pints from Sunday Batch Prep queue!
+    if (filledCount >= batchPrepQueueState.length) {
+      batchPrepQueueState = [];
+    } else {
+      batchPrepQueueState = batchPrepQueueState.filter((_, idx) => !filledIndices.includes(idx));
+    }
+
+    saveBatchPrepQueue();
+    updateBatchPrepDockUI();
+    renderBatchPrepModal();
 
     saveFreezerPints();
     renderFreezerShelfWidget();
     scheduleAllPendingPintAlerts();
     closeBatchPrepModal();
-    showToast(`❄️ Filled ${filledCount} container slots! 16-hour freeze timers running 🎉`);
+    closeBatchAssemblyModal();
+
+    showToast(`❄️ Added ${filledCount} container${filledCount === 1 ? '' : 's'} to freezer & cleared from Prep Mode! 🎉`);
   }
 
   // ==========================================================================
@@ -9952,6 +10003,24 @@
 
     assemblyCurrentStep = 1;
     assemblyCheckedItems.clear();
+
+    // Initialize assembly pint configurations for lid colors & freeze times
+    const takenSlots = new Set(freezerPintsState.map(p => p.slot));
+    const emptySlots = [];
+    for (let s = 1; s <= freezerSlotCapacity; s++) {
+      if (!takenSlots.has(s)) emptySlots.push(s);
+    }
+    assemblyPintConfigs = batchPrepQueueState.map((queued, idx) => {
+      const slotNum = emptySlots[idx] || (idx + 1);
+      const defaultLid = getPintLidColor(slotNum);
+      return {
+        lidColor: defaultLid.id,
+        timeOffset: 0,
+        alreadyFrozen: false,
+        customTime: ''
+      };
+    });
+
     goToAssemblyStep(1);
     requestAssemblyWakeLock();
 
@@ -10042,7 +10111,9 @@
       if (assemblyCurrentStep === 1) nextBtn.textContent = 'Next: Add Powders →';
       else if (assemblyCurrentStep === 2) nextBtn.textContent = 'Next: Froth & Whisk →';
       else if (assemblyCurrentStep === 3) nextBtn.textContent = 'Next: Lid & Freeze →';
-      else if (assemblyCurrentStep === 4) nextBtn.textContent = '❄️ Freeze Pints & Start Timers';
+      else if (assemblyCurrentStep === 4) {
+        nextBtn.textContent = batchPrepQueueState.length === 1 ? '❄️ Freeze Pint & Start Timer' : '❄️ Freeze Pints & Start Timers';
+      }
     }
 
     renderAssemblyStepBody(assemblyCurrentStep);
@@ -10224,13 +10295,31 @@
       body.innerHTML = html;
 
     } else if (step === 4) {
-      // Step 4: Lid & Freeze Flat + Post-Spin Mix-Ins to Reserve
+      // Step 4: Lid & Freeze Flat + Interactive Lid Color & Freeze Time Selector
+      if (!assemblyPintConfigs || assemblyPintConfigs.length !== batchPrepQueueState.length) {
+        const takenSlots = new Set(freezerPintsState.map(p => p.slot));
+        const emptySlots = [];
+        for (let s = 1; s <= freezerSlotCapacity; s++) {
+          if (!takenSlots.has(s)) emptySlots.push(s);
+        }
+        assemblyPintConfigs = batchPrepQueueState.map((queued, idx) => {
+          const slotNum = emptySlots[idx] || (idx + 1);
+          const defaultLid = getPintLidColor(slotNum);
+          return {
+            lidColor: defaultLid.id,
+            timeOffset: 0,
+            alreadyFrozen: false,
+            customTime: ''
+          };
+        });
+      }
+
       let html = `
         <div class="assembly-freeze-stage-card">
           <div class="assembly-freeze-icon">❄️</div>
           <h3 style="font-size: 1.3rem; color: #f8fafc; margin: 0;">Lid Securely &amp; Freeze Flat</h3>
           <p style="font-size: 0.92rem; color: #cbd5e1; max-width: 540px; margin: 0; line-height: 1.5;">
-            Snap all ${batchPrepQueueState.length} container lids on tightly. Place containers on a <strong>completely flat surface</strong> in the coldest part of your freezer. Slanted pints freeze unevenly and can cause machine blade strain!
+            Select your lid color and mixed time for each container below. Place containers on a <strong>completely flat surface</strong> in the coldest part of your freezer.
           </p>
           <div style="display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 6px;">
             <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; padding: 10px 16px; text-align: center;">
@@ -10248,6 +10337,97 @@
           </div>
         </div>
       `;
+
+      if (batchPrepQueueState.length > 1) {
+        html += `
+          <div class="assembly-batch-time-bar">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 1.3rem;">⚡</span>
+              <div>
+                <strong style="color: #f8fafc; font-size: 0.9rem; display: block;">Mixed Entire Batch at Once?</strong>
+                <span style="color: #94a3b8; font-size: 0.78rem;">Quickly apply freeze time to all queued containers:</span>
+              </div>
+            </div>
+            <div class="freezer-time-presets" id="assemblyBatchTimePresets">
+              <button type="button" class="btn-time-preset active" data-batch-offset="0">Just now</button>
+              <button type="button" class="btn-time-preset" data-batch-offset="4">4h ago</button>
+              <button type="button" class="btn-time-preset" data-batch-offset="8">8h ago</button>
+              <button type="button" class="btn-time-preset" data-batch-offset="12">12h ago</button>
+              <button type="button" class="btn-time-preset" data-batch-offset="16">Already Frozen</button>
+            </div>
+          </div>
+        `;
+      }
+
+      html += `<div class="assembly-freeze-grid">`;
+
+      batchPrepQueueState.forEach((queued, idx) => {
+        const scale = queued.scale || 1.0;
+        const sizeBadge = scale === 1.5 ? '24 oz Deluxe' : '16 oz Standard';
+        const cfg = assemblyPintConfigs[idx] || { lidColor: 'blue', timeOffset: 0, alreadyFrozen: false };
+        const currentLid = cfg.lidColor || 'blue';
+        const lidColorObj = getPintLidColor(currentLid);
+        const currentOffset = cfg.timeOffset || 0;
+        const isFrozen = Boolean(cfg.alreadyFrozen || currentOffset >= 16);
+
+        let timeStatusText = '16h Freeze Timer';
+        let timeStatusColor = '#38bdf8';
+        if (isFrozen) {
+          timeStatusText = 'Ready to Spin 🍨';
+          timeStatusColor = '#34d399';
+        } else if (currentOffset > 0) {
+          timeStatusText = `Mixed ${currentOffset}h ago (${16 - currentOffset}h left)`;
+          timeStatusColor = '#facc15';
+        }
+
+        html += `
+          <div class="assembly-freeze-card" data-freeze-pint-idx="${idx}">
+            <div class="assembly-pint-card-header">
+              <div style="display: flex; align-items: center; gap: 8px; min-width: 0;">
+                <span style="font-size: 1.15rem;">🍨</span>
+                <span class="assembly-pint-title" title="${escapeHtml(queued.recipeName)}">#${idx + 1} ${escapeHtml(queued.recipeName)}</span>
+              </div>
+              <span class="assembly-pint-badge">${sizeBadge}</span>
+            </div>
+
+            <!-- Lid Color Selector -->
+            <div style="margin-top: 6px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 7px;">
+                <span style="font-size: 0.8rem; font-weight: 700; color: #cbd5e1;">Pint Lid Color:</span>
+                <span id="assemblyLidLabel_${idx}" style="font-size: 0.78rem; font-weight: 800; color: ${lidColorObj.hex};">${lidColorObj.icon} ${lidColorObj.name}</span>
+              </div>
+              <div class="lid-color-swatches-grid assembly-lid-swatches" data-pint-idx="${idx}">
+                ${PINT_LID_COLORS.map(c => {
+                  const isSel = c.id === currentLid;
+                  return `
+                    <button type="button" class="lid-swatch-btn ${isSel ? 'active' : ''}" data-color-id="${c.id}" data-pint-idx="${idx}" style="--swatch-glow: ${c.hex}; ${isSel ? `border-color: ${c.border}; background: ${c.bgTint};` : ''}" title="${c.name} Lid">
+                      <span class="lid-swatch-circle" style="background: ${c.hex};">${isSel ? '✓' : ''}</span>
+                      <span>${c.name}</span>
+                    </button>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+
+            <!-- Time Preset Selector -->
+            <div style="margin-top: 10px; border-top: 1px dashed rgba(255, 255, 255, 0.08); padding-top: 10px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 7px;">
+                <span style="font-size: 0.8rem; font-weight: 700; color: #cbd5e1;">When Did You Mix It?</span>
+                <span id="assemblyTimeStatus_${idx}" style="font-size: 0.76rem; font-weight: 700; color: ${timeStatusColor};">${timeStatusText}</span>
+              </div>
+              <div class="freezer-time-presets assembly-pint-time-presets" data-pint-idx="${idx}">
+                <button type="button" class="btn-time-preset ${!isFrozen && currentOffset === 0 ? 'active' : ''}" data-offset="0">Just now</button>
+                <button type="button" class="btn-time-preset ${!isFrozen && currentOffset === 4 ? 'active' : ''}" data-offset="4">4h ago</button>
+                <button type="button" class="btn-time-preset ${!isFrozen && currentOffset === 8 ? 'active' : ''}" data-offset="8">8h ago</button>
+                <button type="button" class="btn-time-preset ${!isFrozen && currentOffset === 12 ? 'active' : ''}" data-offset="12">12h ago</button>
+                <button type="button" class="btn-time-preset ${isFrozen ? 'active' : ''}" data-offset="16">Already Frozen</button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      html += `</div>`;
 
       // Check if any pints in queue have mix-ins to reserve for post-spin
       const pintsWithMixins = [];
@@ -10317,6 +10497,119 @@
         `;
       }
       body.innerHTML = html;
+
+      // Attach Step 4 Listeners
+      const batchTimeContainer = body.querySelector('#assemblyBatchTimePresets');
+      if (batchTimeContainer) {
+        batchTimeContainer.querySelectorAll('.btn-time-preset').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const bOffset = parseFloat(btn.dataset.batchOffset) || 0;
+            batchTimeContainer.querySelectorAll('.btn-time-preset').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            assemblyPintConfigs.forEach((cfg, idx) => {
+              cfg.timeOffset = bOffset;
+              cfg.alreadyFrozen = (bOffset >= 16);
+
+              const pintPresets = body.querySelector(`.assembly-pint-time-presets[data-pint-idx="${idx}"]`);
+              if (pintPresets) {
+                pintPresets.querySelectorAll('.btn-time-preset').forEach(pBtn => {
+                  const pOff = parseFloat(pBtn.dataset.offset) || 0;
+                  pBtn.classList.toggle('active', (bOffset >= 16 && pOff >= 16) || (bOffset < 16 && pOff === bOffset));
+                });
+              }
+
+              const statusEl = body.querySelector(`#assemblyTimeStatus_${idx}`);
+              if (statusEl) {
+                if (bOffset >= 16) {
+                  statusEl.textContent = 'Ready to Spin 🍨';
+                  statusEl.style.color = '#34d399';
+                } else if (bOffset > 0) {
+                  statusEl.textContent = `Mixed ${bOffset}h ago (${16 - bOffset}h left)`;
+                  statusEl.style.color = '#facc15';
+                } else {
+                  statusEl.textContent = '16h Freeze Timer';
+                  statusEl.style.color = '#38bdf8';
+                }
+              }
+            });
+          });
+        });
+      }
+
+      // Swatch Click Listeners
+      body.querySelectorAll('.lid-swatch-btn[data-pint-idx]').forEach(swatch => {
+        swatch.addEventListener('click', (e) => {
+          e.preventDefault();
+          const pIdx = parseInt(swatch.dataset.pintIdx, 10);
+          const colorId = swatch.dataset.colorId;
+          const col = PINT_LID_COLORS.find(c => c.id === colorId);
+          if (!col || isNaN(pIdx) || !assemblyPintConfigs[pIdx]) return;
+
+          assemblyPintConfigs[pIdx].lidColor = colorId;
+
+          const swatchesContainer = body.querySelector(`.assembly-lid-swatches[data-pint-idx="${pIdx}"]`);
+          if (swatchesContainer) {
+            swatchesContainer.querySelectorAll('.lid-swatch-btn').forEach(b => {
+              const isThis = b.dataset.colorId === colorId;
+              const thisCol = PINT_LID_COLORS.find(c => c.id === b.dataset.colorId);
+              b.classList.toggle('active', isThis);
+              if (isThis && thisCol) {
+                b.style.borderColor = thisCol.border;
+                b.style.background = thisCol.bgTint;
+              } else {
+                b.style.borderColor = '';
+                b.style.background = '';
+              }
+              const circle = b.querySelector('.lid-swatch-circle');
+              if (circle) circle.textContent = isThis ? '✓' : '';
+            });
+          }
+
+          const label = body.querySelector(`#assemblyLidLabel_${pIdx}`);
+          if (label) {
+            label.textContent = `${col.icon} ${col.name}`;
+            label.style.color = col.hex;
+          }
+        });
+      });
+
+      // Individual Pint Time Preset Listeners
+      body.querySelectorAll('.assembly-pint-time-presets .btn-time-preset').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const presetsWrap = btn.closest('.assembly-pint-time-presets');
+          if (!presetsWrap) return;
+          const pIdx = parseInt(presetsWrap.dataset.pintIdx, 10);
+          const offset = parseFloat(btn.dataset.offset) || 0;
+          if (isNaN(pIdx) || !assemblyPintConfigs[pIdx]) return;
+
+          presetsWrap.querySelectorAll('.btn-time-preset').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+
+          assemblyPintConfigs[pIdx].timeOffset = offset;
+          assemblyPintConfigs[pIdx].alreadyFrozen = (offset >= 16);
+
+          const statusEl = body.querySelector(`#assemblyTimeStatus_${pIdx}`);
+          if (statusEl) {
+            if (offset >= 16) {
+              statusEl.textContent = 'Ready to Spin 🍨';
+              statusEl.style.color = '#34d399';
+            } else if (offset > 0) {
+              statusEl.textContent = `Mixed ${offset}h ago (${16 - offset}h left)`;
+              statusEl.style.color = '#facc15';
+            } else {
+              statusEl.textContent = '16h Freeze Timer';
+              statusEl.style.color = '#38bdf8';
+            }
+          }
+
+          if (batchTimeContainer) {
+            batchTimeContainer.querySelectorAll('.btn-time-preset').forEach(b => b.classList.remove('active'));
+          }
+        });
+      });
     }
 
     // Attach click listeners to checkable items in the rendered step
@@ -17792,8 +18085,7 @@
         if (assemblyCurrentStep < 4) {
           goToAssemblyStep(assemblyCurrentStep + 1);
         } else {
-          batchFillFreezerSlots();
-          closeBatchAssemblyModal();
+          batchFillFreezerSlots(assemblyPintConfigs);
         }
       });
     }
