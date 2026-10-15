@@ -44,6 +44,17 @@
   const BATCH_PREP_STORAGE_KEY = STORAGE_PREFIX + 'creami_batch_prep_queue_v1';
   const HABIT_STREAK_STORAGE_KEY = STORAGE_PREFIX + 'creami_habit_streaks_v1';
 
+  // Defensive HTML Sanitization
+  function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
   // Default Staples Checked for New Users
   const DEFAULT_STAPLES = [];
 
@@ -4421,7 +4432,7 @@
           </div>
         </div>
 
-        <h3 class="recipe-card-title"><a href="${(IS_BETA ? '/beta' : '')}/recipe/${encodeURIComponent(recipe.id)}" class="recipe-title-link">${recipe.name}</a></h3>
+        <h3 class="recipe-card-title"><a href="${(IS_BETA ? '/beta' : '')}/recipe/${encodeURIComponent(recipe.id)}" class="recipe-title-link">${escapeHtml(recipe.name)}</a></h3>
 
         <div class="match-status-bar">
           <div class="match-status-row">
@@ -10396,13 +10407,13 @@
     if (swapFocusCard) {
       swapFocusCard.innerHTML = `
         <div class="swap-focus-top">
-          <div class="swap-focus-name">${cleanName}</div>
-          <span class="swap-focus-category">${swapData.categoryLabel}</span>
+          <div class="swap-focus-name">${escapeHtml(cleanName)}</div>
+          <span class="swap-focus-category">${escapeHtml(swapData.categoryLabel)}</span>
         </div>
-        <div class="swap-focus-role">${swapData.roleDescription}</div>
+        <div class="swap-focus-role">${escapeHtml(swapData.roleDescription)}</div>
         ${activeSwap ? `
           <div class="swap-active-callout">
-            <div><strong>Applied:</strong> Currently swapped with <em>${activeSwap.name}</em> (${activeSwap.ratio})</div>
+            <div><strong>Applied:</strong> Currently swapped with <em>${escapeHtml(activeSwap.name)}</em> (${escapeHtml(activeSwap.ratio)})</div>
             <button type="button" class="btn-reset-swap" id="btnFocusResetSwap">↩️ Revert to Original</button>
           </div>
         ` : ''}
@@ -10682,7 +10693,7 @@
         <div class="roulette-winner-banner">
           <div class="roulette-winner-text">
             <span>🎰</span>
-            <span>Creami Roulette Pick: <strong>${recipe.name}</strong></span>
+            <span>Creami Roulette Pick: <strong>${escapeHtml(recipe.name)}</strong></span>
           </div>
           <button class="btn-modal-spin-again" id="modalSpinAgainBtn">🎲 Spin Again</button>
         </div>
@@ -10721,7 +10732,7 @@
             <span>🎨 Story Card</span>
           </button>
         </div>
-        <h2 class="modal-title">${recipe.name}</h2>
+        <h2 class="modal-title">${escapeHtml(recipe.name)}</h2>
         <p class="modal-subtitle">${recipe.isSharedPortable ? `Custom formulation shared by ${escapeHtml(recipe.sharedAuthor || 'a fellow Creami creator')}.` : (isPersonal ? '🔒 Private personal recipe tied only to your account.' : 'Official Creami Cravings recipe for Ninja Creami ice cream maker.')}</p>
         ${(!currentUser && !recipe.isSharedPortable) ? `
           <div class="guest-pantry-conversion-card">
@@ -10980,7 +10991,7 @@
               <div class="modal-step-item">
                 <span class="step-num-badge">${idx + 1}</span>
                 <div style="flex: 1;">
-                  <span class="step-text">${step}</span>
+                  <span class="step-text">${escapeHtml(step)}</span>
                   ${isDefrostStep ? `
                     <div class="step-timer-widget" id="defrostTimerWidget">
                       <div class="timer-display">
@@ -11011,9 +11022,9 @@
             <div class="official-protip-card">
               <div class="official-protip-header">
                 <span class="protip-badge-pill">💡 Author Pro Tip</span>
-                ${tipObj.title ? `<span class="protip-hack-title">${tipObj.title}</span>` : ''}
+                ${tipObj.title ? `<span class="protip-hack-title">${escapeHtml(tipObj.title)}</span>` : ''}
               </div>
-              <div class="official-protip-text">${tipObj.body}</div>
+              <div class="official-protip-text">${escapeHtml(tipObj.body)}</div>
             </div>
           `;
         })() : ''}
@@ -11821,28 +11832,28 @@
           <div class="modal-ing-main">
             <div class="modal-ing-info">
               <div class="modal-ing-name">
-                <span style="text-decoration: line-through; opacity: 0.55; font-size: 0.88em; margin-right: 6px;">${cleanName}</span>
-                <span style="color: #c084fc; font-weight: 700;">🔄 ${activeSwap.name}</span>
+                <span style="text-decoration: line-through; opacity: 0.55; font-size: 0.88em; margin-right: 6px;">${escapeHtml(cleanName)}</span>
+                <span style="color: #c084fc; font-weight: 700;">🔄 ${escapeHtml(activeSwap.name)}</span>
               </div>
               <div class="ing-active-swap-pill">
-                <span>Ratio: ${activeSwap.ratio}</span>
-                <button type="button" class="btn-ing-revert-swap" data-ing-name="${cleanName}" title="Revert to original ingredient">Revert</button>
+                <span>Ratio: ${escapeHtml(activeSwap.ratio)}</span>
+                <button type="button" class="btn-ing-revert-swap" data-ing-name="${escapeHtml(cleanName)}" title="Revert to original ingredient">Revert</button>
               </div>
-              ${displayNotes ? `<div class="modal-ing-notes">${displayNotes}</div>` : ''}
+              ${displayNotes ? `<div class="modal-ing-notes">${escapeHtml(displayNotes)}</div>` : ''}
             </div>
             <div class="modal-ing-amount-box" title="${modalScale > 1 ? 'Scaled Deluxe (1.5×) amount' : 'Standard amount'}">
               <span class="modal-ing-amount-label">${modalScale > 1 ? 'Deluxe Amt' : 'Amount'}</span>
-              <span class="modal-ing-amount-val ${!amountText ? 'empty' : ''}">${amountText || 'As needed'}</span>
+              <span class="modal-ing-amount-val ${!amountText ? 'empty' : ''}">${escapeHtml(amountText || 'As needed')}</span>
             </div>
           </div>
           <div class="modal-ing-actions">
-            <button type="button" class="ing-swap-badge active-swap" data-ing-name="${cleanName}" title="Modify substitution">
+            <button type="button" class="ing-swap-badge active-swap" data-ing-name="${escapeHtml(cleanName)}" title="Modify substitution">
               🔄 Swapped
             </button>
-            <button type="button" class="modal-ing-shop-btn ${inShopList ? 'in-list' : ''}" data-name="${sanitizeShoppingItemName(activeSwap.name)}" title="${inShopList ? 'Remove from shopping list' : 'Add to shopping list'}">
+            <button type="button" class="modal-ing-shop-btn ${inShopList ? 'in-list' : ''}" data-name="${escapeHtml(sanitizeShoppingItemName(activeSwap.name))}" title="${inShopList ? 'Remove from shopping list' : 'Add to shopping list'}">
               ${inShopList ? '✓ On List' : '🛒 + List'}
             </button>
-            <button type="button" class="modal-ing-toggle-btn ${inPantry ? 'in-pantry' : ''}" data-id="${activeSwap.name}">
+            <button type="button" class="modal-ing-toggle-btn ${inPantry ? 'in-pantry' : ''}" data-id="${escapeHtml(activeSwap.name)}">
               ${inPantry ? '✓ In Pantry' : '+ In Stock'}
             </button>
           </div>
@@ -11854,25 +11865,25 @@
       <div class="modal-ing-row ${inPantry ? 'in-pantry' : ''}">
         <div class="modal-ing-main">
           <div class="modal-ing-info">
-            <div class="modal-ing-name">${cleanName}</div>
-            ${subText ? `<div class="ing-sub-chip" title="Click to explore substitutions">💡 Swap: ${formatSubText(subText)}</div>` : ''}
-            ${displayNotes ? `<div class="modal-ing-notes">${displayNotes}</div>` : ''}
+            <div class="modal-ing-name">${escapeHtml(cleanName)}</div>
+            ${subText ? `<div class="ing-sub-chip" title="Click to explore substitutions">💡 Swap: ${escapeHtml(formatSubText(subText))}</div>` : ''}
+            ${displayNotes ? `<div class="modal-ing-notes">${escapeHtml(displayNotes)}</div>` : ''}
           </div>
           <div class="modal-ing-amount-box" title="${modalScale > 1 ? 'Scaled Deluxe (1.5×) amount' : 'Standard amount'}">
             <span class="modal-ing-amount-label">${modalScale > 1 ? 'Deluxe Amt' : 'Amount'}</span>
-            <span class="modal-ing-amount-val ${!amountText ? 'empty' : ''}">${amountText || 'As needed'}</span>
+            <span class="modal-ing-amount-val ${!amountText ? 'empty' : ''}">${escapeHtml(amountText || 'As needed')}</span>
           </div>
         </div>
         <div class="modal-ing-actions">
           ${(swapCount > 0 || subText) ? `
-            <button type="button" class="ing-swap-badge" data-ing-name="${cleanName}" title="Explore ${swapCount || 1} tested substitutions for Ninja Creami">
+            <button type="button" class="ing-swap-badge" data-ing-name="${escapeHtml(cleanName)}" title="Explore ${swapCount || 1} tested substitutions for Ninja Creami">
               🔄 Swap ${swapCount > 0 ? `(${swapCount})` : ''}
             </button>
           ` : ''}
-          <button type="button" class="modal-ing-shop-btn ${inShopList ? 'in-list' : ''}" data-name="${cleanName}" title="${inShopList ? 'Remove from shopping list' : 'Add to shopping list'}">
+          <button type="button" class="modal-ing-shop-btn ${inShopList ? 'in-list' : ''}" data-name="${escapeHtml(cleanName)}" title="${inShopList ? 'Remove from shopping list' : 'Add to shopping list'}">
             ${inShopList ? '✓ On List' : '🛒 + List'}
           </button>
-          <button type="button" class="modal-ing-toggle-btn ${inPantry ? 'in-pantry' : ''}" data-id="${ing.id}">
+          <button type="button" class="modal-ing-toggle-btn ${inPantry ? 'in-pantry' : ''}" data-id="${escapeHtml(ing.id || ing.name)}">
             ${inPantry ? '✓ In Pantry' : '+ In Stock'}
           </button>
         </div>
@@ -15135,16 +15146,6 @@
         await updateUserPermissions(user.id, user.email, curSubs, user.role, user.creatorId);
       });
     });
-  }
-
-  function escapeHtml(str) {
-    if (!str) return '';
-    return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
   }
 
   function renderAdminClaims() {

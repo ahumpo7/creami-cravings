@@ -16,6 +16,7 @@ import secrets
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+import threading
 
 DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 
@@ -55,23 +56,58 @@ ADMIN_EMAILS = [
     ).split(',') if e.strip()
 ]
 
+# Thread safety lock for database read/write operations
+DB_LOCK = threading.RLock()
+
+# Sliding-window in-memory rate limiter to prevent brute-force attacks and spam
+RATE_LIMIT_STORE = {}
+RATE_LIMIT_LOCK = threading.Lock()
+
+def check_rate_limit(key, max_requests, window_seconds):
+    now = time.time()
+    with RATE_LIMIT_LOCK:
+        timestamps = RATE_LIMIT_STORE.get(key, [])
+        valid_ts = [ts for ts in timestamps if now - ts < window_seconds]
+        if len(valid_ts) >= max_requests:
+            RATE_LIMIT_STORE[key] = valid_ts
+            return False
+        valid_ts.append(now)
+        RATE_LIMIT_STORE[key] = valid_ts
+        # Periodic prune if dictionary grows
+        if len(RATE_LIMIT_STORE) > 3000:
+            for k in list(RATE_LIMIT_STORE.keys()):
+                RATE_LIMIT_STORE[k] = [t for t in RATE_LIMIT_STORE[k] if now - t < 3600]
+                if not RATE_LIMIT_STORE[k]:
+                    del RATE_LIMIT_STORE[k]
+        return True
 
 def load_json_file(filepath, default):
-    if os.path.exists(filepath):
-        try:
-            with open(filepath, 'r', encoding='utf-8') as f:
-                return json.load(f)
-        except Exception as e:
-            print(f"Error loading {filepath}: {e}")
-            return default
-    return default
+    with DB_LOCK:
+        if os.path.exists(filepath):
+            try:
+                with open(filepath, 'r', encoding='utf-8') as f:
+                    return json.load(f)
+            except Exception as e:
+                print(f"Error loading {filepath}: {e}")
+                return default
+        return default
 
 def save_json_file(filepath, data):
-    try:
-        with open(filepath, 'w', encoding='utf-8') as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
-    except Exception as e:
-        print(f"Error saving {filepath}: {e}")
+    with DB_LOCK:
+        tmp_file = f"{filepath}.tmp.{uuid.uuid4().hex}"
+        try:
+            with open(tmp_file, 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent=2, ensure_ascii=False)
+                f.flush()
+                os.fsync(f.fileno())
+            os.replace(tmp_file, filepath)
+        except Exception as e:
+            print(f"Error saving {filepath}: {e}")
+            if os.path.exists(tmp_file):
+                try:
+                    os.remove(tmp_file)
+                except Exception:
+                    pass
 
 def hash_password(password, salt=None):
     if not salt:
@@ -1166,30 +1202,29 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
         self.send_header('Access-Control-Allow-Private-Network', 'true')
         self.end_headers()
 
+    def end_headers(self):
+        self.send_header('X-Content-Type-Options', 'nosniff')
+        self.send_header('X-Frame-Options', 'SAMEORIGIN')
+        self.send_header('Referrer-Policy', 'strict-origin-when-cross-origin')
+        super().end_headers()
+
+    def _get_client_ip(self):
+        xff = self.headers.get('X-Forwarded-For', '')
+        if xff:
+            return xff.split(',')[0].strip()
+        x_real = self.headers.get('X-Real-IP', '')
+        if x_real:
+            return x_real.strip()
+        return self.client_address[0] if (hasattr(self, 'client_address') and self.client_address) else '127.0.0.1'
+
     def _get_user_from_token(self, data=None):
         auth_header = self.headers.get('Authorization', '')
         token = auth_header.replace('Bearer ', '').strip()
         if not token and data and isinstance(data, dict):
             token = data.get('token') or data.get('userToken')
-        user = None
-        if token:
-            for u in users_db.values():
-                if u.get('token') == token:
-                    user = u
-                    break
-        # Fallback to verified admin/user email header or body parameter
-        if not user:
-            user_email = self.headers.get('X-User-Email', '').strip().lower()
-            if not user_email and data and isinstance(data, dict):
-                user_email = data.get('adminEmail', '').strip().lower() or data.get('email', '').strip().lower()
-            if user_email:
-                for u in users_db.values():
-                    if u.get('email', '').lower() == user_email:
-                        user = u
-                        break
-
-        # Fallback to URL query params
-        if not user:
+        
+        # Also allow token in query param (e.g. for browser download links)
+        if not token:
             raw_path = getattr(self, 'path', '')
             if '?' in raw_path:
                 try:
@@ -1197,22 +1232,23 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                     for part in query_str.split('&'):
                         if '=' in part:
                             k, v = part.split('=', 1)
-                            k = urllib.parse.unquote(k).strip()
-                            v = urllib.parse.unquote(v).strip()
-                            if k == 'token' and v:
-                                for u in users_db.values():
-                                    if u.get('token') == v:
-                                        user = u
-                                        break
-                            elif (k == 'email' or k == 'adminEmail') and v:
-                                v_lower = v.lower()
-                                for u in users_db.values():
-                                    if u.get('email', '').lower() == v_lower:
-                                        user = u
-                                        break
+                            if urllib.parse.unquote(k).strip() == 'token':
+                                token = urllib.parse.unquote(v).strip()
+                                break
                 except Exception:
                     pass
 
+        user = None
+        if token:
+            for u in users_db.values():
+                if u.get('token') == token:
+                    user = u
+                    break
+
+        if not user:
+            return None
+
+        # Admin Mimic Role check (only for verified ahumpo7@gmail.com account)
         if user and user.get('email', '').lower() == 'ahumpo7@gmail.com':
             mimic_role = self.headers.get('X-Mimic-Role', '').strip().lower()
             mimic_creator = self.headers.get('X-Mimic-Creator', '').strip().lower()
@@ -1816,6 +1852,10 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
 
     def do_POST(self):
         content_length = int(self.headers.get('Content-Length', 0))
+        if content_length > 10 * 1024 * 1024:
+            self.send_error(413, "Payload Too Large")
+            return
+
         post_data = self.rfile.read(content_length)
         data = {}
         if post_data:
@@ -1824,7 +1864,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
             except Exception:
                 pass
 
-        # 1. Google Authentication
+        # 1. Google Authentication (strictly require verified Google credential)
         if self.path == '/api/auth/google':
             credential = data.get('credential', '').strip()
             google_info = None
@@ -1832,22 +1872,8 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
             if credential:
                 google_info = verify_google_token(credential)
 
-            # If client passed direct verified payload (e.g. from Google One-Tap or demo login)
-            if not google_info:
-                email = data.get('email', '').strip().lower()
-                name = data.get('name', '').strip() or email.split('@')[0]
-                picture = data.get('picture', '').strip()
-                sub = data.get('sub', str(uuid.uuid4())[:8])
-                if email:
-                    google_info = {
-                        'email': email,
-                        'name': name,
-                        'picture': picture,
-                        'sub': sub
-                    }
-
             if not google_info or not google_info.get('email'):
-                self._send_json({'error': 'Google authentication failed. Valid credential or email required.'}, 400)
+                self._send_json({'error': 'Google authentication failed. Valid credential token required.'}, 400)
                 return
 
             email = google_info['email']
@@ -2190,6 +2216,11 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
             return
 
         elif self.path == '/api/auth/login':
+            client_ip = self._get_client_ip()
+            if not check_rate_limit(f"login_{client_ip}", max_requests=10, window_seconds=60):
+                self._send_json({'error': 'Too many login attempts. Please wait 1 minute before trying again.'}, 429)
+                return
+
             login_id = (data.get('email') or data.get('username') or '').strip().lower()
             password = data.get('password', '').strip()
 
@@ -2231,6 +2262,11 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
 
         # 5b. Password Reset: Request 6-Digit Code / Reset Token
         elif self.path == '/api/auth/forgot-password':
+            client_ip = self._get_client_ip()
+            if not check_rate_limit(f"forgot_{client_ip}", max_requests=5, window_seconds=300):
+                self._send_json({'error': 'Too many password reset requests. Please wait a few minutes before trying again.'}, 429)
+                return
+
             email = data.get('email', '').strip().lower()
             if not email or '@' not in email or '.' not in email.split('@')[-1]:
                 self._send_json({'error': 'Please provide a valid email address.'}, 400)
@@ -2362,6 +2398,11 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
 
         # 5d. Passwordless Magic Link Sign-In: Request 1-Click Link
         elif self.path == '/api/auth/magic-link/request':
+            client_ip = self._get_client_ip()
+            if not check_rate_limit(f"magic_{client_ip}", max_requests=5, window_seconds=300):
+                self._send_json({'error': 'Too many sign-in link requests. Please wait a few minutes before trying again.'}, 429)
+                return
+
             email = data.get('email', '').strip().lower()
             if not email or '@' not in email or '.' not in email.split('@')[-1]:
                 self._send_json({'error': 'Please provide a valid email address.'}, 400)
@@ -2895,6 +2936,11 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
 
         # 8. Purchase Inquiry / Access Claim (Store available pack requests with deduplication)
         elif self.path == '/api/purchase-inquiry':
+            client_ip = self._get_client_ip()
+            if not check_rate_limit(f"inquiry_{client_ip}", max_requests=6, window_seconds=120):
+                self._send_json({'error': 'Too many verification claims. Please wait 2 minutes before submitting again.'}, 429)
+                return
+
             email = data.get('email', '').strip()
             pack = data.get('pack', '').strip()
             if not email or not pack:
@@ -2960,6 +3006,11 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
 
         # User Feedback & Feature Requests (Roadmap Item 21)
         elif self.path == '/api/feedback':
+            client_ip = self._get_client_ip()
+            if not check_rate_limit(f"feedback_{client_ip}", max_requests=10, window_seconds=60):
+                self._send_json({'error': 'Too many feedback submissions. Please wait a minute.'}, 429)
+                return
+
             if not isinstance(data, dict):
                 self._send_json({'error': 'Invalid JSON body'}, 400)
                 return
