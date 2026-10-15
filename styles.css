@@ -1424,25 +1424,44 @@ body::before {
 .recipe-card-bottom {
   margin-top: auto;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
   width: 100%;
   max-width: 100%;
   min-width: 0;
   box-sizing: border-box;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-item);
+}
+
+.card-bottom-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  width: 100%;
+}
+
+.card-bottom-actions .btn-card-batch-prep,
+.card-bottom-actions .btn-quick-freeze-card {
+  flex: 0 0 auto;
+}
+
+.card-bottom-actions .btn-view-recipe {
+  flex: 1;
+  text-align: center;
+  justify-content: center;
 }
 
 .spin-tag {
-  font-size: 0.72rem;
+  font-size: 0.78rem;
+  font-weight: 600;
   color: var(--text-muted);
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   min-width: 0;
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  align-self: flex-start;
   white-space: nowrap;
 }
 
@@ -5220,6 +5239,7 @@ body.modal-open .cookie-consent-banner {
 
   .recipe-card.mobile-expanded .recipe-card-bottom {
     display: flex !important;
+    flex-direction: column !important;
     margin-top: 14px !important;
   }
 
