@@ -1017,11 +1017,7 @@
           const isAdmin = currentUser.role === 'admin' || ADMIN_EMAILS.includes(userEmail);
           currentUser.role = isAdmin ? 'admin' : (currentUser.role || 'user');
           if (!currentUser.subscriptions || !Array.isArray(currentUser.subscriptions)) {
-            currentUser.subscriptions = isAdmin 
-              ? ['All-Access', 'Base Flavors', 'Community Legends', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free'] 
-              : ['Community Legends'];
-          } else if (isAdmin && !currentUser.subscriptions.includes('All-Access')) {
-            currentUser.subscriptions = ['All-Access', 'Base Flavors', 'Community Legends', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free'];
+            currentUser.subscriptions = ['Community Legends'];
           }
           if (userEmail === 'ahumpo7@gmail.com' || userEmail === 'ahumpo@gmail.com') {
             realAdminUser = JSON.parse(JSON.stringify(currentUser));
@@ -1916,9 +1912,9 @@
       creatorId: data.user.creatorId || null,
       creatorVips: Array.isArray(data.user.creatorVips) ? data.user.creatorVips : [],
       freezerCapacity: Number(data.user.freezerCapacity) || 4,
-      subscriptions: isAdmin 
-        ? ['All-Access', 'Base Flavors', 'Community Legends', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free']
-        : (data.user.subscriptions || ['Community Legends']),
+      subscriptions: (data.user && Array.isArray(data.user.subscriptions))
+        ? data.user.subscriptions
+        : ['Community Legends'],
       token: data.token || (currentUser ? currentUser.token : '')
     };
     if (isSuperAdminAccount(currentUser)) {
@@ -2509,7 +2505,6 @@
     if (currentUser) {
       if (currentUser.role === 'creator' && currentUser.creatorId === creatorId) return true;
       if (currentUser.creatorVips && Array.isArray(currentUser.creatorVips) && currentUser.creatorVips.includes(creatorId)) return true;
-      if (currentUser.role === 'admin') return true;
     }
 
     const subs = (currentUser && Array.isArray(currentUser.subscriptions)) ? currentUser.subscriptions : ['Community Legends'];
@@ -2609,10 +2604,6 @@
       }
       // 3. User authored this custom recipe
       if (recipe.userId && recipe.userId === currentUser.id) {
-        return true;
-      }
-      // 4. Admin preview access (for entitlement verification/support)
-      if (currentUser.role === 'admin') {
         return true;
       }
     }
@@ -4991,7 +4982,7 @@
       // If user already owns the books or requested perks first, place perks section FIRST!
       const creatorCats = getCategoriesForCreator(creatorId);
       const hasAllBooks = isCategoryUnlocked('All-Access') ||
-        (currentUser && (currentUser.role === 'admin' || currentUser.role === 'vip' || currentUser.role === 'creator')) ||
+        (currentUser && ((currentUser.role === 'creator' && currentUser.creatorId === creatorId) || (currentUser.creatorVips && currentUser.creatorVips.includes(creatorId)))) ||
         (creatorCats.length > 0 && creatorCats.every(p => isCategoryUnlocked(p)));
 
       const perksSection = document.getElementById('creatorPerksSection');

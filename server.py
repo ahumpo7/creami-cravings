@@ -1964,8 +1964,6 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                     user['created_at'] = now_iso
                 if is_admin_email:
                     user['role'] = 'admin'
-                    if 'All-Access' not in user.get('subscriptions', []):
-                        user['subscriptions'] = list(ALL_SUBSCRIPTIONS)
                 if picture:
                     user['picture'] = picture
                 if not user.get('subscriptions'):
