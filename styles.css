@@ -6166,6 +6166,30 @@ body.modal-open .cookie-consent-banner {
   box-shadow: 0 5px 18px rgba(16, 185, 129, 0.55);
 }
 
+.btn-freezer-mark-ready {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 14px;
+  background: rgba(16, 185, 129, 0.16);
+  border: 1px solid rgba(16, 185, 129, 0.45);
+  border-radius: 999px;
+  color: #34d399;
+  font-family: var(--font-heading);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-freezer-mark-ready:hover {
+  background: #10b981;
+  color: #ffffff;
+  border-color: #10b981;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+  transform: translateY(-1px);
+}
+
 .btn-freezer-recipe {
   padding: 6px 12px;
   font-size: 0.78rem;
@@ -12337,6 +12361,22 @@ body.modal-open .cookie-consent-banner {
 .btn-slot-recipe:hover {
   background: rgba(255, 255, 255, 0.15);
   color: #ffffff;
+}
+
+.btn-slot-mark-ready {
+  background: rgba(16, 185, 129, 0.16);
+  border: 1px solid rgba(16, 185, 129, 0.45);
+  color: #34d399;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-slot-mark-ready:hover {
+  background: #10b981;
+  color: #ffffff;
+  border-color: #10b981;
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.4);
 }
 
 .btn-slot-discard {
