@@ -1743,13 +1743,21 @@ body.modal-open {
   padding: 20px;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.2s ease;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
   overscroll-behavior: none;
+}
+
+.modal-overlay:not(.active),
+.modal-overlay:not(.active) * {
+  pointer-events: none !important;
+  visibility: hidden !important;
 }
 
 .modal-overlay.active {
   opacity: 1;
   pointer-events: auto;
+  visibility: visible;
   overscroll-behavior: none;
 }
 
@@ -12004,7 +12012,7 @@ body.modal-open .cookie-consent-banner {
   user-select: auto !important;
   -webkit-user-select: auto !important;
   -webkit-touch-callout: default !important;
-  pointer-events: auto !important;
+  pointer-events: auto;
   cursor: pointer;
 }
 
@@ -14131,7 +14139,7 @@ body.modal-open .cookie-consent-banner {
   font-size: 1.4rem;
   line-height: 1;
   cursor: pointer;
-  pointer-events: auto !important;
+  pointer-events: auto;
   transition: all 0.15s ease;
 }
 
