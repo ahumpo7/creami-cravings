@@ -374,6 +374,7 @@
   let favoritesState = new Set();
   let customRecipesState = [];
   let serverPublishedRecipes = [];
+  let serverCreatorProfiles = {};
   let lastLocalMutationTime = 0;
   let allRecipes = [];
   let ingredientRecipeCount = {};
@@ -1360,6 +1361,9 @@
           if (Array.isArray(data.publishedRecipes)) {
             serverPublishedRecipes = data.publishedRecipes;
             mergeRecipes();
+          }
+          if (data.creatorProfiles && typeof data.creatorProfiles === 'object') {
+            serverCreatorProfiles = data.creatorProfiles;
           }
           saveCommunityStats();
           renderRecipes();
@@ -2638,6 +2642,57 @@
     });
   }
 
+  function getCreatorById(creatorId) {
+    if (!creatorId) return null;
+    const base = (typeof CREATORS_MASTER !== 'undefined') ? CREATORS_MASTER.find(c => c.id === creatorId) : null;
+    const serverProfile = serverCreatorProfiles ? serverCreatorProfiles[creatorId] : null;
+
+    let userOverride = null;
+    if (currentUser) {
+      const isDirect = (currentUser.role === 'creator' && (currentUser.creatorId === creatorId || (!currentUser.creatorId && creatorId === 'fitness_product_finder')));
+      const isMimic = (currentMimicRole === 'creator' && currentMimicCreatorId === creatorId);
+      if (isDirect || isMimic) {
+        userOverride = currentUser;
+      }
+    }
+
+    if (!base && !serverProfile && !userOverride) return null;
+
+    const result = Object.assign({}, base || {
+      id: creatorId,
+      name: 'Creator',
+      brandName: 'Creator Brand',
+      handle: `@${creatorId}`,
+      url: '',
+      storeUrl: '',
+      socialLinks: {},
+      bio: '',
+      perks: []
+    });
+
+    result.perks = (base && Array.isArray(base.perks)) ? JSON.parse(JSON.stringify(base.perks)) : [];
+    result.socialLinks = Object.assign({}, base ? base.socialLinks : {});
+
+    if (serverProfile) {
+      if (serverProfile.name) result.name = serverProfile.name;
+      if (serverProfile.brandName) result.brandName = serverProfile.brandName;
+      if (serverProfile.socialLinks) result.socialLinks = Object.assign({}, result.socialLinks, serverProfile.socialLinks);
+      if (Array.isArray(serverProfile.perks) && serverProfile.perks.length > 0) {
+        result.perks = JSON.parse(JSON.stringify(serverProfile.perks));
+      }
+    }
+
+    if (userOverride) {
+      if (userOverride.brandName) result.brandName = userOverride.brandName;
+      if (userOverride.socialLinks) result.socialLinks = Object.assign({}, result.socialLinks, userOverride.socialLinks);
+      if (Array.isArray(userOverride.perks)) {
+        result.perks = JSON.parse(JSON.stringify(userOverride.perks));
+      }
+    }
+
+    return result;
+  }
+
   function getRecipeCreator(recipe) {
     if (!recipe) return null;
     if (
@@ -2651,7 +2706,7 @@
       return null;
     }
     const creatorId = recipe.creatorId || 'fitness_product_finder';
-    return (typeof CREATORS_MASTER !== 'undefined') ? CREATORS_MASTER.find(c => c.id === creatorId) : null;
+    return getCreatorById(creatorId);
   }
 
   function getRecipeBook(recipe) {
@@ -4798,9 +4853,7 @@
     if (catView) catView.style.display = 'block';
     activeStoreCreatorId = creatorId;
 
-    const creator = (typeof CREATORS_MASTER !== 'undefined')
-      ? CREATORS_MASTER.find(c => c.id === creatorId)
-      : null;
+    const creator = getCreatorById(creatorId);
 
     const breadcrumb = document.getElementById('catalogCreatorBreadcrumb');
     const nameEl = document.getElementById('catalogCreatorName');
@@ -4877,27 +4930,27 @@
     perksGrid.innerHTML = creator.perks.map(perk => {
       const hasCode = Boolean(perk.code);
       return `
-        <div class="creator-perk-card" data-perk-id="${perk.id}">
+        <div class="creator-perk-card" data-perk-id="${escapeHtml(perk.id)}">
           <div class="perk-card-top">
             <div class="perk-card-meta">
-              <span class="perk-category-pill">${perk.category}</span>
-              <span class="perk-discount-badge">${perk.discount}</span>
+              <span class="perk-category-pill">${escapeHtml(perk.category || 'Partner')}</span>
+              <span class="perk-discount-badge">${escapeHtml(perk.discount || 'Special Deal')}</span>
             </div>
-            <h4 class="perk-brand-name">${perk.brand}</h4>
-            <p class="perk-desc">${perk.description}</p>
+            <h4 class="perk-brand-name">${escapeHtml(perk.brand)}</h4>
+            ${perk.description ? `<p class="perk-desc">${escapeHtml(perk.description)}</p>` : ''}
           </div>
           <div class="perk-card-bottom">
             ${hasCode ? `
               <div class="perk-code-box" title="Click to copy discount code">
                 <span class="perk-code-label">PROMO CODE:</span>
-                <span class="perk-code-val">${perk.code}</span>
-                <button type="button" class="btn-copy-perk-code" data-code="${perk.code}" data-brand="${perk.brand}">
+                <span class="perk-code-val">${escapeHtml(perk.code)}</span>
+                <button type="button" class="btn-copy-perk-code" data-code="${escapeHtml(perk.code)}" data-brand="${escapeHtml(perk.brand)}">
                   <span>📋 Copy</span>
                 </button>
               </div>
             ` : ''}
-            <a href="${perk.url}" target="_blank" rel="noopener noreferrer" class="btn-perk-shop">
-              <span>Shop ${perk.brand.split(' ')[0]} ↗</span>
+            <a href="${escapeHtml(perk.url || '#')}" target="_blank" rel="noopener noreferrer" class="btn-perk-shop">
+              <span>Shop ${escapeHtml((perk.brand || 'Partner').split(' ')[0])} ↗</span>
             </a>
           </div>
         </div>
@@ -5152,8 +5205,11 @@
   }
 
   function renderCreatorPortalContent() {
-    const creatorId = (currentUser && currentUser.creatorId) ? currentUser.creatorId : 'fitness_product_finder';
-    const creator = (typeof CREATORS_MASTER !== 'undefined') ? CREATORS_MASTER.find(c => c.id === creatorId) : null;
+    const isMimicCreator = (realAdminUser && currentMimicRole === 'creator');
+    const creatorId = (isMimicCreator && currentMimicCreatorId)
+      ? currentMimicCreatorId
+      : (currentUser && currentUser.creatorId ? currentUser.creatorId : 'fitness_product_finder');
+    const creator = getCreatorById(creatorId);
     const creatorName = creator ? creator.name : 'Eli';
     const creatorBrand = creator ? `${creator.brandName} • ${creator.handle}` : 'Fitness Product Finder • @fitnessproductfinder';
     const handleSlug = creator && creator.handle ? creator.handle.replace('@', '') : 'fitnessproductfinder';
@@ -5236,21 +5292,295 @@
       });
     }
 
-    // 4. Perks & Discount Codes
-    const perksGrid = document.getElementById('studioPerksCompactGrid');
-    if (perksGrid && creator && creator.perks) {
-      perksGrid.innerHTML = creator.perks.map(p => `
-        <div class="perk-compact-card">
-          <div style="display: flex; flex-direction: column; gap: 2px;">
-            <strong style="color: #f8fafc; font-size: 0.86rem;">${escapeHtml(p.brand)}</strong>
-            <span style="color: #94a3b8; font-size: 0.76rem;">${escapeHtml(p.discount || 'Special Partner Deal')}</span>
-          </div>
-          ${p.code ? `<span class="perk-compact-code">${escapeHtml(p.code)}</span>` : '<span style="color: #38bdf8; font-size: 0.78rem;">Partner Link</span>'}
-        </div>
-      `).join('');
-    }
+    // 4. Perks, Brand Codes & Sponsors
+    renderCreatorStudioPerks(creatorId);
+
     // 5. Creator VIP Member Circle
     loadAndRenderCreatorVips(creatorId);
+  }
+
+  function openStudioPerkEditor(perkToEdit = null) {
+    const form = document.getElementById('studioPerkEditorForm');
+    const title = document.getElementById('studioPerkEditorTitle');
+    const idInput = document.getElementById('studioPerkEditorId');
+    const brandInput = document.getElementById('studioPerkEditorBrand');
+    const codeInput = document.getElementById('studioPerkEditorCode');
+    const discountInput = document.getElementById('studioPerkEditorDiscount');
+    const categoryInput = document.getElementById('studioPerkEditorCategory');
+    const urlInput = document.getElementById('studioPerkEditorUrl');
+    const descInput = document.getElementById('studioPerkEditorDesc');
+
+    if (!form) return;
+
+    if (perkToEdit) {
+      if (title) title.textContent = '✏️ Edit Brand Sponsor / Code';
+      if (idInput) idInput.value = perkToEdit.id || '';
+      if (brandInput) brandInput.value = perkToEdit.brand || '';
+      if (codeInput) codeInput.value = perkToEdit.code || '';
+      if (discountInput) discountInput.value = perkToEdit.discount || '';
+      if (categoryInput) categoryInput.value = perkToEdit.category || '';
+      if (urlInput) urlInput.value = perkToEdit.url || '';
+      if (descInput) descInput.value = perkToEdit.description || '';
+    } else {
+      if (title) title.textContent = '➕ Add Brand Sponsor or Promo Code';
+      if (idInput) idInput.value = '';
+      if (brandInput) brandInput.value = '';
+      if (codeInput) codeInput.value = '';
+      if (discountInput) discountInput.value = '';
+      if (categoryInput) categoryInput.value = '';
+      if (urlInput) urlInput.value = '';
+      if (descInput) descInput.value = '';
+    }
+
+    form.style.display = 'block';
+    if (brandInput) brandInput.focus();
+    form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function closeStudioPerkEditor() {
+    const form = document.getElementById('studioPerkEditorForm');
+    if (form) form.style.display = 'none';
+  }
+
+  async function saveStudioPerk() {
+    const idInput = document.getElementById('studioPerkEditorId');
+    const brandInput = document.getElementById('studioPerkEditorBrand');
+    const codeInput = document.getElementById('studioPerkEditorCode');
+    const discountInput = document.getElementById('studioPerkEditorDiscount');
+    const categoryInput = document.getElementById('studioPerkEditorCategory');
+    const urlInput = document.getElementById('studioPerkEditorUrl');
+    const descInput = document.getElementById('studioPerkEditorDesc');
+    const saveBtn = document.getElementById('btnStudioPerkEditorSave');
+
+    const brand = brandInput ? brandInput.value.trim() : '';
+    const discount = discountInput ? discountInput.value.trim() : '';
+    const url = urlInput ? urlInput.value.trim() : '';
+    const code = codeInput ? codeInput.value.trim() : '';
+    const category = categoryInput ? categoryInput.value.trim() : 'Sponsor / Partner';
+    const description = descInput ? descInput.value.trim() : '';
+    const perkId = idInput ? idInput.value.trim() : '';
+
+    if (!brand) {
+      showToast('⚠️ Please provide a Brand or Sponsor name.');
+      if (brandInput) brandInput.focus();
+      return;
+    }
+    if (!discount) {
+      showToast('⚠️ Please provide a Discount or Offer Tag (e.g. 15% OFF or Special Deal).');
+      if (discountInput) discountInput.focus();
+      return;
+    }
+    if (!url) {
+      showToast('⚠️ Please provide a link/URL for your sponsor.');
+      if (urlInput) urlInput.focus();
+      return;
+    }
+
+    const isMimicCreator = (realAdminUser && currentMimicRole === 'creator');
+    const creatorId = (isMimicCreator && currentMimicCreatorId)
+      ? currentMimicCreatorId
+      : (currentUser && currentUser.creatorId ? currentUser.creatorId : 'fitness_product_finder');
+
+    const creator = getCreatorById(creatorId);
+    let currentPerks = (creator && Array.isArray(creator.perks)) ? JSON.parse(JSON.stringify(creator.perks)) : [];
+
+    const perkData = {
+      id: perkId || ('perk_' + Date.now().toString(36) + Math.random().toString(36).substring(2, 6)),
+      brand,
+      discount,
+      category: category || 'Sponsor / Partner',
+      code: code || null,
+      description,
+      url
+    };
+
+    if (perkId) {
+      const idx = currentPerks.findIndex(p => p.id === perkId);
+      if (idx !== -1) {
+        currentPerks[idx] = perkData;
+      } else {
+        currentPerks.push(perkData);
+      }
+    } else {
+      currentPerks.push(perkData);
+    }
+
+    const origBtnHtml = saveBtn ? saveBtn.innerHTML : '';
+    if (saveBtn) {
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = '<span>Saving...</span>';
+    }
+
+    try {
+      const headers = { 'Content-Type': 'application/json' };
+      if (currentUser && currentUser.token) headers['Authorization'] = `Bearer ${currentUser.token}`;
+      if (currentUser && currentUser.email) headers['X-User-Email'] = currentUser.email;
+
+      const res = await fetch('/api/creator/perks', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          token: currentUser ? currentUser.token : '',
+          creatorId,
+          perks: currentPerks
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        const finalPerks = Array.isArray(data.perks) ? data.perks : currentPerks;
+        if (currentUser) {
+          if (!currentUser.perks) currentUser.perks = [];
+          currentUser.perks = finalPerks;
+        }
+        if (!serverCreatorProfiles[creatorId]) {
+          serverCreatorProfiles[creatorId] = { creatorId, perks: finalPerks };
+        } else {
+          serverCreatorProfiles[creatorId].perks = finalPerks;
+        }
+        saveUserAuth();
+        closeStudioPerkEditor();
+        renderCreatorStudioPerks(creatorId);
+        showToast(`✅ "${brand}" saved to your brand codes & sponsors!`);
+      } else {
+        throw new Error(data.error || 'Server rejected perk update');
+      }
+    } catch (err) {
+      console.warn('Error saving creator perk:', err);
+      if (currentUser) {
+        if (!currentUser.perks) currentUser.perks = [];
+        currentUser.perks = currentPerks;
+      }
+      if (!serverCreatorProfiles[creatorId]) {
+        serverCreatorProfiles[creatorId] = { creatorId, perks: currentPerks };
+      } else {
+        serverCreatorProfiles[creatorId].perks = currentPerks;
+      }
+      saveUserAuth();
+      closeStudioPerkEditor();
+      renderCreatorStudioPerks(creatorId);
+      showToast(`✅ "${brand}" saved.`);
+    } finally {
+      if (saveBtn) {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = origBtnHtml;
+      }
+    }
+  }
+
+  async function deleteStudioPerk(perkId, creatorId) {
+    if (!perkId) return;
+    if (!confirm('Are you sure you want to remove this sponsor / discount code from your page?')) {
+      return;
+    }
+
+    const creator = getCreatorById(creatorId);
+    let currentPerks = (creator && Array.isArray(creator.perks)) ? JSON.parse(JSON.stringify(creator.perks)) : [];
+    currentPerks = currentPerks.filter(p => p.id !== perkId);
+
+    try {
+      const headers = { 'Content-Type': 'application/json' };
+      if (currentUser && currentUser.token) headers['Authorization'] = `Bearer ${currentUser.token}`;
+      if (currentUser && currentUser.email) headers['X-User-Email'] = currentUser.email;
+
+      const res = await fetch('/api/creator/perks', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          token: currentUser ? currentUser.token : '',
+          creatorId,
+          perks: currentPerks
+        })
+      });
+
+      const data = await res.json();
+      const finalPerks = (res.ok && data.success && Array.isArray(data.perks)) ? data.perks : currentPerks;
+      if (currentUser) {
+        if (!currentUser.perks) currentUser.perks = [];
+        currentUser.perks = finalPerks;
+      }
+      if (!serverCreatorProfiles[creatorId]) {
+        serverCreatorProfiles[creatorId] = { creatorId, perks: finalPerks };
+      } else {
+        serverCreatorProfiles[creatorId].perks = finalPerks;
+      }
+      saveUserAuth();
+      renderCreatorStudioPerks(creatorId);
+      showToast('🗑️ Sponsor removed.');
+    } catch (err) {
+      console.warn('Error deleting perk:', err);
+      if (currentUser) {
+        if (!currentUser.perks) currentUser.perks = [];
+        currentUser.perks = currentPerks;
+      }
+      if (!serverCreatorProfiles[creatorId]) {
+        serverCreatorProfiles[creatorId] = { creatorId, perks: currentPerks };
+      } else {
+        serverCreatorProfiles[creatorId].perks = currentPerks;
+      }
+      saveUserAuth();
+      renderCreatorStudioPerks(creatorId);
+      showToast('🗑️ Sponsor removed.');
+    }
+  }
+
+  function renderCreatorStudioPerks(creatorId) {
+    const perksGrid = document.getElementById('studioPerksCompactGrid');
+    if (!perksGrid) return;
+    const creator = getCreatorById(creatorId);
+    const perks = (creator && Array.isArray(creator.perks)) ? creator.perks : [];
+
+    if (perks.length === 0) {
+      perksGrid.innerHTML = `
+        <div style="grid-column: 1 / -1; background: rgba(15, 23, 42, 0.4); border: 1px dashed rgba(255, 255, 255, 0.12); border-radius: 10px; padding: 20px; text-align: center; color: #94a3b8; font-size: 0.85rem;">
+          No sponsors or brand codes added yet.<br>
+          <span style="font-size: 0.78rem; color: #64748b;">Click <strong>➕ Add Brand / Sponsor</strong> above to feature your favorite ingredients, equipment, and coupon codes on your storefront!</span>
+        </div>
+      `;
+      return;
+    }
+
+    perksGrid.innerHTML = perks.map(p => `
+      <div class="perk-compact-card" data-perk-id="${escapeHtml(p.id)}">
+        <div style="display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0;">
+          <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+            <strong style="color: #f8fafc; font-size: 0.88rem;">${escapeHtml(p.brand)}</strong>
+            <span style="font-size: 0.7rem; background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 4px; padding: 1px 6px;">${escapeHtml(p.category || 'Partner')}</span>
+          </div>
+          <div style="font-size: 0.78rem; color: #10b981; font-weight: 600;">
+            ${escapeHtml(p.discount || 'Special Deal')}
+          </div>
+          ${p.description ? `<p style="margin: 2px 0 0 0; font-size: 0.76rem; color: #94a3b8; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">${escapeHtml(p.description)}</p>` : ''}
+          <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px; flex-wrap: wrap;">
+            ${p.code ? `<span class="perk-compact-code">CODE: ${escapeHtml(p.code)}</span>` : '<span style="font-size: 0.74rem; color: #94a3b8;">(Direct link deal)</span>'}
+            ${p.url ? `<a href="${escapeHtml(p.url)}" target="_blank" rel="noopener noreferrer" style="font-size: 0.74rem; color: #ec4899; text-decoration: underline;">Test Link ↗</a>` : ''}
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-end; flex-shrink: 0;">
+          <button type="button" class="btn-secondary btn-sm btn-studio-edit-perk" data-perk-id="${escapeHtml(p.id)}" style="padding: 4px 8px; font-size: 0.76rem;" title="Edit this sponsor / code">
+            ✏️ Edit
+          </button>
+          <button type="button" class="btn-secondary btn-sm btn-studio-delete-perk" data-perk-id="${escapeHtml(p.id)}" style="padding: 4px 8px; font-size: 0.76rem; color: #f87171; border-color: rgba(239, 68, 68, 0.3);" title="Delete this sponsor">
+            🗑️
+          </button>
+        </div>
+      </div>
+    `).join('');
+
+    perksGrid.querySelectorAll('.btn-studio-edit-perk').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const pId = btn.dataset.perkId;
+        const p = perks.find(item => item.id === pId);
+        if (p) openStudioPerkEditor(p);
+      });
+    });
+
+    perksGrid.querySelectorAll('.btn-studio-delete-perk').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const pId = btn.dataset.perkId;
+        deleteStudioPerk(pId, creatorId);
+      });
+    });
   }
 
   async function loadAndRenderCreatorVips(creatorId) {
@@ -16805,19 +17135,19 @@
           if (res.ok && data.success) {
             if (!currentUser.socialLinks) currentUser.socialLinks = {};
             currentUser.socialLinks = data.socialLinks || socialLinks;
-            saveAuthSession();
+            saveUserAuth();
             showToast('✅ Social media links saved! Your shared cards now feature your personal branding.');
           } else {
             if (!currentUser.socialLinks) currentUser.socialLinks = {};
             currentUser.socialLinks = socialLinks;
-            saveAuthSession();
+            saveUserAuth();
             showToast('✅ Social links saved to active profile.');
           }
         } catch (err) {
           console.warn('Save creator profile error:', err);
           if (!currentUser.socialLinks) currentUser.socialLinks = {};
           currentUser.socialLinks = socialLinks;
-          saveAuthSession();
+          saveUserAuth();
           showToast('✅ Social links saved.');
         } finally {
           btnStudioSaveSocial.innerHTML = origHtml;
@@ -16830,7 +17160,7 @@
     if (btnStudioCopySlug) {
       btnStudioCopySlug.addEventListener('click', () => {
         const creatorId = (currentUser && currentUser.creatorId) ? currentUser.creatorId : 'fitness_product_finder';
-        const creator = (typeof CREATORS_MASTER !== 'undefined') ? CREATORS_MASTER.find(c => c.id === creatorId) : null;
+        const creator = getCreatorById(creatorId);
         const handle = creator && creator.handle ? creator.handle.replace('@', '') : 'fitnessproductfinder';
         const fullUrl = `${window.location.origin}${IS_BETA ? '/beta' : ''}/@${handle}`;
         if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -16885,6 +17215,35 @@
           e.preventDefault();
           handleAddCreatorVip();
         }
+      });
+    }
+
+    // Creator Studio: Brand Codes, Links & Sponsors
+    const btnStudioOpenAddPerk = document.getElementById('btnStudioOpenAddPerk');
+    if (btnStudioOpenAddPerk) {
+      btnStudioOpenAddPerk.addEventListener('click', () => {
+        openStudioPerkEditor(null);
+      });
+    }
+
+    const btnStudioPerkEditorClose = document.getElementById('btnStudioPerkEditorClose');
+    if (btnStudioPerkEditorClose) {
+      btnStudioPerkEditorClose.addEventListener('click', () => {
+        closeStudioPerkEditor();
+      });
+    }
+
+    const btnStudioPerkEditorCancel = document.getElementById('btnStudioPerkEditorCancel');
+    if (btnStudioPerkEditorCancel) {
+      btnStudioPerkEditorCancel.addEventListener('click', () => {
+        closeStudioPerkEditor();
+      });
+    }
+
+    const btnStudioPerkEditorSave = document.getElementById('btnStudioPerkEditorSave');
+    if (btnStudioPerkEditorSave) {
+      btnStudioPerkEditorSave.addEventListener('click', () => {
+        saveStudioPerk();
       });
     }
 

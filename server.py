@@ -415,7 +415,8 @@ def format_user_payload(user):
         'freezerPints': user.get('freezerPints', []),
         'freezerCapacity': get_effective_freezer_capacity(user),
         'subscriptions': user.get('subscriptions', fallback_subs),
-        'socialLinks': user.get('socialLinks', {})
+        'socialLinks': user.get('socialLinks', {}),
+        'perks': user.get('perks', [])
     }
 
 RECIPES_MASTER = []
@@ -1171,13 +1172,27 @@ def compute_community_stats():
                     published_recipes.append(r)
                     seen_ids.add(r_id)
 
+    creator_profiles = {}
+    for u in users_db.values():
+        c_id = u.get('creatorId')
+        if c_id and (u.get('role') in ['creator', 'admin'] or u.get('email', '').lower() == 'ahumpo7@gmail.com'):
+            if u.get('socialLinks') or u.get('perks') or u.get('brandName'):
+                creator_profiles[c_id] = {
+                    'creatorId': c_id,
+                    'name': u.get('name'),
+                    'brandName': u.get('brandName'),
+                    'socialLinks': u.get('socialLinks', {}),
+                    'perks': u.get('perks', [])
+                }
+
     return {
         'status': 'ok',
         'success': True,
         'ratings': ratings_summary,
         'madeCounts': made_summary,
         'totalBatches': total_community_batches,
-        'publishedRecipes': published_recipes
+        'publishedRecipes': published_recipes,
+        'creatorProfiles': creator_profiles
     }
 
 class RecipeServer(http.server.SimpleHTTPRequestHandler):
@@ -1414,6 +1429,27 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 'status': 'ok',
                 'creatorId': creator_id,
                 'vips': vips
+            })
+            return
+
+        elif clean_path in ('/api/creator/profile', '/api/creator/perks'):
+            user = self._get_user_from_token()
+            if not user or user.get('role') != 'creator':
+                self._send_json({'error': 'Unauthorized: Content creator access required'}, 403)
+                return
+            target_creator_id = user.get('creatorId') or 'fitness_product_finder'
+            target_user = user
+            if user.get('email', '').lower() == 'ahumpo7@gmail.com':
+                for u in users_db.values():
+                    if u.get('creatorId') == target_creator_id:
+                        target_user = u
+                        break
+            self._send_json({
+                'status': 'ok',
+                'creatorId': target_creator_id,
+                'brandName': target_user.get('brandName', ''),
+                'socialLinks': target_user.get('socialLinks', {}),
+                'perks': target_user.get('perks', [])
             })
             return
 
@@ -2595,26 +2631,56 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
             self._send_json({'status': 'ok', 'message': f'Removed {target_email} from VIP list'})
             return
 
-        # Creator: Update Creator Profile & Social Links
-        elif self.path == '/api/creator/profile':
+        # Creator: Update Creator Profile, Social Links & Perks/Sponsors
+        elif self.path in ('/api/creator/profile', '/api/creator/perks'):
             user = self._get_user_from_token(data)
             if not user or user.get('role') != 'creator':
                 self._send_json({'error': 'Unauthorized: Content creator access required'}, 403)
                 return
 
+            target_creator_id = user.get('creatorId') or 'fitness_product_finder'
+            target_user = user
+            if user.get('email', '').lower() == 'ahumpo7@gmail.com':
+                for u in users_db.values():
+                    if u.get('creatorId') == target_creator_id:
+                        target_user = u
+                        break
+
             if 'socialLinks' in data and isinstance(data['socialLinks'], dict):
-                user['socialLinks'] = {
+                target_user['socialLinks'] = {
                     'instagram': str(data['socialLinks'].get('instagram', '')).strip(),
                     'tiktok': str(data['socialLinks'].get('tiktok', '')).strip(),
                     'youtube': str(data['socialLinks'].get('youtube', '')).strip(),
                     'website': str(data['socialLinks'].get('website', '')).strip()
                 }
             if 'brandName' in data and data['brandName']:
-                user['brandName'] = str(data['brandName']).strip()
+                target_user['brandName'] = str(data['brandName']).strip()
 
-            user['last_active'] = datetime.utcnow().isoformat()
+            if 'perks' in data and isinstance(data['perks'], list):
+                sanitized_perks = []
+                for p in data['perks']:
+                    if isinstance(p, dict) and p.get('brand'):
+                        sanitized_perks.append({
+                            'id': str(p.get('id') or f"perk_{uuid.uuid4().hex[:8]}").strip(),
+                            'brand': str(p.get('brand', '')).strip()[:120],
+                            'category': str(p.get('category', 'Sponsor / Partner')).strip()[:80],
+                            'code': str(p.get('code', '')).strip()[:40] if p.get('code') else None,
+                            'discount': str(p.get('discount', 'Special Partner Deal')).strip()[:60],
+                            'description': str(p.get('description', '')).strip()[:400],
+                            'url': str(p.get('url', '')).strip()[:500]
+                        })
+                target_user['perks'] = sanitized_perks
+
+            target_user['last_active'] = datetime.utcnow().isoformat()
             save_json_file(USERS_DB_FILE, users_db)
-            self._send_json({'status': 'ok', 'success': True, 'socialLinks': user.get('socialLinks', {})})
+            self._send_json({
+                'status': 'ok',
+                'success': True,
+                'creatorId': target_creator_id,
+                'brandName': target_user.get('brandName', ''),
+                'socialLinks': target_user.get('socialLinks', {}),
+                'perks': target_user.get('perks', [])
+            })
             return
 
         # Admin: Update User Permissions / Role / Subscriptions
