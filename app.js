@@ -17223,6 +17223,25 @@
           return;
         }
 
+        // 1b. Hit safety for catalog banner store visit button
+        const catalogBanner = e.target.closest('.creator-catalog-banner');
+        if (catalogBanner && !e.target.closest('.creator-banner-left')) {
+          const bannerStoreBtn = catalogBanner.querySelector('.btn-creator-store-visit, #catalogCreatorStoreBtn');
+          if (bannerStoreBtn) {
+            const bRect = bannerStoreBtn.getBoundingClientRect();
+            if (e.clientX >= bRect.left - 15 && e.clientY >= bRect.top - 10 && e.clientY <= bRect.bottom + 10) {
+              e.preventDefault();
+              e.stopPropagation();
+              const creator = activeStoreCreatorId ? getCreatorById(activeStoreCreatorId) : getCreatorById('fitness_product_finder');
+              const targetUrl = bannerStoreBtn.getAttribute('href') || (creator ? (creator.storeUrl || creator.url) : 'https://fitnessproductfinder.com/collections/creami-cravings-recipe-books');
+              if (targetUrl && targetUrl !== '#' && !targetUrl.startsWith('javascript:')) {
+                window.open(targetUrl, '_blank', 'noopener,noreferrer');
+              }
+              return;
+            }
+          }
+        }
+
         // 2. Storefront button on Creator Directory cards (Storefront ↗)
         const websiteLink = e.target.closest('.btn-creator-website-link');
         if (websiteLink) {
@@ -17242,14 +17261,42 @@
         // 3. Browse Books button on Directory cards
         const browseBtn = e.target.closest('.btn-browse-creator-books');
         if (browseBtn) {
+          e.stopPropagation();
           const cId = browseBtn.dataset.creatorId || 'fitness_product_finder';
           showCreatorCatalogView(cId);
           return;
         }
 
-        // 4. Click anywhere on Creator Directory card (except links) to browse books
+        // 4. Click within Creator Card Actions container
+        const cardActions = e.target.closest('.creator-card-actions');
+        if (cardActions) {
+          e.stopPropagation();
+          // Hit-area safety: if clicked near the storefront button (including corners/gap), open storefront!
+          const storefrontBtn = cardActions.querySelector('.btn-creator-website-link');
+          if (storefrontBtn) {
+            const storeRect = storefrontBtn.getBoundingClientRect();
+            if (e.clientX >= storeRect.left - 12) {
+              const targetUrl = storefrontBtn.getAttribute('href');
+              if (targetUrl && targetUrl !== '#' && !targetUrl.startsWith('javascript:')) {
+                if (targetUrl.startsWith('http://') || targetUrl.startsWith('https://')) {
+                  window.open(targetUrl, '_blank', 'noopener,noreferrer');
+                } else {
+                  window.location.href = targetUrl;
+                }
+                return;
+              }
+            }
+          }
+          // Otherwise, if clicked near browse button, open books
+          const cCard = cardActions.closest('.creator-directory-card');
+          const cId = cCard ? (cCard.dataset.creatorId || 'fitness_product_finder') : 'fitness_product_finder';
+          showCreatorCatalogView(cId);
+          return;
+        }
+
+        // 5. Click anywhere on Creator Directory card (except links/actions) to browse books
         const creatorCard = e.target.closest('.creator-directory-card');
-        if (creatorCard && !e.target.closest('.btn-creator-website-link')) {
+        if (creatorCard && !e.target.closest('.btn-creator-website-link') && !e.target.closest('.creator-card-actions')) {
           const cId = creatorCard.dataset.creatorId || 'fitness_product_finder';
           showCreatorCatalogView(cId);
           return;
