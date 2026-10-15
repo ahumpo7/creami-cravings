@@ -4492,8 +4492,8 @@
       </div>
 
       <div class="recipe-card-bottom">
-        <span class="spin-tag" title="Recommended spin cycle">🌀 ${recipe.spinSetting || 'Lite Ice Cream'}</span>
-        <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+        <span class="spin-tag" title="Recommended spin cycle">🌀 ${escapeHtml(recipe.spinSetting || 'Lite Ice Cream')}</span>
+        <div class="card-bottom-actions">
           <button type="button" class="btn-card-batch-prep ${inBatchPrep ? 'active' : ''}" data-recipe-id="${recipe.id}" data-action="batch-prep-toggle" title="${inBatchPrep ? 'Remove from Sunday Batch Prep' : 'Add to Sunday Batch Prep'}">
             ${inBatchPrep ? '🍱 Queued ✓' : '🍱 +Prep'}
           </button>
