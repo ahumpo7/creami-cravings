@@ -14494,11 +14494,28 @@ body.modal-open .cookie-consent-banner {
   letter-spacing: 0.5px;
 }
 
-.btn-studio-edit-perk,
+.btn-studio-edit-perk {
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+  color: #f1f5f9 !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .btn-studio-delete-perk {
   cursor: pointer;
   transition: all 0.15s ease;
   user-select: none;
+  color: #f87171 !important;
+  background: rgba(239, 68, 68, 0.1) !important;
+  border: 1px solid rgba(239, 68, 68, 0.25) !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-studio-edit-perk:hover {
