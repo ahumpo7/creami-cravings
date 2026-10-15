@@ -14461,19 +14461,25 @@ body.modal-open .cookie-consent-banner {
 
 .creator-perks-compact-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
 }
 
 .perk-compact-card {
-  background: rgba(30, 41, 59, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 10px;
-  padding: 10px 14px;
+  padding: 12px 14px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 10px;
+  gap: 12px;
+  transition: all 0.15s ease;
+}
+
+.perk-compact-card:hover {
+  border-color: rgba(255, 255, 255, 0.22);
+  background: rgba(30, 41, 59, 0.75);
 }
 
 .perk-compact-code {
@@ -14485,6 +14491,26 @@ body.modal-open .cookie-consent-banner {
   background: rgba(236, 72, 153, 0.15);
   color: #f472b6;
   border: 1px solid rgba(236, 72, 153, 0.3);
+  letter-spacing: 0.5px;
+}
+
+.btn-studio-edit-perk,
+.btn-studio-delete-perk {
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.btn-studio-edit-perk:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.35) !important;
+}
+
+.btn-studio-delete-perk:hover {
+  background: rgba(239, 68, 68, 0.28) !important;
+  color: #ffffff !important;
+  border-color: rgba(239, 68, 68, 0.5) !important;
 }
 
 .creator-portal-footer {
