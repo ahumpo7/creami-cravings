@@ -1786,6 +1786,8 @@ body.modal-open {
   cursor: pointer;
   line-height: 1;
   transition: color 0.15s;
+  z-index: 100;
+  pointer-events: auto;
 }
 
 .modal-close:hover {
@@ -13947,6 +13949,27 @@ body.modal-open .cookie-consent-banner {
 .spin-log-modal-content .modal-close {
   top: 14px;
   right: 18px;
+  z-index: 100 !important;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  color: #e2e8f0;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  pointer-events: auto !important;
+  transition: all 0.15s ease;
+}
+
+.spin-log-modal-content .modal-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  transform: scale(1.05);
 }
 
 .spin-log-title-row {
@@ -14121,6 +14144,17 @@ body.modal-open .cookie-consent-banner {
   justify-content: space-between;
   gap: 12px;
   flex-shrink: 0;
+}
+
+.spin-log-footer .btn-cancel-spin-modal {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #cbd5e1;
+}
+
+.spin-log-footer .btn-cancel-spin-modal:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #f8fafc;
 }
 
 @media (max-width: 768px) {

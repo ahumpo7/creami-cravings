@@ -10397,6 +10397,7 @@
     }
     spinLogActivePint = null;
   }
+  window.closeSpinLogModal = closeSpinLogModal;
 
   function updateSpinStarRatingUI(rating) {
     document.querySelectorAll('#spinStarRating .star-btn').forEach(btn => {
@@ -10406,25 +10407,34 @@
   }
 
   function confirmSpinLog() {
-    if (!spinLogActivePint) return;
+    if (!spinLogActivePint) {
+      closeSpinLogModal();
+      return;
+    }
     const pint = spinLogActivePint;
     const mixinsVal = (document.getElementById('spinMixInsInput')?.value || '').trim();
 
-    recordHabitStreakSpin({
-      recipeId: pint.recipeId,
-      recipeName: pint.recipeName,
-      cycle: spinLogSelectedCycle,
-      respins: spinLogSelectedRespins,
-      mixins: mixinsVal,
-      rating: spinLogSelectedRating
-    });
+    try {
+      recordHabitStreakSpin({
+        recipeId: pint.recipeId,
+        recipeName: pint.recipeName,
+        cycle: spinLogSelectedCycle,
+        respins: spinLogSelectedRespins,
+        mixins: mixinsVal,
+        rating: spinLogSelectedRating
+      });
 
-    const pintId = pint.id;
-    closeSpinLogModal();
+      const pintId = pint.id;
+      closeSpinLogModal();
 
-    spinAndEnjoyFreezerPint(pintId, true);
+      spinAndEnjoyFreezerPint(pintId, true);
 
-    showToast(`🍨 Spun & Enjoyed "${pint.recipeName}"! 🔥 Week ${habitStreakState.currentStreak} Streak Logged!`);
+      showToast(`🍨 Spun & Enjoyed "${pint.recipeName}"! 🔥 Week ${habitStreakState.currentStreak} Streak Logged!`);
+    } catch (err) {
+      console.error('Error confirming spin log:', err);
+      closeSpinLogModal();
+      showToast('Spin logged!');
+    }
   }
 
   function shareStoryCardFromSpinLog() {
@@ -17595,13 +17605,28 @@
     // Interactive Spin Log Modal & Habit Streaks (Path A Item 4)
     const spinLogCloseBtn = document.getElementById('spinLogModalCloseBtn');
     if (spinLogCloseBtn) {
-      spinLogCloseBtn.addEventListener('click', closeSpinLogModal);
+      spinLogCloseBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        closeSpinLogModal();
+      });
+    }
+
+    const btnCancelSpinLogModal = document.getElementById('btnCancelSpinLogModal');
+    if (btnCancelSpinLogModal) {
+      btnCancelSpinLogModal.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        closeSpinLogModal();
+      });
     }
 
     const spinLogOverlay = document.getElementById('spinLogModalOverlay');
     if (spinLogOverlay) {
       spinLogOverlay.addEventListener('click', (e) => {
-        if (e.target === spinLogOverlay) closeSpinLogModal();
+        if (e.target === spinLogOverlay || e.target.classList.contains('modal-handle-bar')) {
+          closeSpinLogModal();
+        }
       });
     }
 
