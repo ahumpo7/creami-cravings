@@ -5063,20 +5063,24 @@
       `;
     }).join('');
 
-    perksGrid.querySelectorAll('.btn-copy-perk-code').forEach(btn => {
-      btn.addEventListener('click', (e) => {
+    perksGrid.querySelectorAll('.perk-code-box').forEach(box => {
+      box.addEventListener('click', (e) => {
         e.stopPropagation();
-        const code = btn.dataset.code;
-        const brand = btn.dataset.brand;
+        const btn = box.querySelector('.btn-copy-perk-code');
+        const code = btn ? btn.dataset.code : '';
+        const brand = btn ? btn.dataset.brand : '';
+        if (!code) return;
         copyTextToClipboard(code);
         showToast(`📋 Copied code "${code}" for ${brand}!`);
-        const originalHtml = btn.innerHTML;
-        btn.innerHTML = '<span>✓ Copied!</span>';
-        btn.classList.add('copied');
-        setTimeout(() => {
-          btn.innerHTML = originalHtml;
-          btn.classList.remove('copied');
-        }, 1800);
+        if (btn) {
+          const originalHtml = btn.innerHTML;
+          btn.innerHTML = '<span>✓ Copied!</span>';
+          btn.classList.add('copied');
+          setTimeout(() => {
+            btn.innerHTML = originalHtml;
+            btn.classList.remove('copied');
+          }, 1800);
+        }
       });
     });
   }
@@ -17189,7 +17193,14 @@
 
     const btnBackToCreators = document.getElementById('btnBackToCreators');
     if (btnBackToCreators) {
-      btnBackToCreators.addEventListener('click', showCreatorDirectoryView);
+      btnBackToCreators.addEventListener('click', () => showCreatorDirectoryView());
+    }
+
+    const catalogBreadcrumbsWrap = document.querySelector('.creator-catalog-breadcrumbs');
+    if (catalogBreadcrumbsWrap) {
+      catalogBreadcrumbsWrap.style.cursor = 'pointer';
+      catalogBreadcrumbsWrap.title = 'Back to All Creators';
+      catalogBreadcrumbsWrap.addEventListener('click', () => showCreatorDirectoryView());
     }
 
     if (recipePacksModalOverlay) {
@@ -17199,6 +17210,36 @@
           return;
         }
 
+        // 1. Storefront button on Creator Catalog header banner (Visit Eli's Storefront ↗)
+        const storeVisitBtn = e.target.closest('.btn-creator-store-visit, #catalogCreatorStoreBtn');
+        if (storeVisitBtn) {
+          e.preventDefault();
+          e.stopPropagation();
+          const creator = activeStoreCreatorId ? getCreatorById(activeStoreCreatorId) : getCreatorById('fitness_product_finder');
+          const targetUrl = storeVisitBtn.getAttribute('href') || (creator ? (creator.storeUrl || creator.url) : 'https://fitnessproductfinder.com/collections/creami-cravings-recipe-books');
+          if (targetUrl && targetUrl !== '#' && !targetUrl.startsWith('javascript:')) {
+            window.open(targetUrl, '_blank', 'noopener,noreferrer');
+          }
+          return;
+        }
+
+        // 2. Storefront button on Creator Directory cards (Storefront ↗)
+        const websiteLink = e.target.closest('.btn-creator-website-link');
+        if (websiteLink) {
+          e.preventDefault();
+          e.stopPropagation();
+          const targetUrl = websiteLink.getAttribute('href');
+          if (targetUrl && targetUrl !== '#' && !targetUrl.startsWith('javascript:')) {
+            if (targetUrl.startsWith('http://') || targetUrl.startsWith('https://')) {
+              window.open(targetUrl, '_blank', 'noopener,noreferrer');
+            } else {
+              window.location.href = targetUrl;
+            }
+          }
+          return;
+        }
+
+        // 3. Browse Books button on Directory cards
         const browseBtn = e.target.closest('.btn-browse-creator-books');
         if (browseBtn) {
           const cId = browseBtn.dataset.creatorId || 'fitness_product_finder';
@@ -17206,6 +17247,15 @@
           return;
         }
 
+        // 4. Click anywhere on Creator Directory card (except links) to browse books
+        const creatorCard = e.target.closest('.creator-directory-card');
+        if (creatorCard && !e.target.closest('.btn-creator-website-link')) {
+          const cId = creatorCard.dataset.creatorId || 'fitness_product_finder';
+          showCreatorCatalogView(cId);
+          return;
+        }
+
+        // 5. Pack Purchase Action button
         const actionBtn = e.target.closest('.btn-action-pack');
         if (actionBtn) {
           if (actionBtn.dataset.batchPack) {
@@ -17217,6 +17267,18 @@
           return;
         }
 
+        // 6. Click on "Available on [Creator]" status row to purchase/visit
+        const packStatus = e.target.closest('.pack-status-available');
+        if (packStatus) {
+          const card = packStatus.closest('.recipe-pack-card');
+          const pack = card ? card.dataset.pack : null;
+          if (pack) {
+            handlePackPurchase(pack);
+            return;
+          }
+        }
+
+        // 7. Claim Owned Pack link
         const ownLink = e.target.closest('.btn-pack-own-link');
         if (ownLink) {
           e.preventDefault();
