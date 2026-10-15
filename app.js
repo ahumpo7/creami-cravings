@@ -10852,7 +10852,73 @@
     return !isLiquidIngredient(ing);
   }
 
+  function removePintFromAssembly(idx) {
+    if (idx < 0 || idx >= batchPrepQueueState.length) return;
+    const removed = batchPrepQueueState.splice(idx, 1)[0];
+    if (Array.isArray(assemblyPintConfigs) && assemblyPintConfigs.length > idx) {
+      assemblyPintConfigs.splice(idx, 1);
+    }
+
+    // Remap or discard checked items for shifted pint indices
+    const newChecked = new Set();
+    assemblyCheckedItems.forEach(key => {
+      const parts = key.split('_');
+      let pIdx = -1;
+      if (parts[0] === 'step1' || parts[0] === 'step2') {
+        pIdx = parseInt(parts[1], 10);
+      } else if (parts[0] === 'step3' && parts[1] === 'froth') {
+        pIdx = parseInt(parts[2], 10);
+      } else if (parts[0] === 'step4' && parts[1] === 'mixin') {
+        pIdx = parseInt(parts[2], 10);
+      }
+      if (pIdx !== idx) {
+        if (pIdx > idx) {
+          if (parts[0] === 'step1' || parts[0] === 'step2') {
+            newChecked.add(`${parts[0]}_${pIdx - 1}_${parts[2]}`);
+          } else if (parts[0] === 'step3' && parts[1] === 'froth') {
+            newChecked.add(`step3_froth_${pIdx - 1}`);
+          } else if (parts[0] === 'step4' && parts[1] === 'mixin') {
+            newChecked.add(`step4_mixin_${pIdx - 1}_${parts[3]}`);
+          }
+        } else {
+          newChecked.add(key);
+        }
+      }
+    });
+    assemblyCheckedItems = newChecked;
+
+    saveBatchPrepQueue();
+    updateBatchPrepDockUI();
+
+    if (batchPrepQueueState.length === 0) {
+      closeBatchAssemblyModal();
+      showToast(`Removed "${removed ? removed.recipeName : 'Pint'}". Kitchen Prep finished!`);
+      return;
+    }
+
+    showToast(`Removed "${removed ? removed.recipeName : 'Pint'}" (${batchPrepQueueState.length} left)`);
+
+    // Update Header Pill
+    const pintsPill = document.getElementById('assemblyPintsPill');
+    if (pintsPill) {
+      pintsPill.textContent = `${batchPrepQueueState.length} Pint${batchPrepQueueState.length === 1 ? '' : 's'} Queued`;
+    }
+
+    // Update Next/Back button text
+    const nextBtn = document.getElementById('btnAssemblyNextStep');
+    if (nextBtn && assemblyCurrentStep === 4) {
+      nextBtn.textContent = batchPrepQueueState.length === 1 ? '❄️ Freeze Pint & Start Timer' : '❄️ Freeze Pints & Start Timers';
+    }
+
+    // Re-render current stage
+    renderAssemblyStepBody(assemblyCurrentStep);
+  }
+
   function goToAssemblyStep(step) {
+    if (batchPrepQueueState.length === 0) {
+      closeBatchAssemblyModal();
+      return;
+    }
     assemblyCurrentStep = Math.max(1, Math.min(4, step));
 
     // Update Step Bar Buttons
@@ -10925,7 +10991,10 @@
           <div class="assembly-pint-card" data-pint-idx="${idx}">
             <div class="assembly-pint-card-header">
               <span class="assembly-pint-title">#${idx + 1} ${escapeHtml(queued.recipeName)}</span>
-              <span class="assembly-pint-badge">${sizeBadge}</span>
+              <div class="assembly-pint-header-actions">
+                <span class="assembly-pint-badge">${sizeBadge}</span>
+                <button type="button" class="btn-assembly-pint-remove" data-action="remove-assembly-pint" data-pint-idx="${idx}" title="Remove this pint from prep">✕</button>
+              </div>
             </div>
             <div class="assembly-items-list">
         `;
@@ -10980,7 +11049,10 @@
           <div class="assembly-pint-card" data-pint-idx="${idx}">
             <div class="assembly-pint-card-header">
               <span class="assembly-pint-title">#${idx + 1} ${escapeHtml(queued.recipeName)}</span>
-              <span class="assembly-pint-badge">${sizeBadge}</span>
+              <div class="assembly-pint-header-actions">
+                <span class="assembly-pint-badge">${sizeBadge}</span>
+                <button type="button" class="btn-assembly-pint-remove" data-action="remove-assembly-pint" data-pint-idx="${idx}" title="Remove this pint from prep">✕</button>
+              </div>
             </div>
             <div class="assembly-items-list">
         `;
@@ -11056,7 +11128,10 @@
               <span>${isChecked ? '✅' : '⏳'}</span>
               <span class="assembly-item-name">#${idx + 1} ${escapeHtml(queued.recipeName)}</span>
             </div>
-            <span class="assembly-item-qty">${isChecked ? 'Frothed ✓' : 'Froth 30s'}</span>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="assembly-item-qty">${isChecked ? 'Frothed ✓' : 'Froth 30s'}</span>
+              <button type="button" class="btn-assembly-pint-remove" data-action="remove-assembly-pint" data-pint-idx="${idx}" title="Remove this pint from prep">✕</button>
+            </div>
           </div>
         `;
       });
@@ -11160,7 +11235,10 @@
                 <span style="font-size: 1.15rem;">🍨</span>
                 <span class="assembly-pint-title" title="${escapeHtml(queued.recipeName)}">#${idx + 1} ${escapeHtml(queued.recipeName)}</span>
               </div>
-              <span class="assembly-pint-badge">${sizeBadge}</span>
+              <div class="assembly-pint-header-actions">
+                <span class="assembly-pint-badge">${sizeBadge}</span>
+                <button type="button" class="btn-assembly-pint-remove" data-action="remove-assembly-pint" data-pint-idx="${idx}" title="Remove this pint from prep">✕</button>
+              </div>
             </div>
 
             <!-- Lid Color Selector -->
@@ -11408,6 +11486,16 @@
             if (qty) qty.textContent = 'Frothed ✓';
           }
         }
+      });
+    });
+
+    // Attach remove pint listeners across all steps
+    body.querySelectorAll('.btn-assembly-pint-remove[data-pint-idx]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        const pIdx = parseInt(btn.dataset.pintIdx, 10);
+        removePintFromAssembly(pIdx);
       });
     });
   }

@@ -14226,6 +14226,39 @@ body.modal-open .cookie-consent-banner {
   color: #a5b4fc;
 }
 
+.assembly-pint-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.btn-assembly-pint-remove {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 700;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  line-height: 1;
+  padding: 0;
+  transition: all 0.15s ease;
+}
+
+.btn-assembly-pint-remove:hover {
+  background: #ef4444;
+  color: #ffffff;
+  border-color: #ef4444;
+  transform: scale(1.08);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+}
+
 .assembly-items-list {
   display: flex;
   flex-direction: column;
