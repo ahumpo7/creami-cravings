@@ -17297,6 +17297,23 @@
         // 5. Click anywhere on Creator Directory card (except links/actions) to browse books
         const creatorCard = e.target.closest('.creator-directory-card');
         if (creatorCard && !e.target.closest('.btn-creator-website-link') && !e.target.closest('.creator-card-actions')) {
+          // Safety proximity check: If clicked in the quadrant near/above the storefront button, open storefront
+          const storefrontBtn = creatorCard.querySelector('.btn-creator-website-link');
+          if (storefrontBtn) {
+            const storeRect = storefrontBtn.getBoundingClientRect();
+            if (e.clientX >= storeRect.left - 10 && e.clientX <= storeRect.right + 16 &&
+                e.clientY >= storeRect.top - 16 && e.clientY <= storeRect.bottom + 10) {
+              const targetUrl = storefrontBtn.getAttribute('href');
+              if (targetUrl && targetUrl !== '#' && !targetUrl.startsWith('javascript:')) {
+                if (targetUrl.startsWith('http://') || targetUrl.startsWith('https://')) {
+                  window.open(targetUrl, '_blank', 'noopener,noreferrer');
+                } else {
+                  window.location.href = targetUrl;
+                }
+                return;
+              }
+            }
+          }
           const cId = creatorCard.dataset.creatorId || 'fitness_product_finder';
           showCreatorCatalogView(cId);
           return;
