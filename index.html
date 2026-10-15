@@ -3,6 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <base href="/">
+  <script>
+    if ((location.protocol === 'http:' || location.hostname === '63.250.44.133' || location.hostname.startsWith('www.')) && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+      location.replace('https://creamicravings.com' + location.pathname + location.search + location.hash);
+    }
+  </script>
   <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="description" content="Discover 200+ tested Ninja Creami recipes matched to your kitchen pantry! High-protein, low-calorie, keto &amp; fruit sorbet pints with complete macros, spin settings &amp; freeze guides.">
