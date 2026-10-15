@@ -3280,7 +3280,7 @@
   }
 
   // --- Recipe Batch Counter API & Helper ---
-  async function logRecipeBatch(recipeId, delta) {
+  async function logRecipeBatch(recipeId, delta, skipPantryDeduction = false) {
     const currentCount = recipeMadeCounts[recipeId] || 0;
     const newCount = Math.max(0, currentCount + delta);
     recipeMadeCounts[recipeId] = newCount;
@@ -3298,6 +3298,14 @@
         new_batch_count: newCount
       });
       showToast(`🍨 Batch logged! You have spun this ${newCount} time${newCount === 1 ? '' : 's'}.`);
+
+      if (!skipPantryDeduction) {
+        const currentScale = (typeof currentModalRecipe !== 'undefined' && currentModalRecipe && currentModalRecipe.id === recipeId && typeof modalScale === 'number') ? modalScale : 1.0;
+        const deducted = deductSingleUseIngredients(recipeId, currentScale);
+        if (deducted && deducted.length > 0) {
+          setTimeout(() => notifyPantryDeduction(deducted), 800);
+        }
+      }
     } else {
       showToast(`Batch counter updated (${newCount}).`);
     }
@@ -3935,6 +3943,139 @@
     modal.classList.remove('active');
     modal.setAttribute('aria-hidden', 'true');
     unlockBackgroundScroll();
+  }
+
+  // Match single-use ingredients to pantry key in pantryItemQuantities or pantryState
+  function findMatchingPantryKey(targetId, targetName) {
+    if (targetId && pantryItemQuantities && typeof pantryItemQuantities[targetId] === 'number') {
+      return targetId;
+    }
+    if (targetId && typeof INGREDIENT_EQUIVALENTS !== 'undefined' && INGREDIENT_EQUIVALENTS[targetId]) {
+      for (const eqId of INGREDIENT_EQUIVALENTS[targetId]) {
+        if (pantryItemQuantities && typeof pantryItemQuantities[eqId] === 'number') {
+          return eqId;
+        }
+      }
+    }
+    if (targetName) {
+      const clean = sanitizeShoppingItemName(targetName);
+      const slug = clean.toLowerCase().replace(/[^a-z0-9]+/g, '_').trim();
+      if (slug && pantryItemQuantities && typeof pantryItemQuantities[slug] === 'number') {
+        return slug;
+      }
+      if (typeof INGREDIENTS_MASTER !== 'undefined' && Array.isArray(INGREDIENTS_MASTER)) {
+        const masterMatch = INGREDIENTS_MASTER.find(m => 
+          m.id === slug || (m.name && m.name.toLowerCase() === clean.toLowerCase())
+        );
+        if (masterMatch && pantryItemQuantities && typeof pantryItemQuantities[masterMatch.id] === 'number') {
+          return masterMatch.id;
+        }
+        if (masterMatch && typeof INGREDIENT_EQUIVALENTS !== 'undefined' && INGREDIENT_EQUIVALENTS[masterMatch.id]) {
+          for (const eqId of INGREDIENT_EQUIVALENTS[masterMatch.id]) {
+            if (pantryItemQuantities && typeof pantryItemQuantities[eqId] === 'number') {
+              return eqId;
+            }
+          }
+        }
+      }
+    }
+
+    // Fallback: check if tracked in pantryState (user has item checked)
+    if (targetId && pantryState && pantryState.has(targetId)) {
+      return targetId;
+    }
+    if (targetId && typeof INGREDIENT_EQUIVALENTS !== 'undefined' && INGREDIENT_EQUIVALENTS[targetId]) {
+      for (const eqId of INGREDIENT_EQUIVALENTS[targetId]) {
+        if (pantryState && pantryState.has(eqId)) {
+          return eqId;
+        }
+      }
+    }
+    if (targetName) {
+      const clean = sanitizeShoppingItemName(targetName);
+      const slug = clean.toLowerCase().replace(/[^a-z0-9]+/g, '_').trim();
+      if (slug && pantryState && pantryState.has(slug)) {
+        return slug;
+      }
+      if (typeof INGREDIENTS_MASTER !== 'undefined' && Array.isArray(INGREDIENTS_MASTER)) {
+        const masterMatch = INGREDIENTS_MASTER.find(m => 
+          m.id === slug || (m.name && m.name.toLowerCase() === clean.toLowerCase())
+        );
+        if (masterMatch && pantryState && pantryState.has(masterMatch.id)) {
+          return masterMatch.id;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  // Deduct single-use countable ingredients (shakes, cookies, pastries, etc.) from pantry
+  function deductSingleUseIngredients(recipeOrId, scale = 1.0) {
+    if (!recipeOrId) return [];
+    let rec = null;
+    if (typeof recipeOrId === 'string') {
+      rec = (typeof allRecipes !== 'undefined' && Array.isArray(allRecipes))
+        ? allRecipes.find(r => r.id === recipeOrId || (r.name && r.name.toLowerCase() === recipeOrId.toLowerCase()))
+        : null;
+    } else if (typeof recipeOrId === 'object') {
+      rec = recipeOrId;
+    }
+    if (!rec || !Array.isArray(rec.ingredients)) return [];
+
+    const deducted = [];
+    rec.ingredients.forEach(ing => {
+      if (!isSingleUseItem(ing)) return;
+
+      const rawQty = ing.quantity != null ? ing.quantity : ing.amount;
+      const parsedQty = parseIngredientQuantity(rawQty);
+      if (parsedQty === null || parsedQty <= 0) return;
+
+      const neededQty = parsedQty * (scale || 1.0);
+      const roundedNeeded = Math.round(neededQty * 10) / 10;
+
+      const matchedKey = findMatchingPantryKey(ing.id, ing.name);
+      if (matchedKey) {
+        const currentQty = (pantryItemQuantities && typeof pantryItemQuantities[matchedKey] === 'number')
+          ? pantryItemQuantities[matchedKey]
+          : 1;
+        const newQty = Math.max(0, Math.round((currentQty - roundedNeeded) * 10) / 10);
+        if (newQty > 0) {
+          pantryItemQuantities[matchedKey] = newQty;
+          deducted.push({
+            id: matchedKey,
+            name: getPantryItemDisplayName(matchedKey),
+            amountDeducted: roundedNeeded,
+            remaining: newQty
+          });
+        } else {
+          delete pantryItemQuantities[matchedKey];
+          pantryState.delete(matchedKey);
+          deducted.push({
+            id: matchedKey,
+            name: getPantryItemDisplayName(matchedKey),
+            amountDeducted: roundedNeeded,
+            remaining: 0
+          });
+        }
+      }
+    });
+
+    if (deducted.length > 0) {
+      savePantry();
+      updatePantryCheckboxVisuals();
+      renderRecipes();
+    }
+    return deducted;
+  }
+
+  function notifyPantryDeduction(deductedList) {
+    if (!deductedList || deductedList.length === 0) return;
+    const parts = deductedList.map(d => {
+      const leftStr = d.remaining > 0 ? `x${d.remaining} left` : 'depleted';
+      return `${d.amountDeducted} ${d.name} (${leftStr})`;
+    });
+    showToast(`📦 Pantry updated: Used ${parts.join(', ')}`);
   }
 
   // --- Pantry List Rendering ---
@@ -9034,7 +9175,7 @@
       if (pint) {
         openSpinLogModal(pintId);
       } else if (recipeId) {
-        logRecipeBatch(recipeId, 1);
+        logRecipeBatch(recipeId, 1, true);
         showToast(`🍨 Spun & Enjoyed! +1 Batch logged 🎉`);
       }
       if (recipeId) {
@@ -9295,6 +9436,12 @@
     renderFreezerModal();
     toggleFreezerAddForm(false);
 
+    // Deduct single use items used in this newly prepped pint
+    const deducted = deductSingleUseIngredients(newPint.recipeId || newPint.recipeName, newPint.scale || 1.0);
+    if (deducted && deducted.length > 0) {
+      setTimeout(() => notifyPantryDeduction(deducted), 1000);
+    }
+
     // Request notification permission if requested and currently default
     if (requestNotification && 'Notification' in window && Notification.permission === 'default') {
       await requestFreezeNotificationPermission(false);
@@ -9357,7 +9504,7 @@
 
     // Log batch made count for recipe if linked
     if (pint.recipeId) {
-      logRecipeBatch(pint.recipeId, 1);
+      logRecipeBatch(pint.recipeId, 1, true);
     }
 
     // Record streak if not already recorded by modal
@@ -10210,6 +10357,7 @@
 
     let filledCount = 0;
     const filledIndices = [];
+    const allDeducted = [];
 
     batchPrepQueueState.forEach((queued, idx) => {
       if (emptySlots.length > 0) {
@@ -10260,6 +10408,11 @@
         freezerPintsState.unshift(newPint);
         filledCount++;
         filledIndices.push(idx);
+
+        const newlyDeducted = deductSingleUseIngredients(queued.recipeId || queued.recipeName, queued.scale || 1.0);
+        if (newlyDeducted && newlyDeducted.length > 0) {
+          allDeducted.push(...newlyDeducted);
+        }
       }
     });
 
@@ -10281,6 +10434,19 @@
     closeBatchAssemblyModal();
 
     showToast(`❄️ Added ${filledCount} container${filledCount === 1 ? '' : 's'} to freezer & cleared from Prep Mode! 🎉`);
+
+    if (allDeducted.length > 0) {
+      const summaryMap = {};
+      allDeducted.forEach(d => {
+        if (!summaryMap[d.id]) {
+          summaryMap[d.id] = { id: d.id, name: d.name, amountDeducted: 0, remaining: d.remaining };
+        }
+        summaryMap[d.id].amountDeducted = Math.round((summaryMap[d.id].amountDeducted + d.amountDeducted) * 10) / 10;
+        summaryMap[d.id].remaining = d.remaining;
+      });
+      const summaryList = Object.values(summaryMap);
+      setTimeout(() => notifyPantryDeduction(summaryList), 1000);
+    }
   }
 
   // ==========================================================================
@@ -17562,6 +17728,12 @@
         saveFreezerPints();
         closeSlotFillModal();
         renderFreezerShelfWidget();
+
+        const deducted = deductSingleUseIngredients(newPint.recipeId || newPint.recipeName, newPint.scale || 1.0);
+        if (deducted && deducted.length > 0) {
+          setTimeout(() => notifyPantryDeduction(deducted), 800);
+        }
+
         if (isAlreadyFrozen) {
           fireFreezeNotification(newPint);
         } else {
