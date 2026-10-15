@@ -9417,6 +9417,88 @@
     unlockBackgroundScroll();
   }
 
+  // Helper to parse recipe ingredient quantity strings into numeric floats
+  function parseIngredientQuantity(qtyStr) {
+    if (qtyStr == null) return null;
+    let s = String(qtyStr).trim();
+    if (!s) return null;
+    s = s.replace(/^[~≈\s]+/, '');
+    const fracMap = {
+      '¼': 0.25, '½': 0.5, '¾': 0.75, '⅓': 1 / 3, '⅔': 2 / 3, '⅛': 0.125
+    };
+    if (fracMap[s] !== undefined) return fracMap[s];
+    if (s.includes('-')) {
+      const parts = s.split('-');
+      if (parts.length === 2) {
+        const p1 = parseIngredientQuantity(parts[0]);
+        const p2 = parseIngredientQuantity(parts[1]);
+        if (p1 !== null && p2 !== null) return (p1 + p2) / 2;
+      }
+    }
+    const mixedMatch = s.match(/^(\d+)\s+([¼½¾⅓⅔⅛]|\d+\/\d+)$/);
+    if (mixedMatch) {
+      const whole = parseFloat(mixedMatch[1]);
+      let frac = 0;
+      if (fracMap[mixedMatch[2]]) {
+        frac = fracMap[mixedMatch[2]];
+      } else if (mixedMatch[2].includes('/')) {
+        const [num, den] = mixedMatch[2].split('/').map(Number);
+        if (den) frac = num / den;
+      }
+      return whole + frac;
+    }
+    if (/^\d+\/\d+$/.test(s)) {
+      const [num, den] = s.split('/').map(Number);
+      if (den) return num / den;
+    }
+    const val = parseFloat(s);
+    return isNaN(val) ? null : val;
+  }
+
+  // Helper to get friendly unit descriptors for count-based or unitless items (e.g. shakes, cookies, brownies)
+  function getItemUnitDescriptor(name, count, rawUnit = '') {
+    const cleanUnit = (rawUnit || '').trim().toLowerCase();
+    const cleanName = (name || '').trim().toLowerCase();
+
+    if (cleanUnit) {
+      if (cleanUnit === 'shake' || cleanUnit === 'shakes') return count === 1 ? 'shake' : 'shakes';
+      if (cleanUnit === 'cookie' || cleanUnit === 'cookies') return count === 1 ? 'cookie' : 'cookies';
+      if (cleanUnit === 'brownie' || cleanUnit === 'brownies') return count === 1 ? 'brownie' : 'brownies';
+      if (cleanUnit === 'bar' || cleanUnit === 'bars') return count === 1 ? 'bar' : 'bars';
+      if (cleanUnit === 'pastry' || cleanUnit === 'pastries') return count === 1 ? 'pastry' : 'pastries';
+      if (cleanUnit === 'muffin' || cleanUnit === 'muffins') return count === 1 ? 'muffin' : 'muffins';
+      if (cleanUnit === 'can' || cleanUnit === 'cans') return count === 1 ? 'can' : 'cans';
+      if (cleanUnit === 'pack' || cleanUnit === 'packs' || cleanUnit === 'package' || cleanUnit === 'packages' || cleanUnit === 'bag' || cleanUnit === 'bags') {
+        return count === 1 ? 'pack' : 'packs';
+      }
+      if (cleanUnit === 'serving' || cleanUnit === 'servings') return count === 1 ? 'serving' : 'servings';
+      if (cleanUnit === 'sheet' || cleanUnit === 'sheets') return count === 1 ? 'sheet' : 'sheets';
+      if (cleanUnit === 'scoop' || cleanUnit === 'scoops') return count === 1 ? 'scoop' : 'scoops';
+      if (cleanUnit === 'shot' || cleanUnit === 'shots') return count === 1 ? 'shot' : 'shots';
+      if (cleanUnit === 'drop' || cleanUnit === 'drops') return count === 1 ? 'drop' : 'drops';
+      if (cleanUnit === 'pinch' || cleanUnit === 'pinches') return count === 1 ? 'pinch' : 'pinches';
+      return cleanUnit;
+    }
+
+    if (cleanName.includes('shake')) return count === 1 ? 'shake' : 'shakes';
+    if (cleanName.includes('bite')) return count === 1 ? 'pack' : 'packs';
+    if (cleanName.includes('cookie') || cleanName.includes('biscuit') || cleanName.includes('wafer') || cleanName.includes('oreo')) {
+      return count === 1 ? 'cookie' : 'cookies';
+    }
+    if (cleanName.includes('brownie') || cleanName.includes('blondie')) return count === 1 ? 'brownie' : 'brownies';
+    if (cleanName.includes('pastry') || cleanName.includes('pop-tart') || cleanName.includes('tart')) return count === 1 ? 'pastry' : 'pastries';
+    if (cleanName.includes('muffin')) return count === 1 ? 'muffin' : 'muffins';
+    if (cleanName.includes('bar')) return count === 1 ? 'bar' : 'bars';
+    if (cleanName.includes('can')) return count === 1 ? 'can' : 'cans';
+    if (cleanName.includes('pie')) return count === 1 ? 'pie' : 'pies';
+    if (cleanName.includes('cup') && (cleanName.includes('reese') || cleanName.includes('peanut butter cup'))) {
+      return count === 1 ? 'cup' : 'cups';
+    }
+    if (cleanName.includes('almond') || cleanName.includes('nut')) return count === 1 ? 'pc' : 'pcs';
+
+    return '';
+  }
+
   function renderBatchPrepModal() {
     const strip = document.getElementById('batchPrepPintsStrip');
     const pintsCount = document.getElementById('batchPrepPintsCount');
@@ -9542,6 +9624,9 @@
             name: cleanName,
             id: ing.id,
             quantities: {},
+            unitlessSum: 0,
+            hasUnitless: false,
+            preferredUnit: '',
             rawStrings: new Set(),
             usedInRecipes: new Set(),
             isBase: Boolean(ing.isBase)
@@ -9551,13 +9636,53 @@
         const entry = aggregated.get(cleanName);
         entry.usedInRecipes.add(rec.name);
 
-        const qtyNum = parseFloat(ing.quantity);
         const unit = (ing.unit || '').trim().toLowerCase();
+        const parsedQty = parseIngredientQuantity(ing.quantity);
 
-        if (!isNaN(qtyNum) && qtyNum > 0 && unit) {
-          const scaledQty = qtyNum * scale;
-          entry.quantities[unit] = (entry.quantities[unit] || 0) + scaledQty;
+        const countUnitMap = {
+          'shake': 'shake',
+          'shakes': 'shake',
+          'cookie': 'cookie',
+          'cookies': 'cookie',
+          'brownie': 'brownie',
+          'brownies': 'brownie',
+          'bar': 'bar',
+          'bars': 'bar',
+          'pastry': 'pastry',
+          'pastries': 'pastry',
+          'muffin': 'muffin',
+          'muffins': 'muffin',
+          'can': 'can',
+          'cans': 'can',
+          'package': 'pack',
+          'packages': 'pack',
+          'pack': 'pack',
+          'packs': 'pack',
+          'bag': 'pack',
+          'bags': 'pack',
+          'serving': 'serving',
+          'servings': 'serving',
+          'sheet': 'sheet',
+          'sheets': 'sheet'
+        };
+
+        const normalizedCountUnit = countUnitMap[unit];
+
+        if (parsedQty !== null && parsedQty > 0) {
+          const scaledQty = parsedQty * scale;
+          if (unit && !normalizedCountUnit) {
+            // Standard mass/volume units (g, ml, oz, tsp, tbsp, scoop, shot, pinch, etc.)
+            entry.quantities[unit] = (entry.quantities[unit] || 0) + scaledQty;
+          } else {
+            // Unitless or count-based item (e.g. shakes, cookies, brownies, cans)
+            entry.unitlessSum += scaledQty;
+            entry.hasUnitless = true;
+            if (normalizedCountUnit && !entry.preferredUnit) {
+              entry.preferredUnit = normalizedCountUnit;
+            }
+          }
         } else {
+          // Qualitative / unparseable amount (e.g. "To fill line", "A pinch", "All")
           const formatted = formatIngredientAmount(ing, scale, 'metric');
           if (formatted) entry.rawStrings.add(formatted);
         }
@@ -9572,11 +9697,27 @@
       const inPantry = isItemInPantry({ id: entry.id, name: entry.name });
       
       const qtyParts = [];
+      // Mass / volume measurements
       for (const [unit, sum] of Object.entries(entry.quantities)) {
         let displaySum = Math.round(sum * 10) / 10;
         if (displaySum % 1 === 0) displaySum = Math.round(displaySum);
         qtyParts.push(`${displaySum} ${unit}`);
       }
+
+      // Unitless or single-use count items (shakes, cookies, brownies, etc.)
+      if (entry.hasUnitless && entry.unitlessSum > 0) {
+        const desc = getItemUnitDescriptor(entry.name, entry.unitlessSum, entry.preferredUnit);
+        const formattedCount = formatScaledNumber(entry.unitlessSum);
+        if (desc) {
+          qtyParts.push(`${formattedCount} ${desc}`);
+        } else if (entry.unitlessSum > 1 && entry.usedInRecipes.size > 1) {
+          qtyParts.push(`${formattedCount} total`);
+        } else {
+          qtyParts.push(formattedCount);
+        }
+      }
+
+      // Qualitative strings
       entry.rawStrings.forEach(raw => qtyParts.push(raw));
       const totalDisplay = qtyParts.join(' + ') || 'As needed';
 
