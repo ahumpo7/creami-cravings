@@ -4925,8 +4925,8 @@
     const userMade = recipeMadeCounts[recipe.id] || 0;
     const commMade = communityStats.madeCounts[recipe.id] || 0;
     const creator = getRecipeCreator(recipe);
-    const creatorAttrib = getStoryCardAttribution(recipe);
-    const inBatchPrep = isRecipeInBatchPrep(recipe.id);
+    const prepCount = getRecipeBatchPrepCount(recipe.id);
+    const inBatchPrep = prepCount > 0;
 
     const isClaimPending = !isAccessible && (userPendingClaimsState.has(requiredTier) || userPendingClaimsState.has('All-Access'));
 
@@ -5024,24 +5024,17 @@
       <div class="recipe-card-bottom">
         <span class="spin-tag" title="Recommended spin cycle">🌀 ${escapeHtml(recipe.spinSetting || 'Lite Ice Cream')}</span>
         <div class="card-bottom-actions">
-          <button type="button" class="btn-card-batch-prep ${inBatchPrep ? 'active' : ''}" data-recipe-id="${recipe.id}" data-action="batch-prep-toggle" title="${inBatchPrep ? 'Remove from Sunday Batch Prep' : 'Add to Sunday Batch Prep'}">
-            ${inBatchPrep ? '🍱 Queued ✓' : '🍱 +Prep'}
-          </button>
+          <div class="card-prep-slot" data-recipe-id="${recipe.id}">
+            ${renderCardBatchPrepControlHtml(recipe.id, prepCount)}
+          </div>
           <button type="button" class="btn-quick-freeze-card" title="Place into Virtual Freezer Slot" data-action="quick-freeze">❄️ Freeze</button>
           <a href="${(IS_BETA ? '/beta' : '')}/recipe/${encodeURIComponent(recipe.id)}" class="btn-view-recipe">${isAccessible ? 'View Recipe' : (isClaimPending ? '⏳ Pending' : '🔒 Locked')}</a>
         </div>
       </div>
     `;
 
-    // Sunday Batch Prep button click
-    const batchPrepCardBtn = card.querySelector('[data-action="batch-prep-toggle"]');
-    if (batchPrepCardBtn) {
-      batchPrepCardBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        toggleBatchPrepRecipe(recipe.id, 1.0);
-      });
-    }
+    // Sunday Batch Prep card slot events
+    bindCardBatchPrepSlotEvents(card.querySelector('.card-prep-slot'), recipe.id);
 
     // Quick Freeze button click
     const quickFreezeBtn = card.querySelector('[data-action="quick-freeze"]');
@@ -9692,34 +9685,109 @@
     updateBatchPrepDockUI();
   }
 
-  function isRecipeInBatchPrep(recipeId) {
-    return batchPrepQueueState.some(p => p.recipeId === recipeId);
+  function getRecipeBatchPrepCount(recipeId) {
+    if (!recipeId || !Array.isArray(batchPrepQueueState)) return 0;
+    return batchPrepQueueState.filter(p => p.recipeId === recipeId).length;
   }
 
-  function toggleBatchPrepRecipe(recipeId, scale = 1.0) {
+  function isRecipeInBatchPrep(recipeId) {
+    return getRecipeBatchPrepCount(recipeId) > 0;
+  }
+
+  function addRecipeToBatchPrep(recipeId, scale = 1.0) {
     if (!currentUser) {
       showToast('🔒 Please sign in to use Sunday Batch Prep & Grocery List.');
       openGoogleAuthModal();
       return;
     }
-    const existingIndex = batchPrepQueueState.findIndex(p => p.recipeId === recipeId);
     const rec = allRecipes.find(r => r.id === recipeId);
     if (!rec) return;
 
-    if (existingIndex >= 0) {
-      batchPrepQueueState.splice(existingIndex, 1);
-      saveBatchPrepQueue();
-      showToast(`Removed "${rec.name}" from Sunday Batch Prep`);
+    batchPrepQueueState.push({
+      recipeId: rec.id,
+      recipeName: rec.name,
+      scale: scale || 1.0
+    });
+    saveBatchPrepQueue();
+    const count = getRecipeBatchPrepCount(rec.id);
+    if (count > 1) {
+      showToast(`🍱 Added another "${rec.name}" to Sunday Batch Prep! (${count} in prep)`);
     } else {
-      batchPrepQueueState.push({
-        recipeId: rec.id,
-        recipeName: rec.name,
-        scale: scale || 1.0
-      });
-      saveBatchPrepQueue();
       showToast(`🍱 Added "${rec.name}" to Sunday Batch Prep! (${batchPrepQueueState.length} total)`);
     }
     updateBatchPrepDockUI();
+    if (isBatchPrepModalOpen()) {
+      renderBatchPrepModal();
+    }
+  }
+
+  function removeRecipeFromBatchPrep(recipeId, removeAll = false) {
+    const rec = allRecipes.find(r => r.id === recipeId);
+    const name = rec ? rec.name : 'Pint';
+    if (removeAll) {
+      batchPrepQueueState = batchPrepQueueState.filter(p => p.recipeId !== recipeId);
+      saveBatchPrepQueue();
+      showToast(`Removed "${name}" from Sunday Batch Prep`);
+    } else {
+      for (let i = batchPrepQueueState.length - 1; i >= 0; i--) {
+        if (batchPrepQueueState[i].recipeId === recipeId) {
+          batchPrepQueueState.splice(i, 1);
+          break;
+        }
+      }
+      saveBatchPrepQueue();
+      const remaining = getRecipeBatchPrepCount(recipeId);
+      if (remaining > 0) {
+        showToast(`Removed 1 "${name}" (${remaining} remaining in prep)`);
+      } else {
+        showToast(`Removed "${name}" from Sunday Batch Prep`);
+      }
+    }
+    updateBatchPrepDockUI();
+    if (isBatchPrepModalOpen()) {
+      renderBatchPrepModal();
+    }
+  }
+
+  function duplicatePintByIndex(index) {
+    if (index >= 0 && index < batchPrepQueueState.length) {
+      const orig = batchPrepQueueState[index];
+      batchPrepQueueState.splice(index + 1, 0, {
+        recipeId: orig.recipeId,
+        recipeName: orig.recipeName,
+        scale: orig.scale || 1.0
+      });
+      saveBatchPrepQueue();
+      const count = getRecipeBatchPrepCount(orig.recipeId);
+      showToast(`🍱 Added another "${orig.recipeName}" (${count} in prep)`);
+      updateBatchPrepDockUI();
+      renderBatchPrepModal();
+    }
+  }
+
+  function removePintByIndex(index) {
+    if (index >= 0 && index < batchPrepQueueState.length) {
+      const removed = batchPrepQueueState.splice(index, 1)[0];
+      saveBatchPrepQueue();
+      if (removed) {
+        const remaining = getRecipeBatchPrepCount(removed.recipeId);
+        if (remaining > 0) {
+          showToast(`Removed 1 "${removed.recipeName}" (${remaining} remaining in prep)`);
+        } else {
+          showToast(`Removed "${removed.recipeName}" from Sunday Batch Prep`);
+        }
+      }
+      updateBatchPrepDockUI();
+      renderBatchPrepModal();
+    }
+  }
+
+  function toggleBatchPrepRecipe(recipeId, scale = 1.0) {
+    if (isRecipeInBatchPrep(recipeId)) {
+      removeRecipeFromBatchPrep(recipeId, false);
+    } else {
+      addRecipeToBatchPrep(recipeId, scale);
+    }
   }
 
   function clearBatchPrepQueue() {
@@ -9727,6 +9795,114 @@
     saveBatchPrepQueue();
     closeBatchPrepModal();
     showToast('Cleared Sunday Batch Prep queue');
+  }
+
+  function isBatchPrepModalOpen() {
+    const modal = document.getElementById('batchPrepModalOverlay');
+    return Boolean(modal && modal.classList.contains('active'));
+  }
+
+  function renderCardBatchPrepControlHtml(recipeId, count) {
+    if (count > 0) {
+      return `
+        <div class="card-batch-prep-stepper" data-recipe-id="${recipeId}">
+          <button type="button" class="btn-prep-step dec" data-action="batch-prep-dec" title="Remove 1 from Sunday Batch Prep">−</button>
+          <button type="button" class="prep-step-count" data-action="open-batch-prep" title="View Sunday Batch Prep (${count} queued)">🍱 ${count}</button>
+          <button type="button" class="btn-prep-step inc" data-action="batch-prep-inc" title="Add another to Sunday Batch Prep">+</button>
+        </div>
+      `;
+    }
+    return `
+      <button type="button" class="btn-card-batch-prep" data-recipe-id="${recipeId}" data-action="batch-prep-add" title="Add to Sunday Batch Prep">
+        🍱 +Prep
+      </button>
+    `;
+  }
+
+  function bindCardBatchPrepSlotEvents(slot, recipeId) {
+    if (!slot) return;
+    const addBtn = slot.querySelector('[data-action="batch-prep-add"]');
+    if (addBtn) {
+      addBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        addRecipeToBatchPrep(recipeId, 1.0);
+      });
+    }
+    const incBtn = slot.querySelector('[data-action="batch-prep-inc"]');
+    if (incBtn) {
+      incBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        addRecipeToBatchPrep(recipeId, 1.0);
+      });
+    }
+    const decBtn = slot.querySelector('[data-action="batch-prep-dec"]');
+    if (decBtn) {
+      decBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        removeRecipeFromBatchPrep(recipeId, false);
+      });
+    }
+    const openBtn = slot.querySelector('[data-action="open-batch-prep"]');
+    if (openBtn) {
+      openBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        openBatchPrepModal();
+      });
+    }
+  }
+
+  function renderModalBatchPrepControlHtml(recipeId, count) {
+    if (count > 0) {
+      return `
+        <div class="modal-batch-prep-stepper" data-recipe-id="${recipeId}">
+          <button type="button" class="btn-modal-prep-step dec" data-action="modal-prep-dec" title="Remove 1 from Sunday Batch Prep">−</button>
+          <button type="button" class="modal-prep-step-label" data-action="modal-prep-open" title="View Sunday Batch Prep">🍱 ${count} in Batch Prep</button>
+          <button type="button" class="btn-modal-prep-step inc" data-action="modal-prep-inc" title="Add another to Sunday Batch Prep">+ Add Another</button>
+        </div>
+      `;
+    }
+    return `
+      <button type="button" class="btn-modal-batch-prep" data-recipe-id="${recipeId}" data-action="modal-prep-add" title="Add to Sunday Batch Prep Queue">
+        🍱 Add to Sunday Batch Prep
+      </button>
+    `;
+  }
+
+  function bindModalBatchPrepSlotEvents(slot, recipeId) {
+    if (!slot) return;
+    const addBtn = slot.querySelector('[data-action="modal-prep-add"]');
+    if (addBtn) {
+      addBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        addRecipeToBatchPrep(recipeId, typeof modalScale === 'number' ? modalScale : 1.0);
+      });
+    }
+    const incBtn = slot.querySelector('[data-action="modal-prep-inc"]');
+    if (incBtn) {
+      incBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        addRecipeToBatchPrep(recipeId, typeof modalScale === 'number' ? modalScale : 1.0);
+      });
+    }
+    const decBtn = slot.querySelector('[data-action="modal-prep-dec"]');
+    if (decBtn) {
+      decBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        removeRecipeFromBatchPrep(recipeId, false);
+      });
+    }
+    const openBtn = slot.querySelector('[data-action="modal-prep-open"]');
+    if (openBtn) {
+      openBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        closeRecipeModal();
+        openBatchPrepModal();
+      });
+    }
   }
 
   function updateBatchPrepDockUI() {
@@ -9760,21 +9936,31 @@
       }
     }
 
-    // Update buttons on visible recipe cards
-    document.querySelectorAll('.btn-card-batch-prep').forEach(btn => {
-      const rId = btn.dataset.recipeId;
-      const inQueue = isRecipeInBatchPrep(rId);
-      btn.classList.toggle('active', inQueue);
-      btn.innerHTML = inQueue ? '🍱 Queued ✓' : '🍱 +Prep';
-      btn.title = inQueue ? 'Remove from Sunday Batch Prep' : 'Add to Sunday Batch Prep';
+    // Update controls on visible recipe cards
+    document.querySelectorAll('.card-prep-slot').forEach(slot => {
+      const rId = slot.dataset.recipeId;
+      if (rId) {
+        const pCount = getRecipeBatchPrepCount(rId);
+        slot.innerHTML = renderCardBatchPrepControlHtml(rId, pCount);
+        bindCardBatchPrepSlotEvents(slot, rId);
+      }
     });
 
-    // Update button in active recipe modal if open
-    const modalBtn = document.getElementById('modalBatchPrepToggleBtn');
-    if (modalBtn && currentModalRecipe) {
-      const inQueue = isRecipeInBatchPrep(currentModalRecipe.id);
-      modalBtn.classList.toggle('active', inQueue);
-      modalBtn.innerHTML = inQueue ? '🍱 Queued in Batch Prep ✓' : '🍱 Add to Sunday Batch Prep';
+    // Fallback for any plain button on card
+    document.querySelectorAll('.btn-card-batch-prep').forEach(btn => {
+      const rId = btn.dataset.recipeId;
+      if (rId) {
+        const inQueue = isRecipeInBatchPrep(rId);
+        btn.classList.toggle('active', inQueue);
+      }
+    });
+
+    // Update control in active recipe modal if open
+    const modalSlot = document.getElementById('modalBatchPrepSlot');
+    if (modalSlot && currentModalRecipe) {
+      const pCount = getRecipeBatchPrepCount(currentModalRecipe.id);
+      modalSlot.innerHTML = renderModalBatchPrepControlHtml(currentModalRecipe.id, pCount);
+      bindModalBatchPrepSlotEvents(modalSlot, currentModalRecipe.id);
     }
   }
 
@@ -9901,23 +10087,33 @@
       strip.innerHTML = batchPrepQueueState.map((item, idx) => {
         const isDeluxe = item.scale === 1.5;
         return `
-          <div class="batch-pint-chip" data-recipe-id="${item.recipeId}">
+          <div class="batch-pint-chip" data-recipe-id="${item.recipeId}" data-index="${idx}">
             <span style="font-size: 1.1rem;">🍨</span>
             <div class="batch-pint-chip-info">
               <span class="batch-pint-chip-title" title="${escapeHtml(item.recipeName)}">${escapeHtml(item.recipeName)}</span>
               <span class="batch-pint-chip-scale">${isDeluxe ? '24 oz Deluxe' : '16 oz Standard'}</span>
             </div>
-            <button type="button" class="btn-batch-chip-remove" data-action="remove-queued-pint" data-index="${idx}" title="Remove from batch">✕</button>
+            <div class="batch-pint-chip-actions">
+              <button type="button" class="btn-batch-chip-add" data-action="duplicate-queued-pint" data-index="${idx}" title="Add another pint of this recipe">+</button>
+              <button type="button" class="btn-batch-chip-remove" data-action="remove-queued-pint" data-index="${idx}" title="Remove this pint">✕</button>
+            </div>
           </div>
         `;
       }).join('');
 
-      strip.querySelectorAll('[data-action="remove-queued-pint"]').forEach(btn => {
-        btn.addEventListener('click', () => {
+      strip.querySelectorAll('[data-action="duplicate-queued-pint"]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
           const idx = parseInt(btn.dataset.index, 10);
-          batchPrepQueueState.splice(idx, 1);
-          saveBatchPrepQueue();
-          renderBatchPrepModal();
+          duplicatePintByIndex(idx);
+        });
+      });
+
+      strip.querySelectorAll('[data-action="remove-queued-pint"]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const idx = parseInt(btn.dataset.index, 10);
+          removePintByIndex(idx);
         });
       });
     }
@@ -9925,9 +10121,13 @@
     // Populate Quick Add Select & Bind In-Modal Prep Controls
     const quickSelect = document.getElementById('batchPrepQuickAddSelect');
     if (quickSelect) {
-      const unqueued = allRecipes.filter(r => isRecipeAccessible(r) && !isRecipeInBatchPrep(r.id)).slice(0, 120);
+      const accessible = allRecipes.filter(r => isRecipeAccessible(r)).slice(0, 150);
       quickSelect.innerHTML = '<option value="">+ Add a Recipe to this Batch...</option>' + 
-        unqueued.map(r => `<option value="${r.id}">${escapeHtml(r.name)} (${escapeHtml(r.category || 'High Protein')})</option>`).join('');
+        accessible.map(r => {
+          const count = getRecipeBatchPrepCount(r.id);
+          const countLabel = count > 0 ? ` (${count} in prep)` : '';
+          return `<option value="${r.id}">${escapeHtml(r.name)} (${escapeHtml(r.category || 'High Protein')})${countLabel}</option>`;
+        }).join('');
     }
 
     const quickAddBtn = document.getElementById('btnBatchPrepQuickAdd');
@@ -9936,7 +10136,7 @@
       quickAddBtn.addEventListener('click', () => {
         const select = document.getElementById('batchPrepQuickAddSelect');
         if (select && select.value) {
-          toggleBatchPrepRecipe(select.value, 1.0);
+          addRecipeToBatchPrep(select.value, 1.0);
           renderBatchPrepModal();
         } else {
           showToast('Please select a recipe from the dropdown first!');
@@ -10012,12 +10212,14 @@
             preferredUnit: '',
             rawStrings: new Set(),
             usedInRecipes: new Set(),
+            pintsCount: 0,
             isBase: Boolean(ing.isBase)
           });
         }
 
         const entry = aggregated.get(cleanName);
         entry.usedInRecipes.add(rec.name);
+        entry.pintsCount = (entry.pintsCount || 0) + 1;
 
         const unit = (ing.unit || '').trim().toLowerCase();
         const parsedQty = parseIngredientQuantity(ing.quantity);
@@ -10093,7 +10295,7 @@
         const formattedCount = formatScaledNumber(entry.unitlessSum);
         if (desc) {
           qtyParts.push(`${formattedCount} ${desc}`);
-        } else if (entry.unitlessSum > 1 && entry.usedInRecipes.size > 1) {
+        } else if (entry.unitlessSum > 1 && (entry.usedInRecipes.size > 1 || (entry.pintsCount || 0) > 1)) {
           qtyParts.push(`${formattedCount} total`);
         } else {
           qtyParts.push(formattedCount);
@@ -10135,7 +10337,7 @@
       const itemData = {
         name: entry.name,
         qtyText: qtyDisplayText,
-        recipesCount: entry.usedInRecipes.size
+        recipesCount: entry.pintsCount || entry.usedInRecipes.size
       };
 
       if (itemInStock) {
@@ -12448,9 +12650,9 @@
             </div>
           </div>
           <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-            <button type="button" class="btn-modal-batch-prep ${isRecipeInBatchPrep(recipe.id) ? 'active' : ''}" id="modalBatchPrepToggleBtn" title="Add or remove from Sunday Batch Prep Queue">
-              ${isRecipeInBatchPrep(recipe.id) ? '🍱 Queued in Batch Prep ✓' : '🍱 Add to Sunday Batch Prep'}
-            </button>
+            <div id="modalBatchPrepSlot" data-recipe-id="${recipe.id}">
+              ${renderModalBatchPrepControlHtml(recipe.id, getRecipeBatchPrepCount(recipe.id))}
+            </div>
             <button type="button" class="btn-freeze-slot-primary" id="modalPutInFreezerBtn" title="Place this recipe into an open freezer container slot">
               <span>❄️ Put in Freezer Slot</span>
             </button>
@@ -12663,12 +12865,10 @@
       });
     }
 
-    // Sunday Batch Prep Modal Toggle Button (Beta Staging)
-    const modalBatchPrepBtn = recipeModalBody.querySelector('#modalBatchPrepToggleBtn');
-    if (modalBatchPrepBtn) {
-      modalBatchPrepBtn.addEventListener('click', () => {
-        toggleBatchPrepRecipe(recipe.id, modalScale || 1.0);
-      });
+    // Sunday Batch Prep Modal Slot Events
+    const modalBatchSlot = recipeModalBody.querySelector('#modalBatchPrepSlot');
+    if (modalBatchSlot) {
+      bindModalBatchPrepSlotEvents(modalBatchSlot, recipe.id);
     }
 
     // Put in Freezer Slot Button (Beta Staging)

@@ -1537,6 +1537,8 @@ body::before {
 }
 
 .card-bottom-actions .btn-card-batch-prep,
+.card-bottom-actions .card-prep-slot,
+.card-bottom-actions .card-batch-prep-stepper,
 .card-bottom-actions .btn-quick-freeze-card {
   flex: 0 0 auto;
 }
@@ -13353,20 +13355,204 @@ body.modal-open .cookie-consent-banner {
   margin-top: 1px;
 }
 
+/* Batch Pint Chip Actions (Add another & Remove) */
+.batch-pint-chip-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.btn-batch-chip-add {
+  background: rgba(99, 102, 241, 0.2);
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  color: #a5b4fc;
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 800;
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  line-height: 1;
+  padding: 0;
+  transition: all 0.15s ease;
+}
+
+.btn-batch-chip-add:hover {
+  background: #6366f1;
+  color: #ffffff;
+  border-color: #6366f1;
+  transform: scale(1.08);
+}
+
 .btn-batch-chip-remove {
   background: transparent;
-  border: none;
+  border: 1px solid transparent;
   color: #64748b;
   cursor: pointer;
   font-size: 0.8rem;
-  padding: 2px 4px;
-  border-radius: 4px;
+  font-weight: 700;
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  line-height: 1;
+  padding: 0;
   transition: all 0.15s ease;
 }
 
 .btn-batch-chip-remove:hover {
   color: #f87171;
   background: rgba(248, 113, 113, 0.15);
+  border-color: rgba(248, 113, 113, 0.35);
+  transform: scale(1.08);
+}
+
+/* Card Batch Prep Stepper (v5.8 Multi-Pint Prep) */
+.card-prep-slot {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.card-batch-prep-stepper {
+  display: inline-flex;
+  align-items: center;
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.28) 0%, rgba(124, 58, 237, 0.28) 100%);
+  border: 1px solid rgba(129, 140, 248, 0.5);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(79, 70, 229, 0.25);
+  height: 28px;
+}
+
+.btn-prep-step {
+  background: transparent;
+  border: none;
+  color: #c7d2fe;
+  font-size: 0.9rem;
+  font-weight: 800;
+  width: 24px;
+  height: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  line-height: 1;
+  padding: 0;
+}
+
+.btn-prep-step:hover {
+  background: rgba(99, 102, 241, 0.45);
+  color: #ffffff;
+}
+
+.btn-prep-step.dec:hover {
+  background: rgba(239, 68, 68, 0.35);
+  color: #fca5a5;
+}
+
+.prep-step-count {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 0 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  line-height: 28px;
+  white-space: nowrap;
+}
+
+.prep-step-count:hover {
+  text-decoration: underline;
+  color: #e0e7ff;
+}
+
+/* Modal Batch Prep Stepper */
+.modal-batch-prep-stepper {
+  display: inline-flex;
+  align-items: center;
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.22) 0%, rgba(124, 58, 237, 0.22) 100%);
+  border: 1px solid rgba(129, 140, 248, 0.45);
+  border-radius: var(--radius-md, 10px);
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25);
+  height: 40px;
+}
+
+.btn-modal-prep-step {
+  background: transparent;
+  border: none;
+  color: #c7d2fe;
+  font-size: 0.92rem;
+  font-weight: 700;
+  padding: 0 14px;
+  height: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  line-height: 1;
+}
+
+.btn-modal-prep-step:hover {
+  background: rgba(99, 102, 241, 0.4);
+  color: #ffffff;
+}
+
+.btn-modal-prep-step.dec:hover {
+  background: rgba(239, 68, 68, 0.35);
+  color: #fca5a5;
+}
+
+.modal-prep-step-label {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 0.88rem;
+  font-weight: 700;
+  padding: 0 10px;
+  height: 100%;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.modal-prep-step-label:hover {
+  text-decoration: underline;
+  color: #e0e7ff;
+}
+
+[data-theme="light"] .card-batch-prep-stepper {
+  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+  border-color: #4338ca;
+  color: #ffffff;
+}
+
+[data-theme="light"] .btn-prep-step {
+  color: #e0e7ff;
+}
+
+[data-theme="light"] .prep-step-count {
+  color: #ffffff;
+}
+
+[data-theme="light"] .modal-batch-prep-stepper {
+  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+  border-color: #4338ca;
+  color: #ffffff;
 }
 
 /* Shelf & Freezer Modal Batch Prep Buttons & Banner */
