@@ -8222,18 +8222,18 @@
       pintNotifTimers.delete(pint.id);
     }
 
-    if (!freezeNotifsEnabled) return;
-
     const now = Date.now();
     const frozenAt = pint.frozenAt || now;
+    const durationMs = pint.freezeHours ? (pint.freezeHours * 60 * 60 * 1000) : FREEZE_DURATION_MS;
     const elapsedMs = Math.max(0, now - frozenAt);
-    const remainingMs = Math.max(0, FREEZE_DURATION_MS - elapsedMs);
+    const remainingMs = Math.max(0, durationMs - elapsedMs);
 
     if (remainingMs <= 0) {
       fireFreezeNotification(pint);
       return;
     }
 
+    // Precise millisecond timer: fires the exact instant the countdown finishes
     const timerId = setTimeout(() => {
       fireFreezeNotification(pint);
       pintNotifTimers.delete(pint.id);
@@ -8243,7 +8243,6 @@
   }
 
   function scheduleAllPendingPintAlerts() {
-    if (!freezeNotifsEnabled) return;
     freezerPintsState.forEach(p => {
       if (!p.notified) {
         schedulePintFreezeAlert(p);
@@ -8252,7 +8251,6 @@
   }
 
   function checkAndNotifyReadyPints() {
-    if (!freezeNotifsEnabled) return;
     freezerPintsState.forEach(pint => {
       const status = computePintStatus(pint);
       if (status.isReady && !pint.notified) {
@@ -8264,6 +8262,10 @@
   function fireFreezeNotification(pint) {
     if (!pint || pint.notified) return;
     pint.notified = true;
+    if (pintNotifTimers.has(pint.id)) {
+      clearTimeout(pintNotifTimers.get(pint.id));
+      pintNotifTimers.delete(pint.id);
+    }
     saveFreezerPints();
     updateFreezerBadges();
     playAudioChime();
@@ -8271,11 +8273,13 @@
     if (freezerModalOverlay && freezerModalOverlay.classList.contains('active')) {
       renderFreezerModal();
     }
+    renderFreezerShelfWidget();
 
     const isDeluxe = pint.scale === 1.5 || (pint.sizeLabel && pint.sizeLabel.includes('24 oz'));
     const sizeStr = isDeluxe ? '24 oz Deluxe' : '16 oz Standard';
+    const hours = pint.freezeHours || 16;
     const title = `🍨 Ding! Ready to Spin: ${pint.recipeName}`;
-    const body = `Your ${sizeStr} pint has chilled for 16 hours and is frozen solid! Tap to open spin instructions & log your batch.`;
+    const body = `Your ${sizeStr} pint has chilled for ${hours} hours and is frozen solid! Tap to open spin instructions & log your batch.`;
 
     const notifData = {
       url: `/?action=freeze-ready&pintId=${encodeURIComponent(pint.id)}${pint.recipeId ? '&recipeId=' + encodeURIComponent(pint.recipeId) : ''}`,
@@ -8299,18 +8303,20 @@
       ]
     };
 
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.ready.then(reg => {
-        if (reg && reg.showNotification) {
-          return reg.showNotification(title, notifOptions);
-        } else {
+    if (freezeNotifsEnabled && 'Notification' in window && Notification.permission === 'granted') {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.ready.then(reg => {
+          if (reg && reg.showNotification) {
+            return reg.showNotification(title, notifOptions);
+          } else {
+            fallbackShowNotification(title, notifOptions);
+          }
+        }).catch(err => {
           fallbackShowNotification(title, notifOptions);
-        }
-      }).catch(err => {
+        });
+      } else {
         fallbackShowNotification(title, notifOptions);
-      });
-    } else {
-      fallbackShowNotification(title, notifOptions);
+      }
     }
 
     showToast(`🍨 Ding! "${pint.recipeName}" is frozen solid and ready to spin!`, 6000);
@@ -8402,14 +8408,19 @@
 
   function startFreezerTicker() {
     if (freezerTickerInterval) clearInterval(freezerTickerInterval);
-    // Refresh countdown every 30 seconds and check for completed pints
+    // Immediately check upon startup / ticker initialization
+    checkAndNotifyReadyPints();
+    scheduleAllPendingPintAlerts();
+    updateFreezerBadges();
+
+    // High-precision 1-second interval: guarantees instantaneous ready alerts and responsive countdowns
     freezerTickerInterval = setInterval(() => {
       checkAndNotifyReadyPints();
       updateFreezerBadges();
       if (freezerModalOverlay && freezerModalOverlay.classList.contains('active')) {
         renderFreezerModal();
       }
-    }, 30000);
+    }, 1000);
   }
 
   function populateFreezerRecipeDatalist() {
@@ -8523,13 +8534,13 @@
 
     const calc = computePintStatus(newPint);
     if (calc.isReady) {
-      showToast(`🎉 "${newPint.recipeName}" logged as Ready to Spin! 🍨`);
+      fireFreezeNotification(newPint);
     } else {
+      schedulePintFreezeAlert(newPint);
       if ('Notification' in window && Notification.permission === 'granted' && freezeNotifsEnabled) {
-        schedulePintFreezeAlert(newPint);
-        showToast(`🧊 Logged "${newPint.recipeName}" in freezer! 16h timer started (${calc.timeRemainingLabel}). Push alert scheduled! 🔔`);
+        showToast(`🧊 Logged "${newPint.recipeName}" in freezer! ${newPint.freezeHours || 16}h timer started (${calc.timeRemainingLabel}). Push alert scheduled! 🔔`);
       } else {
-        showToast(`🧊 Logged "${newPint.recipeName}" in freezer! 16h timer started (${calc.timeRemainingLabel}).`);
+        showToast(`🧊 Logged "${newPint.recipeName}" in freezer! ${newPint.freezeHours || 16}h timer started (${calc.timeRemainingLabel}).`);
       }
     }
   }
@@ -8544,7 +8555,12 @@
     if (freezerModalOverlay && freezerModalOverlay.classList.contains('active')) {
       renderFreezerModal();
     }
-    showToast(`🟢 "${pint.recipeName}" is now marked as frozen solid & ready to spin! 🍨`);
+    // Fire the ready alert, audio chime, and notification instantly
+    if (pintNotifTimers.has(pint.id)) {
+      clearTimeout(pintNotifTimers.get(pint.id));
+      pintNotifTimers.delete(pint.id);
+    }
+    fireFreezeNotification(pint);
   }
   window.markPintAsReady = markPintAsReady;
 
@@ -16206,8 +16222,9 @@
         closeSlotFillModal();
         renderFreezerShelfWidget();
         if (isAlreadyFrozen) {
-          showToast(`🎉 Slot ${slotNum} filled with "${recName}" — 100% frozen solid & ready to spin! 🍨`);
+          fireFreezeNotification(newPint);
         } else {
+          schedulePintFreezeAlert(newPint);
           showToast(`❄️ Slot ${slotNum} filled with "${recName}"! ${actualHours}h countdown active. 🎉`);
         }
       });
