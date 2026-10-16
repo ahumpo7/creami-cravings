@@ -352,6 +352,19 @@ ratings_db = load_json_file(RATINGS_DB_FILE, {})
 stats_db = load_json_file(STATS_DB_FILE, {})
 creator_vips_db = load_json_file(CREATOR_VIPS_DB_FILE, {})
 
+def add_user_token(user, token):
+    if not user or not isinstance(user, dict) or not token:
+        return
+    tokens = user.get('tokens')
+    if not isinstance(tokens, list):
+        tokens = [user['token']] if user.get('token') else []
+        user['tokens'] = tokens
+    if token not in tokens:
+        tokens.append(token)
+    if len(tokens) > 25:
+        user['tokens'] = tokens[-25:]
+    user['token'] = token
+
 def get_user_creator_vips(email):
     if not email:
         return []
@@ -1203,6 +1216,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
     def _send_json(self, data, code=200):
         self.send_response(code)
         self.send_header('Content-Type', 'application/json')
+        self.send_header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
         self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-User-Email')
@@ -1257,7 +1271,8 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
         user = None
         if token:
             for u in users_db.values():
-                if u.get('token') == token:
+                u_tokens = u.get('tokens') if isinstance(u.get('tokens'), list) else []
+                if u.get('token') == token or token in u_tokens:
                     user = u
                     break
 
@@ -2047,11 +2062,12 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                     'subscriptions': initial_subs,
                     'created_at': now_iso,
                     'last_active': now_iso,
-                    'token': new_token
+                    'token': new_token,
+                    'tokens': [new_token]
                 }
                 users_db[target_key] = user
             else:
-                user['token'] = new_token
+                add_user_token(user, new_token)
                 user['name'] = name
                 user['last_active'] = now_iso
                 if not user.get('created_at'):
@@ -2378,7 +2394,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 return
 
             token = 'token_em_' + str(uuid.uuid4())
-            target_user['token'] = token
+            add_user_token(target_user, token)
             target_user['last_active'] = datetime.utcnow().isoformat()
             save_json_file(USERS_DB_FILE, users_db)
 
@@ -2513,7 +2529,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
             target_user.pop('passwordReset', None)
 
             new_token = 'token_em_' + str(uuid.uuid4())
-            target_user['token'] = new_token
+            add_user_token(target_user, new_token)
             target_user['last_active'] = datetime.utcnow().isoformat()
             save_json_file(USERS_DB_FILE, users_db)
 
@@ -2648,7 +2664,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
             target_user.pop('magicLink', None)
 
             new_token = 'token_em_' + str(uuid.uuid4())
-            target_user['token'] = new_token
+            add_user_token(target_user, new_token)
             target_user['last_active'] = datetime.utcnow().isoformat()
             save_json_file(USERS_DB_FILE, users_db)
 
