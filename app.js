@@ -2014,13 +2014,82 @@
       method: method
     });
 
+    const isSilent = Boolean(data.isSilent);
     const hasRecentLocalMutation = (Date.now() - lastLocalMutationTime < 5000) || (syncTimeout !== null);
 
-    // 1. Restore & switch to authenticated user's pantry (STRICT ISOLATION - do not merge with guest session!)
-    if (!data.isSilent || !hasRecentLocalMutation) {
+    // If silent background sync occurs during active local user mutation, skip to avoid race conditions
+    if (isSilent && hasRecentLocalMutation) {
+      return;
+    }
+
+    // Detect granular data mutations between local state and incoming server state
+    let pantryChanged = false;
+    let quantitiesChanged = false;
+    let favoritesChanged = false;
+    let madeChanged = false;
+    let ratingsChanged = false;
+    let customChanged = false;
+    let shoppingChanged = false;
+    let freezerChanged = false;
+    let claimsChanged = false;
+
+    if (data.user && Array.isArray(data.user.pantry)) {
+      if (data.user.pantry.length !== pantryState.size || data.user.pantry.some(id => !pantryState.has(id))) {
+        pantryChanged = true;
+      }
+    }
+    if (data.user && data.user.pantryQuantities && typeof data.user.pantryQuantities === 'object') {
+      if (JSON.stringify(data.user.pantryQuantities) !== JSON.stringify(pantryItemQuantities)) {
+        quantitiesChanged = true;
+      }
+    }
+    if (data.user && Array.isArray(data.user.favorites)) {
+      if (data.user.favorites.length !== favoritesState.size || data.user.favorites.some(id => !favoritesState.has(id))) {
+        favoritesChanged = true;
+      }
+    }
+    if (data.user && data.user.madeCounts && typeof data.user.madeCounts === 'object') {
+      if (JSON.stringify(data.user.madeCounts) !== JSON.stringify(recipeMadeCounts)) {
+        madeChanged = true;
+      }
+    }
+    if (data.user && data.user.ratings && typeof data.user.ratings === 'object') {
+      if (JSON.stringify(data.user.ratings) !== JSON.stringify(userRecipeData)) {
+        ratingsChanged = true;
+      }
+    }
+    if (data.user && Array.isArray(data.user.customRecipes)) {
+      if (JSON.stringify(data.user.customRecipes) !== JSON.stringify(customRecipesState)) {
+        customChanged = true;
+      }
+    }
+    if (data.user && Array.isArray(data.user.shoppingList)) {
+      const incomingShop = new Set(data.user.shoppingList.filter(item => !isShoppingExcluded(item)).map(item => sanitizeShoppingItemName(item)));
+      if (incomingShop.size !== manualShoppingList.size || [...incomingShop].some(x => !manualShoppingList.has(x))) {
+        shoppingChanged = true;
+      }
+    }
+    if (data.user && Array.isArray(data.user.freezerPints)) {
+      if (JSON.stringify(data.user.freezerPints) !== JSON.stringify(freezerPintsState)) {
+        freezerChanged = true;
+      }
+    }
+    if (data.user && Array.isArray(data.user.pendingClaims)) {
+      if (JSON.stringify(data.user.pendingClaims) !== JSON.stringify(Array.from(userPendingClaimsState))) {
+        claimsChanged = true;
+      }
+    }
+
+    // On silent periodic sync, if nothing changed, exit immediately to prevent any DOM tearing or scroll resets
+    if (isSilent && !pantryChanged && !quantitiesChanged && !favoritesChanged && !madeChanged && !ratingsChanged && !customChanged && !shoppingChanged && !freezerChanged && !claimsChanged) {
+      return;
+    }
+
+    // 1. Restore & switch to authenticated user's pantry
+    if (!isSilent || pantryChanged || quantitiesChanged) {
       if (data.user && Array.isArray(data.user.pantry)) {
         pantryState = new Set(data.user.pantry);
-      } else {
+      } else if (!isSilent) {
         const userPantryKey = `${PANTRY_STORAGE_KEY}_${currentUser.id}`;
         const savedUserPantry = localStorage.getItem(userPantryKey);
         if (savedUserPantry !== null) {
@@ -2047,7 +2116,7 @@
       if (data.user && data.user.pantryQuantities && typeof data.user.pantryQuantities === 'object') {
         pantryItemQuantities = { ...data.user.pantryQuantities };
         localStorage.setItem(getPantryQuantitiesStorageKey(), JSON.stringify(pantryItemQuantities));
-      } else {
+      } else if (!isSilent) {
         const savedQ = localStorage.getItem(getPantryQuantitiesStorageKey());
         if (savedQ) {
           try { pantryItemQuantities = JSON.parse(savedQ) || {}; } catch (e) { pantryItemQuantities = {}; }
@@ -2056,9 +2125,13 @@
 
       updateStats();
       updatePantryCheckboxVisuals();
-      renderPantryList();
+      if (!isSilent) {
+        renderPantryList();
+      }
+    }
 
-      // 2. Restore user's favorites
+    // 2. Restore user's favorites
+    if (!isSilent || favoritesChanged) {
       favoritesState = new Set(Array.isArray(data.user.favorites) ? data.user.favorites : []);
       if (currentUser && currentUser.id) {
         const userFavKey = `${FAVORITES_STORAGE_KEY}_${currentUser.id}`;
@@ -2066,24 +2139,30 @@
       }
       localStorage.removeItem(FAVORITES_STORAGE_KEY);
       updateCategoryCounts();
+    }
 
-      // 3. Restore made counts
+    // 3. Restore made counts
+    if (!isSilent || madeChanged) {
       recipeMadeCounts = (data.user.madeCounts && typeof data.user.madeCounts === 'object') ? { ...data.user.madeCounts } : {};
       if (currentUser && currentUser.id) {
         const userMadeKey = `${RECIPE_MADE_STORAGE_KEY}_${currentUser.id}`;
         localStorage.setItem(userMadeKey, JSON.stringify(recipeMadeCounts));
       }
       localStorage.removeItem(RECIPE_MADE_STORAGE_KEY);
+    }
 
-      // 4. Restore ratings
+    // 4. Restore ratings
+    if (!isSilent || ratingsChanged) {
       userRecipeData = (data.user.ratings && typeof data.user.ratings === 'object') ? { ...data.user.ratings } : {};
       if (currentUser && currentUser.id) {
         const userRatingKey = `${USER_RECIPE_DATA_KEY}_${currentUser.id}`;
         localStorage.setItem(userRatingKey, JSON.stringify(userRecipeData));
       }
       localStorage.removeItem(USER_RECIPE_DATA_KEY);
+    }
 
-      // 5. Restore custom recipes
+    // 5. Restore custom recipes
+    if (!isSilent || customChanged) {
       if (data.user.customRecipes && Array.isArray(data.user.customRecipes)) {
         customRecipesState = data.user.customRecipes;
         const userCustomKey = `${CUSTOM_RECIPES_STORAGE_KEY}_${currentUser.id}`;
@@ -2094,8 +2173,10 @@
       } else {
         customRecipesState = [];
       }
+    }
 
-      // 6. Restore shopping list (STRICT ISOLATION - do not merge!)
+    // 6. Restore shopping list
+    if (!isSilent || shoppingChanged) {
       if (data.user.shoppingList && Array.isArray(data.user.shoppingList)) {
         manualShoppingList = new Set(
           data.user.shoppingList
@@ -2111,8 +2192,10 @@
       } else {
         manualShoppingList = new Set();
       }
+    }
 
-      // 7. Restore freezer pints
+    // 7. Restore freezer pints
+    if (!isSilent || freezerChanged) {
       if (data.user.freezerPints && Array.isArray(data.user.freezerPints)) {
         freezerPintsState = data.user.freezerPints;
         const userFreezerKey = `${FREEZER_STORAGE_KEY}_${currentUser.id}`;
@@ -2124,18 +2207,22 @@
     }
 
     // 8. Restore pending access claims from server
-    if (data.user && Array.isArray(data.user.pendingClaims)) {
-      userPendingClaimsState = new Set(data.user.pendingClaims);
-      localStorage.setItem('creami_pending_claims_v1', JSON.stringify(Array.from(userPendingClaimsState)));
+    if (!isSilent || claimsChanged) {
+      if (data.user && Array.isArray(data.user.pendingClaims)) {
+        userPendingClaimsState = new Set(data.user.pendingClaims);
+        localStorage.setItem('creami_pending_claims_v1', JSON.stringify(Array.from(userPendingClaimsState)));
+      }
     }
 
-    mergeRecipes();
-    calculateIngredientUsage();
-    updateCategoryCounts();
-    updateAuthUI();
-    updateFreezerBadges();
-    recipeCardCache.clear();
-    renderRecipes();
+    if (!isSilent || pantryChanged || customChanged || favoritesChanged) {
+      mergeRecipes();
+      calculateIngredientUsage();
+      updateCategoryCounts();
+      updateAuthUI();
+      updateFreezerBadges();
+      recipeCardCache.clear();
+      renderRecipes();
+    }
 
     // Sync freezer shelf capacity from account permissions
     const userMaxSlots = getUserMaxFreezerSlots(currentUser);
@@ -4142,6 +4229,7 @@
   function renderPantryList() {
     if (!ingredientListContainer || typeof INGREDIENTS_MASTER === 'undefined') return;
 
+    const prevScrollTop = ingredientListContainer.scrollTop;
     ingredientListContainer.replaceChildren();
     const q = ingredientSearchQuery.toLowerCase().trim();
 
@@ -4222,6 +4310,10 @@
           No ingredients match "${ingredientSearchQuery}"
         </div>
       `;
+    }
+
+    if (prevScrollTop > 0) {
+      ingredientListContainer.scrollTop = prevScrollTop;
     }
 
     updateStats();
