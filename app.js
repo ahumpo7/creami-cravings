@@ -532,7 +532,24 @@
   const maxCaloriesDisplay = document.getElementById('maxCaloriesDisplay');
   const maxFatSlider = document.getElementById('maxFatSlider');
   const maxFatDisplay = document.getElementById('maxFatDisplay');
-  
+  // Chef Badges & Milestones Elements (Phase 1 Gamification)
+  const openBadgesBtn = document.getElementById('openBadgesBtn');
+  const statBadgesCard = document.getElementById('statBadgesCard');
+  const headerBadgesBadge = document.getElementById('headerBadgesBadge');
+  const statBadgesUnlockedCount = document.getElementById('statBadgesUnlockedCount');
+  const statBadgesRankLabel = document.getElementById('statBadgesRankLabel');
+  const badgesModalOverlay = document.getElementById('badgesModalOverlay');
+  const badgesModalCloseBtn = document.getElementById('badgesModalCloseBtn');
+  const btnCloseBadgesFooter = document.getElementById('btnCloseBadgesFooter');
+  const btnShareBadges = document.getElementById('btnShareBadges');
+  const badgesGridContainer = document.getElementById('badgesGridContainer');
+  const badgesModalRankText = document.getElementById('badgesModalRankText');
+  const badgesModalCountText = document.getElementById('badgesModalCountText');
+  const badgesModalProgressBar = document.getElementById('badgesModalProgressBar');
+  const badgeTabAll = document.getElementById('badgeTabAll');
+  const badgeTabUnlocked = document.getElementById('badgeTabUnlocked');
+  const badgeTabLocked = document.getElementById('badgeTabLocked');
+
   const shoppingModalOverlay = document.getElementById('shoppingModalOverlay');
   const shoppingModalBody = document.getElementById('shoppingModalBody') || document.getElementById('shoppingListBody');
   const shoppingModalCloseBtn = document.getElementById('shoppingModalCloseBtn');
@@ -1247,6 +1264,10 @@
         userPendingClaimsState = new Set();
       }
     }
+
+    // 13. Phase 1 Gamification: Chef Badges & Milestones
+    loadUserBadges();
+    evaluateBadges(false);
   }
 
   function saveActiveSwaps() {
@@ -1266,6 +1287,7 @@
       localStorage.removeItem(PANTRY_QUANTITIES_STORAGE_KEY);
     }
     updateStats();
+    evaluateBadges(false);
     triggerCloudSync();
   }
 
@@ -1336,6 +1358,7 @@
     calculateIngredientUsage();
     renderPantryList();
     renderRecipes();
+    evaluateBadges(true);
     triggerCloudSync();
   }
 
@@ -1347,7 +1370,11 @@
     } else {
       localStorage.setItem(FREEZER_STORAGE_KEY, JSON.stringify(freezerPintsState));
     }
+    if (freezerPintsState && freezerPintsState.length > 0) {
+      try { localStorage.setItem('creami_freezer_ever_added', '1'); } catch (e) {}
+    }
     updateFreezerBadges();
+    evaluateBadges(true);
     triggerCloudSync();
   }
 
@@ -1370,7 +1397,8 @@
           ratings: userRecipeData,
           customRecipes: customRecipesState,
           shoppingList: Array.from(manualShoppingList),
-          freezerPints: freezerPintsState
+          freezerPints: freezerPintsState,
+          badges: userBadgesState
         };
         await fetch('/api/user/sync', {
           method: 'POST',
@@ -2079,9 +2107,15 @@
         claimsChanged = true;
       }
     }
+    let badgesChanged = false;
+    if (data.user && data.user.badges && typeof data.user.badges === 'object') {
+      if (JSON.stringify(data.user.badges) !== JSON.stringify(userBadgesState)) {
+        badgesChanged = true;
+      }
+    }
 
     // On silent periodic sync, if nothing changed, exit immediately to prevent any DOM tearing or scroll resets
-    if (isSilent && !pantryChanged && !quantitiesChanged && !favoritesChanged && !madeChanged && !ratingsChanged && !customChanged && !shoppingChanged && !freezerChanged && !claimsChanged) {
+    if (isSilent && !pantryChanged && !quantitiesChanged && !favoritesChanged && !madeChanged && !ratingsChanged && !customChanged && !shoppingChanged && !freezerChanged && !claimsChanged && !badgesChanged) {
       return;
     }
 
@@ -2214,6 +2248,17 @@
       }
     }
 
+    // 9. Restore Chef Badges & Milestones from server
+    if (!isSilent || badgesChanged) {
+      if (data.user && data.user.badges && typeof data.user.badges === 'object') {
+        userBadgesState = { ...userBadgesState, ...data.user.badges };
+        saveUserBadgesLocally();
+      } else {
+        loadUserBadges();
+      }
+      evaluateBadges(false);
+    }
+
     if (!isSilent || pantryChanged || customChanged || favoritesChanged) {
       mergeRecipes();
       calculateIngredientUsage();
@@ -2301,6 +2346,8 @@
     loadShoppingListForCurrentSession();
     loadUserRecipeDataForCurrentSession();
     loadRecipeMadeCountsForCurrentSession();
+    loadUserBadges();
+    evaluateBadges(false);
 
     updatePantryCheckboxVisuals();
     mergeRecipes();
@@ -3436,6 +3483,7 @@
     // Immediately update modal counter and recipe listing UI
     updateModalBatchDisplay(recipeId);
     renderRecipes();
+    evaluateBadges(delta > 0);
 
     if (delta > 0) {
       playAudioSuccess();
@@ -7908,6 +7956,13 @@
     lastRouletteWinner = winner;
     const winnerMatch = computeRecipeMatch(winner);
 
+    // Track roulette spin count for gamification milestone
+    try {
+      const curRouletteSpins = parseInt(localStorage.getItem('creami_roulette_spins_count') || '0', 10);
+      localStorage.setItem('creami_roulette_spins_count', (curRouletteSpins + 1).toString());
+    } catch (e) {}
+    evaluateBadges(true);
+
     // If modal overlay exists, trigger the animated slot machine ticker
     if (rouletteModalOverlay && rouletteSlotItem) {
       rouletteModalOverlay.classList.add('active');
@@ -7996,6 +8051,378 @@
       if (rouletteWinnerCard) rouletteWinnerCard.style.display = 'none';
     }
     unlockBackgroundScroll();
+  }
+
+  // --- Phase 1 Gamification: Chef Badges & Milestones ---
+  let userBadgesState = {};
+  let currentBadgeFilter = 'all';
+
+  const CHEF_BADGES_MASTER = [
+    {
+      id: 'first_spin',
+      title: 'First Spin',
+      icon: '🥇',
+      category: 'Spins',
+      desc: 'Spin your very first Ninja Creami pint ("I Made This!").',
+      target: 1,
+      check: (s) => s.totalSpins >= 1,
+      progress: (s) => ({ current: Math.min(s.totalSpins, 1), target: 1, label: `${Math.min(s.totalSpins, 1)} / 1 spin` })
+    },
+    {
+      id: 'spins_10',
+      title: 'Spin Apprentice',
+      icon: '🔟',
+      category: 'Spins',
+      desc: 'Reach 10 total recipe spins enjoyed.',
+      target: 10,
+      check: (s) => s.totalSpins >= 10,
+      progress: (s) => ({ current: Math.min(s.totalSpins, 10), target: 10, label: `${Math.min(s.totalSpins, 10)} / 10 spins` })
+    },
+    {
+      id: 'spins_50',
+      title: 'Master Spinologist',
+      icon: '👑',
+      category: 'Spins',
+      desc: 'Reach 50 total recipe spins across your favorite flavors.',
+      target: 50,
+      check: (s) => s.totalSpins >= 50,
+      progress: (s) => ({ current: Math.min(s.totalSpins, 50), target: 50, label: `${Math.min(s.totalSpins, 50)} / 50 spins` })
+    },
+    {
+      id: 'spins_100',
+      title: 'Spin Centurion',
+      icon: '💯',
+      category: 'Spins',
+      desc: 'Reach 100 total recipe spins. A true Creami legend!',
+      target: 100,
+      check: (s) => s.totalSpins >= 100,
+      progress: (s) => ({ current: Math.min(s.totalSpins, 100), target: 100, label: `${Math.min(s.totalSpins, 100)} / 100 spins` })
+    },
+    {
+      id: 'freezer_first',
+      title: 'Chilly Pioneer',
+      icon: '🧊',
+      category: 'Freezer',
+      desc: 'Place your first pint on the Virtual Freezer Shelf with a 16-hr timer.',
+      target: 1,
+      check: (s) => s.freezerPintsCount >= 1 || s.freezerEverAdded >= 1,
+      progress: (s) => ({ current: (s.freezerPintsCount >= 1 || s.freezerEverAdded >= 1) ? 1 : 0, target: 1, label: (s.freezerPintsCount >= 1 || s.freezerEverAdded >= 1) ? '1 / 1 pint' : '0 / 1 pint' })
+    },
+    {
+      id: 'freezer_full',
+      title: 'Frozen Treasury',
+      icon: '❄️',
+      category: 'Freezer',
+      desc: 'Fill at least 4 slots on your Virtual Freezer shelf at once.',
+      target: 4,
+      check: (s) => s.freezerPintsCount >= 4,
+      progress: (s) => ({ current: Math.min(s.freezerPintsCount, 4), target: 4, label: `${Math.min(s.freezerPintsCount, 4)} / 4 pints` })
+    },
+    {
+      id: 'pantry_10',
+      title: 'Pantry Starter',
+      icon: '📦',
+      category: 'Pantry',
+      desc: 'Stock at least 10 ingredients in your kitchen pantry.',
+      target: 10,
+      check: (s) => s.pantryCount >= 10,
+      progress: (s) => ({ current: Math.min(s.pantryCount, 10), target: 10, label: `${Math.min(s.pantryCount, 10)} / 10 items` })
+    },
+    {
+      id: 'pantry_30',
+      title: 'Pantry Master',
+      icon: '🏪',
+      category: 'Pantry',
+      desc: 'Stock 30+ ingredients in your kitchen pantry.',
+      target: 30,
+      check: (s) => s.pantryCount >= 30,
+      progress: (s) => ({ current: Math.min(s.pantryCount, 30), target: 30, label: `${Math.min(s.pantryCount, 30)} / 30 items` })
+    },
+    {
+      id: 'flavor_choc_3',
+      title: 'Chocoholic',
+      icon: '🍫',
+      category: 'Flavors',
+      desc: 'Spin 3 chocolate, cocoa, fudge, or brownie recipes.',
+      target: 3,
+      check: (s) => s.chocolateSpins >= 3,
+      progress: (s) => ({ current: Math.min(s.chocolateSpins, 3), target: 3, label: `${Math.min(s.chocolateSpins, 3)} / 3 spins` })
+    },
+    {
+      id: 'flavor_fruit_3',
+      title: 'Berry Burst',
+      icon: '🍓',
+      category: 'Flavors',
+      desc: 'Spin 3 fruit, berry, or citrus recipes.',
+      target: 3,
+      check: (s) => s.fruitSpins >= 3,
+      progress: (s) => ({ current: Math.min(s.fruitSpins, 3), target: 3, label: `${Math.min(s.fruitSpins, 3)} / 3 spins` })
+    },
+    {
+      id: 'custom_recipe',
+      title: 'Mad Scientist',
+      icon: '🧪',
+      category: 'Creation',
+      desc: 'Formulate and save your first custom recipe.',
+      target: 1,
+      check: (s) => s.customRecipesCount >= 1,
+      progress: (s) => ({ current: Math.min(s.customRecipesCount, 1), target: 1, label: `${Math.min(s.customRecipesCount, 1)} / 1 custom` })
+    },
+    {
+      id: 'roulette_spin',
+      title: 'Flavor Gambler',
+      icon: '🎰',
+      category: 'Roulette',
+      desc: 'Let Creami Roulette pick a surprise pint for you.',
+      target: 1,
+      check: (s) => s.rouletteSpun >= 1,
+      progress: (s) => ({ current: Math.min(s.rouletteSpun, 1), target: 1, label: `${Math.min(s.rouletteSpun, 1)} / 1 spin` })
+    }
+  ];
+
+  function getBadgesStorageKey() {
+    return (currentUser && currentUser.id)
+      ? `${STORAGE_PREFIX}creami_badges_${currentUser.id}`
+      : `${STORAGE_PREFIX}creami_badges_guest`;
+  }
+
+  function loadUserBadges() {
+    try {
+      const saved = localStorage.getItem(getBadgesStorageKey());
+      if (saved) {
+        userBadgesState = JSON.parse(saved) || {};
+      } else {
+        userBadgesState = {};
+      }
+    } catch (e) {
+      userBadgesState = {};
+    }
+  }
+
+  function saveUserBadgesLocally() {
+    try {
+      localStorage.setItem(getBadgesStorageKey(), JSON.stringify(userBadgesState));
+    } catch (e) {}
+  }
+
+  function getGamificationStats() {
+    let totalSpins = 0;
+    let chocolateSpins = 0;
+    let fruitSpins = 0;
+
+    if (recipeMadeCounts && typeof recipeMadeCounts === 'object') {
+      Object.entries(recipeMadeCounts).forEach(([rId, count]) => {
+        const c = Number(count) || 0;
+        totalSpins += c;
+        const r = (typeof allRecipes !== 'undefined') ? allRecipes.find(x => x.id === rId) : null;
+        if (r) {
+          const cat = (r.category || '').toLowerCase();
+          const name = (r.name || '').toLowerCase();
+          if (cat.includes('chocolate') || name.includes('chocolate') || name.includes('brownie') || name.includes('fudge') || name.includes('cocoa')) {
+            chocolateSpins += c;
+          }
+          if (cat.includes('fruit') || cat.includes('sorbet') || name.includes('berry') || name.includes('strawberry') || name.includes('banana') || name.includes('lemon') || name.includes('mango') || name.includes('peach') || name.includes('apple')) {
+            fruitSpins += c;
+          }
+        }
+      });
+    }
+
+    const pantryCount = (pantryState && pantryState.size) ? pantryState.size : 0;
+    const freezerPintsCount = (Array.isArray(freezerPintsState)) ? freezerPintsState.length : 0;
+    const customRecipesCount = (Array.isArray(customRecipesState)) ? customRecipesState.length : 0;
+    const rouletteSpun = parseInt(localStorage.getItem('creami_roulette_spins_count') || '0', 10);
+    const freezerEverAdded = parseInt(localStorage.getItem('creami_freezer_ever_added') || (freezerPintsCount > 0 ? '1' : '0'), 10);
+
+    return {
+      totalSpins,
+      chocolateSpins,
+      fruitSpins,
+      pantryCount,
+      freezerPintsCount,
+      freezerEverAdded,
+      customRecipesCount,
+      rouletteSpun
+    };
+  }
+
+  function getChefRank(unlockedCount) {
+    if (unlockedCount >= 12) return 'Ice Cream Alchemist 👑';
+    if (unlockedCount >= 9) return 'Master Spinologist 🍦';
+    if (unlockedCount >= 6) return 'Macro Mixologist 🥣';
+    if (unlockedCount >= 3) return 'Pint Pioneer 🍨';
+    return 'Spin Rookie 🥄';
+  }
+
+  function evaluateBadges(showCelebration = true) {
+    const stats = getGamificationStats();
+    let newlyUnlocked = [];
+
+    CHEF_BADGES_MASTER.forEach(badge => {
+      if (!userBadgesState[badge.id] && badge.check(stats)) {
+        userBadgesState[badge.id] = {
+          unlockedAt: Date.now()
+        };
+        newlyUnlocked.push(badge);
+      }
+    });
+
+    if (newlyUnlocked.length > 0) {
+      saveUserBadgesLocally();
+      triggerCloudSync();
+      if (showCelebration) {
+        newlyUnlocked.forEach(b => {
+          showBadgeCelebration(b);
+        });
+      }
+    }
+
+    updateBadgesUI();
+  }
+
+  function showBadgeCelebration(badge) {
+    playAudioJackpot();
+    triggerHaptic([40, 60, 40, 80]);
+    showToast(`🏆 Badge Unlocked: ${badge.icon} ${badge.title}!`);
+  }
+
+  function updateBadgesUI() {
+    const unlockedCount = Object.keys(userBadgesState).length;
+    const totalCount = CHEF_BADGES_MASTER.length;
+    const rank = getChefRank(unlockedCount);
+
+    if (headerBadgesBadge) {
+      headerBadgesBadge.textContent = `${unlockedCount}/${totalCount}`;
+    }
+    if (statBadgesUnlockedCount) {
+      statBadgesUnlockedCount.textContent = `${unlockedCount}/${totalCount}`;
+    }
+    if (statBadgesRankLabel) {
+      statBadgesRankLabel.textContent = rank;
+    }
+    if (badgesModalCountText) {
+      badgesModalCountText.textContent = `${unlockedCount} / ${totalCount} Unlocked`;
+    }
+    if (badgesModalRankText) {
+      badgesModalRankText.textContent = `👑 Rank: ${rank}`;
+    }
+    if (badgesModalProgressBar) {
+      const pct = Math.round((unlockedCount / totalCount) * 100);
+      badgesModalProgressBar.style.width = `${pct}%`;
+    }
+    if (badgeTabUnlocked) {
+      badgeTabUnlocked.textContent = `Unlocked (${unlockedCount})`;
+    }
+    if (badgeTabLocked) {
+      badgeTabLocked.textContent = `In Progress (${totalCount - unlockedCount})`;
+    }
+
+    if (badgesModalOverlay && badgesModalOverlay.classList.contains('active')) {
+      renderBadgesGrid();
+    }
+  }
+
+  function renderBadgesGrid() {
+    if (!badgesGridContainer) return;
+    const stats = getGamificationStats();
+
+    let filtered = CHEF_BADGES_MASTER;
+    if (currentBadgeFilter === 'unlocked') {
+      filtered = CHEF_BADGES_MASTER.filter(b => userBadgesState[b.id]);
+    } else if (currentBadgeFilter === 'locked') {
+      filtered = CHEF_BADGES_MASTER.filter(b => !userBadgesState[b.id]);
+    }
+
+    if (filtered.length === 0) {
+      badgesGridContainer.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 32px 16px; color: var(--text-dim);">
+          ${currentBadgeFilter === 'unlocked' ? 'No badges unlocked yet! Keep spinning recipes to unlock milestones.' : 'All badges unlocked! You are a master! 🎉'}
+        </div>
+      `;
+      return;
+    }
+
+    badgesGridContainer.innerHTML = filtered.map(badge => {
+      const isUnlocked = Boolean(userBadgesState[badge.id]);
+      const prog = badge.progress(stats);
+      const pct = Math.round((prog.current / prog.target) * 100);
+      const unlockedDateStr = isUnlocked && userBadgesState[badge.id].unlockedAt
+        ? new Date(userBadgesState[badge.id].unlockedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+        : 'Unlocked';
+
+      return `
+        <div class="badge-card ${isUnlocked ? 'unlocked' : 'locked'}">
+          <div class="badge-icon-box">${badge.icon}</div>
+          <div class="badge-info-col">
+            <div class="badge-top-row">
+              <span class="badge-title-text" title="${badge.title}">${badge.title}</span>
+              <span class="badge-cat-tag">${badge.category}</span>
+            </div>
+            <div class="badge-desc-text">${badge.desc}</div>
+            ${isUnlocked ? `
+              <div class="badge-unlocked-status">
+                <span>✓</span> ${unlockedDateStr}
+              </div>
+            ` : `
+              <div class="badge-progress-wrap">
+                <div class="badge-progress-label">
+                  <span>Progress</span>
+                  <span>${prog.label}</span>
+                </div>
+                <div class="badge-progress-bar">
+                  <div class="badge-progress-fill-bar" style="width: ${pct}%;"></div>
+                </div>
+              </div>
+            `}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function openBadgesModal() {
+    if (!badgesModalOverlay) return;
+    evaluateBadges(false);
+    badgesModalOverlay.classList.add('active');
+    badgesModalOverlay.setAttribute('aria-hidden', 'false');
+    lockBackgroundScroll();
+    renderBadgesGrid();
+  }
+
+  function closeBadgesModal() {
+    if (!badgesModalOverlay) return;
+    badgesModalOverlay.classList.remove('active');
+    badgesModalOverlay.setAttribute('aria-hidden', 'true');
+    unlockBackgroundScroll();
+  }
+
+  async function shareBadgesAchievement() {
+    const unlockedCount = Object.keys(userBadgesState).length;
+    const totalCount = CHEF_BADGES_MASTER.length;
+    const rank = getChefRank(unlockedCount);
+
+    const shareText = `🏆 I've unlocked ${unlockedCount}/${totalCount} Chef Badges on Creami Cravings!\nCurrent Rank: ${rank}\nCheck out high-protein Ninja Creami recipes matching your kitchen pantry: https://creamicravings.com`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Creami Cravings Chef Badges',
+          text: shareText,
+          url: 'https://creamicravings.com'
+        });
+        return;
+      } catch (e) {}
+    }
+
+    if (navigator.clipboard) {
+      try {
+        await navigator.clipboard.writeText(shareText);
+        showToast('📋 Achievement summary copied to clipboard!');
+        return;
+      } catch (e) {}
+    }
+
+    showToast(shareText);
   }
 
   // Fitness & Macro Target Panel Helpers (Roadmap Item 10)
@@ -18085,6 +18512,44 @@
       btnRouletteSpinAgain.addEventListener('click', spinCreamiRoulette);
     }
 
+    // Chef Badges & Milestones (Phase 1 Gamification)
+    if (openBadgesBtn) {
+      openBadgesBtn.addEventListener('click', openBadgesModal);
+    }
+    if (statBadgesCard) {
+      statBadgesCard.addEventListener('click', openBadgesModal);
+    }
+    if (badgesModalCloseBtn) {
+      badgesModalCloseBtn.addEventListener('click', closeBadgesModal);
+    }
+    if (btnCloseBadgesFooter) {
+      btnCloseBadgesFooter.addEventListener('click', closeBadgesModal);
+    }
+    if (badgesModalOverlay) {
+      badgesModalOverlay.addEventListener('click', (e) => {
+        if (e.target === badgesModalOverlay) closeBadgesModal();
+      });
+    }
+    if (btnShareBadges) {
+      btnShareBadges.addEventListener('click', shareBadgesAchievement);
+    }
+
+    const badgeTabs = document.querySelectorAll('.btn-badge-tab');
+    if (badgeTabs && badgeTabs.length > 0) {
+      badgeTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          badgeTabs.forEach(t => {
+            t.classList.remove('active');
+            t.setAttribute('aria-selected', 'false');
+          });
+          tab.classList.add('active');
+          tab.setAttribute('aria-selected', 'true');
+          currentBadgeFilter = tab.dataset.filter || tab.dataset.tab || 'all';
+          renderBadgesGrid();
+        });
+      });
+    }
+
     // Fitness & Macro Target Sliders (Roadmap Item 10)
     if (toggleMacroSlidersBtn) {
       toggleMacroSlidersBtn.addEventListener('click', toggleMacroSliders);
@@ -18672,6 +19137,7 @@
         closeSwapInspector();
         closeRecipeModal();
         closeRouletteModal();
+        closeBadgesModal();
         closeShoppingListModal();
         closeFreezerModal();
         closeSlotFillModal();

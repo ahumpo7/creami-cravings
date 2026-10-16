@@ -115,7 +115,7 @@
   <link rel="icon" type="image/png" sizes="144x144" href="icon-144.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=v6.5">
+  <link rel="stylesheet" href="styles.css?v=v6.6">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -236,6 +236,9 @@
           <button id="openShoppingListBtn" class="btn-secondary-action header-desktop-only" title="View Shopping List for Missing Items">
             🛒 Shopping List <span class="badge-count" id="shoppingListBadge">0</span>
           </button>
+          <button id="openBadgesBtn" class="btn-secondary-action btn-badges-header" title="Chef Badges &amp; Culinary Milestones">
+            🏆 <span class="badge-text-desktop">Badges</span> <span class="badge-count" id="headerBadgesBadge">0/12</span>
+          </button>
 
           <!-- 1-Tap PWA Install Button (Roadmap Item 19) -->
           <button id="btnInstallPwa" class="btn-install-pwa" title="Install Creami Cravings on this Device">
@@ -334,6 +337,17 @@
             <div class="stat-text-group">
               <div class="stat-label">Community Spins</div>
               <div class="stat-sublabel">Total pints enjoyed</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-card stat-card-interactive" id="statBadgesCard" role="button" tabindex="0" title="Click to view Chef Badges &amp; Milestones">
+          <div class="stat-icon gold">🏆</div>
+          <div class="stat-info">
+            <div class="stat-num" id="statBadgesUnlockedCount">0/12</div>
+            <div class="stat-text-group">
+              <div class="stat-label">Chef Badges</div>
+              <div class="stat-sublabel" id="statBadgesRankLabel">Spin Rookie</div>
             </div>
           </div>
         </div>
@@ -831,6 +845,47 @@
           <button class="btn-primary" id="btnRouletteOpenWinner">🍨 Open Recipe</button>
           <button class="btn-secondary" id="btnRouletteSpinAgain">🎲 Spin Again</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chef Badges & Milestones Modal -->
+  <div class="modal-overlay" id="badgesModalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-content badges-modal-content">
+      <div class="modal-handle-bar" aria-hidden="true"></div>
+      <button class="modal-close" id="badgesModalCloseBtn" aria-label="Close modal">&times;</button>
+      
+      <div class="modal-header badges-modal-header">
+        <div class="badges-header-badge">🏆 CULINARY ACHIEVEMENTS</div>
+        <h2 class="modal-title">Chef Badges &amp; Milestones</h2>
+        <p class="modal-subtitle">Earn badges as you spin recipes, stock your pantry, freeze pints, and formulate custom creations!</p>
+        
+        <!-- Overall Progress Bar & Rank -->
+        <div class="badges-progress-container">
+          <div class="badges-progress-header">
+            <span class="badges-progress-rank" id="badgesModalRankText">👑 Rank: Spin Rookie</span>
+            <span class="badges-progress-count" id="badgesModalCountText">0 / 12 Unlocked</span>
+          </div>
+          <div class="badges-progress-track">
+            <div class="badges-progress-fill" id="badgesModalProgressBar" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <!-- Filter tabs: All, Unlocked, In Progress -->
+        <div class="badges-tab-bar" role="tablist">
+          <button type="button" class="btn-badge-tab active" data-filter="all" id="badgeTabAll">All (12)</button>
+          <button type="button" class="btn-badge-tab" data-filter="unlocked" id="badgeTabUnlocked">Unlocked (0)</button>
+          <button type="button" class="btn-badge-tab" data-filter="locked" id="badgeTabLocked">In Progress (12)</button>
+        </div>
+      </div>
+
+      <div class="badges-modal-body" id="badgesGridContainer">
+        <!-- Dynamically populated by app.js -->
+      </div>
+
+      <div class="modal-footer badges-modal-footer">
+        <button type="button" class="btn-secondary" id="btnShareBadges">📲 Share Achievements</button>
+        <button type="button" class="btn-primary" id="btnCloseBadgesFooter">Done</button>
       </div>
     </div>
   </div>
@@ -3366,6 +3421,6 @@
 
   <!-- Scripts -->
   <script src="recipes-data.js?v=v4.3"></script>
-  <script src="app.js?v=v6.5"></script>
+  <script src="app.js?v=v6.6"></script>
 </body>
 </html>
