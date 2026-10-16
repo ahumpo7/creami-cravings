@@ -10,6 +10,28 @@
   const API_BASE = IS_BETA ? '/beta' : '';
   const STORAGE_PREFIX = IS_BETA ? 'beta_' : '';
 
+  if (IS_BETA) {
+    document.documentElement.classList.add('is-beta-env');
+    if (document.body) {
+      document.body.classList.add('is-beta-env');
+    } else {
+      document.addEventListener('DOMContentLoaded', () => {
+        document.body.classList.add('is-beta-env');
+      });
+    }
+  } else {
+    // On production, strictly purge any beta elements or ribbons immediately
+    const stripBetaBanner = () => {
+      const ribbon = document.getElementById('betaSandboxRibbon');
+      if (ribbon) ribbon.remove();
+    };
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', stripBetaBanner);
+    } else {
+      stripBetaBanner();
+    }
+  }
+
   // Intercept fetch on beta to automatically route /api calls to /beta/api
   if (IS_BETA && window.fetch) {
     const origFetch = window.fetch;

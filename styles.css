@@ -12651,12 +12651,12 @@ body.modal-open .cookie-consent-banner {
 
 /* --- Beta Staging Sandbox Ribbon --- */
 .beta-ribbon-bar {
+  display: none !important;
   background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 50%, #db2777 100%);
   color: #ffffff;
   padding: 8px 18px;
   font-size: 0.82rem;
   font-weight: 600;
-  display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
@@ -12665,6 +12665,11 @@ body.modal-open .cookie-consent-banner {
   top: 0;
   z-index: 10000;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+body.is-beta-env .beta-ribbon-bar,
+html.is-beta-env .beta-ribbon-bar {
+  display: flex !important;
 }
 
 .beta-ribbon-left {
