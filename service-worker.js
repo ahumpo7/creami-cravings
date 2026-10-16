@@ -1,5 +1,5 @@
 // Creami Cravings Service Worker (Roadmap Items 11 & 17 & 19)
-const CACHE_NAME = 'creami-cravings-v6.3';
+const CACHE_NAME = 'creami-cravings-v6.4';
 
 const PRECACHE_ASSETS = [
   '/',
@@ -98,7 +98,27 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 3. API Read requests (/api/community/stats, /api/user/data): Network-first with cache fallback
+  // 3. API Requests:
+  // Non-GET requests (POST /api/user/sync, etc.) must NEVER be intercepted by CacheStorage
+  if (request.method !== 'GET') {
+    return;
+  }
+
+  // User personal account and auth APIs (/api/user/*, /api/auth/*, /api/admin/*):
+  // ALWAYS fetch live from network. Never store user personal data in CacheStorage to prevent stale multi-device states.
+  if (url.pathname.startsWith('/api/user/') || url.pathname.startsWith('/api/auth/') || url.pathname.startsWith('/api/admin/')) {
+    event.respondWith(
+      fetch(request).catch(() => {
+        return new Response(JSON.stringify({ offline: true, error: 'Offline mode active' }), {
+          status: 503,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      })
+    );
+    return;
+  }
+
+  // Public/Shared read APIs (/api/community/stats, /api/config): Network-first with cache fallback
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(
       fetch(request)

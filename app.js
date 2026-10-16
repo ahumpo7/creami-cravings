@@ -783,6 +783,13 @@
       }
     });
 
+    // Periodic cloud sync to keep multi-device sessions seamlessly updated in real time
+    setInterval(() => {
+      if (document.visibilityState === 'visible' && currentUser && (currentUser.token || currentUser.email)) {
+        fetchLatestUserData();
+      }
+    }, 45000);
+
     if (window.innerWidth <= 768) {
       setMobileView('recipes');
     }
@@ -1397,7 +1404,10 @@
       if (currentUser.token) headers['Authorization'] = `Bearer ${currentUser.token}`;
       if (currentUser.email) headers['X-User-Email'] = currentUser.email;
 
-      const res = await fetch('/api/user/data', { headers });
+      const res = await fetch(`/api/user/data?_t=${Date.now()}`, {
+        headers,
+        cache: 'no-store'
+      });
       if (res.ok) {
         const data = await res.json();
         if (data && data.id) {
@@ -1407,6 +1417,8 @@
             isSilent: true
           });
         }
+      } else if (res.status === 401) {
+        console.warn('Session expired or unauthorized for user data sync.');
       }
     } catch (e) {
       // Offline mode: keep cached local state
@@ -19493,8 +19505,9 @@
     window.addEventListener('online', () => {
       updateOnlineStatus();
       showToast('🟢 Back Online! Syncing with cloud...');
-      if (currentUser && typeof syncUserDataWithServer === 'function') {
-        syncUserDataWithServer();
+      if (currentUser && (currentUser.token || currentUser.email)) {
+        triggerCloudSync(true);
+        fetchLatestUserData();
       }
     });
 
