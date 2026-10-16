@@ -115,7 +115,7 @@
   <link rel="icon" type="image/png" sizes="144x144" href="icon-144.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=v6.9">
+  <link rel="stylesheet" href="styles.css?v=v7.0">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -3409,6 +3409,27 @@
         <button type="button" class="ratio-btn" id="btnRatioSquare" data-ratio="square">🟦 1:1 Square</button>
       </div>
 
+      <!-- Theme Switcher -->
+      <div class="story-theme-bar">
+        <div class="story-theme-switcher" role="tablist" id="storyThemeSwitcher" aria-label="Card Theme Switcher">
+          <button type="button" class="theme-pill-btn active" data-theme="berry" title="Neon Berry Theme">
+            <span class="theme-dot dot-berry"></span> 🍓 Berry
+          </button>
+          <button type="button" class="theme-pill-btn" data-theme="chocolate" title="Midnight Mocha Theme">
+            <span class="theme-dot dot-chocolate"></span> 🍫 Mocha
+          </button>
+          <button type="button" class="theme-pill-btn" data-theme="glacier" title="Glacier Chill Theme">
+            <span class="theme-dot dot-glacier"></span> 🧊 Glacier
+          </button>
+          <button type="button" class="theme-pill-btn" data-theme="sunset" title="Sunset Sorbet Theme">
+            <span class="theme-dot dot-sunset"></span> 🥭 Sunset
+          </button>
+          <button type="button" class="theme-pill-btn" data-theme="matcha" title="Matcha Dream Theme">
+            <span class="theme-dot dot-matcha"></span> 🍵 Matcha
+          </button>
+        </div>
+      </div>
+
       <!-- Live Canvas Preview Container -->
       <div class="story-canvas-preview-wrapper" id="storyCanvasPreviewWrapper">
         <div class="story-loading-indicator" id="storyLoadingIndicator">
@@ -3447,6 +3468,6 @@
 
   <!-- Scripts -->
   <script src="recipes-data.js?v=v4.3"></script>
-  <script src="app.js?v=v6.9"></script>
+  <script src="app.js?v=v7.0"></script>
 </body>
 </html>

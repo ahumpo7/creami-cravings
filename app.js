@@ -7233,6 +7233,287 @@
   let currentStoryDataUrl = null;
   let storyRenderingPromise = null;
 
+  let currentStoryTheme = (function() {
+    try {
+      return localStorage.getItem('creami_story_theme') || 'berry';
+    } catch (e) {
+      return 'berry';
+    }
+  })();
+
+  const STORY_THEMES = {
+    berry: {
+      id: 'berry',
+      name: 'Neon Berry',
+      icon: '🍓',
+      bgStops: [
+        [0, '#831843'],    // Deep berry
+        [0.22, '#be185d'], // Vivid magenta
+        [0.50, '#4c1d95'], // Electric violet
+        [0.78, '#1e1b4b'], // Night indigo
+        [1, '#0f172a']     // Deep obsidian
+      ],
+      glows: [
+        { x: 0.85, y: 0.08, r: 0.85, stops: ['rgba(244, 63, 94, 0.75)', 'rgba(236, 72, 153, 0.35)', 'transparent'] },
+        { x: 0.15, y: 0.25, r: 0.75, stops: ['rgba(168, 85, 247, 0.65)', 'rgba(124, 58, 237, 0.25)', 'transparent'] },
+        { x: 0.5, y: 0.92, r: 0.80, stops: ['rgba(244, 63, 94, 0.55)', 'rgba(217, 70, 239, 0.25)', 'transparent'] }
+      ],
+      particles: [
+        { x: 90, y: 140, s: 20, char: '✦', color: 'rgba(244, 114, 182, 0.75)' },
+        { x: 990, y: 160, s: 24, char: '✨', color: 'rgba(251, 191, 36, 0.8)' },
+        { x: 50, y: 440, s: 22, char: '🍓', color: 'rgba(255, 255, 255, 0.85)' },
+        { x: 1030, y: 460, s: 18, char: '★', color: 'rgba(244, 114, 182, 0.65)' },
+        { x: 45, y: 920, s: 22, char: '✨', color: 'rgba(249, 168, 212, 0.75)' },
+        { x: 1035, y: 940, s: 20, char: '✦', color: 'rgba(192, 132, 252, 0.7)' },
+        { x: 55, y: 1380, s: 22, char: '★', color: 'rgba(244, 114, 182, 0.65)' },
+        { x: 1025, y: 1400, s: 24, char: '🍓', color: 'rgba(255, 255, 255, 0.85)' },
+        { x: 80, y: 1780, s: 22, char: '✨', color: 'rgba(251, 191, 36, 0.8)' },
+        { x: 1000, y: 1760, s: 20, char: '✦', color: 'rgba(168, 85, 247, 0.75)' }
+      ],
+      cardBg: 'rgba(20, 10, 36, 0.88)',
+      cardBorder: 'rgba(244, 114, 182, 0.35)',
+      cardBorderGlow: 'rgba(236, 72, 153, 0.4)',
+      accentPrimary: '#f472b6',
+      accentSecondary: '#c084fc',
+      brandPillBg: 'rgba(236, 72, 153, 0.2)',
+      brandPillBorder: 'rgba(244, 114, 182, 0.6)',
+      brandText: '#fbcfe8',
+      subText: '#e2e8f0',
+      titleColor: '#ffffff',
+      titleGlow: 'rgba(236, 72, 153, 0.7)',
+      scoreBg: 'rgba(20, 10, 36, 0.9)',
+      scoreBorder: 'rgba(52, 211, 153, 0.7)',
+      scoreText: '#6ee7b7',
+      settingsDeckBorder: 'rgba(192, 132, 252, 0.5)',
+      settingsDeckHeader: '#e879f9',
+      settingsDeckVal: '#ffffff',
+      ingsHeader: '#f472b6',
+      dividerColor: 'rgba(255, 255, 255, 0.1)',
+      tipBg: 'rgba(20, 10, 36, 0.92)',
+      tipBorder: 'rgba(251, 191, 36, 0.6)',
+      tipHeader: '#fbbf24',
+      footerCtaBg: 'rgba(236, 72, 153, 0.25)',
+      footerCtaBorder: 'rgba(244, 114, 182, 0.85)',
+      footerCtaText: '#fce7f3'
+    },
+    chocolate: {
+      id: 'chocolate',
+      name: 'Midnight Mocha',
+      icon: '🍫',
+      bgStops: [
+        [0, '#381604'],    // Rich chocolate cocoa
+        [0.25, '#210d02'], // Dark espresso
+        [0.55, '#150801'], // Midnight roast
+        [0.80, '#271103'], // Warm molasses
+        [1, '#0d0501']     // Dark truffle
+      ],
+      glows: [
+        { x: 0.85, y: 0.10, r: 0.85, stops: ['rgba(245, 158, 11, 0.65)', 'rgba(217, 119, 6, 0.30)', 'transparent'] },
+        { x: 0.15, y: 0.30, r: 0.75, stops: ['rgba(251, 191, 36, 0.50)', 'rgba(180, 83, 9, 0.25)', 'transparent'] },
+        { x: 0.5, y: 0.92, r: 0.80, stops: ['rgba(245, 158, 11, 0.55)', 'rgba(217, 119, 6, 0.20)', 'transparent'] }
+      ],
+      particles: [
+        { x: 90, y: 140, s: 20, char: '✨', color: 'rgba(251, 191, 36, 0.8)' },
+        { x: 990, y: 160, s: 20, char: '✦', color: 'rgba(253, 230, 138, 0.75)' },
+        { x: 50, y: 440, s: 22, char: '🍫', color: 'rgba(255, 255, 255, 0.85)' },
+        { x: 1030, y: 460, s: 22, char: '★', color: 'rgba(245, 158, 11, 0.65)' },
+        { x: 45, y: 920, s: 20, char: '✨', color: 'rgba(251, 191, 36, 0.75)' },
+        { x: 1035, y: 940, s: 18, char: '✦', color: 'rgba(253, 230, 138, 0.7)' },
+        { x: 55, y: 1380, s: 22, char: '🍫', color: 'rgba(255, 255, 255, 0.85)' },
+        { x: 1025, y: 1400, s: 22, char: '★', color: 'rgba(245, 158, 11, 0.65)' },
+        { x: 80, y: 1780, s: 22, char: '✨', color: 'rgba(251, 191, 36, 0.8)' },
+        { x: 1000, y: 1760, s: 20, char: '✦', color: 'rgba(253, 230, 138, 0.75)' }
+      ],
+      cardBg: 'rgba(28, 14, 4, 0.90)',
+      cardBorder: 'rgba(251, 191, 36, 0.40)',
+      cardBorderGlow: 'rgba(245, 158, 11, 0.45)',
+      accentPrimary: '#fbbf24',
+      accentSecondary: '#f59e0b',
+      brandPillBg: 'rgba(245, 158, 11, 0.2)',
+      brandPillBorder: 'rgba(251, 191, 36, 0.65)',
+      brandText: '#fef3c7',
+      subText: '#fde68a',
+      titleColor: '#ffffff',
+      titleGlow: 'rgba(245, 158, 11, 0.65)',
+      scoreBg: 'rgba(28, 14, 4, 0.92)',
+      scoreBorder: 'rgba(251, 191, 36, 0.7)',
+      scoreText: '#fde68a',
+      settingsDeckBorder: 'rgba(251, 191, 36, 0.55)',
+      settingsDeckHeader: '#fbbf24',
+      settingsDeckVal: '#ffffff',
+      ingsHeader: '#f59e0b',
+      dividerColor: 'rgba(251, 191, 36, 0.15)',
+      tipBg: 'rgba(28, 14, 4, 0.94)',
+      tipBorder: 'rgba(251, 191, 36, 0.75)',
+      tipHeader: '#fef08a',
+      footerCtaBg: 'rgba(245, 158, 11, 0.25)',
+      footerCtaBorder: 'rgba(251, 191, 36, 0.9)',
+      footerCtaText: '#fffbeb'
+    },
+    glacier: {
+      id: 'glacier',
+      name: 'Glacier Chill',
+      icon: '🧊',
+      bgStops: [
+        [0, '#0369a1'],    // Crisp ocean blue
+        [0.25, '#075985'], // Electric sapphire
+        [0.55, '#0f172a'], // Deep abyss
+        [0.80, '#0c4a6e'], // Arctic twilight
+        [1, '#082f49']     // Polar deep
+      ],
+      glows: [
+        { x: 0.85, y: 0.10, r: 0.85, stops: ['rgba(6, 182, 212, 0.75)', 'rgba(14, 165, 233, 0.35)', 'transparent'] },
+        { x: 0.15, y: 0.28, r: 0.75, stops: ['rgba(56, 189, 248, 0.65)', 'rgba(3, 105, 161, 0.25)', 'transparent'] },
+        { x: 0.5, y: 0.92, r: 0.80, stops: ['rgba(34, 211, 238, 0.60)', 'rgba(6, 182, 212, 0.25)', 'transparent'] }
+      ],
+      particles: [
+        { x: 90, y: 140, s: 22, char: '❄️', color: 'rgba(165, 243, 252, 0.85)' },
+        { x: 990, y: 160, s: 22, char: '✦', color: 'rgba(103, 232, 249, 0.75)' },
+        { x: 50, y: 440, s: 22, char: '🧊', color: 'rgba(255, 255, 255, 0.85)' },
+        { x: 1030, y: 460, s: 18, char: '★', color: 'rgba(56, 189, 248, 0.65)' },
+        { x: 45, y: 920, s: 22, char: '❄️', color: 'rgba(165, 243, 252, 0.85)' },
+        { x: 1035, y: 940, s: 20, char: '✦', color: 'rgba(34, 211, 238, 0.75)' },
+        { x: 55, y: 1380, s: 22, char: '★', color: 'rgba(56, 189, 248, 0.65)' },
+        { x: 1025, y: 1400, s: 22, char: '🧊', color: 'rgba(255, 255, 255, 0.85)' },
+        { x: 80, y: 1780, s: 22, char: '✨', color: 'rgba(165, 243, 252, 0.8)' },
+        { x: 1000, y: 1760, s: 22, char: '❄️', color: 'rgba(56, 189, 248, 0.85)' }
+      ],
+      cardBg: 'rgba(8, 28, 48, 0.90)',
+      cardBorder: 'rgba(34, 211, 238, 0.42)',
+      cardBorderGlow: 'rgba(6, 182, 212, 0.5)',
+      accentPrimary: '#38bdf8',
+      accentSecondary: '#22d3ee',
+      brandPillBg: 'rgba(6, 182, 212, 0.22)',
+      brandPillBorder: 'rgba(34, 211, 238, 0.65)',
+      brandText: '#cffafe',
+      subText: '#e0f2fe',
+      titleColor: '#ffffff',
+      titleGlow: 'rgba(34, 211, 238, 0.7)',
+      scoreBg: 'rgba(8, 28, 48, 0.92)',
+      scoreBorder: 'rgba(45, 212, 191, 0.75)',
+      scoreText: '#5eead4',
+      settingsDeckBorder: 'rgba(56, 189, 248, 0.55)',
+      settingsDeckHeader: '#38bdf8',
+      settingsDeckVal: '#ffffff',
+      ingsHeader: '#22d3ee',
+      dividerColor: 'rgba(34, 211, 238, 0.15)',
+      tipBg: 'rgba(8, 28, 48, 0.94)',
+      tipBorder: 'rgba(251, 191, 36, 0.7)',
+      tipHeader: '#fde047',
+      footerCtaBg: 'rgba(6, 182, 212, 0.25)',
+      footerCtaBorder: 'rgba(34, 211, 238, 0.9)',
+      footerCtaText: '#ecfeff'
+    },
+    sunset: {
+      id: 'sunset',
+      name: 'Sunset Sorbet',
+      icon: '🥭',
+      bgStops: [
+        [0, '#c2410c'],    // Sunburst fiery orange
+        [0.25, '#9f1239'], // Passionfruit crimson
+        [0.55, '#4c0519'], // Deep blackberry
+        [0.80, '#2e1065'], // Sunset twilight purple
+        [1, '#1e1b4b']     // Evening indigo
+      ],
+      glows: [
+        { x: 0.85, y: 0.10, r: 0.85, stops: ['rgba(249, 115, 22, 0.80)', 'rgba(234, 88, 12, 0.35)', 'transparent'] },
+        { x: 0.15, y: 0.28, r: 0.75, stops: ['rgba(244, 63, 94, 0.70)', 'rgba(225, 29, 72, 0.30)', 'transparent'] },
+        { x: 0.5, y: 0.92, r: 0.80, stops: ['rgba(251, 146, 60, 0.60)', 'rgba(244, 63, 94, 0.25)', 'transparent'] }
+      ],
+      particles: [
+        { x: 90, y: 140, s: 22, char: '☀️', color: 'rgba(254, 215, 170, 0.85)' },
+        { x: 990, y: 160, s: 22, char: '✦', color: 'rgba(253, 186, 116, 0.75)' },
+        { x: 50, y: 440, s: 22, char: '🥭', color: 'rgba(255, 255, 255, 0.85)' },
+        { x: 1030, y: 460, s: 18, char: '★', color: 'rgba(251, 113, 133, 0.7)' },
+        { x: 45, y: 920, s: 22, char: '✨', color: 'rgba(253, 224, 71, 0.8)' },
+        { x: 1035, y: 940, s: 20, char: '✦', color: 'rgba(251, 146, 60, 0.75)' },
+        { x: 55, y: 1380, s: 22, char: '★', color: 'rgba(251, 113, 133, 0.7)' },
+        { x: 1025, y: 1400, s: 22, char: '🥭', color: 'rgba(255, 255, 255, 0.85)' },
+        { x: 80, y: 1780, s: 22, char: '☀️', color: 'rgba(253, 186, 116, 0.85)' },
+        { x: 1000, y: 1760, s: 22, char: '✨', color: 'rgba(253, 224, 71, 0.8)' }
+      ],
+      cardBg: 'rgba(32, 14, 18, 0.90)',
+      cardBorder: 'rgba(251, 146, 60, 0.45)',
+      cardBorderGlow: 'rgba(249, 115, 22, 0.5)',
+      accentPrimary: '#fb923c',
+      accentSecondary: '#f43f5e',
+      brandPillBg: 'rgba(249, 115, 22, 0.22)',
+      brandPillBorder: 'rgba(251, 146, 60, 0.7)',
+      brandText: '#ffedd5',
+      subText: '#fed7aa',
+      titleColor: '#ffffff',
+      titleGlow: 'rgba(249, 115, 22, 0.7)',
+      scoreBg: 'rgba(32, 14, 18, 0.92)',
+      scoreBorder: 'rgba(250, 204, 21, 0.75)',
+      scoreText: '#fde047',
+      settingsDeckBorder: 'rgba(251, 113, 133, 0.55)',
+      settingsDeckHeader: '#fb7185',
+      settingsDeckVal: '#ffffff',
+      ingsHeader: '#fb923c',
+      dividerColor: 'rgba(251, 146, 60, 0.15)',
+      tipBg: 'rgba(32, 14, 18, 0.94)',
+      tipBorder: 'rgba(250, 204, 21, 0.7)',
+      tipHeader: '#fef08a',
+      footerCtaBg: 'rgba(249, 115, 22, 0.25)',
+      footerCtaBorder: 'rgba(251, 146, 60, 0.9)',
+      footerCtaText: '#fff7ed'
+    },
+    matcha: {
+      id: 'matcha',
+      name: 'Matcha Dream',
+      icon: '🍵',
+      bgStops: [
+        [0, '#064e3b'],    // Rich matcha emerald
+        [0.25, '#065f46'], // Botanical green
+        [0.55, '#042f2e'], // Forest deep
+        [0.80, '#064e3b'], // Herbal moss
+        [1, '#022c22']     // Dark botanical night
+      ],
+      glows: [
+        { x: 0.85, y: 0.10, r: 0.85, stops: ['rgba(132, 204, 22, 0.75)', 'rgba(101, 163, 13, 0.35)', 'transparent'] },
+        { x: 0.15, y: 0.28, r: 0.75, stops: ['rgba(52, 211, 153, 0.65)', 'rgba(5, 150, 105, 0.30)', 'transparent'] },
+        { x: 0.5, y: 0.92, r: 0.80, stops: ['rgba(163, 230, 53, 0.60)', 'rgba(132, 204, 22, 0.25)', 'transparent'] }
+      ],
+      particles: [
+        { x: 90, y: 140, s: 22, char: '🍃', color: 'rgba(190, 242, 100, 0.85)' },
+        { x: 990, y: 160, s: 22, char: '✦', color: 'rgba(110, 231, 183, 0.75)' },
+        { x: 50, y: 440, s: 22, char: '🍵', color: 'rgba(255, 255, 255, 0.85)' },
+        { x: 1030, y: 460, s: 18, char: '★', color: 'rgba(132, 204, 22, 0.65)' },
+        { x: 45, y: 920, s: 22, char: '✨', color: 'rgba(217, 249, 157, 0.8)' },
+        { x: 1035, y: 940, s: 20, char: '✦', color: 'rgba(52, 211, 153, 0.75)' },
+        { x: 55, y: 1380, s: 22, char: '★', color: 'rgba(132, 204, 22, 0.65)' },
+        { x: 1025, y: 1400, s: 22, char: '🍵', color: 'rgba(255, 255, 255, 0.85)' },
+        { x: 80, y: 1780, s: 22, char: '✨', color: 'rgba(217, 249, 157, 0.8)' },
+        { x: 1000, y: 1760, s: 22, char: '🍃', color: 'rgba(190, 242, 100, 0.85)' }
+      ],
+      cardBg: 'rgba(6, 32, 24, 0.92)',
+      cardBorder: 'rgba(74, 222, 128, 0.45)',
+      cardBorderGlow: 'rgba(132, 204, 22, 0.5)',
+      accentPrimary: '#a3e635',
+      accentSecondary: '#34d399',
+      brandPillBg: 'rgba(132, 204, 22, 0.22)',
+      brandPillBorder: 'rgba(163, 230, 53, 0.7)',
+      brandText: '#ecfccb',
+      subText: '#d1fae5',
+      titleColor: '#ffffff',
+      titleGlow: 'rgba(132, 204, 22, 0.7)',
+      scoreBg: 'rgba(6, 32, 24, 0.94)',
+      scoreBorder: 'rgba(163, 230, 53, 0.75)',
+      scoreText: '#bef264',
+      settingsDeckBorder: 'rgba(52, 211, 153, 0.55)',
+      settingsDeckHeader: '#6ee7b7',
+      settingsDeckVal: '#ffffff',
+      ingsHeader: '#a3e635',
+      dividerColor: 'rgba(74, 222, 128, 0.15)',
+      tipBg: 'rgba(6, 32, 24, 0.95)',
+      tipBorder: 'rgba(250, 204, 21, 0.7)',
+      tipHeader: '#fef08a',
+      footerCtaBg: 'rgba(132, 204, 22, 0.25)',
+      footerCtaBorder: 'rgba(163, 230, 53, 0.9)',
+      footerCtaText: '#f7fee7'
+    }
+  };
+
   function openStoryCardModal(recipeInput) {
     if (!recipeInput) return;
     const recipe = typeof recipeInput === 'string'
@@ -7254,6 +7535,14 @@
     const btnSquare = document.getElementById('btnRatioSquare');
     if (btnStory) btnStory.classList.add('active');
     if (btnSquare) btnSquare.classList.remove('active');
+
+    // Sync theme switcher buttons
+    const themeSwitcher = document.getElementById('storyThemeSwitcher');
+    if (themeSwitcher) {
+      themeSwitcher.querySelectorAll('.theme-pill-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.theme === currentStoryTheme);
+      });
+    }
 
     overlay.classList.add('active');
     overlay.setAttribute('aria-hidden', 'false');
@@ -7498,39 +7787,37 @@
     canvas.height = height;
     const ctx = canvas.getContext('2d');
 
+    const theme = STORY_THEMES[currentStoryTheme] || STORY_THEMES.berry;
+
     // 1. Full-Bleed Radiant Gradient extending 100% to all borders
     const bg = ctx.createLinearGradient(0, 0, width, height);
-    bg.addColorStop(0, '#be185d');      // Vibrant deep rose / hot fuchsia (top-left)
-    bg.addColorStop(0.28, '#831843');   // Deep berry
-    bg.addColorStop(0.55, '#581c87');   // Vivid purple
-    bg.addColorStop(0.82, '#312e81');   // Indigo
-    bg.addColorStop(1, '#1e1b4b');      // Deep night violet (bottom-right)
+    theme.bgStops.forEach(([stop, color]) => bg.addColorStop(stop, color));
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, width, height);
 
     // 2. Radiant mesh glows extending edge-to-edge
-    const glowPink = ctx.createRadialGradient(width * 0.9, height * 0.05, 0, width * 0.9, height * 0.05, width * 0.9);
-    glowPink.addColorStop(0, 'rgba(244, 63, 94, 0.70)');
-    glowPink.addColorStop(0.4, 'rgba(236, 72, 153, 0.45)');
-    glowPink.addColorStop(0.8, 'rgba(217, 70, 239, 0.20)');
-    glowPink.addColorStop(1, 'rgba(217, 70, 239, 0)');
-    ctx.fillStyle = glowPink;
-    ctx.fillRect(0, 0, width, height);
+    theme.glows.forEach(g => {
+      const gx = width * g.x;
+      const gy = height * g.y;
+      const gr = width * g.r;
+      const radGlow = ctx.createRadialGradient(gx, gy, 0, gx, gy, gr);
+      g.stops.forEach((stopColor, idx) => {
+        radGlow.addColorStop(idx / (g.stops.length - 1), stopColor);
+      });
+      ctx.fillStyle = radGlow;
+      ctx.fillRect(0, 0, width, height);
+    });
 
-    const glowViolet = ctx.createRadialGradient(width * 0.1, height * 0.20, 0, width * 0.1, height * 0.20, width * 0.85);
-    glowViolet.addColorStop(0, 'rgba(168, 85, 247, 0.60)');
-    glowViolet.addColorStop(0.5, 'rgba(124, 58, 237, 0.35)');
-    glowViolet.addColorStop(1, 'rgba(99, 102, 241, 0)');
-    ctx.fillStyle = glowViolet;
-    ctx.fillRect(0, 0, width, height);
-
-    const glowBottom = ctx.createRadialGradient(width * 0.5, height * 0.98, 0, width * 0.5, height * 0.98, width * 0.9);
-    glowBottom.addColorStop(0, 'rgba(244, 63, 94, 0.55)');
-    glowBottom.addColorStop(0.45, 'rgba(217, 70, 239, 0.35)');
-    glowBottom.addColorStop(0.85, 'rgba(139, 92, 246, 0.20)');
-    glowBottom.addColorStop(1, 'rgba(139, 92, 246, 0)');
-    ctx.fillStyle = glowBottom;
-    ctx.fillRect(0, 0, width, height);
+    // 2.5 Decorative whimsical sparkles and particles
+    ctx.save();
+    theme.particles.forEach(p => {
+      const py = ratio === 'story' ? p.y : p.y * (1080 / 1920);
+      ctx.font = `${p.s}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+      ctx.fillStyle = p.color;
+      ctx.textAlign = 'center';
+      ctx.fillText(p.char, p.x, py);
+    });
+    ctx.restore();
 
     // CRITICAL: Initialize textAlign to center for all canvas text
     ctx.textAlign = 'center';
@@ -7550,13 +7837,13 @@
     ctx.textAlign = 'center';
     const brandWidth = ctx.measureText(brandText).width + (ratio === 'story' ? 56 : 46);
     const brandH = ratio === 'story' ? 56 : 46;
-    drawRoundedRect(ctx, (width - brandWidth) / 2, curY - (brandH / 2), brandWidth, brandH, brandH / 2, 'rgba(255, 255, 255, 0.08)', 'rgba(255, 255, 255, 0.2)', 1.5);
-    ctx.fillStyle = '#f9a8d4';
+    drawRoundedRect(ctx, (width - brandWidth) / 2, curY - (brandH / 2), brandWidth, brandH, brandH / 2, theme.brandPillBg, theme.brandPillBorder, 1.5);
+    ctx.fillStyle = theme.brandText;
     ctx.fillText(brandText, width / 2, curY + (ratio === 'story' ? 10 : 8));
 
     curY += ratio === 'story' ? 66 : 44;
     ctx.font = ratio === 'story' ? '700 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' : '700 20px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-    ctx.fillStyle = '#cbd5e1';
+    ctx.fillStyle = theme.subText;
     let subheaderText = '✦ THE ULTIMATE NINJA CREAMI® COMPANION ✦';
     if (attrib.isCreator) {
       const s = [];
@@ -7601,8 +7888,8 @@
       : `${catEmoji} ${cat} • OFFICIAL RECIPE`;
     const tagWidth = ctx.measureText(tagText).width + (ratio === 'story' ? 56 : 46);
     const tagH = ratio === 'story' ? 52 : 44;
-    drawRoundedRect(ctx, (width - tagWidth) / 2, curY - (tagH / 2), tagWidth, tagH, tagH / 2, 'rgba(236, 72, 153, 0.26)', 'rgba(236, 72, 153, 0.7)', 2);
-    ctx.fillStyle = '#f472b6';
+    drawRoundedRect(ctx, (width - tagWidth) / 2, curY - (tagH / 2), tagWidth, tagH, tagH / 2, theme.brandPillBg, theme.cardBorder, 2);
+    ctx.fillStyle = theme.accentPrimary;
     ctx.fillText(tagText, width / 2, curY + (ratio === 'story' ? 9 : 7));
 
     // Clear gap before title (so category bubble and title never collide!)
@@ -7615,9 +7902,9 @@
     const titleLineHeight = ratio === 'story' ? (isLongName ? 74 : 86) : (isLongName ? 58 : 66);
 
     ctx.font = `900 ${titleFontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-    ctx.fillStyle = '#ffffff';
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.95)';
-    ctx.shadowBlur = 24;
+    ctx.fillStyle = theme.titleColor;
+    ctx.shadowColor = theme.titleGlow;
+    ctx.shadowBlur = 28;
     ctx.shadowOffsetY = 6;
     ctx.textAlign = 'center';
 
@@ -7644,8 +7931,8 @@
     ctx.textAlign = 'center';
     const scoreWidth = ctx.measureText(scoreText).width + (ratio === 'story' ? 52 : 44);
     const scoreH = ratio === 'story' ? 48 : 40;
-    drawRoundedRect(ctx, (width - scoreWidth) / 2, curY - (scoreH / 2), scoreWidth, scoreH, scoreH / 2, 'rgba(15, 23, 42, 0.85)', 'rgba(52, 211, 153, 0.8)', 1.5);
-    ctx.fillStyle = '#6ee7b7';
+    drawRoundedRect(ctx, (width - scoreWidth) / 2, curY - (scoreH / 2), scoreWidth, scoreH, scoreH / 2, theme.scoreBg, theme.scoreBorder, 1.5);
+    ctx.fillStyle = theme.scoreText;
     ctx.fillText(scoreText, width / 2, curY + (ratio === 'story' ? 8 : 6));
 
     curY += (scoreH / 2) + (ratio === 'story' ? Math.max(30, 48 - multiLineAdj) : 32);
@@ -7678,7 +7965,7 @@
       ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
       ctx.shadowBlur = 18;
       ctx.shadowOffsetY = 6;
-      drawRoundedRect(ctx, cx, curY, cardW, cardH, 22, 'rgba(15, 23, 42, 0.90)', 'rgba(255, 255, 255, 0.22)', 1.5);
+      drawRoundedRect(ctx, cx, curY, cardW, cardH, 22, theme.cardBg, theme.cardBorder, 1.5);
       ctx.restore();
 
       // Top colored accent stripe
@@ -7712,13 +7999,13 @@
     ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
     ctx.shadowBlur = 18;
     ctx.shadowOffsetY = 6;
-    drawRoundedRect(ctx, specX, curY, specW, specH, 22, 'rgba(15, 23, 42, 0.92)', 'rgba(192, 132, 252, 0.5)', 1.5);
+    drawRoundedRect(ctx, specX, curY, specW, specH, 22, theme.cardBg, theme.settingsDeckBorder, 1.5);
     ctx.restore();
 
     // Deck Header Tag
     ctx.textAlign = 'center';
     ctx.font = ratio === 'story' ? '800 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' : '800 15px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-    ctx.fillStyle = '#c084fc';
+    ctx.fillStyle = theme.settingsDeckHeader;
     ctx.fillText('🌀 NINJA CREAMI® MACHINE SETTINGS', width / 2, curY + (ratio === 'story' ? 30 : 24));
 
     // 3 Columns: Stacked Label above Value
@@ -7739,7 +8026,7 @@
 
       // Vertical dividers between columns
       if (c > 0) {
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+        ctx.strokeStyle = theme.dividerColor || 'rgba(255, 255, 255, 0.12)';
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(colX, curY + (ratio === 'story' ? 44 : 34));
@@ -7755,7 +8042,7 @@
 
       // Column Value
       ctx.font = ratio === 'story' ? '900 26px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' : '900 20px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-      ctx.fillStyle = item.color;
+      ctx.fillStyle = c === 0 ? (theme.settingsDeckVal || '#ffffff') : (c === 1 ? theme.accentPrimary : theme.accentSecondary);
       ctx.fillText(item.val, colX + colW / 2, curY + (ratio === 'story' ? 104 : 82));
     }
 
@@ -7777,12 +8064,12 @@
         ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
         ctx.shadowBlur = 18;
         ctx.shadowOffsetY = 6;
-        drawRoundedRect(ctx, boxX, curY, boxW, boxH, 24, 'rgba(15, 23, 42, 0.90)', 'rgba(255, 255, 255, 0.18)', 1.5);
+        drawRoundedRect(ctx, boxX, curY, boxW, boxH, 24, theme.cardBg, theme.cardBorder, 1.5);
         ctx.restore();
 
         ctx.textAlign = 'center';
         ctx.font = '800 26px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-        ctx.fillStyle = '#e879f9';
+        ctx.fillStyle = theme.ingsHeader;
         ctx.fillText(`🥣 PINT INGREDIENTS LIST (${ings.length} ITEMS)`, width / 2, curY + 44);
 
         let ingY = curY + 98;
@@ -7793,7 +8080,7 @@
 
           // Diamond icon
           ctx.font = rowH >= 65 ? '700 22px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' : '700 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-          ctx.fillStyle = '#f472b6';
+          ctx.fillStyle = theme.accentPrimary;
           ctx.textAlign = 'left';
           ctx.fillText('✦', boxX + 32, ingY);
 
@@ -7804,7 +8091,7 @@
             qW = ctx.measureText(ingQty).width + 36;
             const qX = boxX + boxW - 32 - qW;
             const pillH = rowH >= 65 ? 42 : 36;
-            drawRoundedRect(ctx, qX, ingY - (pillH * 0.65), qW, pillH, pillH / 2, 'rgba(255, 255, 255, 0.12)', 'rgba(255, 255, 255, 0.3)', 1.5);
+            drawRoundedRect(ctx, qX, ingY - (pillH * 0.65), qW, pillH, pillH / 2, theme.brandPillBg, theme.cardBorder, 1.5);
             ctx.fillStyle = '#ffffff';
             ctx.fillText(ingQty, qX + 18, ingY + (rowH >= 65 ? 2 : 1));
           }
@@ -7824,7 +8111,7 @@
 
           // Row divider
           if (j < displayIngs.length - 1) {
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.strokeStyle = theme.dividerColor || 'rgba(255, 255, 255, 0.1)';
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(boxX + 32, ingY + Math.floor(rowH * 0.38));
@@ -7847,12 +8134,12 @@
       ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
       ctx.shadowBlur = 18;
       ctx.shadowOffsetY = 6;
-      drawRoundedRect(ctx, tipBoxX, curY, tipBoxW, tipBoxH, 22, 'rgba(15, 23, 42, 0.90)', 'rgba(251, 191, 36, 0.5)', 1.5);
+      drawRoundedRect(ctx, tipBoxX, curY, tipBoxW, tipBoxH, 22, theme.tipBg, theme.tipBorder, 1.5);
       ctx.restore();
 
       ctx.textAlign = 'center';
       ctx.font = '800 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-      ctx.fillStyle = '#fbbf24';
+      ctx.fillStyle = theme.tipHeader;
       ctx.fillText('💡 NINJA CREAMI PRO SECRET', width / 2, curY + 44);
 
       ctx.font = '600 26px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
@@ -7904,7 +8191,7 @@
           const gx = gridX + col * (cellW + colGap);
           const gy = curY + row * (cellH + gapY);
 
-          drawRoundedRect(ctx, gx, gy, cellW, cellH, 16, 'rgba(15, 23, 42, 0.90)', 'rgba(255, 255, 255, 0.16)', 1);
+          drawRoundedRect(ctx, gx, gy, cellW, cellH, 16, theme.cardBg, theme.cardBorder, 1);
 
           const ing = ings[j];
           const ingName = ing.name || ing.raw || '';
@@ -7933,8 +8220,8 @@
       ctx.font = '700 21px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
       ctx.textAlign = 'center';
       const tipWidth = ctx.measureText(tipText).width + 46;
-      drawRoundedRect(ctx, (width - tipWidth) / 2, curY, tipWidth, 44, 22, 'rgba(15, 23, 42, 0.85)', 'rgba(251, 191, 36, 0.6)', 1);
-      ctx.fillStyle = '#fbbf24';
+      drawRoundedRect(ctx, (width - tipWidth) / 2, curY, tipWidth, 44, 22, theme.tipBg, theme.tipBorder, 1);
+      ctx.fillStyle = theme.tipHeader;
       ctx.fillText(tipText, width / 2, curY + 28);
     }
 
@@ -7959,8 +8246,8 @@
     ctx.textAlign = 'center';
     const ctaWidth = ctx.measureText(ctaText).width + (ratio === 'story' ? 60 : 48);
     const ctaH = ratio === 'story' ? 62 : 48;
-    drawRoundedRect(ctx, (width - ctaWidth) / 2, footerY - (ctaH / 2) - 8, ctaWidth, ctaH, ctaH / 2, 'rgba(15, 23, 42, 0.85)', 'rgba(244, 114, 182, 0.9)', 2);
-    ctx.fillStyle = '#f9a8d4';
+    drawRoundedRect(ctx, (width - ctaWidth) / 2, footerY - (ctaH / 2) - 8, ctaWidth, ctaH, ctaH / 2, theme.footerCtaBg, theme.footerCtaBorder, 2);
+    ctx.fillStyle = theme.footerCtaText;
     ctx.fillText(ctaText, width / 2, footerY + (ratio === 'story' ? 4 : 0));
 
     if (ratio === 'story') {
@@ -21473,6 +21760,23 @@
         currentStoryRatio = 'square';
         btnRatioSquare.classList.add('active');
         if (btnRatioStory) btnRatioStory.classList.remove('active');
+        renderStoryCardGraphic();
+      });
+    }
+    const storyThemeSwitcher = document.getElementById('storyThemeSwitcher');
+    if (storyThemeSwitcher) {
+      storyThemeSwitcher.addEventListener('click', (e) => {
+        const btn = e.target.closest('.theme-pill-btn');
+        if (!btn) return;
+        const themeId = btn.dataset.theme;
+        if (!themeId || themeId === currentStoryTheme) return;
+        currentStoryTheme = themeId;
+        try {
+          localStorage.setItem('creami_story_theme', currentStoryTheme);
+        } catch (err) {}
+        storyThemeSwitcher.querySelectorAll('.theme-pill-btn').forEach(b => {
+          b.classList.toggle('active', b.dataset.theme === currentStoryTheme);
+        });
         renderStoryCardGraphic();
       });
     }

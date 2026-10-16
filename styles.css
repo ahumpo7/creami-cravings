@@ -12562,6 +12562,88 @@ body.modal-open .cookie-consent-banner {
   box-shadow: 0 3px 12px rgba(236, 72, 153, 0.45);
 }
 
+.story-theme-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+
+.story-theme-switcher {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  max-width: 420px;
+}
+
+.theme-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--bg-surface-elevated, #1e293b);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.theme-pill-btn:hover {
+  border-color: rgba(255, 255, 255, 0.35);
+  transform: translateY(-1px);
+  color: #ffffff;
+}
+
+.theme-pill-btn.active {
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.theme-pill-btn[data-theme="berry"].active {
+  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+  box-shadow: 0 3px 14px rgba(236, 72, 153, 0.55);
+}
+
+.theme-pill-btn[data-theme="chocolate"].active {
+  background: linear-gradient(135deg, #b45309 0%, #78350f 100%);
+  box-shadow: 0 3px 14px rgba(245, 158, 11, 0.5);
+}
+
+.theme-pill-btn[data-theme="glacier"].active {
+  background: linear-gradient(135deg, #0284c7 0%, #06b6d4 100%);
+  box-shadow: 0 3px 14px rgba(6, 182, 212, 0.55);
+}
+
+.theme-pill-btn[data-theme="sunset"].active {
+  background: linear-gradient(135deg, #ea580c 0%, #e11d48 100%);
+  box-shadow: 0 3px 14px rgba(249, 115, 22, 0.55);
+}
+
+.theme-pill-btn[data-theme="matcha"].active {
+  background: linear-gradient(135deg, #65a30d 0%, #059669 100%);
+  box-shadow: 0 3px 14px rgba(132, 204, 22, 0.55);
+}
+
+.theme-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.dot-berry { background: #f43f5e; box-shadow: 0 0 6px #f43f5e; }
+.dot-chocolate { background: #fbbf24; box-shadow: 0 0 6px #fbbf24; }
+.dot-glacier { background: #38bdf8; box-shadow: 0 0 6px #38bdf8; }
+.dot-sunset { background: #fb923c; box-shadow: 0 0 6px #fb923c; }
+.dot-matcha { background: #a3e635; box-shadow: 0 0 6px #a3e635; }
+
 .story-canvas-preview-wrapper {
   position: relative;
   width: 100%;
