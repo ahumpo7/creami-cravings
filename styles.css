@@ -12582,12 +12582,12 @@ body.modal-open .cookie-consent-banner {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
-  background: var(--bg-surface-elevated, #1e293b);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  padding: 6px 13px;
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 999px;
-  color: var(--text-secondary);
-  font-size: 0.78rem;
+  color: #cbd5e1;
+  font-size: 0.8rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -12595,14 +12595,16 @@ body.modal-open .cookie-consent-banner {
 }
 
 .theme-pill-btn:hover {
-  border-color: rgba(255, 255, 255, 0.35);
+  border-color: rgba(255, 255, 255, 0.4);
   transform: translateY(-1px);
   color: #ffffff;
+  background: rgba(30, 41, 59, 0.9);
 }
 
 .theme-pill-btn.active {
-  color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.5);
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.6);
+  transform: scale(1.04);
 }
 
 .theme-pill-btn[data-theme="berry"].active {
