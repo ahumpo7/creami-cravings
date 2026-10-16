@@ -1418,7 +1418,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "almond_joy",
       "no_protein_almond_joy_12"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DWCdZtnlRpB/"
   },
   {
     "id": "americone_dream",
@@ -1533,7 +1534,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "americone_dream",
       "fan_favorites_americone_dream_14"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DKDB8PYS3t7/?hl=en"
   },
   {
     "id": "apple_pie",
@@ -1685,7 +1687,8 @@ const RECIPES_MASTER = [
       "apple_pie",
       "no_protein_apple_pie_14",
       "lactose_free_apple_pie_13"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DO1ipa7jgd8/"
   },
   {
     "id": "baked_alaska",
@@ -1808,7 +1811,8 @@ const RECIPES_MASTER = [
       "baked_alaska",
       "fan_favorites_baked_alaska_16",
       "no_protein_baked_alaska_16"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DNd6thUyo6U/"
   },
   {
     "id": "banana",
@@ -1918,7 +1922,8 @@ const RECIPES_MASTER = [
       "banana",
       "no_protein_banana_18",
       "lactose_free_banana_15"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DQxMcEBEg4B/"
   },
   {
     "id": "banana_bread_matcha",
@@ -2057,7 +2062,8 @@ const RECIPES_MASTER = [
       "banana_bread_matcha",
       "no_protein_banana_bread_matcha_20",
       "lactose_free_banana_bread_matcha_17"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DSYP7gEjvs_/"
   },
   {
     "id": "banana_pudding",
@@ -2181,7 +2187,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "banana_pudding",
       "no_protein_banana_pudding_22"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DIhX_L1S6m3/"
   },
   {
     "id": "berry_crumble",
@@ -2326,7 +2333,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "berry_crumble",
       "no_protein_berry_crumble_24"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DBQNmUTvRUR/"
   },
   {
     "id": "birthday_cake",
@@ -2437,7 +2445,8 @@ const RECIPES_MASTER = [
       "birthday_cake",
       "no_protein_birthday_cake_26",
       "lactose_free_birthday_cake_19"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DDOJ4unPuql/"
   },
   {
     "id": "biscoff_cookie_butter",
@@ -2558,7 +2567,8 @@ const RECIPES_MASTER = [
       "biscoff_cookie_butter",
       "no_protein_biscoff_cookie_butter_28",
       "lactose_free_biscoff_cookie_butter_21"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DUMHoyRkgDS/"
   },
   {
     "id": "blueberry_pie",
@@ -2681,7 +2691,8 @@ const RECIPES_MASTER = [
       "blueberry_pie",
       "keto_blueberry_pie_12",
       "lactose_free_blueberry_pie_23"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DIW_v3ySu7V/"
   },
   {
     "id": "brown_butter_banana_bread",
@@ -2797,7 +2808,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "brown_butter_banana_bread",
       "no_protein_brown_butter_banana_bread_30"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DLnq6cwyDtl/"
   },
   {
     "id": "brownie_batter",
@@ -2897,7 +2909,8 @@ const RECIPES_MASTER = [
       "brownie_batter",
       "keto_brownie_batter_14",
       "lactose_free_brownie_batter_25"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DPhVVxuD57T/"
   },
   {
     "id": "brownie_batter_blizzard",
@@ -3018,7 +3031,8 @@ const RECIPES_MASTER = [
       "brownie_batter_blizzard",
       "fan_favorites_brownie_batter_blizzard_18",
       "keto_brownie_batter_blizzard_16"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DRxn8POkvZh/"
   },
   {
     "id": "brown_sugar_cinnamon_pop_tart",
@@ -3133,7 +3147,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "brown_sugar_cinnamon_pop_tart",
       "no_protein_brown_sugar_cinnamon_pop_tart_32"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DGyrRRJyjyz/"
   },
   {
     "id": "cake_batter",
@@ -3239,7 +3254,8 @@ const RECIPES_MASTER = [
       "cake_batter",
       "keto_cake_batter_18",
       "no_protein_cake_batter_34"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DGJXe-eyqIK/"
   },
   {
     "id": "cake_batter_cookie_dough_blizzard",
@@ -3370,7 +3386,8 @@ const RECIPES_MASTER = [
       "cake_batter_cookie_dough_blizzard",
       "fan_favorites_cake_batter_cookie_dough_blizzard_20",
       "no_protein_cake_batter_cookie_dough_blizzard_36"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DLTCAnWS6K9/"
   },
   {
     "id": "cake_batter_milk",
@@ -3481,7 +3498,8 @@ const RECIPES_MASTER = [
       "cake_batter_milk",
       "lactose_free_cake_batter_milk_27",
       "no_protein_cake_batter_34"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/reel/DBaP2NmPm99/"
   },
   {
     "id": "cake_batter_oreo",
@@ -3602,7 +3620,8 @@ const RECIPES_MASTER = [
       "cake_batter_oreo",
       "no_protein_cake_batter_oreo_38",
       "lactose_free_cake_batter_oreo_31"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DUEXPd5Dvt_/"
   },
   {
     "id": "cake_batter_protein_shake",
@@ -3706,7 +3725,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "cake_batter_protein_shake",
       "lactose_free_cake_batter_protein_shake_29"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DGJXe-eyqIK/"
   },
   {
     "id": "candy_bar",
@@ -3810,7 +3830,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "candy_bar",
       "no_protein_candy_bar_40"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DQfH0nNjmUe/"
   },
   {
     "id": "caramel_apple",
@@ -3956,7 +3977,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "caramel_apple",
       "lactose_free_caramel_apple_33"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DPKKGdNDrEo/"
   },
   {
     "id": "cereal_milk",
@@ -4068,7 +4090,8 @@ const RECIPES_MASTER = [
       "cereal_milk",
       "no_protein_cereal_milk_42",
       "lactose_free_cereal_milk_35"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DN6YHXVDi1r/"
   },
   {
     "id": "chai",
@@ -4181,7 +4204,8 @@ const RECIPES_MASTER = [
       "chai",
       "no_protein_chai_44",
       "lactose_free_chai_37"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DNtRzLg3EWz/"
   },
   {
     "id": "cherry_garcia",
@@ -4298,7 +4322,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "cherry_garcia",
       "fan_favorites_cherry_garcia_22"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DH9V5beSbsy/"
   },
   {
     "id": "choco_brownie_extreme_blizzard",
@@ -4419,7 +4444,8 @@ const RECIPES_MASTER = [
       "choco_brownie_extreme_blizzard",
       "fan_favorites_choco_brownie_extreme_blizzard_24",
       "no_protein_choco_brownie_extreme_blizzard_46"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DLlHa9wyEoR/"
   },
   {
     "id": "chocolate",
@@ -4520,7 +4546,8 @@ const RECIPES_MASTER = [
       "chocolate",
       "keto_chocolate_20",
       "lactose_free_chocolate_39"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DHRSz7tSyhO/"
   },
   {
     "id": "chocolate_cake_shake",
@@ -4626,7 +4653,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "chocolate_cake_shake",
       "keto_chocolate_cake_shake_22"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/reel/DDOKd6Dv3Mj/"
   },
   {
     "id": "chocolate_caramel_cheesecake",
@@ -4731,7 +4759,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "chocolate_caramel_cheesecake",
       "fan_favorites_chocolate_caramel_cheesecake_28"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DOByjtLDmlN/"
   },
   {
     "id": "chocolate_chip_cookie_dough",
@@ -4843,7 +4872,8 @@ const RECIPES_MASTER = [
       "chocolate_chip_cookie_dough",
       "fan_favorites_chocolate_chip_cookie_dough_30",
       "no_protein_chocolate_chip_cookie_dough_48"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DJpc6oJS0B8/"
   },
   {
     "id": "chocolate_chip_stracciatella",
@@ -4947,7 +4977,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "chocolate_chip_stracciatella",
       "no_protein_chocolate_chip_stracciatella_50"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/reel/DSQZLiMkpF4/"
   },
   {
     "id": "chocolate_covered_strawberry",
@@ -5059,7 +5090,8 @@ const RECIPES_MASTER = [
       "chocolate_covered_strawberry",
       "fan_favorites_chocolate_covered_strawberry_32",
       "keto_chocolate_covered_strawberry_24"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DQPiUjzDroT/"
   },
   {
     "id": "chocolate_fudge_brownie",
@@ -5171,7 +5203,8 @@ const RECIPES_MASTER = [
       "chocolate_fudge_brownie",
       "fan_favorites_chocolate_fudge_brownie_34",
       "keto_chocolate_fudge_brownie_26"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DImWyj2SWBa/"
   },
   {
     "id": "chocolate_therapy",
@@ -5286,7 +5319,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "chocolate_therapy",
       "fan_favorites_chocolate_therapy_36"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DNWTyXUyhar/"
   },
   {
     "id": "chocolate_and_vanilla_twist",
@@ -5398,7 +5432,8 @@ const RECIPES_MASTER = [
       "chocolate_and_vanilla_twist",
       "no_protein_chocolate_and_vanilla_twist_52",
       "lactose_free_chocolate_and_vanilla_twist_41"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DVHU8A5jvgd/"
   },
   {
     "id": "chocolatey_love_a_fair",
@@ -5524,7 +5559,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "chocolatey_love_a_fair",
       "fan_favorites_chocolatey_love_a_fair_38"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DQC9eNIjsEr/"
   },
   {
     "id": "choco_lotta_cheesecake_sundae",
@@ -5669,7 +5705,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "choco_lotta_cheesecake_sundae",
       "fan_favorites_choco_lotta_cheesecake_sundae_26"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DSIzLgLksBi/"
   },
   {
     "id": "chubby_hubby",
@@ -5802,7 +5839,8 @@ const RECIPES_MASTER = [
       "chubby_hubby",
       "fan_favorites_chubby_hubby_40",
       "no_protein_chubby_hubby_54"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DRnUy1dDnvC/"
   },
   {
     "id": "chunky_monkey",
@@ -5934,7 +5972,8 @@ const RECIPES_MASTER = [
       "chunky_monkey",
       "fan_favorites_chunky_monkey_42",
       "no_protein_chunky_monkey_56"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DQ4-fw4Dr6y/"
   },
   {
     "id": "churray_for_churros",
@@ -6065,7 +6104,8 @@ const RECIPES_MASTER = [
       "churray_for_churros",
       "fan_favorites_churray_for_churros_44",
       "no_protein_churray_for_churros_58"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DMlcVVhSzFp/"
   },
   {
     "id": "cinnamon_bun",
@@ -6186,7 +6226,8 @@ const RECIPES_MASTER = [
       "cinnamon_bun",
       "fan_favorites_cinnamon_bun_46",
       "no_protein_cinnamon_bun_60"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DKagUicyw_B/"
   },
   {
     "id": "cinnamon_pebbles",
@@ -6308,7 +6349,8 @@ const RECIPES_MASTER = [
       "cinnamon_pebbles",
       "no_protein_cinnamon_pebbles_62",
       "lactose_free_cinnamon_pebbles_43"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/reels/DUjQPv_koe_/"
   },
   {
     "id": "coffee",
@@ -6409,7 +6451,8 @@ const RECIPES_MASTER = [
       "coffee",
       "keto_coffee_28",
       "lactose_free_coffee_45"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DL-mmVFSlGJ/"
   },
   {
     "id": "coffee_coffee_buzzbuzzbuzz",
@@ -6521,7 +6564,8 @@ const RECIPES_MASTER = [
       "coffee_coffee_buzzbuzzbuzz",
       "fan_favorites_coffee_coffee_buzzbuzzbuzz_48",
       "no_protein_coffee_coffee_buzzbuzzbuzz_64"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DM6DDUcSjGc/"
   },
   {
     "id": "coffee_oreo",
@@ -6625,7 +6669,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "coffee_oreo",
       "no_protein_coffee_oreo_66"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DRnUy1dDnvC/"
   },
   {
     "id": "coffee_toffee_bar_crunch",
@@ -6746,7 +6791,8 @@ const RECIPES_MASTER = [
       "coffee_toffee_bar_crunch",
       "fan_favorites_coffee_toffee_bar_crunch_50",
       "no_protein_coffee_toffee_bar_crunch_68"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DKfpXoKy8XA/"
   },
   {
     "id": "confetti_cake_blizzard",
@@ -6857,7 +6903,8 @@ const RECIPES_MASTER = [
       "confetti_cake_blizzard",
       "fan_favorites_confetti_cake_blizzard_52",
       "no_protein_confetti_cake_blizzard_70"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DK0MGBQyPsU/"
   },
   {
     "id": "cookie_dough",
@@ -6961,7 +7008,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "cookie_dough",
       "fan_favorites_cookie_dough_54"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DKIZ7RdSz5-/"
   },
   {
     "id": "cookie_monster",
@@ -7087,7 +7135,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "cookie_monster",
       "no_protein_cookie_monster_72"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DM03Fm9SliM/"
   },
   {
     "id": "cosmic_brownie",
@@ -7191,7 +7240,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "cosmic_brownie",
       "fan_favorites_cosmic_brownie_56"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DRLFzMujh2u/"
   },
   {
     "id": "cotton_candy_blizzard",
@@ -7309,7 +7359,8 @@ const RECIPES_MASTER = [
       "fan_favorites_cotton_candy_blizzard_58",
       "no_protein_cotton_candy_blizzard_74",
       "lactose_free_cotton_candy_blizzard_47"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DLGJM9RyEcB/"
   },
   {
     "id": "dark_chocolate_raspberry",
@@ -7424,7 +7475,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "dark_chocolate_raspberry",
       "lactose_free_dark_chocolate_raspberry_49"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DCDdGgPPdye/"
   },
   {
     "id": "death_by_chocolate",
@@ -7546,7 +7598,8 @@ const RECIPES_MASTER = [
       "death_by_chocolate",
       "fan_favorites_death_by_chocolate_60",
       "keto_death_by_chocolate_30"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DI68Y3rSSvq/"
   },
   {
     "id": "dirt_cake",
@@ -7680,7 +7733,8 @@ const RECIPES_MASTER = [
       "dirt_cake",
       "fan_favorites_dirt_cake_62",
       "no_protein_dirt_cake_76"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DLfZVQ1sYPt/"
   },
   {
     "id": "dole_whip",
@@ -7783,7 +7837,8 @@ const RECIPES_MASTER = [
       "dole_whip",
       "no_protein_dole_whip_78",
       "lactose_free_dole_whip_51"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DEnvrzuyDe2/"
   },
   {
     "id": "double_oreo",
@@ -7889,7 +7944,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "double_oreo",
       "fan_favorites_double_oreo_64"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DWHm8M_JxVN/"
   },
   {
     "id": "dr_pepper_float",
@@ -7989,7 +8045,8 @@ const RECIPES_MASTER = [
       "dr_pepper_float",
       "keto_dr_pepper_float_32",
       "lactose_free_dr_pepper_float_53"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DTQ4AURkmMo/"
   },
   {
     "id": "dubai_chocolate",
@@ -8124,7 +8181,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "dubai_chocolate",
       "no_protein_dubai_chocolate_80"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DRdA2cvjjHC/"
   },
   {
     "id": "eggnog",
@@ -8264,7 +8322,8 @@ const RECIPES_MASTER = [
       "eggnog",
       "no_protein_eggnog_82",
       "lactose_free_eggnog_55"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DR8B0CSDuy-/"
   },
   {
     "id": "everything_but_the",
@@ -8398,7 +8457,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "everything_but_the",
       "fan_favorites_everything_but_the_66"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/reel/DPPT2nojowx/"
   },
   {
     "id": "frosted_animal_cookie_blizzard",
@@ -8520,7 +8580,8 @@ const RECIPES_MASTER = [
       "frosted_animal_cookie_blizzard",
       "fan_favorites_frosted_animal_cookie_blizzard_68",
       "no_protein_frosted_animal_cookie_blizzard_84"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DPE-FncjtJG/"
   },
   {
     "id": "frosted_lemonade",
@@ -8613,7 +8674,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "frosted_lemonade",
       "keto_frosted_lemonade_34"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DLx1FHyST7y/"
   },
   {
     "id": "frosted_sugar_cookie_blizzard",
@@ -8739,7 +8801,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "frosted_sugar_cookie_blizzard",
       "fan_favorites_frosted_sugar_cookie_blizzard_70"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DRAs16pDk8C/"
   },
   {
     "id": "fruit_sorbet",
@@ -8829,7 +8892,8 @@ const RECIPES_MASTER = [
       "fruit_sorbet",
       "no_protein_fruit_sorbet_86",
       "lactose_free_fruit_sorbet_57"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DF022hhSK-G/"
   },
   {
     "id": "fruity_pebbles",
@@ -8941,7 +9005,8 @@ const RECIPES_MASTER = [
       "fruity_pebbles",
       "no_protein_fruity_pebbles_88",
       "lactose_free_fruity_pebbles_59"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DTYp3OzDupN/"
   },
   {
     "id": "gimme_smores",
@@ -9077,7 +9142,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "gimme_smores",
       "fan_favorites_gimme_s_mores_72"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DMLrsLXSYOp/"
   },
   {
     "id": "glampfire_trail_mix",
@@ -9203,7 +9269,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "glampfire_trail_mix",
       "fan_favorites_glampfire_trail_mix_74"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/reels/DVmA1sBjowk/"
   },
   {
     "id": "gooey_butter_cake",
@@ -9329,7 +9396,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "gooey_butter_cake",
       "fan_favorites_gooey_butter_cake_76"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DVzAi-YDmgD/"
   },
   {
     "id": "grape_sorbet",
@@ -9401,7 +9469,8 @@ const RECIPES_MASTER = [
       "grape_sorbet",
       "no_protein_grape_sorbet_90",
       "lactose_free_grape_sorbet_61"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DJKebWySr81/"
   },
   {
     "id": "half_baked",
@@ -9515,7 +9584,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "half_baked",
       "fan_favorites_half_baked_78"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DK7tiTWyoHy/"
   },
   {
     "id": "half_baked_twist",
@@ -9641,7 +9711,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "half_baked_twist",
       "fan_favorites_half_baked_twist_80"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DWhW6A0JTzR/"
   },
   {
     "id": "horchata",
@@ -9751,7 +9822,8 @@ const RECIPES_MASTER = [
       "horchata",
       "no_protein_horchata_92",
       "lactose_free_horchata_63"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DFyW5xKykSk/"
   },
   {
     "id": "hot_cocoa",
@@ -9857,7 +9929,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "hot_cocoa",
       "lactose_free_hot_cocoa_65"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DDfiPdIPFwI/"
   },
   {
     "id": "impretzively_fudged",
@@ -9973,7 +10046,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "impretzively_fudged",
       "fan_favorites_impretzively_fudged_82"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DOWq1jREW-G/"
   },
   {
     "id": "jamoca_almond_fudge",
@@ -10104,7 +10178,8 @@ const RECIPES_MASTER = [
       "jamoca_almond_fudge",
       "fan_favorites_jamoca_almond_fudge_84",
       "keto_jamoca_almond_fudge_36"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DT3hWJdjp7Q/"
   },
   {
     "id": "key_lime_pie",
@@ -10247,7 +10322,8 @@ const RECIPES_MASTER = [
       "key_lime_pie",
       "fan_favorites_key_lime_pie_86",
       "no_protein_key_lime_pie_94"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DUbm_RckjB4/"
   },
   {
     "id": "lights_caramel_action",
@@ -10372,7 +10448,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "lights_caramel_action",
       "fan_favorites_lights_caramel_action_88"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DKN6eBdsOef/"
   },
   {
     "id": "mango_and_cream",
@@ -10455,7 +10532,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "mango_and_cream",
       "lactose_free_mango_and_cream_67"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DHEml1xRkgB/?hl=en"
   },
   {
     "id": "maple",
@@ -10555,7 +10633,8 @@ const RECIPES_MASTER = [
       "maple",
       "no_protein_maple_98",
       "lactose_free_maple_69"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DOt2wgpDmK8/"
   },
   {
     "id": "marshmallow_sky",
@@ -10696,7 +10775,8 @@ const RECIPES_MASTER = [
       "marshmallow_sky",
       "fan_favorites_marshmallow_sky_92",
       "no_protein_marshmallow_sky_100"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DL3GUT_yYdp/"
   },
   {
     "id": "matcha",
@@ -10813,7 +10893,8 @@ const RECIPES_MASTER = [
       "keto_matcha_38",
       "no_protein_matcha_102",
       "lactose_free_matcha_71"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DJAP7jeyFP2/"
   },
   {
     "id": "matcha_oreo",
@@ -10934,7 +11015,8 @@ const RECIPES_MASTER = [
       "matcha_oreo",
       "no_protein_matcha_oreo_104",
       "lactose_free_matcha_oreo_73"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DTyYUHEkg0x/"
   },
   {
     "id": "mexican_chocolate",
@@ -11054,7 +11136,8 @@ const RECIPES_MASTER = [
       "mexican_chocolate",
       "keto_mexican_chocolate_40",
       "lactose_free_mexican_chocolate_75"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DNG2jJ6y6f0/"
   },
   {
     "id": "milk_and_cookies",
@@ -11177,7 +11260,8 @@ const RECIPES_MASTER = [
       "milk_and_cookies",
       "fan_favorites_milk_and_cookies_94",
       "no_protein_milk_and_cookies_106"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DLA_TiCSl9R/"
   },
   {
     "id": "mint_chocolate_chip",
@@ -11299,7 +11383,8 @@ const RECIPES_MASTER = [
       "mint_chocolate_chip",
       "keto_mint_chocolate_chip_42",
       "no_protein_mint_chocolate_chip_108"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DP7FV6JDrW1/"
   },
   {
     "id": "minter_wonderland",
@@ -11424,7 +11509,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "minter_wonderland",
       "fan_favorites_minter_wonderland_96"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DS5uQbzjlev/"
   },
   {
     "id": "mandm",
@@ -11528,7 +11614,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "mandm",
       "no_protein_mandm_96"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DDOKQ4UPo7a/"
   },
   {
     "id": "mandm_mcflurry",
@@ -11632,7 +11719,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "mandm_mcflurry",
       "fan_favorites_mandm_mcflurry_90"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DDOKQ4UPo7a/"
   },
   {
     "id": "mocha",
@@ -11742,7 +11830,8 @@ const RECIPES_MASTER = [
       "mocha",
       "keto_mocha_44",
       "lactose_free_mocha_77"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DFbKOQvSF6L/"
   },
   {
     "id": "moose_tracks",
@@ -11857,7 +11946,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "moose_tracks",
       "no_protein_moose_tracks_110"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DVWyx58CZM-/"
   },
   {
     "id": "netflix_and_chilld",
@@ -11988,7 +12078,8 @@ const RECIPES_MASTER = [
       "netflix_and_chilld",
       "fan_favorites_netflix_and_chill_d_98",
       "no_protein_netflix_and_chill_d_112"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DT_O-TKDju0/"
   },
   {
     "id": "new_york_super_fudge_chunk",
@@ -12139,7 +12230,8 @@ const RECIPES_MASTER = [
       "new_york_super_fudge_chunk",
       "fan_favorites_new_york_super_fudge_chunk_100",
       "keto_new_york_super_fudge_chunk_46"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DMV7A5WyVUX/"
   },
   {
     "id": "nutella",
@@ -12252,7 +12344,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "nutella",
       "fan_favorites_nutella_102"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DGq7V0AS_Y6/"
   },
   {
     "id": "oatmeal_cream_pie",
@@ -12378,7 +12471,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "oatmeal_cream_pie",
       "no_protein_oatmeal_cream_pie_114"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DTBcot1DpQT/"
   },
   {
     "id": "oat_of_this_swirled",
@@ -12493,7 +12587,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "oat_of_this_swirled",
       "fan_favorites_oat_of_this_swirled_104"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DLLVjnOMOFC/"
   },
   {
     "id": "one_love",
@@ -12636,7 +12731,8 @@ const RECIPES_MASTER = [
       "one_love",
       "fan_favorites_one_love_106",
       "no_protein_one_love_116"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DOjIp8vDp3B/"
   },
   {
     "id": "orange_creamsicle",
@@ -12745,7 +12841,8 @@ const RECIPES_MASTER = [
       "orange_creamsicle",
       "no_protein_orange_creamsicle_118",
       "lactose_free_orange_creamsicle_79"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DDOKJL5P9q7/"
   },
   {
     "id": "oreo_mcflurry",
@@ -12857,7 +12954,8 @@ const RECIPES_MASTER = [
       "oreo_mcflurry",
       "fan_favorites_oreo_mcflurry_108",
       "no_protein_oreo_mcflurry_120"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DRnUy1dDnvC/"
   },
   {
     "id": "pb_over_the_top",
@@ -12983,7 +13081,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "pb_over_the_top",
       "fan_favorites_pb_over_the_top_110"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DU_nhHZjc11/"
   },
   {
     "id": "peaches_and_cream_frozen_yogurt",
@@ -13089,7 +13188,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "peaches_and_cream_frozen_yogurt",
       "no_protein_peaches_and_cream_frozen_yogurt_122"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/reel/DEvjeqUS6Mu/?igsh=cjExd2JueW5uMnk1"
   },
   {
     "id": "peanut_butter_cup",
@@ -13210,7 +13310,8 @@ const RECIPES_MASTER = [
       "peanut_butter_cup",
       "fan_favorites_peanut_butter_cup_112",
       "no_protein_peanut_butter_cup_124"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DNoTWbaOBI_/"
   },
   {
     "id": "peanut_butter_half_baked",
@@ -13341,7 +13442,8 @@ const RECIPES_MASTER = [
       "peanut_butter_half_baked",
       "fan_favorites_peanut_butter_half_baked_114",
       "no_protein_peanut_butter_half_baked_126"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DP1_Yh6jgvo/"
   },
   {
     "id": "peanut_butter_oreo",
@@ -13456,7 +13558,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "peanut_butter_oreo",
       "no_protein_peanut_butter_oreo_128"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DORtB9zDqbS/"
   },
   {
     "id": "peanut_butter_world",
@@ -13577,7 +13680,8 @@ const RECIPES_MASTER = [
       "peanut_butter_world",
       "fan_favorites_peanut_butter_world_116",
       "keto_peanut_butter_world_48"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DMQx6aqSUkG/"
   },
   {
     "id": "pecan_pie",
@@ -13698,7 +13802,8 @@ const RECIPES_MASTER = [
       "pecan_pie",
       "no_protein_pecan_pie_130",
       "lactose_free_pecan_pie_81"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DPuFmEWDnyV/"
   },
   {
     "id": "peppermint",
@@ -13818,7 +13923,8 @@ const RECIPES_MASTER = [
       "peppermint",
       "no_protein_peppermint_132",
       "lactose_free_peppermint_83"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DCDqXp2PDAZ/"
   },
   {
     "id": "peppermint_bark",
@@ -13943,7 +14049,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "peppermint_bark",
       "no_protein_peppermint_bark_134"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DRVTS9eDg7c/"
   },
   {
     "id": "peppermint_brownie",
@@ -14068,7 +14175,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "peppermint_brownie",
       "no_protein_peppermint_brownie_136"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DDOU7zsPQKF/"
   },
   {
     "id": "peppermint_mocha",
@@ -14198,7 +14306,8 @@ const RECIPES_MASTER = [
       "peppermint_mocha",
       "keto_peppermint_mocha_50",
       "lactose_free_peppermint_mocha_85"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DDOVNB5PZA1/"
   },
   {
     "id": "phish_food",
@@ -14324,7 +14433,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "phish_food",
       "fan_favorites_phish_food_118"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DToKDGbDmq_/"
   },
   {
     "id": "pistachio",
@@ -14433,7 +14543,8 @@ const RECIPES_MASTER = [
       "pistachio",
       "no_protein_pistachio_138",
       "lactose_free_pistachio_87"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DRnUy1dDnvC/"
   },
   {
     "id": "pistachio_pistachio",
@@ -14572,7 +14683,8 @@ const RECIPES_MASTER = [
       "fan_favorites_pistachio_pistachio_120",
       "no_protein_pistachio_pistachio_140",
       "lactose_free_pistachio_pistachio_89"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DPmiPjyjg4J/"
   },
   {
     "id": "pumpkin_bread_crumble",
@@ -14677,7 +14789,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "pumpkin_bread_crumble",
       "no_protein_pumpkin_bread_crumble_142"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DDOUAbkve00/"
   },
   {
     "id": "pumpkin_cheesecake",
@@ -14818,7 +14931,8 @@ const RECIPES_MASTER = [
       "pumpkin_cheesecake",
       "fan_favorites_pumpkin_cheesecake_122",
       "no_protein_pumpkin_cheesecake_144"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DO6vAy5DtCr/"
   },
   {
     "id": "pumpkin_pie_blizzard",
@@ -14957,7 +15071,8 @@ const RECIPES_MASTER = [
       "fan_favorites_pumpkin_pie_blizzard_124",
       "no_protein_pumpkin_pie_blizzard_146",
       "lactose_free_pumpkin_pie_blizzard_91"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DOeYJyzjuwd/?hl=en"
   },
   {
     "id": "pumpkin_spice",
@@ -15077,7 +15192,8 @@ const RECIPES_MASTER = [
       "pumpkin_spice",
       "no_protein_pumpkin_spice_148",
       "lactose_free_pumpkin_spice_93"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DDOSOFuPD4R/"
   },
   {
     "id": "pumpkin_spice_latte",
@@ -15217,7 +15333,8 @@ const RECIPES_MASTER = [
       "pumpkin_spice_latte",
       "no_protein_pumpkin_spice_latte_150",
       "lactose_free_pumpkin_spice_latte_95"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DN1Gt8E3NjN/"
   },
   {
     "id": "raspberry_cheesecake_topped",
@@ -15363,7 +15480,8 @@ const RECIPES_MASTER = [
       "raspberry_cheesecake_topped",
       "fan_favorites_raspberry_cheesecake_topped_126",
       "no_protein_raspberry_cheesecake_topped_152"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DUrBMTpCYMl/?hl=en"
   },
   {
     "id": "red_velvet",
@@ -15480,7 +15598,8 @@ const RECIPES_MASTER = [
       "fan_favorites_red_velvet_128",
       "keto_red_velvet_52",
       "lactose_free_red_velvet_97"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DGByFDGxP0T/"
   },
   {
     "id": "red_velvet_cake",
@@ -15590,7 +15709,8 @@ const RECIPES_MASTER = [
       "red_velvet_cake",
       "fan_favorites_red_velvet_cake_130",
       "keto_red_velvet_cake_54"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DSx_1srjqah/"
   },
   {
     "id": "red_velvet_cake_blizzard",
@@ -15712,7 +15832,8 @@ const RECIPES_MASTER = [
       "red_velvet_cake_blizzard",
       "fan_favorites_red_velvet_cake_blizzard_132",
       "no_protein_red_velvet_cake_blizzard_154"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DUwKzKfEbJ4/?hl=en"
   },
   {
     "id": "reeses_caramel_craze_blizzard",
@@ -15844,7 +15965,8 @@ const RECIPES_MASTER = [
       "reeses_caramel_craze_blizzard",
       "fan_favorites_reese_s_caramel_craze_blizzard_134",
       "no_protein_reese_s_caramel_craze_blizzard_156"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DRnUy1dDnvC/"
   },
   {
     "id": "reeses_pieces",
@@ -15948,7 +16070,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "reeses_pieces",
       "no_protein_reese_s_pieces_158"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DIR1bh7yYYe/"
   },
   {
     "id": "rice_krispy_treat",
@@ -16072,7 +16195,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "rice_krispy_treat",
       "no_protein_rice_krispy_treat_160"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DBaPQ2iPYxl/"
   },
   {
     "id": "rocky_road",
@@ -16194,7 +16318,8 @@ const RECIPES_MASTER = [
       "rocky_road",
       "fan_favorites_rocky_road_136",
       "lactose_free_rocky_road_99"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DUT4j7CkqRD/"
   },
   {
     "id": "root_beer_float",
@@ -16294,7 +16419,8 @@ const RECIPES_MASTER = [
       "root_beer_float",
       "keto_root_beer_float_56",
       "lactose_free_root_beer_float_101"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DDOUM1_voMm/"
   },
   {
     "id": "royal_new_york_cheesecake_blizzard",
@@ -16420,7 +16546,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "royal_new_york_cheesecake_blizzard",
       "fan_favorites_royal_new_york_cheesecake_blizzard_138"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DMvtcn6ySqJ/"
   },
   {
     "id": "royal_reeses_fluffernutter_blizzard",
@@ -16545,7 +16672,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "royal_reeses_fluffernutter_blizzard",
       "fan_favorites_royal_reese_s_fluffernutter_blizzard_140"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DNOsq4-ypCN/"
   },
   {
     "id": "salted_peanut_butter",
@@ -16666,7 +16794,8 @@ const RECIPES_MASTER = [
       "salted_peanut_butter",
       "fan_favorites_salted_peanut_butter_142",
       "no_protein_salted_peanut_butter_164"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DVehETYFL9q/"
   },
   {
     "id": "salty_caramel",
@@ -16769,7 +16898,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "salty_caramel",
       "fan_favorites_salty_caramel_144"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/reels/DWcNRI_J1F_/"
   },
   {
     "id": "shamrock_oreo_mcflurry",
@@ -16900,7 +17030,8 @@ const RECIPES_MASTER = [
       "shamrock_oreo_mcflurry",
       "fan_favorites_shamrock_oreo_mcflurry_146",
       "no_protein_shamrock_oreo_mcflurry_166"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DVPEW9LCYhI/"
   },
   {
     "id": "shamrock_shake",
@@ -17037,7 +17168,8 @@ const RECIPES_MASTER = [
       "fan_favorites_shamrock_shake_148",
       "keto_shamrock_shake_58",
       "lactose_free_shamrock_shake_103"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DHJxJ2nyfmJ/"
   },
   {
     "id": "smores_blizzard",
@@ -17178,7 +17310,8 @@ const RECIPES_MASTER = [
       "smores_blizzard",
       "fan_favorites_s_mores_blizzard_150",
       "no_protein_s_mores_blizzard_162"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DMD85J6yYrM/"
   },
   {
     "id": "snowdrift_blizzard",
@@ -17310,7 +17443,8 @@ const RECIPES_MASTER = [
       "snowdrift_blizzard",
       "fan_favorites_snowdrift_blizzard_152",
       "no_protein_snowdrift_blizzard_168"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DSlS7TMDlvK/"
   },
   {
     "id": "strawberry",
@@ -17401,7 +17535,8 @@ const RECIPES_MASTER = [
       "strawberry",
       "keto_strawberry_60",
       "lactose_free_strawberry_105"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DOHRJVbDrKH/"
   },
   {
     "id": "strawberry_banana",
@@ -17464,7 +17599,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "strawberry_banana",
       "lactose_free_strawberry_banana_107"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DGOoYwJyZXk/"
   },
   {
     "id": "strawberry_cheesecake",
@@ -17597,7 +17733,8 @@ const RECIPES_MASTER = [
       "strawberry_cheesecake",
       "fan_favorites_strawberry_cheesecake_154",
       "keto_strawberry_cheesecake_62"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DQaAz0VkvMj/"
   },
   {
     "id": "tart_frozen_yogurt",
@@ -17691,7 +17828,8 @@ const RECIPES_MASTER = [
       "tart_frozen_yogurt",
       "fan_favorites_tart_frozen_yogurt_156",
       "no_protein_tart_frozen_yogurt_170"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DEliAsZvqt-/"
   },
   {
     "id": "thai_tea",
@@ -17805,7 +17943,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "thai_tea",
       "no_protein_thai_tea_172"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DDOJkONvqt9/"
   },
   {
     "id": "the_tonight_dough",
@@ -17931,7 +18070,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "the_tonight_dough",
       "fan_favorites_the_tonight_dough_158"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DQphqpVEvSE/"
   },
   {
     "id": "tiramisu_topped",
@@ -18073,7 +18213,8 @@ const RECIPES_MASTER = [
       "tiramisu_topped",
       "fan_favorites_tiramisu_topped_160",
       "no_protein_tiramisu_topped_174"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DPcEuIQDjC8/"
   },
   {
     "id": "turtle_pecan_cluster",
@@ -18206,7 +18347,8 @@ const RECIPES_MASTER = [
       "turtle_pecan_cluster",
       "fan_favorites_turtle_pecan_cluster_162",
       "no_protein_turtle_pecan_cluster_176"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DJht0r1ydg1/"
   },
   {
     "id": "vanilla",
@@ -18300,7 +18442,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "vanilla",
       "no_protein_vanilla_178"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/reel/DU7W3Y3jmmX/?igsh=MTJ4enJzYXpob29hNA=="
   },
   {
     "id": "vanilla_bean_frozen_yogurt",
@@ -18377,7 +18520,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "vanilla_bean_frozen_yogurt",
       "no_protein_vanilla_bean_frozen_yogurt_180"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DF6CyIMSyaw/"
   },
   {
     "id": "vanilla_milk",
@@ -18478,7 +18622,8 @@ const RECIPES_MASTER = [
       "vanilla_milk",
       "keto_vanilla_milk_64",
       "lactose_free_vanilla_milk_109"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/reel/DU7W3Y3jmmX/?igsh=MTJ4enJzYXpob29hNA=="
   },
   {
     "id": "vanilla_pecan_blondie",
@@ -18610,7 +18755,8 @@ const RECIPES_MASTER = [
       "vanilla_pecan_blondie",
       "fan_favorites_vanilla_pecan_blondie_164",
       "no_protein_vanilla_pecan_blondie_182"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DLYRV2XyZ0P/"
   },
   {
     "id": "vanilla_protein_shake",
@@ -18711,7 +18857,8 @@ const RECIPES_MASTER = [
       "vanilla_protein_shake",
       "keto_vanilla_protein_shake_66",
       "lactose_free_vanilla_protein_shake_111"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DLagzRiOrHL/"
   },
   {
     "id": "vietnamese_iced_coffee",
@@ -18815,7 +18962,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "vietnamese_iced_coffee",
       "no_protein_vietnamese_iced_coffee_184"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DIwzQhXyKh9/"
   },
   {
     "id": "watermelon_sorbet",
@@ -18888,7 +19036,8 @@ const RECIPES_MASTER = [
       "watermelon_sorbet",
       "no_protein_watermelon_sorbet_186",
       "lactose_free_watermelon_sorbet_113"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DJU2xHsyzVo/"
   },
   {
     "id": "classic_drive_thru_chocolate_malt",
@@ -18984,7 +19133,8 @@ const RECIPES_MASTER = [
       "wendys_frosty",
       "chocolate_malt_frosty",
       "drive_thru_frosty"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DHRSz7tSyhO/"
   },
   {
     "id": "strawberry_shortcake_crunch_bar",
@@ -19089,7 +19239,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "good_humor_strawberry_shortcake",
       "strawberry_crumb_bar"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DOHRJVbDrKH/"
   },
   {
     "id": "caramel_shortbread_cookie_crunch",
@@ -20012,7 +20163,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "black_forest_gelato",
       "chocolate_cherry_ice_cream"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DHRSz7tSyhO/"
   },
   {
     "id": "spiced_apple_cider_donut",
@@ -20421,7 +20573,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "peanut_butter_base",
       "peanut_butter"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DMQx6aqSUkG/"
   },
   {
     "id": "cinnamon_base",
@@ -20512,7 +20665,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "cinnamon_base",
       "cinnamon"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DKagUicyw_B/"
   },
   {
     "id": "caramel_base",
@@ -20593,7 +20747,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "caramel_base",
       "caramel"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DRnUy1dDnvC/"
   },
   {
     "id": "chocolate_peanut_butter_base",
@@ -20694,7 +20849,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "chocolate_peanut_butter_base",
       "chocolate_pb_base"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DHRSz7tSyhO/"
   },
   {
     "id": "reeses_base",
@@ -20880,7 +21036,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "vanilla_bean_base",
       "c4_vanilla_bean_base"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/reel/DU7W3Y3jmmX/?igsh=MTJ4enJzYXpob29hNA=="
   },
   {
     "id": "hersheys_milk_chocolate_base",
@@ -20975,7 +21132,8 @@ const RECIPES_MASTER = [
       "classic_milk_chocolate_base",
       "hershey",
       "hersheys"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DHRSz7tSyhO/"
   },
   {
     "id": "acai_base",
@@ -21158,7 +21316,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "marshmallow_base",
       "toasted_marshmallow_base"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DL3GUT_yYdp/"
   },
   {
     "id": "lime_base",
@@ -21581,7 +21740,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "cheesecake_base",
       "classic_cheesecake_base"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DO6vAy5DtCr/"
   },
   {
     "id": "salted_caramel_base",
@@ -21762,7 +21922,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "darkest_chocolate_base",
       "dark_chocolate_base"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DHRSz7tSyhO/"
   },
   {
     "id": "vegan_vanilla_base",
@@ -21853,7 +22014,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "vegan_vanilla_base",
       "soy_vanilla_base"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/reel/DU7W3Y3jmmX/?igsh=MTJ4enJzYXpob29hNA=="
   },
   {
     "id": "black_raspberry_base",
@@ -22161,7 +22323,8 @@ const RECIPES_MASTER = [
     ],
     "aliases": [
       "cake_batter_crumble"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DGJXe-eyqIK/"
   },
   {
     "id": "smores_fan_favorite",
@@ -22294,7 +22457,8 @@ const RECIPES_MASTER = [
     "aliases": [
       "smores_fan_favorite",
       "smores_classic"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DMD85J6yYrM/"
   },
   {
     "id": "mocha_chip",
@@ -22408,7 +22572,8 @@ const RECIPES_MASTER = [
       "mocha_chip",
       "gatsby_mocha_chip",
       "gatsby"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DFbKOQvSF6L/"
   },
   {
     "id": "dark_chocolate_pb_cup",
@@ -22522,7 +22687,8 @@ const RECIPES_MASTER = [
       "dark_chocolate_pb_cup",
       "reese",
       "reeses"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DHRSz7tSyhO/"
   },
   {
     "id": "chocolate_cookies_and_cream",
@@ -22626,7 +22792,8 @@ const RECIPES_MASTER = [
       "chocolate_cookies_and_cream",
       "chocolate_oreo",
       "oreo"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DHRSz7tSyhO/"
   },
   {
     "id": "chocolate_pb_cup",
@@ -22730,7 +22897,8 @@ const RECIPES_MASTER = [
       "chocolate_pb_cup",
       "reese",
       "reeses"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DHRSz7tSyhO/"
   },
   {
     "id": "mint_oreo",
@@ -22856,7 +23024,8 @@ const RECIPES_MASTER = [
       "mint_chocolate_cookie",
       "oreo",
       "mint_chocolate_chip_cookie"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DHRSz7tSyhO/"
   },
   {
     "id": "salted_caramel_brownie",
@@ -23605,7 +23774,8 @@ const RECIPES_MASTER = [
     ],
     "aliases": [
       "vanilla_caramel_fudge"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/reel/DU7W3Y3jmmX/?igsh=MTJ4enJzYXpob29hNA=="
   },
   {
     "id": "confetti_brownie_batter",
@@ -23717,7 +23887,8 @@ const RECIPES_MASTER = [
     ],
     "aliases": [
       "confetti_brownie_batter"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DPhVVxuD57T/"
   },
   {
     "id": "cookies_n_cream_cheesecake",
@@ -23956,7 +24127,8 @@ const RECIPES_MASTER = [
       "cookie_dough_blizzard",
       "cookie_dough_blast",
       "blizzard"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DKIZ7RdSz5-/"
   },
   {
     "id": "chocolate_chip_banana_bread",
@@ -24087,7 +24259,8 @@ const RECIPES_MASTER = [
     ],
     "aliases": [
       "chocolate_chip_banana_bread"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DHRSz7tSyhO/"
   },
   {
     "id": "chocolate_oreo_mcflurry",
@@ -24192,7 +24365,8 @@ const RECIPES_MASTER = [
       "chocolate_mcflurry",
       "mcflurry",
       "oreo"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DHRSz7tSyhO/"
   },
   {
     "id": "chocolate_devotion",
@@ -24318,7 +24492,8 @@ const RECIPES_MASTER = [
       "triple_chocolate_decadence",
       "cold_stone_chocolate_devotion",
       "cold_stone"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DHRSz7tSyhO/"
   },
   {
     "id": "mocha_brownie_mudslide_blizzard",
@@ -24441,7 +24616,8 @@ const RECIPES_MASTER = [
       "mocha_brownie_mudslide_blizzard",
       "mocha_brownie_mudslide_blast",
       "blizzard"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DFbKOQvSF6L/"
   },
   {
     "id": "matchapolitan",
@@ -24563,7 +24739,8 @@ const RECIPES_MASTER = [
     ],
     "aliases": [
       "matchapolitan"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DJAP7jeyFP2/"
   },
   {
     "id": "vegan_oreo_mcflurry",
@@ -24778,7 +24955,8 @@ const RECIPES_MASTER = [
     ],
     "aliases": [
       "fluffernutter"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DNOsq4-ypCN/"
   },
   {
     "id": "biscoff_blizzard",
@@ -24997,7 +25175,8 @@ const RECIPES_MASTER = [
       "white_chocolate_raspberry_swirl",
       "baskin_robbins_love_potion",
       "love_potion"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DHRSz7tSyhO/"
   },
   {
     "id": "late_night_snack",
@@ -25396,7 +25575,8 @@ const RECIPES_MASTER = [
     ],
     "aliases": [
       "peanut_butter_chocolate_banana"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DHRSz7tSyhO/"
   },
   {
     "id": "reeses_peanut_butter_cup_fan",
@@ -25831,7 +26011,8 @@ const RECIPES_MASTER = [
     ],
     "aliases": [
       "strawberry_shortcake_crisp"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DOHRJVbDrKH/"
   },
   {
     "id": "tc_cookies_and_cream_blitz",
@@ -26146,7 +26327,8 @@ const RECIPES_MASTER = [
     ],
     "aliases": [
       "ultra_volume_dark_chocolate_fudge"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DHRSz7tSyhO/"
   },
   {
     "id": "tc_blueberry_lemon_bliss",
@@ -26472,6 +26654,7 @@ const RECIPES_MASTER = [
     ],
     "aliases": [
       "banana_cream_pie_mega_volume"
-    ]
+    ],
+    "videoUrl": "https://www.instagram.com/p/DQxMcEBEg4B/"
   }
 ];

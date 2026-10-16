@@ -5153,6 +5153,11 @@
               </span>
             ` : ''}
             ${userFeedback.rating ? `<span class="recipe-card-rating" title="Your rating: ${userFeedback.rating} stars">⭐ You: ${userFeedback.rating}★</span>` : ''}
+            ${recipe.videoUrl ? `
+              <a href="${recipe.videoUrl}" target="_blank" rel="noopener noreferrer" class="card-video-btn" title="Watch Creator Video / Reel" onclick="event.stopPropagation();">
+                🎬
+              </a>
+            ` : ''}
             <button class="card-share-btn" data-recipe-id="${recipe.id}" title="Share recipe link">
               🔗
             </button>
@@ -5332,7 +5337,7 @@
     card.addEventListener('click', (e) => {
       // On mobile (<= 768px), clicking the card toggles expansion
       if (window.innerWidth <= 768) {
-        if (e.target.closest('button, .favorite-btn, .card-share-btn, .card-delete-recipe-btn')) {
+        if (e.target.closest('button, .favorite-btn, .card-share-btn, .card-delete-recipe-btn, .card-video-btn')) {
           return;
         }
         if (e.target.closest('.btn-view-recipe')) {
@@ -13047,6 +13052,48 @@
             </div>
           </div>
         `;
+      })()}
+
+      ${(() => {
+        const creator = getRecipeCreator(recipe);
+        if (recipe.videoUrl) {
+          return `
+            <div class="recipe-modal-video-card">
+              <div class="video-card-left">
+                <span class="video-card-icon">🎬</span>
+                <div class="video-card-details">
+                  <div class="video-card-title">Creator Video Tutorial Available</div>
+                  <div class="video-card-sub">Watch ${creator ? creator.name : 'the creator'} spin and review this pint on Instagram</div>
+                </div>
+              </div>
+              <a href="${recipe.videoUrl}" target="_blank" rel="noopener noreferrer" class="btn-watch-creator-video">
+                <span>▶️ Watch Reel ↗</span>
+              </a>
+            </div>
+          `;
+        } else if (!isPersonal) {
+          const searchQ = (creator ? creator.handle + ' ' : '') + recipe.name;
+          return `
+            <div class="recipe-modal-video-card search-fallback">
+              <div class="video-card-left">
+                <span class="video-card-icon">📱</span>
+                <div class="video-card-details">
+                  <div class="video-card-title">Watch Video Inspiration</div>
+                  <div class="video-card-sub">Explore video spins and tutorials for this flavor</div>
+                </div>
+              </div>
+              <div class="video-card-actions" style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+                <a href="https://www.tiktok.com/search?q=${encodeURIComponent(searchQ)}" target="_blank" rel="noopener noreferrer" class="btn-watch-creator-video tiktok">
+                  <span>TikTok ↗</span>
+                </a>
+                <a href="https://www.instagram.com/explore/tags/${encodeURIComponent(recipe.name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase())}/" target="_blank" rel="noopener noreferrer" class="btn-watch-creator-video instagram">
+                  <span>Insta ↗</span>
+                </a>
+              </div>
+            </div>
+          `;
+        }
+        return '';
       })()}
 
       ${(pintsInFreezer.length > 0 && isAccessible) ? (() => {
