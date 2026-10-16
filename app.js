@@ -20519,6 +20519,30 @@
         }
       });
     }
+
+    // Floating Back to Top Button
+    const btnBackToTop = document.getElementById('btnBackToTop');
+    if (btnBackToTop) {
+      let bttRafId = null;
+      const handleBttScroll = () => {
+        if (bttRafId) return;
+        bttRafId = requestAnimationFrame(() => {
+          bttRafId = null;
+          const shouldShow = window.scrollY > 400;
+          btnBackToTop.classList.toggle('visible', shouldShow);
+        });
+      };
+
+      window.addEventListener('scroll', handleBttScroll, { passive: true });
+      handleBttScroll();
+
+      btnBackToTop.addEventListener('click', () => {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      });
+    }
   }
 
   // Run on DOM Ready
