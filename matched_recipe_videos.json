@@ -1,0 +1,917 @@
+{
+  "almond_joy": {
+    "id": "almond_joy",
+    "name": "Almond Joy",
+    "videoUrl": "https://www.instagram.com/p/DWCdZtnlRpB/"
+  },
+  "americone_dream": {
+    "id": "americone_dream",
+    "name": "Americone Dream",
+    "videoUrl": "https://www.instagram.com/p/DKDB8PYS3t7/?hl=en"
+  },
+  "apple_pie": {
+    "id": "apple_pie",
+    "name": "Apple Pie",
+    "videoUrl": "https://www.instagram.com/p/DO1ipa7jgd8/"
+  },
+  "baked_alaska": {
+    "id": "baked_alaska",
+    "name": "Baked Alaska",
+    "videoUrl": "https://www.instagram.com/p/DNd6thUyo6U/"
+  },
+  "banana": {
+    "id": "banana",
+    "name": "Banana",
+    "videoUrl": "https://www.instagram.com/p/DQxMcEBEg4B/"
+  },
+  "banana_bread_matcha": {
+    "id": "banana_bread_matcha",
+    "name": "Banana Bread Matcha",
+    "videoUrl": "https://www.instagram.com/p/DSYP7gEjvs_/"
+  },
+  "banana_pudding": {
+    "id": "banana_pudding",
+    "name": "Banana Pudding",
+    "videoUrl": "https://www.instagram.com/p/DIhX_L1S6m3/"
+  },
+  "berry_crumble": {
+    "id": "berry_crumble",
+    "name": "Berry Crumble",
+    "videoUrl": "https://www.instagram.com/p/DBQNmUTvRUR/"
+  },
+  "birthday_cake": {
+    "id": "birthday_cake",
+    "name": "Birthday Cake",
+    "videoUrl": "https://www.instagram.com/p/DDOJ4unPuql/"
+  },
+  "biscoff_cookie_butter": {
+    "id": "biscoff_cookie_butter",
+    "name": "Biscoff (Cookie Butter)",
+    "videoUrl": "https://www.instagram.com/p/DUMHoyRkgDS/"
+  },
+  "blueberry_pie": {
+    "id": "blueberry_pie",
+    "name": "Blueberry Pie",
+    "videoUrl": "https://www.instagram.com/p/DIW_v3ySu7V/"
+  },
+  "brown_butter_banana_bread": {
+    "id": "brown_butter_banana_bread",
+    "name": "Brown Butter Banana Bread",
+    "videoUrl": "https://www.instagram.com/p/DLnq6cwyDtl/"
+  },
+  "brownie_batter": {
+    "id": "brownie_batter",
+    "name": "Brownie Batter",
+    "videoUrl": "https://www.instagram.com/p/DPhVVxuD57T/"
+  },
+  "brownie_batter_blizzard": {
+    "id": "brownie_batter_blizzard",
+    "name": "Brownie Batter Blizzard",
+    "videoUrl": "https://www.instagram.com/p/DRxn8POkvZh/"
+  },
+  "brown_sugar_cinnamon_pop_tart": {
+    "id": "brown_sugar_cinnamon_pop_tart",
+    "name": "Brown Sugar Cinnamon Pop Tart",
+    "videoUrl": "https://www.instagram.com/p/DGyrRRJyjyz/"
+  },
+  "cake_batter": {
+    "id": "cake_batter",
+    "name": "Cake Batter",
+    "videoUrl": "https://www.instagram.com/p/DGJXe-eyqIK/"
+  },
+  "cake_batter_cookie_dough_blizzard": {
+    "id": "cake_batter_cookie_dough_blizzard",
+    "name": "Cake Batter Cookie Dough Blizzard",
+    "videoUrl": "https://www.instagram.com/p/DLTCAnWS6K9/"
+  },
+  "cake_batter_milk": {
+    "id": "cake_batter_milk",
+    "name": "Cake Batter (Milk)",
+    "videoUrl": "https://www.instagram.com/reel/DBaP2NmPm99/"
+  },
+  "cake_batter_oreo": {
+    "id": "cake_batter_oreo",
+    "name": "Cake Batter Oreo",
+    "videoUrl": "https://www.instagram.com/p/DUEXPd5Dvt_/"
+  },
+  "cake_batter_protein_shake": {
+    "id": "cake_batter_protein_shake",
+    "name": "Cake Batter (Protein Shake)",
+    "videoUrl": "https://www.instagram.com/p/DGJXe-eyqIK/"
+  },
+  "candy_bar": {
+    "id": "candy_bar",
+    "name": "Candy Bar",
+    "videoUrl": "https://www.instagram.com/p/DQfH0nNjmUe/"
+  },
+  "caramel_apple": {
+    "id": "caramel_apple",
+    "name": "Caramel Apple",
+    "videoUrl": "https://www.instagram.com/p/DPKKGdNDrEo/"
+  },
+  "cereal_milk": {
+    "id": "cereal_milk",
+    "name": "Cereal Milk",
+    "videoUrl": "https://www.instagram.com/p/DN6YHXVDi1r/"
+  },
+  "chai": {
+    "id": "chai",
+    "name": "Chai",
+    "videoUrl": "https://www.instagram.com/p/DNtRzLg3EWz/"
+  },
+  "cherry_garcia": {
+    "id": "cherry_garcia",
+    "name": "Cherry Garcia",
+    "videoUrl": "https://www.instagram.com/p/DH9V5beSbsy/"
+  },
+  "choco_brownie_extreme_blizzard": {
+    "id": "choco_brownie_extreme_blizzard",
+    "name": "Choco Brownie Extreme Blizzard",
+    "videoUrl": "https://www.instagram.com/p/DLlHa9wyEoR/"
+  },
+  "chocolate": {
+    "id": "chocolate",
+    "name": "Chocolate",
+    "videoUrl": "https://www.instagram.com/p/DHRSz7tSyhO/"
+  },
+  "chocolate_cake_shake": {
+    "id": "chocolate_cake_shake",
+    "name": "Chocolate Cake Shake",
+    "videoUrl": "https://www.instagram.com/reel/DDOKd6Dv3Mj/"
+  },
+  "chocolate_caramel_cheesecake": {
+    "id": "chocolate_caramel_cheesecake",
+    "name": "Chocolate Caramel Cheesecake",
+    "videoUrl": "https://www.instagram.com/p/DOByjtLDmlN/"
+  },
+  "chocolate_chip_cookie_dough": {
+    "id": "chocolate_chip_cookie_dough",
+    "name": "Chocolate Chip Cookie Dough",
+    "videoUrl": "https://www.instagram.com/p/DJpc6oJS0B8/"
+  },
+  "chocolate_chip_stracciatella": {
+    "id": "chocolate_chip_stracciatella",
+    "name": "Chocolate Chip / Stracciatella",
+    "videoUrl": "https://www.instagram.com/reel/DSQZLiMkpF4/"
+  },
+  "chocolate_covered_strawberry": {
+    "id": "chocolate_covered_strawberry",
+    "name": "Chocolate Covered Strawberry",
+    "videoUrl": "https://www.instagram.com/p/DQPiUjzDroT/"
+  },
+  "chocolate_fudge_brownie": {
+    "id": "chocolate_fudge_brownie",
+    "name": "Chocolate Fudge Brownie",
+    "videoUrl": "https://www.instagram.com/p/DImWyj2SWBa/"
+  },
+  "chocolate_therapy": {
+    "id": "chocolate_therapy",
+    "name": "Chocolate Therapy",
+    "videoUrl": "https://www.instagram.com/p/DNWTyXUyhar/"
+  },
+  "chocolate_and_vanilla_twist": {
+    "id": "chocolate_and_vanilla_twist",
+    "name": "Chocolate & Vanilla Twist",
+    "videoUrl": "https://www.instagram.com/p/DVHU8A5jvgd/"
+  },
+  "chocolatey_love_a_fair": {
+    "id": "chocolatey_love_a_fair",
+    "name": "Chocolatey Love A-Fair",
+    "videoUrl": "https://www.instagram.com/p/DQC9eNIjsEr/"
+  },
+  "choco_lotta_cheesecake_sundae": {
+    "id": "choco_lotta_cheesecake_sundae",
+    "name": "Choco-Lotta Cheesecake Sundae",
+    "videoUrl": "https://www.instagram.com/p/DSIzLgLksBi/"
+  },
+  "chubby_hubby": {
+    "id": "chubby_hubby",
+    "name": "Chubby Hubby",
+    "videoUrl": "https://www.instagram.com/p/DRnUy1dDnvC/"
+  },
+  "chunky_monkey": {
+    "id": "chunky_monkey",
+    "name": "Chunky Monkey",
+    "videoUrl": "https://www.instagram.com/p/DQ4-fw4Dr6y/"
+  },
+  "churray_for_churros": {
+    "id": "churray_for_churros",
+    "name": "Churray For Churros",
+    "videoUrl": "https://www.instagram.com/p/DMlcVVhSzFp/"
+  },
+  "cinnamon_bun": {
+    "id": "cinnamon_bun",
+    "name": "Cinnamon Bun",
+    "videoUrl": "https://www.instagram.com/p/DKagUicyw_B/"
+  },
+  "cinnamon_pebbles": {
+    "id": "cinnamon_pebbles",
+    "name": "Cinnamon Pebbles",
+    "videoUrl": "https://www.instagram.com/reels/DUjQPv_koe_/"
+  },
+  "coffee": {
+    "id": "coffee",
+    "name": "Coffee",
+    "videoUrl": "https://www.instagram.com/p/DL-mmVFSlGJ/"
+  },
+  "coffee_coffee_buzzbuzzbuzz": {
+    "id": "coffee_coffee_buzzbuzzbuzz",
+    "name": "Coffee Coffee Buzzbuzzbuzz",
+    "videoUrl": "https://www.instagram.com/p/DM6DDUcSjGc/"
+  },
+  "coffee_oreo": {
+    "id": "coffee_oreo",
+    "name": "Coffee Oreo",
+    "videoUrl": "https://www.instagram.com/p/DRnUy1dDnvC/"
+  },
+  "coffee_toffee_bar_crunch": {
+    "id": "coffee_toffee_bar_crunch",
+    "name": "Coffee Toffee Bar Crunch",
+    "videoUrl": "https://www.instagram.com/p/DKfpXoKy8XA/"
+  },
+  "confetti_cake_blizzard": {
+    "id": "confetti_cake_blizzard",
+    "name": "Confetti Cake Blizzard",
+    "videoUrl": "https://www.instagram.com/p/DK0MGBQyPsU/"
+  },
+  "cookie_dough": {
+    "id": "cookie_dough",
+    "name": "Cookie Dough",
+    "videoUrl": "https://www.instagram.com/p/DKIZ7RdSz5-/"
+  },
+  "cookie_monster": {
+    "id": "cookie_monster",
+    "name": "Cookie Monster",
+    "videoUrl": "https://www.instagram.com/p/DM03Fm9SliM/"
+  },
+  "cosmic_brownie": {
+    "id": "cosmic_brownie",
+    "name": "Cosmic Brownie",
+    "videoUrl": "https://www.instagram.com/p/DRLFzMujh2u/"
+  },
+  "cotton_candy_blizzard": {
+    "id": "cotton_candy_blizzard",
+    "name": "Cotton Candy Blizzard",
+    "videoUrl": "https://www.instagram.com/p/DLGJM9RyEcB/"
+  },
+  "dark_chocolate_raspberry": {
+    "id": "dark_chocolate_raspberry",
+    "name": "Dark Chocolate Raspberry",
+    "videoUrl": "https://www.instagram.com/p/DCDdGgPPdye/"
+  },
+  "death_by_chocolate": {
+    "id": "death_by_chocolate",
+    "name": "Death By Chocolate",
+    "videoUrl": "https://www.instagram.com/p/DI68Y3rSSvq/"
+  },
+  "dirt_cake": {
+    "id": "dirt_cake",
+    "name": "Dirt Cake",
+    "videoUrl": "https://www.instagram.com/p/DLfZVQ1sYPt/"
+  },
+  "dole_whip": {
+    "id": "dole_whip",
+    "name": "Dole Whip",
+    "videoUrl": "https://www.instagram.com/p/DEnvrzuyDe2/"
+  },
+  "double_oreo": {
+    "id": "double_oreo",
+    "name": "Double Oreo",
+    "videoUrl": "https://www.instagram.com/p/DWHm8M_JxVN/"
+  },
+  "dr_pepper_float": {
+    "id": "dr_pepper_float",
+    "name": "Dr Pepper Float",
+    "videoUrl": "https://www.instagram.com/p/DTQ4AURkmMo/"
+  },
+  "dubai_chocolate": {
+    "id": "dubai_chocolate",
+    "name": "Dubai Chocolate",
+    "videoUrl": "https://www.instagram.com/p/DRdA2cvjjHC/"
+  },
+  "eggnog": {
+    "id": "eggnog",
+    "name": "Eggnog",
+    "videoUrl": "https://www.instagram.com/p/DR8B0CSDuy-/"
+  },
+  "everything_but_the": {
+    "id": "everything_but_the",
+    "name": "Everything But The\u00e2\u20ac\u00a6",
+    "videoUrl": "https://www.instagram.com/reel/DPPT2nojowx/"
+  },
+  "frosted_animal_cookie_blizzard": {
+    "id": "frosted_animal_cookie_blizzard",
+    "name": "Frosted Animal Cookie Blizzard",
+    "videoUrl": "https://www.instagram.com/p/DPE-FncjtJG/"
+  },
+  "frosted_lemonade": {
+    "id": "frosted_lemonade",
+    "name": "Frosted Lemonade",
+    "videoUrl": "https://www.instagram.com/p/DLx1FHyST7y/"
+  },
+  "frosted_sugar_cookie_blizzard": {
+    "id": "frosted_sugar_cookie_blizzard",
+    "name": "Frosted Sugar Cookie Blizzard",
+    "videoUrl": "https://www.instagram.com/p/DRAs16pDk8C/"
+  },
+  "fruit_sorbet": {
+    "id": "fruit_sorbet",
+    "name": "Fruit Sorbet",
+    "videoUrl": "https://www.instagram.com/p/DF022hhSK-G/"
+  },
+  "fruity_pebbles": {
+    "id": "fruity_pebbles",
+    "name": "Fruity Pebbles",
+    "videoUrl": "https://www.instagram.com/p/DTYp3OzDupN/"
+  },
+  "gimme_smores": {
+    "id": "gimme_smores",
+    "name": "Gimme S'Mores",
+    "videoUrl": "https://www.instagram.com/p/DMLrsLXSYOp/"
+  },
+  "glampfire_trail_mix": {
+    "id": "glampfire_trail_mix",
+    "name": "Glampfire Trail Mix",
+    "videoUrl": "https://www.instagram.com/reels/DVmA1sBjowk/"
+  },
+  "gooey_butter_cake": {
+    "id": "gooey_butter_cake",
+    "name": "Gooey Butter Cake",
+    "videoUrl": "https://www.instagram.com/p/DVzAi-YDmgD/"
+  },
+  "grape_sorbet": {
+    "id": "grape_sorbet",
+    "name": "Grape Sorbet",
+    "videoUrl": "https://www.instagram.com/p/DJKebWySr81/"
+  },
+  "half_baked": {
+    "id": "half_baked",
+    "name": "Half Baked",
+    "videoUrl": "https://www.instagram.com/p/DK7tiTWyoHy/"
+  },
+  "half_baked_twist": {
+    "id": "half_baked_twist",
+    "name": "Half Baked (Twist)",
+    "videoUrl": "https://www.instagram.com/p/DWhW6A0JTzR/"
+  },
+  "horchata": {
+    "id": "horchata",
+    "name": "Horchata",
+    "videoUrl": "https://www.instagram.com/p/DFyW5xKykSk/"
+  },
+  "hot_cocoa": {
+    "id": "hot_cocoa",
+    "name": "Hot Cocoa",
+    "videoUrl": "https://www.instagram.com/p/DDfiPdIPFwI/"
+  },
+  "impretzively_fudged": {
+    "id": "impretzively_fudged",
+    "name": "Impretzively Fudged",
+    "videoUrl": "https://www.instagram.com/p/DOWq1jREW-G/"
+  },
+  "jamoca_almond_fudge": {
+    "id": "jamoca_almond_fudge",
+    "name": "Jamoca Almond Fudge",
+    "videoUrl": "https://www.instagram.com/p/DT3hWJdjp7Q/"
+  },
+  "key_lime_pie": {
+    "id": "key_lime_pie",
+    "name": "Key Lime Pie",
+    "videoUrl": "https://www.instagram.com/p/DUbm_RckjB4/"
+  },
+  "lights_caramel_action": {
+    "id": "lights_caramel_action",
+    "name": "Lights Caramel Action",
+    "videoUrl": "https://www.instagram.com/p/DKN6eBdsOef/"
+  },
+  "mango_and_cream": {
+    "id": "mango_and_cream",
+    "name": "Mango & Cream",
+    "videoUrl": "https://www.instagram.com/p/DHEml1xRkgB/?hl=en"
+  },
+  "maple": {
+    "id": "maple",
+    "name": "Maple",
+    "videoUrl": "https://www.instagram.com/p/DOt2wgpDmK8/"
+  },
+  "marshmallow_sky": {
+    "id": "marshmallow_sky",
+    "name": "Marshmallow Sky",
+    "videoUrl": "https://www.instagram.com/p/DL3GUT_yYdp/"
+  },
+  "matcha": {
+    "id": "matcha",
+    "name": "Matcha",
+    "videoUrl": "https://www.instagram.com/p/DJAP7jeyFP2/"
+  },
+  "matcha_oreo": {
+    "id": "matcha_oreo",
+    "name": "Matcha Oreo",
+    "videoUrl": "https://www.instagram.com/p/DTyYUHEkg0x/"
+  },
+  "mexican_chocolate": {
+    "id": "mexican_chocolate",
+    "name": "Mexican Chocolate",
+    "videoUrl": "https://www.instagram.com/p/DNG2jJ6y6f0/"
+  },
+  "milk_and_cookies": {
+    "id": "milk_and_cookies",
+    "name": "Milk & Cookies",
+    "videoUrl": "https://www.instagram.com/p/DLA_TiCSl9R/"
+  },
+  "mint_chocolate_chip": {
+    "id": "mint_chocolate_chip",
+    "name": "Mint Chocolate Chip",
+    "videoUrl": "https://www.instagram.com/p/DP7FV6JDrW1/"
+  },
+  "minter_wonderland": {
+    "id": "minter_wonderland",
+    "name": "Minter Wonderland",
+    "videoUrl": "https://www.instagram.com/p/DS5uQbzjlev/"
+  },
+  "mandm": {
+    "id": "mandm",
+    "name": "M&M",
+    "videoUrl": "https://www.instagram.com/p/DDOKQ4UPo7a/"
+  },
+  "mandm_mcflurry": {
+    "id": "mandm_mcflurry",
+    "name": "M&M Mcflurry",
+    "videoUrl": "https://www.instagram.com/p/DDOKQ4UPo7a/"
+  },
+  "mocha": {
+    "id": "mocha",
+    "name": "Mocha",
+    "videoUrl": "https://www.instagram.com/p/DFbKOQvSF6L/"
+  },
+  "moose_tracks": {
+    "id": "moose_tracks",
+    "name": "Moose Tracks",
+    "videoUrl": "https://www.instagram.com/p/DVWyx58CZM-/"
+  },
+  "netflix_and_chilld": {
+    "id": "netflix_and_chilld",
+    "name": "Netflix & Chill'd",
+    "videoUrl": "https://www.instagram.com/p/DT_O-TKDju0/"
+  },
+  "new_york_super_fudge_chunk": {
+    "id": "new_york_super_fudge_chunk",
+    "name": "New York Super Fudge Chunk",
+    "videoUrl": "https://www.instagram.com/p/DMV7A5WyVUX/"
+  },
+  "nutella": {
+    "id": "nutella",
+    "name": "Nutella",
+    "videoUrl": "https://www.instagram.com/p/DGq7V0AS_Y6/"
+  },
+  "oatmeal_cream_pie": {
+    "id": "oatmeal_cream_pie",
+    "name": "Oatmeal Cream Pie",
+    "videoUrl": "https://www.instagram.com/p/DTBcot1DpQT/"
+  },
+  "oat_of_this_swirled": {
+    "id": "oat_of_this_swirled",
+    "name": "Oat Of This Swirled",
+    "videoUrl": "https://www.instagram.com/p/DLLVjnOMOFC/"
+  },
+  "one_love": {
+    "id": "one_love",
+    "name": "One Love",
+    "videoUrl": "https://www.instagram.com/p/DOjIp8vDp3B/"
+  },
+  "orange_creamsicle": {
+    "id": "orange_creamsicle",
+    "name": "Orange Creamsicle",
+    "videoUrl": "https://www.instagram.com/p/DDOKJL5P9q7/"
+  },
+  "oreo_mcflurry": {
+    "id": "oreo_mcflurry",
+    "name": "Oreo Mcflurry",
+    "videoUrl": "https://www.instagram.com/p/DRnUy1dDnvC/"
+  },
+  "pb_over_the_top": {
+    "id": "pb_over_the_top",
+    "name": "Pb Over The Top",
+    "videoUrl": "https://www.instagram.com/p/DU_nhHZjc11/"
+  },
+  "peaches_and_cream_frozen_yogurt": {
+    "id": "peaches_and_cream_frozen_yogurt",
+    "name": "Peaches And Cream Frozen Yogurt",
+    "videoUrl": "https://www.instagram.com/reel/DEvjeqUS6Mu/?igsh=cjExd2JueW5uMnk1"
+  },
+  "peanut_butter_cup": {
+    "id": "peanut_butter_cup",
+    "name": "Peanut Butter Cup",
+    "videoUrl": "https://www.instagram.com/p/DNoTWbaOBI_/"
+  },
+  "peanut_butter_half_baked": {
+    "id": "peanut_butter_half_baked",
+    "name": "Peanut Butter Half Baked",
+    "videoUrl": "https://www.instagram.com/p/DP1_Yh6jgvo/"
+  },
+  "peanut_butter_oreo": {
+    "id": "peanut_butter_oreo",
+    "name": "Peanut Butter Oreo",
+    "videoUrl": "https://www.instagram.com/p/DORtB9zDqbS/"
+  },
+  "peanut_butter_world": {
+    "id": "peanut_butter_world",
+    "name": "Peanut Butter World",
+    "videoUrl": "https://www.instagram.com/p/DMQx6aqSUkG/"
+  },
+  "pecan_pie": {
+    "id": "pecan_pie",
+    "name": "Pecan Pie",
+    "videoUrl": "https://www.instagram.com/p/DPuFmEWDnyV/"
+  },
+  "peppermint": {
+    "id": "peppermint",
+    "name": "Peppermint",
+    "videoUrl": "https://www.instagram.com/p/DCDqXp2PDAZ/"
+  },
+  "peppermint_bark": {
+    "id": "peppermint_bark",
+    "name": "Peppermint Bark",
+    "videoUrl": "https://www.instagram.com/p/DRVTS9eDg7c/"
+  },
+  "peppermint_brownie": {
+    "id": "peppermint_brownie",
+    "name": "Peppermint Brownie",
+    "videoUrl": "https://www.instagram.com/p/DDOU7zsPQKF/"
+  },
+  "peppermint_mocha": {
+    "id": "peppermint_mocha",
+    "name": "Peppermint Mocha",
+    "videoUrl": "https://www.instagram.com/p/DDOVNB5PZA1/"
+  },
+  "phish_food": {
+    "id": "phish_food",
+    "name": "Phish Food",
+    "videoUrl": "https://www.instagram.com/p/DToKDGbDmq_/"
+  },
+  "pistachio": {
+    "id": "pistachio",
+    "name": "Pistachio",
+    "videoUrl": "https://www.instagram.com/p/DRnUy1dDnvC/"
+  },
+  "pistachio_pistachio": {
+    "id": "pistachio_pistachio",
+    "name": "Pistachio Pistachio",
+    "videoUrl": "https://www.instagram.com/p/DPmiPjyjg4J/"
+  },
+  "pumpkin_bread_crumble": {
+    "id": "pumpkin_bread_crumble",
+    "name": "Pumpkin Bread Crumble",
+    "videoUrl": "https://www.instagram.com/p/DDOUAbkve00/"
+  },
+  "pumpkin_cheesecake": {
+    "id": "pumpkin_cheesecake",
+    "name": "Pumpkin Cheesecake",
+    "videoUrl": "https://www.instagram.com/p/DO6vAy5DtCr/"
+  },
+  "pumpkin_pie_blizzard": {
+    "id": "pumpkin_pie_blizzard",
+    "name": "Pumpkin Pie Blizzard",
+    "videoUrl": "https://www.instagram.com/p/DOeYJyzjuwd/?hl=en"
+  },
+  "pumpkin_spice": {
+    "id": "pumpkin_spice",
+    "name": "Pumpkin Spice",
+    "videoUrl": "https://www.instagram.com/p/DDOSOFuPD4R/"
+  },
+  "pumpkin_spice_latte": {
+    "id": "pumpkin_spice_latte",
+    "name": "Pumpkin Spice Latte",
+    "videoUrl": "https://www.instagram.com/p/DN1Gt8E3NjN/"
+  },
+  "raspberry_cheesecake_topped": {
+    "id": "raspberry_cheesecake_topped",
+    "name": "Raspberry Cheesecake Topped",
+    "videoUrl": "https://www.instagram.com/p/DUrBMTpCYMl/?hl=en"
+  },
+  "red_velvet": {
+    "id": "red_velvet",
+    "name": "Red Velvet",
+    "videoUrl": "https://www.instagram.com/p/DGByFDGxP0T/"
+  },
+  "red_velvet_cake": {
+    "id": "red_velvet_cake",
+    "name": "Red Velvet Cake",
+    "videoUrl": "https://www.instagram.com/p/DSx_1srjqah/"
+  },
+  "red_velvet_cake_blizzard": {
+    "id": "red_velvet_cake_blizzard",
+    "name": "Red Velvet Cake Blizzard",
+    "videoUrl": "https://www.instagram.com/p/DUwKzKfEbJ4/?hl=en"
+  },
+  "reeses_caramel_craze_blizzard": {
+    "id": "reeses_caramel_craze_blizzard",
+    "name": "Reese's Caramel Craze Blizzard",
+    "videoUrl": "https://www.instagram.com/p/DRnUy1dDnvC/"
+  },
+  "reeses_pieces": {
+    "id": "reeses_pieces",
+    "name": "Reese's Pieces",
+    "videoUrl": "https://www.instagram.com/p/DIR1bh7yYYe/"
+  },
+  "rice_krispy_treat": {
+    "id": "rice_krispy_treat",
+    "name": "Rice Krispy Treat",
+    "videoUrl": "https://www.instagram.com/p/DBaPQ2iPYxl/"
+  },
+  "rocky_road": {
+    "id": "rocky_road",
+    "name": "Rocky Road",
+    "videoUrl": "https://www.instagram.com/p/DUT4j7CkqRD/"
+  },
+  "root_beer_float": {
+    "id": "root_beer_float",
+    "name": "Root Beer Float",
+    "videoUrl": "https://www.instagram.com/p/DDOUM1_voMm/"
+  },
+  "royal_new_york_cheesecake_blizzard": {
+    "id": "royal_new_york_cheesecake_blizzard",
+    "name": "Royal New York Cheesecake Blizzard",
+    "videoUrl": "https://www.instagram.com/p/DMvtcn6ySqJ/"
+  },
+  "royal_reeses_fluffernutter_blizzard": {
+    "id": "royal_reeses_fluffernutter_blizzard",
+    "name": "Royal Reese's Fluffernutter Blizzard",
+    "videoUrl": "https://www.instagram.com/p/DNOsq4-ypCN/"
+  },
+  "salted_peanut_butter": {
+    "id": "salted_peanut_butter",
+    "name": "Salted Peanut Butter",
+    "videoUrl": "https://www.instagram.com/p/DVehETYFL9q/"
+  },
+  "salty_caramel": {
+    "id": "salty_caramel",
+    "name": "Salty Caramel",
+    "videoUrl": "https://www.instagram.com/reels/DWcNRI_J1F_/"
+  },
+  "shamrock_oreo_mcflurry": {
+    "id": "shamrock_oreo_mcflurry",
+    "name": "Shamrock Oreo Mcflurry",
+    "videoUrl": "https://www.instagram.com/p/DVPEW9LCYhI/"
+  },
+  "shamrock_shake": {
+    "id": "shamrock_shake",
+    "name": "Shamrock Shake",
+    "videoUrl": "https://www.instagram.com/p/DHJxJ2nyfmJ/"
+  },
+  "smores_blizzard": {
+    "id": "smores_blizzard",
+    "name": "S'Mores Blizzard",
+    "videoUrl": "https://www.instagram.com/p/DMD85J6yYrM/"
+  },
+  "snowdrift_blizzard": {
+    "id": "snowdrift_blizzard",
+    "name": "Snowdrift Blizzard",
+    "videoUrl": "https://www.instagram.com/p/DSlS7TMDlvK/"
+  },
+  "strawberry": {
+    "id": "strawberry",
+    "name": "Strawberry",
+    "videoUrl": "https://www.instagram.com/p/DOHRJVbDrKH/"
+  },
+  "strawberry_banana": {
+    "id": "strawberry_banana",
+    "name": "Strawberry Banana",
+    "videoUrl": "https://www.instagram.com/p/DGOoYwJyZXk/"
+  },
+  "strawberry_cheesecake": {
+    "id": "strawberry_cheesecake",
+    "name": "Strawberry Cheesecake",
+    "videoUrl": "https://www.instagram.com/p/DQaAz0VkvMj/"
+  },
+  "tart_frozen_yogurt": {
+    "id": "tart_frozen_yogurt",
+    "name": "Tart Frozen Yogurt",
+    "videoUrl": "https://www.instagram.com/p/DEliAsZvqt-/"
+  },
+  "thai_tea": {
+    "id": "thai_tea",
+    "name": "Thai Tea",
+    "videoUrl": "https://www.instagram.com/p/DDOJkONvqt9/"
+  },
+  "the_tonight_dough": {
+    "id": "the_tonight_dough",
+    "name": "The Tonight Dough",
+    "videoUrl": "https://www.instagram.com/p/DQphqpVEvSE/"
+  },
+  "tiramisu_topped": {
+    "id": "tiramisu_topped",
+    "name": "Tiramisu Topped",
+    "videoUrl": "https://www.instagram.com/p/DPcEuIQDjC8/"
+  },
+  "turtle_pecan_cluster": {
+    "id": "turtle_pecan_cluster",
+    "name": "Turtle Pecan Cluster",
+    "videoUrl": "https://www.instagram.com/p/DJht0r1ydg1/"
+  },
+  "vanilla": {
+    "id": "vanilla",
+    "name": "Vanilla",
+    "videoUrl": "https://www.instagram.com/reel/DU7W3Y3jmmX/?igsh=MTJ4enJzYXpob29hNA=="
+  },
+  "vanilla_bean_frozen_yogurt": {
+    "id": "vanilla_bean_frozen_yogurt",
+    "name": "Vanilla Bean Frozen Yogurt",
+    "videoUrl": "https://www.instagram.com/p/DF6CyIMSyaw/"
+  },
+  "vanilla_milk": {
+    "id": "vanilla_milk",
+    "name": "Vanilla (Milk)",
+    "videoUrl": "https://www.instagram.com/reel/DU7W3Y3jmmX/?igsh=MTJ4enJzYXpob29hNA=="
+  },
+  "vanilla_pecan_blondie": {
+    "id": "vanilla_pecan_blondie",
+    "name": "Vanilla Pecan Blondie",
+    "videoUrl": "https://www.instagram.com/p/DLYRV2XyZ0P/"
+  },
+  "vanilla_protein_shake": {
+    "id": "vanilla_protein_shake",
+    "name": "Vanilla (Protein Shake)",
+    "videoUrl": "https://www.instagram.com/p/DLagzRiOrHL/"
+  },
+  "vietnamese_iced_coffee": {
+    "id": "vietnamese_iced_coffee",
+    "name": "Vietnamese Iced Coffee",
+    "videoUrl": "https://www.instagram.com/p/DIwzQhXyKh9/"
+  },
+  "watermelon_sorbet": {
+    "id": "watermelon_sorbet",
+    "name": "Watermelon Sorbet",
+    "videoUrl": "https://www.instagram.com/p/DJU2xHsyzVo/"
+  },
+  "classic_drive_thru_chocolate_malt": {
+    "id": "classic_drive_thru_chocolate_malt",
+    "name": "Classic Drive-Thru Chocolate Malt",
+    "videoUrl": "https://www.instagram.com/p/DHRSz7tSyhO/"
+  },
+  "strawberry_shortcake_crunch_bar": {
+    "id": "strawberry_shortcake_crunch_bar",
+    "name": "Strawberry Shortcake Crunch Bar",
+    "videoUrl": "https://www.instagram.com/p/DOHRJVbDrKH/"
+  },
+  "black_forest_chocolate_cherry": {
+    "id": "black_forest_chocolate_cherry",
+    "name": "Black Forest Chocolate Cherry",
+    "videoUrl": "https://www.instagram.com/p/DHRSz7tSyhO/"
+  },
+  "peanut_butter_base": {
+    "id": "peanut_butter_base",
+    "name": "Peanut Butter",
+    "videoUrl": "https://www.instagram.com/p/DMQx6aqSUkG/"
+  },
+  "cinnamon_base": {
+    "id": "cinnamon_base",
+    "name": "Cinnamon",
+    "videoUrl": "https://www.instagram.com/p/DKagUicyw_B/"
+  },
+  "caramel_base": {
+    "id": "caramel_base",
+    "name": "Caramel",
+    "videoUrl": "https://www.instagram.com/p/DRnUy1dDnvC/"
+  },
+  "chocolate_peanut_butter_base": {
+    "id": "chocolate_peanut_butter_base",
+    "name": "Chocolate Peanut Butter",
+    "videoUrl": "https://www.instagram.com/p/DHRSz7tSyhO/"
+  },
+  "vanilla_bean_base": {
+    "id": "vanilla_bean_base",
+    "name": "Vanilla Bean",
+    "videoUrl": "https://www.instagram.com/reel/DU7W3Y3jmmX/?igsh=MTJ4enJzYXpob29hNA=="
+  },
+  "hersheys_milk_chocolate_base": {
+    "id": "hersheys_milk_chocolate_base",
+    "name": "Classic Milk Chocolate",
+    "videoUrl": "https://www.instagram.com/p/DHRSz7tSyhO/"
+  },
+  "marshmallow_base": {
+    "id": "marshmallow_base",
+    "name": "Marshmallow",
+    "videoUrl": "https://www.instagram.com/p/DL3GUT_yYdp/"
+  },
+  "cheesecake_base": {
+    "id": "cheesecake_base",
+    "name": "Cheesecake",
+    "videoUrl": "https://www.instagram.com/p/DO6vAy5DtCr/"
+  },
+  "darkest_chocolate_base": {
+    "id": "darkest_chocolate_base",
+    "name": "Darkest Chocolate",
+    "videoUrl": "https://www.instagram.com/p/DHRSz7tSyhO/"
+  },
+  "vegan_vanilla_base": {
+    "id": "vegan_vanilla_base",
+    "name": "Vegan Vanilla",
+    "videoUrl": "https://www.instagram.com/reel/DU7W3Y3jmmX/?igsh=MTJ4enJzYXpob29hNA=="
+  },
+  "cake_batter_crumble": {
+    "id": "cake_batter_crumble",
+    "name": "Cake Batter Crumble",
+    "videoUrl": "https://www.instagram.com/p/DGJXe-eyqIK/"
+  },
+  "smores_fan_favorite": {
+    "id": "smores_fan_favorite",
+    "name": "S\u00e2\u20ac\u2122mores",
+    "videoUrl": "https://www.instagram.com/p/DMD85J6yYrM/"
+  },
+  "mocha_chip": {
+    "id": "mocha_chip",
+    "name": "Mocha Chip",
+    "videoUrl": "https://www.instagram.com/p/DFbKOQvSF6L/"
+  },
+  "dark_chocolate_pb_cup": {
+    "id": "dark_chocolate_pb_cup",
+    "name": "Dark Chocolate PB Cup",
+    "videoUrl": "https://www.instagram.com/p/DHRSz7tSyhO/"
+  },
+  "chocolate_cookies_and_cream": {
+    "id": "chocolate_cookies_and_cream",
+    "name": "Chocolate Cookies & Cream",
+    "videoUrl": "https://www.instagram.com/p/DHRSz7tSyhO/"
+  },
+  "chocolate_pb_cup": {
+    "id": "chocolate_pb_cup",
+    "name": "Chocolate PB Cup",
+    "videoUrl": "https://www.instagram.com/p/DHRSz7tSyhO/"
+  },
+  "mint_oreo": {
+    "id": "mint_oreo",
+    "name": "Mint Chocolate Cookie",
+    "videoUrl": "https://www.instagram.com/p/DHRSz7tSyhO/"
+  },
+  "vanilla_caramel_fudge": {
+    "id": "vanilla_caramel_fudge",
+    "name": "Vanilla Caramel Fudge",
+    "videoUrl": "https://www.instagram.com/reel/DU7W3Y3jmmX/?igsh=MTJ4enJzYXpob29hNA=="
+  },
+  "confetti_brownie_batter": {
+    "id": "confetti_brownie_batter",
+    "name": "Confetti Brownie Batter",
+    "videoUrl": "https://www.instagram.com/p/DPhVVxuD57T/"
+  },
+  "chocolate_chip_cookie_dough_blizzard_ff": {
+    "id": "chocolate_chip_cookie_dough_blizzard_ff",
+    "name": "Chocolate Chip Cookie Dough Blast",
+    "videoUrl": "https://www.instagram.com/p/DKIZ7RdSz5-/"
+  },
+  "chocolate_chip_banana_bread": {
+    "id": "chocolate_chip_banana_bread",
+    "name": "Chocolate Chip Banana Bread",
+    "videoUrl": "https://www.instagram.com/p/DHRSz7tSyhO/"
+  },
+  "chocolate_oreo_mcflurry": {
+    "id": "chocolate_oreo_mcflurry",
+    "name": "Chocolate Cookie Crunch Flurry",
+    "videoUrl": "https://www.instagram.com/p/DHRSz7tSyhO/"
+  },
+  "chocolate_devotion": {
+    "id": "chocolate_devotion",
+    "name": "Triple Chocolate Decadence",
+    "videoUrl": "https://www.instagram.com/p/DHRSz7tSyhO/"
+  },
+  "mocha_brownie_mudslide_blizzard": {
+    "id": "mocha_brownie_mudslide_blizzard",
+    "name": "Mocha Brownie Mudslide Blast",
+    "videoUrl": "https://www.instagram.com/p/DFbKOQvSF6L/"
+  },
+  "matchapolitan": {
+    "id": "matchapolitan",
+    "name": "Matchapolitan",
+    "videoUrl": "https://www.instagram.com/p/DJAP7jeyFP2/"
+  },
+  "fluffernutter": {
+    "id": "fluffernutter",
+    "name": "Fluffernutter",
+    "videoUrl": "https://www.instagram.com/p/DNOsq4-ypCN/"
+  },
+  "love_potion_31": {
+    "id": "love_potion_31",
+    "name": "White Chocolate Raspberry Swirl",
+    "videoUrl": "https://www.instagram.com/p/DHRSz7tSyhO/"
+  },
+  "peanut_butter_chocolate_banana": {
+    "id": "peanut_butter_chocolate_banana",
+    "name": "Peanut Butter Chocolate Banana",
+    "videoUrl": "https://www.instagram.com/p/DHRSz7tSyhO/"
+  },
+  "tc_strawberry_shortcake_crisp": {
+    "id": "tc_strawberry_shortcake_crisp",
+    "name": "Strawberry Shortcake Crisp",
+    "videoUrl": "https://www.instagram.com/p/DOHRJVbDrKH/"
+  },
+  "tc_dark_chocolate_fudge": {
+    "id": "tc_dark_chocolate_fudge",
+    "name": "Ultra-Volume Dark Chocolate Fudge",
+    "videoUrl": "https://www.instagram.com/p/DHRSz7tSyhO/"
+  },
+  "tc_banana_cream_dream": {
+    "id": "tc_banana_cream_dream",
+    "name": "Banana Cream Pie Mega-Volume",
+    "videoUrl": "https://www.instagram.com/p/DQxMcEBEg4B/"
+  }
+}
