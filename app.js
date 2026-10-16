@@ -541,7 +541,53 @@
   const copyShoppingListBtn = document.getElementById('copyShoppingListBtn');
   const printShoppingListBtn = document.getElementById('printShoppingListBtn');
   const clearShoppingListBtn = document.getElementById('clearShoppingListBtn');
-  
+
+  // Shopping List In-Store Mode & Wake Lock State
+  let shoppingViewMode = localStorage.getItem('creami_shopping_view_mode') || 'standard';
+  let shoppingStoreWakeLock = null;
+  let storeSessionInCart = [];
+
+  async function requestShoppingStoreWakeLock() {
+    try {
+      if ('wakeLock' in navigator && !shoppingStoreWakeLock) {
+        shoppingStoreWakeLock = await navigator.wakeLock.request('screen');
+        updateShoppingStoreWakeLockUI(true);
+        shoppingStoreWakeLock.addEventListener('release', () => {
+          shoppingStoreWakeLock = null;
+          updateShoppingStoreWakeLockUI(false);
+        });
+      } else {
+        updateShoppingStoreWakeLockUI(Boolean(shoppingStoreWakeLock));
+      }
+    } catch (err) {
+      console.warn('Shopping wake lock failed:', err);
+      updateShoppingStoreWakeLockUI(false);
+    }
+  }
+
+  function releaseShoppingStoreWakeLock() {
+    if (shoppingStoreWakeLock) {
+      shoppingStoreWakeLock.release().catch(() => {});
+      shoppingStoreWakeLock = null;
+    }
+    updateShoppingStoreWakeLockUI(false);
+  }
+
+  function updateShoppingStoreWakeLockUI(isActive) {
+    const pill = document.getElementById('storeWakeLockPill');
+    if (!pill) return;
+    if (isActive) {
+      pill.innerHTML = '⚡ Screen Awake';
+      pill.style.background = 'rgba(16, 185, 129, 0.2)';
+      pill.style.borderColor = 'rgba(16, 185, 129, 0.45)';
+      pill.style.color = '#34d399';
+    } else {
+      pill.innerHTML = '💤 Screen Normal';
+      pill.style.background = 'rgba(255, 255, 255, 0.05)';
+      pill.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+      pill.style.color = '#94a3b8';
+    }
+  }
   const customRecipeModalOverlay = document.getElementById('customRecipeModalOverlay');
   const customModalCloseBtn = document.getElementById('customModalCloseBtn');
   const addCustomRecipeBtn = document.getElementById('addCustomRecipeBtn');
@@ -13617,6 +13663,27 @@
       openGoogleAuthModal();
       return;
     }
+
+    // Sync view switcher buttons in header
+    const btnShopViewStandard = document.getElementById('btnShopViewStandard');
+    const btnShopViewStore = document.getElementById('btnShopViewStore');
+    if (btnShopViewStandard && btnShopViewStore) {
+      btnShopViewStandard.classList.toggle('active', shoppingViewMode === 'standard');
+      btnShopViewStore.classList.toggle('active', shoppingViewMode === 'store');
+    }
+
+    if (shoppingViewMode === 'store') {
+      requestShoppingStoreWakeLock();
+    } else {
+      releaseShoppingStoreWakeLock();
+    }
+
+    if (Array.isArray(storeSessionInCart) && storeSessionInCart.length > 0) {
+      storeSessionInCart = storeSessionInCart.filter(item => pantryState.has(item.id));
+    } else if (!Array.isArray(storeSessionInCart)) {
+      storeSessionInCart = [];
+    }
+
     // 1. Sanitize any legacy manual items first
     let manualChanged = false;
     const cleanManual = new Set();
@@ -13712,9 +13779,35 @@
     });
 
     const totalPrimaryItems = Object.values(groupedGroceries).reduce((acc, list) => acc + list.length, 0);
+    const inCartCount = storeSessionInCart.length;
+    const totalStoreItems = totalPrimaryItems + inCartCount;
+    const progressPct = totalStoreItems > 0 ? Math.round((inCartCount / totalStoreItems) * 100) : (totalPrimaryItems === 0 && inCartCount === 0 ? 0 : 100);
 
     // Build Modal HTML
-    let html = `
+    let html = '';
+
+    if (shoppingViewMode === 'store') {
+      html += `
+        <div class="store-mode-banner">
+          <div class="store-mode-banner-top">
+            <div class="store-mode-title-wrap">
+              <span class="store-mode-pill">🛒 In-Store Grocery Mode</span>
+              <span style="font-size: 0.82rem; font-weight: 700; color: #f1f5f9;">
+                ${inCartCount} of ${totalStoreItems} items in cart (${progressPct}%)
+              </span>
+            </div>
+            <span class="store-wake-lock-pill" id="storeWakeLockPill" title="Keeps your screen awake while shopping in the aisles">
+              ${shoppingStoreWakeLock ? '⚡ Screen Awake' : '💤 Screen Normal'}
+            </span>
+          </div>
+          <div class="store-progress-track">
+            <div class="store-progress-fill" style="width: ${progressPct}%;"></div>
+          </div>
+        </div>
+      `;
+    }
+
+    html += `
       <div class="shopping-quick-add-wrap">
         <div class="shopping-quick-add-input-box">
           <input type="text" id="shopQuickAddInput" class="shopping-quick-add-input" placeholder="Quick add grocery item (e.g. Fairlife 2% Milk)..." autocomplete="off" />
@@ -13724,76 +13817,176 @@
       </div>
     `;
 
-    if (totalPrimaryItems === 0) {
-      html += `
-        <div class="shopping-empty-state">
-          <div style="font-size: 2.8rem; margin-bottom: 10px;">🛒</div>
-          <h3>Your Grocery List is Empty</h3>
-          <p>Star recipes you plan to make to track their missing ingredients automatically, or type items above to add them to your list.</p>
-        </div>
-      `;
-    } else {
-      html += '<div class="shopping-list-items">';
-      
-      // Render sorted categories
-      const categoryOrder = [
-        'dairy_liquids',
-        'protein_powders',
-        'pudding_mixes',
-        'sweeteners_binders',
-        'baking_powders',
-        'extracts_flavors',
-        'syrups_sauces',
-        'nut_butters_spreads',
-        'produce_fruit',
-        'beverages_drinks',
-        'spices_seasonings',
-        'mixins_snacks'
-      ];
-
-      // Add any custom or remaining categories
-      Object.keys(groupedGroceries).forEach(cat => {
-        if (!categoryOrder.includes(cat)) categoryOrder.push(cat);
-      });
-
-      categoryOrder.forEach(catKey => {
-        const items = groupedGroceries[catKey];
-        if (!items || items.length === 0) return;
-
-        const catTitle = INGREDIENT_CATEGORIES[catKey] || 'Other Groceries';
-        const catIcon = CATEGORY_ICONS[catKey] || '🛒';
-
+    if (shoppingViewMode === 'store') {
+      if (totalPrimaryItems === 0 && inCartCount === 0) {
         html += `
-          <div class="shopping-category-group">
-            <div class="shopping-category-header">
-              <span class="shopping-cat-icon">${catIcon}</span>
-              <span class="shopping-cat-title">${catTitle}</span>
-              <span class="shopping-cat-count">${items.length}</span>
-            </div>
-            <div class="shopping-category-items">
-              ${items.map(item => `
-                <div class="shopping-item-row" data-name="${item.name}">
-                  <div class="shopping-item-left">
-                    <button type="button" class="shopping-item-check-btn add-bought-btn" data-name="${item.name}" title="Mark as bought (+ In Stock)">
-                      <span class="shop-check-box"></span>
-                    </button>
-                    <div style="min-width: 0;">
-                      <div class="shopping-item-name">${item.name}</div>
-                      <div class="shopping-item-recipes" title="${item.source}">${item.source}</div>
+          <div class="shopping-empty-state">
+            <div style="font-size: 2.8rem; margin-bottom: 10px;">🛒</div>
+            <h3>Your Grocery List is Empty</h3>
+            <p>Star recipes you plan to make to track their missing ingredients automatically, or type items above to add them to your list.</p>
+          </div>
+        `;
+      } else if (totalPrimaryItems === 0 && inCartCount > 0) {
+        html += `
+          <div class="store-complete-card">
+            <div class="store-complete-icon">🎉</div>
+            <h3 style="color: #34d399; margin: 0 0 6px 0; font-size: 1.25rem;">All Done! Grocery Run Complete</h3>
+            <p style="color: #94a3b8; font-size: 0.88rem; margin: 0;">You've picked up all items on your grocery list! Everything is synced to your pantry.</p>
+          </div>
+        `;
+      } else {
+        html += '<div class="store-aisles-wrap">';
+        
+        const categoryOrder = [
+          'dairy_liquids',
+          'protein_powders',
+          'pudding_mixes',
+          'sweeteners_binders',
+          'baking_powders',
+          'extracts_flavors',
+          'syrups_sauces',
+          'nut_butters_spreads',
+          'produce_fruit',
+          'beverages_drinks',
+          'spices_seasonings',
+          'mixins_snacks'
+        ];
+
+        Object.keys(groupedGroceries).forEach(cat => {
+          if (!categoryOrder.includes(cat)) categoryOrder.push(cat);
+        });
+
+        categoryOrder.forEach(catKey => {
+          const items = groupedGroceries[catKey];
+          if (!items || items.length === 0) return;
+
+          const catTitle = INGREDIENT_CATEGORIES[catKey] || 'Other Groceries';
+          const catIcon = CATEGORY_ICONS[catKey] || '🛒';
+
+          html += `
+            <div class="store-aisle-group">
+              <div class="store-aisle-header">
+                <span class="store-aisle-icon">${catIcon}</span>
+                <span class="store-aisle-title">${catTitle}</span>
+                <span class="store-aisle-count" style="font-size: 0.75rem; color: #94a3b8; font-weight: 600;">(${items.length})</span>
+              </div>
+              <div class="store-aisle-items">
+                ${items.map(item => `
+                  <div class="store-item-card" data-name="${escapeHtml(item.name)}" data-manual="${item.isManual}">
+                    <div class="store-item-left">
+                      <div class="store-check-circle" aria-hidden="true"></div>
+                      <div style="min-width: 0; flex: 1;">
+                        <div class="store-item-name">${escapeHtml(item.name)}</div>
+                        <div class="store-item-source" title="${escapeHtml(item.source)}">${escapeHtml(item.source)}</div>
+                      </div>
                     </div>
+                    <div class="store-item-tag">+ Got It</div>
                   </div>
-                  <div class="shopping-item-actions">
-                    <button type="button" class="btn-xs btn-outline add-bought-btn" data-name="${item.name}">+ In Stock</button>
-                    ${item.isManual ? `<button type="button" class="btn-xs remove-shop-item-btn" data-name="${item.name}" style="background: transparent; border: 1px solid var(--border-glass); color: var(--text-dim); border-radius: var(--radius-sm); cursor: pointer;" title="Remove from list">✕</button>` : ''}
+                `).join('')}
+              </div>
+            </div>
+          `;
+        });
+
+        html += '</div>';
+      }
+
+      // Render "In Your Cart" section if items have been collected
+      if (inCartCount > 0) {
+        html += `
+          <div class="store-found-section">
+            <div class="store-found-header">
+              <span>🧺 In Your Cart (${inCartCount})</span>
+              <span style="font-size: 0.75rem; color: #94a3b8; font-weight: 500;">Tap Put Back if needed</span>
+            </div>
+            <div class="store-found-items">
+              ${storeSessionInCart.map((item, idx) => `
+                <div class="store-found-item-card">
+                  <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+                    <span style="color: #34d399; font-size: 0.9rem;">✓</span>
+                    <span class="store-found-name">${escapeHtml(item.name)}</span>
                   </div>
+                  <button type="button" class="btn-store-undo" data-idx="${idx}" data-name="${escapeHtml(item.name)}" title="Move back to missing list">
+                    ↩️ Put Back
+                  </button>
                 </div>
               `).join('')}
             </div>
           </div>
         `;
-      });
+      }
+    } else {
+      if (totalPrimaryItems === 0) {
+        html += `
+          <div class="shopping-empty-state">
+            <div style="font-size: 2.8rem; margin-bottom: 10px;">🛒</div>
+            <h3>Your Grocery List is Empty</h3>
+            <p>Star recipes you plan to make to track their missing ingredients automatically, or type items above to add them to your list.</p>
+          </div>
+        `;
+      } else {
+        html += '<div class="shopping-list-items">';
+        
+        // Render sorted categories
+        const categoryOrder = [
+          'dairy_liquids',
+          'protein_powders',
+          'pudding_mixes',
+          'sweeteners_binders',
+          'baking_powders',
+          'extracts_flavors',
+          'syrups_sauces',
+          'nut_butters_spreads',
+          'produce_fruit',
+          'beverages_drinks',
+          'spices_seasonings',
+          'mixins_snacks'
+        ];
 
-      html += '</div>';
+        // Add any custom or remaining categories
+        Object.keys(groupedGroceries).forEach(cat => {
+          if (!categoryOrder.includes(cat)) categoryOrder.push(cat);
+        });
+
+        categoryOrder.forEach(catKey => {
+          const items = groupedGroceries[catKey];
+          if (!items || items.length === 0) return;
+
+          const catTitle = INGREDIENT_CATEGORIES[catKey] || 'Other Groceries';
+          const catIcon = CATEGORY_ICONS[catKey] || '🛒';
+
+          html += `
+            <div class="shopping-category-group">
+              <div class="shopping-category-header">
+                <span class="shopping-cat-icon">${catIcon}</span>
+                <span class="shopping-cat-title">${catTitle}</span>
+                <span class="shopping-cat-count">${items.length}</span>
+              </div>
+              <div class="shopping-category-items">
+                ${items.map(item => `
+                  <div class="shopping-item-row" data-name="${item.name}">
+                    <div class="shopping-item-left">
+                      <button type="button" class="shopping-item-check-btn add-bought-btn" data-name="${item.name}" title="Mark as bought (+ In Stock)">
+                        <span class="shop-check-box"></span>
+                      </button>
+                      <div style="min-width: 0;">
+                        <div class="shopping-item-name">${item.name}</div>
+                        <div class="shopping-item-recipes" title="${item.source}">${item.source}</div>
+                      </div>
+                    </div>
+                    <div class="shopping-item-actions">
+                      <button type="button" class="btn-xs btn-outline add-bought-btn" data-name="${item.name}">+ In Stock</button>
+                      ${item.isManual ? `<button type="button" class="btn-xs remove-shop-item-btn" data-name="${item.name}" style="background: transparent; border: 1px solid var(--border-glass); color: var(--text-dim); border-radius: var(--radius-sm); cursor: pointer;" title="Remove from list">✕</button>` : ''}
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        });
+
+        html += '</div>';
+      }
     }
 
     // Render suggestions section if available
@@ -13826,27 +14019,78 @@
     shoppingModalBody.innerHTML = html;
 
     // Attach Event Listeners inside Shopping Modal
-    // 1. Mark as Bought (+ In Stock)
-    shoppingModalBody.querySelectorAll('.add-bought-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const ingName = btn.dataset.name;
-        markShoppingItemAsBought(ingName);
-        showToast(`✓ "${ingName}" added to pantry!`);
-        openShoppingListModal();
-      });
-    });
+    if (shoppingViewMode === 'store') {
+      // 1. Store Mode: Tapping whole card marks bought and moves to cart
+      shoppingModalBody.querySelectorAll('.store-item-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const name = card.dataset.name;
+          const isManual = card.dataset.manual === 'true';
 
-    // 2. Remove Manual Item
-    shoppingModalBody.querySelectorAll('.remove-shop-item-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const ingName = btn.dataset.name;
-        manualShoppingList.delete(ingName);
-        manualShoppingList.delete(sanitizeShoppingItemName(ingName));
-        saveManualShoppingList();
-        openShoppingListModal();
-        showToast(`Removed "${ingName}" from shopping list`);
+          try { playAudioSuccess(); } catch (e) {}
+          if (navigator.vibrate) {
+            try { navigator.vibrate([40]); } catch (e) {}
+          }
+
+          let masterMatch = null;
+          if (typeof INGREDIENTS_MASTER !== 'undefined') {
+            masterMatch = INGREDIENTS_MASTER.find(i => i.name.toLowerCase() === name.toLowerCase());
+          }
+          const id = masterMatch ? masterMatch.id : name.toLowerCase().replace(/[^a-z0-9]+/g, '_').trim();
+
+          storeSessionInCart.push({ name, id, isManual });
+          markShoppingItemAsBought(name);
+          showToast(`🛒 "${name}" added to cart & pantry!`);
+          openShoppingListModal();
+        });
       });
-    });
+
+      // 2. Store Mode: Undo / Put Back
+      shoppingModalBody.querySelectorAll('.btn-store-undo').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const idx = parseInt(btn.dataset.idx, 10);
+          if (isNaN(idx) || idx < 0 || idx >= storeSessionInCart.length) return;
+
+          const item = storeSessionInCart[idx];
+          pantryState.delete(item.id);
+          if (item.isManual) {
+            manualShoppingList.add(item.name);
+          }
+          savePantry();
+          saveManualShoppingList();
+          renderPantryList();
+          renderRecipes();
+          triggerCloudSync();
+
+          storeSessionInCart.splice(idx, 1);
+          showToast(`↩️ "${item.name}" moved back to list`);
+          openShoppingListModal();
+        });
+      });
+    } else {
+      // Standard Mode Event Listeners
+      // 1. Mark as Bought (+ In Stock)
+      shoppingModalBody.querySelectorAll('.add-bought-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const ingName = btn.dataset.name;
+          markShoppingItemAsBought(ingName);
+          showToast(`✓ "${ingName}" added to pantry!`);
+          openShoppingListModal();
+        });
+      });
+
+      // 2. Remove Manual Item
+      shoppingModalBody.querySelectorAll('.remove-shop-item-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const ingName = btn.dataset.name;
+          manualShoppingList.delete(ingName);
+          manualShoppingList.delete(sanitizeShoppingItemName(ingName));
+          saveManualShoppingList();
+          openShoppingListModal();
+          showToast(`Removed "${ingName}" from shopping list`);
+        });
+      });
+    }
 
     // 3. Quick Add Custom Item with Autocomplete from Pantry Database
     const quickInput = shoppingModalBody.querySelector('#shopQuickAddInput');
@@ -14072,21 +14316,23 @@
   }
 
   function closeShoppingListModal() {
+    releaseShoppingStoreWakeLock();
     shoppingModalOverlay.classList.remove('active');
     shoppingModalOverlay.setAttribute('aria-hidden', 'true');
     unlockBackgroundScroll();
   }
 
   function clearShoppingList() {
-    if (manualShoppingList.size === 0) {
+    if (manualShoppingList.size === 0 && (!storeSessionInCart || storeSessionInCart.length === 0)) {
       showToast('Manual shopping list is already empty');
       return;
     }
     const count = manualShoppingList.size;
     manualShoppingList.clear();
+    storeSessionInCart = [];
     saveManualShoppingList();
     openShoppingListModal();
-    showToast(`🗑️ Cleared ${count} manual item${count === 1 ? '' : 's'} from shopping list`);
+    showToast(count > 0 ? `🗑️ Cleared ${count} manual item${count === 1 ? '' : 's'} from shopping list` : '🗑️ Cleared shopping cart items');
   }
 
   function updateShoppingListBadge() {
@@ -14127,14 +14373,14 @@
   }
 
   function getFormattedShoppingListText(format = 'standard') {
-    const categoryGroups = shoppingModalBody.querySelectorAll('.shopping-category-group');
+    const categoryGroups = shoppingModalBody.querySelectorAll('.shopping-category-group, .store-aisle-group');
     if (categoryGroups.length === 0) return null;
 
     let listText = '🛒 Creami Cravings Grocery List:\n';
     categoryGroups.forEach(grp => {
-      const title = grp.querySelector('.shopping-cat-title')?.textContent || 'Groceries';
-      const icon = grp.querySelector('.shopping-cat-icon')?.textContent || '🛒';
-      const items = Array.from(grp.querySelectorAll('.shopping-item-name')).map(n => n.textContent.trim());
+      const title = grp.querySelector('.shopping-cat-title, .store-aisle-title')?.textContent || 'Groceries';
+      const icon = grp.querySelector('.shopping-cat-icon, .store-aisle-icon')?.textContent || '🛒';
+      const items = Array.from(grp.querySelectorAll('.shopping-item-name, .store-item-name')).map(n => n.textContent.trim());
       if (items.length > 0) {
         listText += `\n${icon} ${title}:\n`;
         items.forEach(it => {
@@ -17940,6 +18186,27 @@
     if (keepShoppingListBtn) keepShoppingListBtn.addEventListener('click', exportToGoogleKeep);
     if (printShoppingListBtn) printShoppingListBtn.addEventListener('click', printShoppingList);
     if (clearShoppingListBtn) clearShoppingListBtn.addEventListener('click', clearShoppingList);
+
+    const btnShopViewStandard = document.getElementById('btnShopViewStandard');
+    const btnShopViewStore = document.getElementById('btnShopViewStore');
+    if (btnShopViewStandard) {
+      btnShopViewStandard.addEventListener('click', () => {
+        if (shoppingViewMode !== 'standard') {
+          shoppingViewMode = 'standard';
+          localStorage.setItem('creami_shopping_view_mode', 'standard');
+          openShoppingListModal();
+        }
+      });
+    }
+    if (btnShopViewStore) {
+      btnShopViewStore.addEventListener('click', () => {
+        if (shoppingViewMode !== 'store') {
+          shoppingViewMode = 'store';
+          localStorage.setItem('creami_shopping_view_mode', 'store');
+          openShoppingListModal();
+        }
+      });
+    }
 
     // Freezer Tracker Modal & Add Form (Roadmap Item 8)
     if (openFreezerTrackerBtn) openFreezerTrackerBtn.addEventListener('click', openFreezerModal);

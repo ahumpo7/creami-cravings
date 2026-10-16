@@ -115,7 +115,7 @@
   <link rel="icon" type="image/png" sizes="144x144" href="icon-144.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=v6.1">
+  <link rel="stylesheet" href="styles.css?v=v6.2">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -840,9 +840,17 @@
     <div class="modal-content shopping-modal-content">
       <div class="modal-handle-bar" aria-hidden="true"></div>
       <button class="modal-close" id="shoppingModalCloseBtn" aria-label="Close modal">&times;</button>
-      <div class="modal-header">
-        <h2 class="modal-title">🛒 Missing Ingredients Shopping List</h2>
-        <p class="modal-subtitle">Items needed across your selected recipes or favorites that are not currently in your pantry.</p>
+      <div class="modal-header shopping-modal-header">
+        <div class="shopping-header-top">
+          <div class="shopping-header-titles">
+            <h2 class="modal-title">🛒 Missing Ingredients Shopping List</h2>
+            <p class="modal-subtitle">Items needed across your selected recipes or favorites that are not currently in your pantry.</p>
+          </div>
+          <div class="shopping-view-switcher" role="group" aria-label="Shopping view mode">
+            <button type="button" class="btn-shop-view active" id="btnShopViewStandard" data-view="standard">📋 Standard</button>
+            <button type="button" class="btn-shop-view" id="btnShopViewStore" data-view="store">🛒 In-Store Mode</button>
+          </div>
+        </div>
       </div>
       <div id="shoppingModalBody" class="shopping-modal-body"></div>
       <div class="modal-footer shopping-modal-footer">
@@ -3352,6 +3360,6 @@
 
   <!-- Scripts -->
   <script src="recipes-data.js?v=v4.3"></script>
-  <script src="app.js?v=v6.1"></script>
+  <script src="app.js?v=v6.2"></script>
 </body>
 </html>
