@@ -430,7 +430,8 @@ def format_user_payload(user):
         'freezerCapacity': get_effective_freezer_capacity(user),
         'subscriptions': user.get('subscriptions', fallback_subs),
         'socialLinks': user.get('socialLinks', {}),
-        'perks': user.get('perks', [])
+        'perks': user.get('perks', []),
+        'badges': user.get('badges', {})
     }
 
 RECIPES_MASTER = []
@@ -2141,6 +2142,8 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 user['freezerPints'] = data['freezerPints']
             if 'socialLinks' in data and isinstance(data['socialLinks'], dict):
                 user['socialLinks'] = data['socialLinks']
+            if 'badges' in data and isinstance(data['badges'], dict):
+                user['badges'] = data['badges']
 
             user['last_active'] = datetime.utcnow().isoformat()
             save_json_file(USERS_DB_FILE, users_db)

@@ -15680,3 +15680,309 @@ body.modal-open .btn-back-to-top {
   }
 }
 
+/* --- Phase 1 Gamification: Chef Badges & Milestones --- */
+.stat-card.stat-card-interactive {
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card.stat-card-interactive:hover {
+  transform: translateY(-2px);
+  border-color: rgba(245, 158, 11, 0.4);
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.12);
+}
+
+.stat-card.stat-card-interactive:active {
+  transform: scale(0.98);
+}
+
+.stat-icon.gold {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(217, 119, 6, 0.15));
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.15);
+}
+
+.btn-badges-header {
+  border-color: rgba(245, 158, 11, 0.35) !important;
+  color: #fbbf24 !important;
+}
+
+.btn-badges-header:hover {
+  border-color: rgba(245, 158, 11, 0.6) !important;
+  box-shadow: 0 0 18px rgba(245, 158, 11, 0.25) !important;
+}
+
+.badges-modal-content {
+  max-width: 680px;
+  width: 95%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7), 0 0 40px rgba(245, 158, 11, 0.15);
+}
+
+.badges-modal-header {
+  margin-bottom: 14px;
+  text-align: center;
+}
+
+.badges-header-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.1));
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #fbbf24;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}
+
+.badges-progress-container {
+  background: var(--bg-card);
+  border: 1px solid var(--border-item);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  margin: 14px 0 16px;
+  text-align: left;
+}
+
+.badges-progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 0.86rem;
+}
+
+.badges-progress-rank {
+  font-weight: 700;
+  color: #fbbf24;
+}
+
+.badges-progress-count {
+  font-weight: 600;
+  color: var(--text-dim);
+}
+
+.badges-progress-track {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+}
+
+.badges-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #ec4899, #f59e0b, #10b981);
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.badges-tab-bar {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.btn-badge-tab {
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-item);
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-badge-tab:hover {
+  color: var(--text-main);
+  border-color: var(--border-focus);
+}
+
+.btn-badge-tab.active {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.5);
+  color: #fbbf24;
+}
+
+.badges-modal-body {
+  flex-grow: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 4px 2px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.badge-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px;
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  border: 1px solid var(--border-item);
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.badge-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-focus);
+}
+
+.badge-card.unlocked {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(236, 72, 153, 0.04));
+  border-color: rgba(245, 158, 11, 0.35);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.2);
+}
+
+.badge-card.unlocked::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #ec4899, #f59e0b);
+}
+
+.badge-card.locked {
+  opacity: 0.72;
+}
+
+.badge-icon-box {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  flex-shrink: 0;
+  background: var(--bg-input);
+  border: 1px solid var(--border-item);
+}
+
+.badge-card.unlocked .badge-icon-box {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(236, 72, 153, 0.15));
+  border-color: rgba(245, 158, 11, 0.45);
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.2);
+}
+
+.badge-card.locked .badge-icon-box {
+  filter: grayscale(0.8);
+}
+
+.badge-info-col {
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.badge-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.badge-title-text {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.badge-cat-tag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-dim);
+  letter-spacing: 0.04em;
+}
+
+.badge-card.unlocked .badge-cat-tag {
+  background: rgba(245, 158, 11, 0.18);
+  color: #fbbf24;
+}
+
+.badge-desc-text {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.35;
+  margin-bottom: 8px;
+}
+
+.badge-progress-wrap {
+  margin-top: 6px;
+}
+
+.badge-progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  margin-bottom: 4px;
+}
+
+.badge-progress-bar {
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.badge-progress-fill-bar {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #f59e0b, #ec4899);
+}
+
+.badge-unlocked-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #10b981;
+}
+
+.badges-modal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-item);
+}
+
+@media (max-width: 768px) {
+  .badges-modal-content {
+    max-height: 88dvh;
+    padding: 18px 16px;
+  }
+  .badges-modal-body {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
+
