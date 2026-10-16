@@ -1455,115 +1455,120 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
             return
 
         elif clean_path == '/api/admin/users':
-            user = self._get_user_from_token()
-            if not user or user.get('role') != 'admin':
-                self._send_json({'error': 'Unauthorized admin access'}, 403)
-                return
-            
-            qs = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
-            search_query = qs.get('search', [qs.get('q', [''])])[0].strip().lower()
-            role_filter = qs.get('role', ['all'])[0].strip().lower()
-            sort_by = qs.get('sort', ['last_active'])[0].strip().lower()
-            sort_order = qs.get('order', ['desc'])[0].strip().lower()
-            
-            raw_limit = qs.get('limit', ['50'])[0].strip().lower()
             try:
-                page = max(1, int(qs.get('page', ['1'])[0]))
-            except ValueError:
-                page = 1
+                user = self._get_user_from_token()
+                if not user or user.get('role') != 'admin':
+                    self._send_json({'error': 'Unauthorized admin access'}, 403)
+                    return
+                
+                qs = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+                search_query = (qs.get('search') or qs.get('q') or [''])[0].strip().lower()
+                role_filter = qs.get('role', ['all'])[0].strip().lower()
+                sort_by = qs.get('sort', ['last_active'])[0].strip().lower()
+                sort_order = qs.get('order', ['desc'])[0].strip().lower()
+                
+                raw_limit = qs.get('limit', ['50'])[0].strip().lower()
+                try:
+                    page = max(1, int(qs.get('page', ['1'])[0]))
+                except ValueError:
+                    page = 1
 
-            users_list = []
-            for u in users_db.values():
-                subs = u.get('subscriptions', list(DEFAULT_SUBSCRIPTIONS))
-                role = u.get('role', 'user')
-                email = u.get('email', '')
-                name = u.get('name') or u.get('username') or ''
-                username = u.get('username') or ''
+                users_list = []
+                for u in users_db.values():
+                    subs = u.get('subscriptions', list(DEFAULT_SUBSCRIPTIONS))
+                    role = u.get('role', 'user')
+                    email = u.get('email', '')
+                    name = u.get('name') or u.get('username') or ''
+                    username = u.get('username') or ''
 
-                # Filtering: Role
-                if role_filter == 'admin' and role != 'admin':
-                    continue
-                elif role_filter == 'creator' and role != 'creator':
-                    continue
-                elif role_filter == 'vip' and role != 'vip':
-                    continue
-                elif role_filter == 'user' and role != 'user':
-                    continue
-                elif role_filter == 'allaccess' and 'All-Access' not in subs and 'Eli All-Access' not in subs:
-                    continue
-
-                # Filtering: Search query
-                if search_query:
-                    searchable = f"{name} {username} {email} {role} {' '.join(subs)}".lower()
-                    if search_query not in searchable:
+                    # Filtering: Role
+                    if role_filter == 'admin' and role != 'admin':
+                        continue
+                    elif role_filter == 'creator' and role != 'creator':
+                        continue
+                    elif role_filter == 'vip' and role != 'vip':
+                        continue
+                    elif role_filter == 'user' and role != 'user':
+                        continue
+                    elif role_filter == 'allaccess' and 'All-Access' not in subs and 'Eli All-Access' not in subs:
                         continue
 
-                made_total = sum(u.get('madeCounts', {}).values()) if isinstance(u.get('madeCounts'), dict) else 0
+                    # Filtering: Search query
+                    if search_query:
+                        searchable = f"{name} {username} {email} {role} {' '.join(subs)}".lower()
+                        if search_query not in searchable:
+                            continue
 
-                users_list.append({
-                    'id': u.get('id'),
-                    'username': username,
-                    'name': name,
-                    'email': email,
-                    'picture': u.get('picture', ''),
-                    'role': role,
-                    'creatorId': u.get('creatorId', ''),
-                    'creatorVips': get_user_creator_vips(email),
-                    'created_at': u.get('created_at', ''),
-                    'last_active': u.get('last_active', ''),
-                    'subscriptions': subs,
-                    'freezerCapacity': get_effective_freezer_capacity(u),
-                    'socialLinks': u.get('socialLinks', {}),
-                    'pantryCount': len(u.get('pantry', [])),
-                    'favoritesCount': len(u.get('favorites', [])),
-                    'customCount': len(u.get('customRecipes', [])),
-                    'madeTotal': made_total
+                    made_total = sum(u.get('madeCounts', {}).values()) if isinstance(u.get('madeCounts'), dict) else 0
+
+                    users_list.append({
+                        'id': u.get('id'),
+                        'username': username,
+                        'name': name,
+                        'email': email,
+                        'picture': u.get('picture', ''),
+                        'role': role,
+                        'creatorId': u.get('creatorId', ''),
+                        'creatorVips': get_user_creator_vips(email),
+                        'created_at': u.get('created_at', ''),
+                        'last_active': u.get('last_active', ''),
+                        'subscriptions': subs,
+                        'freezerCapacity': get_effective_freezer_capacity(u),
+                        'socialLinks': u.get('socialLinks', {}),
+                        'pantryCount': len(u.get('pantry', [])),
+                        'favoritesCount': len(u.get('favorites', [])),
+                        'customCount': len(u.get('customRecipes', [])),
+                        'madeTotal': made_total
+                    })
+
+                # Sorting
+                reverse_order = (sort_order != 'asc')
+                if sort_by == 'name':
+                    users_list.sort(key=lambda x: (x.get('name') or '').lower(), reverse=reverse_order)
+                elif sort_by == 'email':
+                    users_list.sort(key=lambda x: (x.get('email') or '').lower(), reverse=reverse_order)
+                elif sort_by == 'created_at':
+                    users_list.sort(key=lambda x: x.get('created_at') or '', reverse=reverse_order)
+                elif sort_by == 'madetotal':
+                    users_list.sort(key=lambda x: x.get('madeTotal', 0), reverse=reverse_order)
+                else:  # default last_active
+                    users_list.sort(key=lambda x: x.get('last_active') or '', reverse=reverse_order)
+
+                total_matched = len(users_list)
+                
+                # Pagination
+                if raw_limit == 'all':
+                    paginated_users = users_list
+                    limit = total_matched
+                    total_pages = 1
+                    page = 1
+                else:
+                    try:
+                        limit = max(1, min(200, int(raw_limit)))
+                    except ValueError:
+                        limit = 50
+                    total_pages = max(1, (total_matched + limit - 1) // limit)
+                    page = min(page, total_pages)
+                    start_idx = (page - 1) * limit
+                    paginated_users = users_list[start_idx:start_idx + limit]
+
+                self._send_json({
+                    'status': 'ok',
+                    'users': paginated_users,
+                    'pagination': {
+                        'totalUsers': total_matched,
+                        'totalAllUsers': len(users_db),
+                        'page': page,
+                        'limit': limit,
+                        'totalPages': total_pages,
+                        'hasNext': page < total_pages,
+                        'hasPrev': page > 1
+                    }
                 })
-
-            # Sorting
-            reverse_order = (sort_order != 'asc')
-            if sort_by == 'name':
-                users_list.sort(key=lambda x: (x.get('name') or '').lower(), reverse=reverse_order)
-            elif sort_by == 'email':
-                users_list.sort(key=lambda x: (x.get('email') or '').lower(), reverse=reverse_order)
-            elif sort_by == 'created_at':
-                users_list.sort(key=lambda x: x.get('created_at') or '', reverse=reverse_order)
-            elif sort_by == 'madetotal':
-                users_list.sort(key=lambda x: x.get('madeTotal', 0), reverse=reverse_order)
-            else:  # default last_active
-                users_list.sort(key=lambda x: x.get('last_active') or '', reverse=reverse_order)
-
-            total_matched = len(users_list)
-            
-            # Pagination
-            if raw_limit == 'all':
-                paginated_users = users_list
-                limit = total_matched
-                total_pages = 1
-                page = 1
-            else:
-                try:
-                    limit = max(1, min(200, int(raw_limit)))
-                except ValueError:
-                    limit = 50
-                total_pages = max(1, (total_matched + limit - 1) // limit)
-                page = min(page, total_pages)
-                start_idx = (page - 1) * limit
-                paginated_users = users_list[start_idx:start_idx + limit]
-
-            self._send_json({
-                'status': 'ok',
-                'users': paginated_users,
-                'pagination': {
-                    'totalUsers': total_matched,
-                    'totalAllUsers': len(users_db),
-                    'page': page,
-                    'limit': limit,
-                    'totalPages': total_pages,
-                    'hasNext': page < total_pages,
-                    'hasPrev': page > 1
-                }
-            })
+            except Exception as e:
+                logger.error(f"Error handling /api/admin/users: {e}", exc_info=True)
+                self._send_json({'error': f"Internal server error: {str(e)}"}, 500)
+            return
 
         elif self.path == '/api/admin/inquiries':
             user = self._get_user_from_token()
