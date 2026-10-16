@@ -41,7 +41,9 @@ else:
 DB_FILES = [
     "db_users.json",
     "db_recipe_stats.json",
-    "db_ratings.json"
+    "db_ratings.json",
+    "db_creator_vips.json",
+    "db_stats.json"
 ]
 
 def load_env():
