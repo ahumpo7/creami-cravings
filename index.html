@@ -1627,6 +1627,14 @@
               <small class="bap-category-hint" id="bapCategoryHint"></small>
             </div>
           </div>
+
+          <div class="bap-video-field" id="bapVideoFieldGroup" style="width: 100%; margin-top: 8px;">
+            <label for="bapVideoUrl" style="font-size: 0.76rem; font-weight: 700; color: #f472b6; display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+              <span style="display: flex; align-items: center; gap: 4px;">🎬 Creator Video Tutorial Link (Optional)</span>
+              <span style="font-size: 0.72rem; color: #94a3b8; font-weight: normal;">Instagram Reel / TikTok</span>
+            </label>
+            <input type="url" id="bapVideoUrl" placeholder="https://www.instagram.com/reel/... or TikTok URL" class="bap-text-input" style="width: 100%; box-sizing: border-box; font-size: 0.82rem; padding: 7px 10px;">
+          </div>
         </div>
 
         <!-- Step Navigation Tabs -->
@@ -1861,6 +1869,7 @@
       <!-- MANUAL FORM CONTAINER (Keeps existing custom recipe form intact) -->
       <div id="manualFormContainer" style="display: none;">
         <form id="customRecipeForm">
+          <input type="hidden" id="crEditingId" value="">
           <div class="form-row">
             <div class="form-group flex-2">
               <label for="crName">Recipe Title *</label>
@@ -1873,6 +1882,16 @@
               </select>
               <small class="form-hint" id="crCategoryHint" style="display: block; margin-top: 4px; font-size: 0.74rem;"></small>
             </div>
+          </div>
+
+          <!-- Video Tutorial Link (Instagram Reel / TikTok) -->
+          <div class="form-group" id="crVideoUrlFieldGroup">
+            <label for="crVideoUrl" style="display: flex; align-items: center; justify-content: space-between;">
+              <span style="display: flex; align-items: center; gap: 6px;">🎬 Creator Video Link (Instagram Reel / TikTok)</span>
+              <span style="font-size: 0.74rem; color: #94a3b8; font-weight: normal;">Optional</span>
+            </label>
+            <input type="url" id="crVideoUrl" placeholder="https://www.instagram.com/reel/... or https://www.tiktok.com/@.../video/..." style="width: 100%; box-sizing: border-box;">
+            <small class="form-hint">Paste an Instagram Reel, Post, or TikTok video link for followers to watch you spin this pint.</small>
           </div>
 
           <div class="form-row">
@@ -1924,7 +1943,7 @@
 
           <div class="modal-footer">
             <button type="button" class="btn-secondary" id="cancelCustomRecipeBtn">Cancel</button>
-            <button type="submit" class="btn-primary">Save Custom Recipe</button>
+            <button type="submit" class="btn-primary" id="crSubmitBtn">Save Custom Recipe</button>
           </div>
         </form>
       </div>
@@ -2548,6 +2567,22 @@
             <span class="creator-studio-badge">5 Active Collections</span>
           </div>
           <div class="creator-collections-list" id="studioCollectionsList">
+            <!-- Dynamically populated in app.js -->
+          </div>
+        </div>
+
+        <!-- Creator Published Recipes & Video Manager -->
+        <div class="creator-studio-section" id="studioRecipesManagerSection">
+          <div class="creator-studio-section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <div>
+              <h3 class="creator-studio-section-title" style="margin: 0;">📖 Manage &amp; Edit Recipes in Your Books</h3>
+              <p style="font-size: 0.8rem; color: #94a3b8; margin: 3px 0 0 0;">Add or edit video tutorial links, ingredients, instructions, and macros. All edits immediately sync to everyone with book access.</p>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <input type="text" id="studioRecipeSearchInput" placeholder="🔍 Search your recipes..." style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; padding: 6px 12px; color: #fff; font-size: 0.82rem; width: 180px;">
+            </div>
+          </div>
+          <div class="creator-recipes-manage-list" id="studioRecipesManageList" style="max-height: 360px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-top: 12px; padding-right: 4px;">
             <!-- Dynamically populated in app.js -->
           </div>
         </div>

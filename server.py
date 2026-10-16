@@ -42,6 +42,7 @@ USERS_DB_FILE = os.path.join(DIRECTORY, 'db_users.json')
 RATINGS_DB_FILE = os.path.join(DIRECTORY, 'db_ratings.json')
 STATS_DB_FILE = os.path.join(DIRECTORY, 'db_recipe_stats.json')
 CREATOR_VIPS_DB_FILE = os.path.join(DIRECTORY, 'db_creator_vips.json')
+RECIPE_OVERRIDES_FILE = os.path.join(DIRECTORY, 'db_recipe_overrides.json')
 
 DEFAULT_STAPLES = []
 
@@ -351,6 +352,7 @@ users_db = load_json_file(USERS_DB_FILE, {})
 ratings_db = load_json_file(RATINGS_DB_FILE, {})
 stats_db = load_json_file(STATS_DB_FILE, {})
 creator_vips_db = load_json_file(CREATOR_VIPS_DB_FILE, {})
+recipe_overrides_db = load_json_file(RECIPE_OVERRIDES_FILE, {})
 
 def add_user_token(user, token):
     if not user or not isinstance(user, dict) or not token:
@@ -457,7 +459,20 @@ def load_recipes_master():
         except Exception as e:
             print(f"Error loading recipes for SEO: {e}")
 
+def apply_recipe_overrides():
+    global RECIPES_MASTER, RECIPES_BY_ID
+    if not recipe_overrides_db:
+        return
+    for r_id, override in recipe_overrides_db.items():
+        if r_id in RECIPES_BY_ID:
+            RECIPES_BY_ID[r_id].update(override)
+        else:
+            RECIPES_MASTER.append(override)
+            RECIPES_BY_ID[r_id] = override
+    print(f"Applied {len(recipe_overrides_db)} creator recipe overrides.")
+
 load_recipes_master()
+apply_recipe_overrides()
 
 def is_high_pro(r):
     try:
@@ -1207,6 +1222,7 @@ def compute_community_stats():
         'madeCounts': made_summary,
         'totalBatches': total_community_batches,
         'publishedRecipes': published_recipes,
+        'recipeOverrides': recipe_overrides_db,
         'creatorProfiles': creator_profiles
     }
 
@@ -2170,6 +2186,69 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 'success': True,
                 'deleted': recipe_id,
                 'remaining': len(user['customRecipes'])
+            })
+
+        # 2c. Creator / Admin Update Recipe & Push to Followers
+        elif self.path == '/api/recipe/update':
+            user = self._get_user_from_token(data)
+            if not user:
+                self._send_json({'error': 'Unauthorized. Please sign in.'}, 401)
+                return
+
+            recipe_data = data.get('recipe') or data
+            recipe_id = recipe_data.get('id')
+            if not recipe_id:
+                self._send_json({'error': 'Recipe ID required'}, 400)
+                return
+
+            is_admin = user.get('role') == 'admin' or user.get('email', '').lower() == 'ahumpo7@gmail.com'
+            is_creator = user.get('role') == 'creator'
+            user_id = user.get('id')
+
+            has_permission = False
+            if is_admin:
+                has_permission = True
+            elif is_creator:
+                c_id = user.get('creatorId') or 'fitness_product_finder'
+                target_cat = recipe_data.get('category', '')
+                eli_categories = ['Fan Favorites', 'Keto', 'No Protein', 'Lactose Free', 'Community Legends', 'TestContent Sampler']
+                if (c_id == 'fitness_product_finder' and target_cat in eli_categories) or recipe_data.get('creatorId') == c_id:
+                    has_permission = True
+                elif recipe_data.get('userId') == user_id:
+                    has_permission = True
+            elif recipe_data.get('userId') == user_id or (recipe_id.startswith('custom_') and any(r.get('id') == recipe_id for r in user.get('customRecipes', []))):
+                has_permission = True
+
+            if not has_permission:
+                self._send_json({'error': 'Permission denied. Only the recipe creator or admin can update this recipe.'}, 403)
+                return
+
+            # Update in recipe_overrides_db
+            recipe_overrides_db[recipe_id] = recipe_data
+            save_json_file(RECIPE_OVERRIDES_FILE, recipe_overrides_db)
+
+            # Update in user's customRecipes if present
+            found_in_user = False
+            if 'customRecipes' in user and isinstance(user['customRecipes'], list):
+                for idx, cr in enumerate(user['customRecipes']):
+                    if cr.get('id') == recipe_id:
+                        user['customRecipes'][idx] = recipe_data
+                        found_in_user = True
+                        break
+            if not found_in_user and not recipe_data.get('isPersonal', False):
+                if 'customRecipes' not in user or not isinstance(user['customRecipes'], list):
+                    user['customRecipes'] = []
+                user['customRecipes'].append(recipe_data)
+
+            user['last_active'] = datetime.utcnow().isoformat()
+            save_json_file(USERS_DB_FILE, users_db)
+
+            apply_recipe_overrides()
+
+            self._send_json({
+                'status': 'ok',
+                'success': True,
+                'recipe': recipe_data
             })
 
         # 3. Log Recipe Batch Made (Personal & Community counter)

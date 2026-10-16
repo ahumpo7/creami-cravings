@@ -1469,11 +1469,41 @@
             totalUsers: data.totalUsers || 1
           };
           let needsGridReRender = false;
-          if (Array.isArray(data.publishedRecipes) && data.publishedRecipes.length > 0) {
-            const prevLen = serverPublishedRecipes.length;
-            serverPublishedRecipes = data.publishedRecipes;
-            mergeRecipes();
-            if (serverPublishedRecipes.length !== prevLen) {
+
+          // Apply creator recipe overrides from server
+          if (data.recipeOverrides && typeof data.recipeOverrides === 'object') {
+            let overridesChanged = false;
+            Object.entries(data.recipeOverrides).forEach(([rId, override]) => {
+              const found = (window.RECIPES_MASTER || []).find(r => r.id === rId);
+              if (found) {
+                const beforeStr = JSON.stringify(found);
+                Object.assign(found, override);
+                if (JSON.stringify(found) !== beforeStr) {
+                  overridesChanged = true;
+                }
+              } else if (override && override.id) {
+                if (!window.RECIPES_MASTER) window.RECIPES_MASTER = [];
+                window.RECIPES_MASTER.push(override);
+                overridesChanged = true;
+              }
+            });
+            if (overridesChanged) {
+              mergeRecipes();
+              calculateIngredientUsage();
+              needsGridReRender = true;
+              if (typeof recipeModalOverlay !== 'undefined' && recipeModalOverlay.classList.contains('active') && typeof currentModalRecipe !== 'undefined' && currentModalRecipe && data.recipeOverrides[currentModalRecipe.id]) {
+                renderRecipeModalContent(currentModalRecipe);
+              }
+            }
+          }
+
+          if (Array.isArray(data.publishedRecipes)) {
+            const prevStr = JSON.stringify(serverPublishedRecipes);
+            const newStr = JSON.stringify(data.publishedRecipes);
+            if (prevStr !== newStr) {
+              serverPublishedRecipes = data.publishedRecipes;
+              mergeRecipes();
+              calculateIngredientUsage();
               needsGridReRender = true;
             }
           }
@@ -1484,6 +1514,15 @@
           updateCommunityStatsUI();
           if (needsGridReRender) {
             renderRecipes();
+          }
+
+          if (!window._communityStatsInterval) {
+            window._communityStatsInterval = setInterval(() => {
+              fetchCommunityStats();
+            }, 45000);
+            document.addEventListener('visibilitychange', () => {
+              if (!document.hidden) fetchCommunityStats();
+            });
           }
         }
       }
@@ -5969,11 +6008,87 @@
       });
     }
 
+    // 3b. Manage & Edit Recipes in Your Books
+    renderStudioRecipesManager(creatorId);
+
+    const searchInput = document.getElementById('studioRecipeSearchInput');
+    if (searchInput && !searchInput._bound) {
+      searchInput._bound = true;
+      searchInput.addEventListener('input', () => {
+        renderStudioRecipesManager(creatorId, searchInput.value.trim());
+      });
+    }
+
     // 4. Perks, Brand Codes & Sponsors
     renderCreatorStudioPerks(creatorId);
 
     // 5. Creator VIP Member Circle
     loadAndRenderCreatorVips(creatorId);
+  }
+
+  function renderStudioRecipesManager(creatorId, searchQuery = '') {
+    const listEl = document.getElementById('studioRecipesManageList');
+    if (!listEl) return;
+
+    let matchedRecipes = allRecipes.filter(r => {
+      const cr = getRecipeCreator(r);
+      const isCreatorMatch = (cr && cr.id === creatorId) || (r.creatorId === creatorId) || (creatorId === 'fitness_product_finder' && !r.isPersonal);
+      if (!isCreatorMatch) return false;
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        return (r.name && r.name.toLowerCase().includes(q)) || (r.category && r.category.toLowerCase().includes(q));
+      }
+      return true;
+    });
+
+    if (matchedRecipes.length === 0) {
+      listEl.innerHTML = `
+        <div style="text-align: center; padding: 20px; color: #94a3b8; font-size: 0.88rem; background: rgba(15, 23, 42, 0.4); border-radius: 8px; border: 1px dashed rgba(255, 255, 255, 0.1);">
+          ${searchQuery ? 'No recipes found matching "' + escapeHtml(searchQuery) + '".' : 'No recipes found for this creator.'}
+        </div>
+      `;
+      return;
+    }
+
+    listEl.innerHTML = matchedRecipes.slice(0, 60).map(r => {
+      const hasVideo = !!r.videoUrl;
+      return `
+        <div class="creator-recipe-manage-item" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; gap: 10px; flex-wrap: wrap;">
+          <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0;">
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <strong style="color: #f8fafc; font-size: 0.9rem;">${escapeHtml(r.name)}</strong>
+              <span style="font-size: 0.72rem; padding: 2px 7px; border-radius: 999px; background: rgba(236, 72, 153, 0.15); border: 1px solid rgba(236, 72, 153, 0.3); color: #f472b6;">${escapeHtml(r.category || 'Official Book')}</span>
+              ${hasVideo ? `
+                <a href="${r.videoUrl}" target="_blank" rel="noopener noreferrer" style="font-size: 0.72rem; padding: 2px 7px; border-radius: 999px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); color: #34d399; text-decoration: none; display: inline-flex; align-items: center; gap: 3px;">
+                  🎬 Video Live ↗
+                </a>
+              ` : `
+                <span style="font-size: 0.72rem; padding: 2px 7px; border-radius: 999px; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); color: #fbbf24;">
+                  ⚠️ No Video Link
+                </span>
+              `}
+            </div>
+            <span style="font-size: 0.75rem; color: #94a3b8;">${r.macros?.calories || 0} kcal • ${r.macros?.protein || '0g'} pro • Spin: ${r.spinSetting || 'Lite'}</span>
+          </div>
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <button type="button" class="btn-primary btn-sm btn-studio-edit-recipe" data-recipe-id="${r.id}" style="padding: 6px 14px; font-size: 0.8rem; font-weight: 600;">
+              ✏️ Edit Recipe
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    listEl.querySelectorAll('.btn-studio-edit-recipe').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const rId = btn.dataset.recipeId;
+        const target = allRecipes.find(x => x.id === rId) || (window.RECIPES_MASTER || []).find(x => x.id === rId);
+        if (target) {
+          closeCreatorPortalModal();
+          openEditRecipeModal(target);
+        }
+      });
+    });
   }
 
   function openStudioPerkEditor(perkToEdit = null) {
@@ -13066,30 +13181,9 @@
                   <div class="video-card-sub">Watch ${creator ? creator.name : 'the creator'} spin and review this pint on Instagram</div>
                 </div>
               </div>
-              <a href="${recipe.videoUrl}" target="_blank" rel="noopener noreferrer" class="btn-watch-creator-video">
+              <a href="${recipe.videoUrl}" target="_blank" rel="noopener noreferrer" class="btn-watch-creator-video" aria-label="Watch ${escapeHtml(recipe.name)} video reel by ${creator ? creator.name : 'creator'}">
                 <span>▶️ Watch Reel ↗</span>
               </a>
-            </div>
-          `;
-        } else if (!isPersonal) {
-          const searchQ = (creator ? creator.handle + ' ' : '') + recipe.name;
-          return `
-            <div class="recipe-modal-video-card search-fallback">
-              <div class="video-card-left">
-                <span class="video-card-icon">📱</span>
-                <div class="video-card-details">
-                  <div class="video-card-title">Watch Video Inspiration</div>
-                  <div class="video-card-sub">Explore video spins and tutorials for this flavor</div>
-                </div>
-              </div>
-              <div class="video-card-actions" style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
-                <a href="https://www.tiktok.com/search?q=${encodeURIComponent(searchQ)}" target="_blank" rel="noopener noreferrer" class="btn-watch-creator-video tiktok">
-                  <span>TikTok ↗</span>
-                </a>
-                <a href="https://www.instagram.com/explore/tags/${encodeURIComponent(recipe.name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase())}/" target="_blank" rel="noopener noreferrer" class="btn-watch-creator-video instagram">
-                  <span>Insta ↗</span>
-                </a>
-              </div>
             </div>
           `;
         }
@@ -13474,6 +13568,11 @@
 
       <div class="modal-footer" style="margin-top: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
         <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+          ${canUserEditRecipe(recipe) ? `
+            <button class="btn-secondary" id="modalEditRecipeBtn" style="padding: 8px 14px; border-radius: var(--radius-sm); border: 1px solid rgba(236, 72, 153, 0.4); color: #f472b6; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;" title="Edit this recipe and push updates to followers">
+              ✏️ Edit Recipe
+            </button>
+          ` : ''}
           ${recipe.isSharedPortable ? `
             <button class="btn-primary btn-save-shared-recipe" id="modalSaveSharedRecipeBtn">
               <span>📥 Save to My Recipes</span>
@@ -14000,6 +14099,17 @@
     const saveSharedBtn2 = recipeModalBody.querySelector('#btnTopSaveSharedRecipe');
     if (saveSharedBtn1) saveSharedBtn1.addEventListener('click', () => handleSaveSharedToMyRecipes(saveSharedBtn1));
     if (saveSharedBtn2) saveSharedBtn2.addEventListener('click', () => handleSaveSharedToMyRecipes(saveSharedBtn2));
+
+    // Edit Recipe Button
+    const modalEditBtn = recipeModalBody.querySelector('#modalEditRecipeBtn');
+    if (modalEditBtn) {
+      modalEditBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        closeRecipeModal();
+        openEditRecipeModal(recipe);
+      });
+    }
 
     // Delete Personal Recipe Button (with in-modal 2-step confirmation)
     const modalDeleteBtn = recipeModalBody.querySelector('#modalDeleteRecipeBtn');
@@ -16227,6 +16337,8 @@
       ? 'Personal Custom' 
       : (matchedBook ? matchedBook.title : finalCategory);
 
+    const bapVideoUrl = document.getElementById('bapVideoUrl') ? document.getElementById('bapVideoUrl').value.trim() : '';
+
     const newRecipe = {
       id: isPersonalRecipe ? `custom_${currentUser.id}_${Date.now()}` : `pub_${currentUser.id}_${Date.now()}`,
       name: title,
@@ -16236,6 +16348,7 @@
       isPersonal: isPersonalRecipe,
       sourceFile: recipeSourceFile,
       creatorId: recipeCreatorId,
+      videoUrl: bapVideoUrl,
       page: 1,
       macros: {
         calories: String(nutrition.totalKcal),
@@ -16256,6 +16369,21 @@
     };
 
     customRecipesState.push(newRecipe);
+
+    // If publishing to an official book, push to server immediately
+    if (!isPersonalRecipe && currentUser && (currentUser.token || currentUser.email)) {
+      fetch('/api/recipe/update', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': currentUser.token ? `Bearer ${currentUser.token}` : '',
+          'X-User-Email': currentUser.email || ''
+        },
+        body: JSON.stringify({
+          recipe: newRecipe
+        })
+      }).catch(err => console.warn('Could not publish recipe to server:', err));
+    }
 
     // Auto-add required ingredients for this balanced recipe into the user's pantry
     let addedCount = 0;
@@ -16832,6 +16960,11 @@
 
   function openCustomRecipeModal() {
     if (customRecipeForm) customRecipeForm.reset();
+    const editingIdEl = document.getElementById('crEditingId');
+    if (editingIdEl) editingIdEl.value = '';
+    const submitBtn = document.getElementById('crSubmitBtn');
+    if (submitBtn) submitBtn.textContent = 'Save Custom Recipe';
+
     initBuildAPint();
     updateRecipeCategorySelectors();
 
@@ -16858,13 +16991,133 @@
   function closeCustomRecipeModal() {
     customRecipeModalOverlay.classList.remove('active');
     customRecipeModalOverlay.setAttribute('aria-hidden', 'true');
+    const editingIdEl = document.getElementById('crEditingId');
+    if (editingIdEl) editingIdEl.value = '';
     unlockBackgroundScroll();
+  }
+
+  function canUserEditRecipe(recipe) {
+    if (!currentUser || !recipe) return false;
+    // Super admin
+    if (currentUser.role === 'admin' || (currentUser.email && currentUser.email.toLowerCase() === 'ahumpo7@gmail.com')) {
+      return true;
+    }
+    // Author of custom or published recipe
+    if (recipe.userId && recipe.userId === currentUser.id) {
+      return true;
+    }
+    // Personal custom recipe owned by user
+    if (recipe.isPersonal && (recipe.id.startsWith('custom_') || customRecipesState.some(r => r.id === recipe.id))) {
+      return true;
+    }
+    // Verified Creator in their own books
+    if (currentUser.role === 'creator') {
+      const userCreatorId = currentUser.creatorId || 'fitness_product_finder';
+      if (recipe.creatorId && recipe.creatorId === userCreatorId) return true;
+      if (userCreatorId === 'fitness_product_finder') {
+        const eliCategories = ['Fan Favorites', 'Keto', 'No Protein', 'Lactose Free', 'Community Legends', 'TestContent Sampler'];
+        if (eliCategories.includes(recipe.category)) return true;
+      }
+    }
+    return false;
+  }
+
+  function openEditRecipeModal(recipe) {
+    if (!recipe) return;
+    if (customRecipeForm) customRecipeForm.reset();
+    initBuildAPint();
+    updateRecipeCategorySelectors();
+
+    // Switch to manual mode
+    setBapMode('manual');
+    const manualContainer = document.getElementById('manualFormContainer');
+    const wizardContainer = document.getElementById('bapWizardContainer');
+    if (manualContainer) manualContainer.style.display = 'block';
+    if (wizardContainer) wizardContainer.style.display = 'none';
+
+    // Set hidden editing ID
+    const editingIdEl = document.getElementById('crEditingId');
+    if (editingIdEl) editingIdEl.value = recipe.id;
+
+    // Fill fields
+    const nameEl = document.getElementById('crName');
+    if (nameEl) nameEl.value = recipe.name || '';
+
+    const catEl = document.getElementById('crCategory');
+    if (catEl) {
+      const targetCat = recipe.category || 'Custom';
+      let optExists = Array.from(catEl.options).some(o => o.value === targetCat);
+      if (!optExists) {
+        const newOpt = document.createElement('option');
+        newOpt.value = targetCat;
+        newOpt.textContent = targetCat;
+        catEl.appendChild(newOpt);
+      }
+      catEl.value = targetCat;
+    }
+
+    const videoUrlEl = document.getElementById('crVideoUrl');
+    if (videoUrlEl) videoUrlEl.value = recipe.videoUrl || '';
+
+    const calEl = document.getElementById('crCalories');
+    if (calEl) calEl.value = (recipe.macros && recipe.macros.calories) ? String(recipe.macros.calories).replace(/[^\d]/g, '') : '';
+
+    const proEl = document.getElementById('crProtein');
+    if (proEl) proEl.value = (recipe.macros && recipe.macros.protein) ? String(recipe.macros.protein) : '';
+
+    const carbEl = document.getElementById('crCarbs');
+    if (carbEl) carbEl.value = (recipe.macros && recipe.macros.carbs) ? String(recipe.macros.carbs) : '';
+
+    const fatEl = document.getElementById('crFat');
+    if (fatEl) fatEl.value = (recipe.macros && recipe.macros.fat) ? String(recipe.macros.fat) : '';
+
+    const spinEl = document.getElementById('crSpinSetting');
+    if (spinEl) spinEl.value = recipe.spinSetting || 'Lite Ice Cream';
+
+    const freezeEl = document.getElementById('crFreezeTime');
+    if (freezeEl) freezeEl.value = recipe.freezeTime || '16+ HOURS';
+
+    const ingsEl = document.getElementById('crIngredients');
+    if (ingsEl) {
+      if (Array.isArray(recipe.ingredients)) {
+        ingsEl.value = recipe.ingredients.map(ing => {
+          if (ing.raw) return ing.raw;
+          let str = `${ing.quantity || ''} ${ing.unit || ''} ${ing.name || ''}`.trim();
+          if (ing.isMixin && !str.toLowerCase().includes('(mix-in)')) {
+            str += ' (Mix-in)';
+          }
+          return str;
+        }).filter(Boolean).join('\n');
+      } else {
+        ingsEl.value = '';
+      }
+    }
+
+    const instEl = document.getElementById('crInstructions');
+    if (instEl) {
+      if (Array.isArray(recipe.instructions)) {
+        instEl.value = recipe.instructions.join('\n');
+      } else {
+        instEl.value = '';
+      }
+    }
+
+    const modalMainTitle = document.getElementById('bapModalMainTitle');
+    const modalSubTitle = document.getElementById('bapModalSubTitle');
+    const submitBtn = document.getElementById('crSubmitBtn');
+    if (modalMainTitle) modalMainTitle.textContent = `✏️ Edit Recipe: ${recipe.name}`;
+    if (modalSubTitle) modalSubTitle.textContent = 'Update video tutorial link, ingredients, instructions, and macros. Edits push live to everyone with book access.';
+    if (submitBtn) submitBtn.textContent = '💾 Save Changes & Push to Followers';
+
+    customRecipeModalOverlay.classList.add('active');
+    customRecipeModalOverlay.setAttribute('aria-hidden', 'false');
+    lockBackgroundScroll();
   }
 
   function handleCustomRecipeSubmit(e) {
     e.preventDefault();
     if (!currentUser) {
-      showToast('🔒 Please sign in with Google to save personal recipes.');
+      showToast('🔒 Please sign in with Google to save or edit recipes.');
       openGoogleAuthModal();
       return;
     }
@@ -16872,6 +17125,8 @@
     const chosenCat = (document.getElementById('crCategory') ? document.getElementById('crCategory').value : 'Custom') || 'Custom';
     const { finalCategory, creatorId: recipeCreatorId } = validateAndResolveRecipeCategory(chosenCat);
     const isPersonalRecipe = (finalCategory === 'Custom');
+    const editingId = document.getElementById('crEditingId') ? document.getElementById('crEditingId').value.trim() : '';
+    const videoUrl = document.getElementById('crVideoUrl') ? document.getElementById('crVideoUrl').value.trim() : '';
 
     const matchedBook = (typeof BOOKS_MASTER !== 'undefined' && !isPersonalRecipe)
       ? BOOKS_MASTER.find(b => b.categoryKey === finalCategory || (b.categories && b.categories.includes(finalCategory)))
@@ -16916,6 +17171,68 @@
 
     const parsedInst = instructionsRaw.map(l => l.trim()).filter(l => l.length > 0);
 
+    // Check if we are updating an existing recipe
+    if (editingId) {
+      const targetRecipe = allRecipes.find(r => r.id === editingId) || (window.RECIPES_MASTER || []).find(r => r.id === editingId) || { id: editingId };
+      targetRecipe.name = name;
+      targetRecipe.category = finalCategory;
+      targetRecipe.categories = [finalCategory];
+      targetRecipe.videoUrl = videoUrl;
+      targetRecipe.macros = {
+        calories: calories,
+        protein: protein.endsWith('g') ? protein : protein + 'g',
+        carbs: carbs.endsWith('g') ? carbs : carbs + 'g',
+        fat: fat.endsWith('g') ? fat : fat + 'g',
+        sugar: (targetRecipe.macros && targetRecipe.macros.sugar) || '0g',
+        fiber: (targetRecipe.macros && targetRecipe.macros.fiber) || '0g'
+      };
+      targetRecipe.spinSetting = spinSetting;
+      targetRecipe.freezeTime = freezeTime;
+      targetRecipe.ingredients = parsedIngs;
+      targetRecipe.instructions = parsedInst;
+      if (!targetRecipe.creatorId && recipeCreatorId) {
+        targetRecipe.creatorId = recipeCreatorId;
+      }
+
+      // Update in customRecipesState if present
+      const crIdx = customRecipesState.findIndex(r => r.id === editingId);
+      if (crIdx !== -1) {
+        customRecipesState[crIdx] = Object.assign({}, customRecipesState[crIdx], targetRecipe);
+        saveCustomRecipes();
+      }
+
+      // Sync to server so it is pushed to all followers
+      if (currentUser && (currentUser.token || currentUser.email)) {
+        fetch('/api/recipe/update', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': currentUser.token ? `Bearer ${currentUser.token}` : '',
+            'X-User-Email': currentUser.email || ''
+          },
+          body: JSON.stringify({
+            recipe: targetRecipe
+          })
+        }).then(res => res.json()).then(resData => {
+          if (resData && resData.recipe) {
+            console.log('Recipe update saved to server and pushed to followers:', resData.recipe.name);
+          }
+        }).catch(err => console.warn('Could not sync recipe update to server:', err));
+      }
+
+      calculateIngredientUsage();
+      closeCustomRecipeModal();
+      updateAuthUI();
+      renderPantryList();
+      renderRecipes();
+      updateStats();
+      if (recipeModalOverlay.classList.contains('active') && currentModalRecipe && currentModalRecipe.id === editingId) {
+        renderRecipeModalContent(targetRecipe);
+      }
+      showToast(`✨ Updated "${name}"! Changes pushed out to everyone with access.`);
+      return;
+    }
+
     const newRecipe = {
       id: isPersonalRecipe ? `custom_${currentUser.id}_${Date.now()}` : `pub_${currentUser.id}_${Date.now()}`,
       name: name,
@@ -16925,6 +17242,7 @@
       isPersonal: isPersonalRecipe,
       sourceFile: recipeSourceFile,
       creatorId: recipeCreatorId,
+      videoUrl: videoUrl,
       page: 1,
       macros: {
         calories: calories,
@@ -16943,6 +17261,21 @@
     };
 
     customRecipesState.push(newRecipe);
+
+    // If publishing to an official book, push to server immediately
+    if (!isPersonalRecipe && currentUser && (currentUser.token || currentUser.email)) {
+      fetch('/api/recipe/update', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': currentUser.token ? `Bearer ${currentUser.token}` : '',
+          'X-User-Email': currentUser.email || ''
+        },
+        body: JSON.stringify({
+          recipe: newRecipe
+        })
+      }).catch(err => console.warn('Could not publish recipe to server:', err));
+    }
 
     // Auto-add required ingredients for this personal recipe into the user's pantry
     let addedCount = 0;
