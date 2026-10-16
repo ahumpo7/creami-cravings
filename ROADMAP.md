@@ -280,6 +280,54 @@ A prioritized checklist of fixes, features, and refinements for the Creami Cravi
 | **Step 10** | **Item 24: 🎯 Long-Tail Search Landing Hubs** | Dedicated SEO hubs for protein, low cal, sorbet, dairy-free, keto, deluxe, and gelato with SSR & ItemList schemas. GSC status: Success. | 🟢 ~30–40 mins | ✅ **Done** |
 | **Step 11** | **Item 14: 🤖 Google Play Store Android App (Bubblewrap)** | Generate signed `.aab` bundle, deploy `assetlinks.json`, generate $1024\times500$ banner and $512\times512$ store icon. | 🟠 ~30–45 mins | ⏳ **Next** |
 | **Step 12** | **Item 21: ✉️ Domain Email & Additional Auth Options** | Namecheap email forward for `admin@creamicravings.com`, Sign in with Apple, or passwordless magic links. | 🟡 ~20–30 mins | 📋 **Planned** |
+| **Step 13** | **Item 25: 🚀 Phase 1 Scale & Safety Rails** | 6-hour automated backups, 1200ms sync debouncing, admin pagination & query indexing. | 🟢 Completed | ✅ **Done** |
+| **Step 14** | **Item 26: ⚡ Phase 2 Moderate Scale (500–5,000 Users)** | SQLite WAL mode migration, Gunicorn/FastAPI runner, server-side admin SQL queries. | 🟠 ~2–3 hrs | 📋 **Planned** |
+| **Step 15** | **Item 27: 🌐 Phase 3 High Scale (5,000–50,000+ Users)** | Managed PostgreSQL, PgBouncer, Redis caching, Cloudflare Edge CDN offloading. | 🔴 ~4–6 hrs | 📋 **Planned** |
+
+---
+
+## 📈 Scalability & Architecture Growth Roadmap
+
+### 25. 🛡️ Phase 1: Launch & Traction Scaling (0 – 500 Users) (Completed ✅)
+- [x] **Automated 6-Hour Database Backups:**
+  - Configured automated cron snapshots on production VPS running every 6 hours (`0 */6 * * *`).
+  - Pre-flight JSON integrity verification for `db_users.json`, `db_recipe_stats.json`, `db_ratings.json`, `db_creator_vips.json`, and `db_stats.json`.
+  - Timestamped `.tar.gz` archives with 30-day automated disk rotation and Discord/Slack webhook notification support.
+- [x] **Client-Side Sync Debouncing & Batching:**
+  - Debounce timer in `triggerCloudSync()` raised to 1200ms to batch rapid multi-item pantry checkoffs, shopping list modifications, and favoriting into a single atomic payload.
+  - Immediate synchronous flush with `keepalive: true` on `beforeunload`, `pagehide`, and `visibilitychange` (`hidden`) so zero state is ever lost.
+- [x] **Admin Portal User Directory Pagination & Query Indexing:**
+  - Paginated rendering in `app.js` (25 cards per page) with interactive `Previous` / `Next` controls and live record count.
+  - Full server-side query parameter support in `server.py` (`/api/admin/users?page=1&limit=50&search=...&role=...&sort=...&order=...`).
+  - Instant client search and filter response with zero DOM freezing.
+
+### 26. ⚡ Phase 2: Moderate Scale (500 – 5,000 Users) (Planned 📋)
+> **Trigger Condition:** User count approaches ~300–500 registered accounts, or `db_users.json` exceeds 2 MB.
+- [ ] **SQLite Database Migration (WAL Mode):**
+  - Migrate flat `.json` files to an embedded SQLite database (`creami.db`) using Python's native `sqlite3`.
+  - Enable Write-Ahead Logging (`PRAGMA journal_mode=WAL;`) for non-blocking concurrent reads during active writes.
+  - Implement granular row-level updates (`UPDATE users SET freezer_pints = ? WHERE id = ?`) rather than re-serializing the entire multi-megabyte JSON dictionary.
+  - Add B-tree indexes on `email`, `role`, `created_at`, `last_active`, and recipe IDs.
+- [ ] **Production ASGI/WSGI Server Runner:**
+  - Replace Python standard library `http.server.ThreadingHTTPServer` with **Gunicorn + Uvicorn** running FastAPI or Flask.
+  - Multi-worker process model to absorb sudden burst traffic without OS thread exhaustion or connection drops.
+- [ ] **Server-Side SQL Pagination & Cached Analytics:**
+  - Dynamic SQL `LIMIT` / `OFFSET` queries in the Admin Portal for instant sub-10ms loads at any user count.
+  - In-memory TTL cache for community spins and leaderboard metrics.
+
+### 27. 🌐 Phase 3: High Scale (5,000 – 50,000+ Users) (Planned 📋)
+> **Trigger Condition:** User count exceeds 5,000 active accounts or multi-server hosting is required.
+- [ ] **Managed PostgreSQL Database:**
+  - Migrate from SQLite to a fully managed relational database (Supabase, Neon, AWS RDS, or DigitalOcean Managed PostgreSQL).
+  - PgBouncer connection pooling and point-in-time recovery (PITR) continuous backups.
+- [ ] **Redis High-Speed Caching Layer:**
+  - In-memory store for session tokens, real-time sync debouncing, rate limits, and live active user counts.
+- [ ] **Cloudflare Edge CDN Asset Offloading:**
+  - Edge cache all static application assets (`recipes-data.js`, `styles.css`, `app.js`, app icons, category hubs, sitemap).
+  - 95%+ of all inbound requests served directly from the CDN edge without touching the Python origin server.
+- [ ] **Horizontal Stateless Server Scaling:**
+  - Docker containerization enabling multiple application instances behind an Nginx load balancer.
+
 
 
 

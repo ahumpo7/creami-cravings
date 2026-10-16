@@ -620,6 +620,8 @@
   let adminFilterRole = 'all';
   let adminFilterClaimStatus = 'all';
   let adminSearchQuery = '';
+  let adminUsersCurrentPage = 1;
+  const ADMIN_USERS_PER_PAGE = 25;
 
   const themeToggleBtn = document.getElementById('themeToggleBtn');
   const themeToggleLabel = document.getElementById('themeToggleLabel');
@@ -1336,7 +1338,7 @@
       syncTimeout = null;
       performSync();
     } else {
-      syncTimeout = setTimeout(performSync, 400);
+      syncTimeout = setTimeout(performSync, 1200);
     }
   }
 
@@ -16296,7 +16298,7 @@
     }
 
     try {
-      const res = await fetch('/api/admin/users', {
+      const res = await fetch('/api/admin/users?limit=all', {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': currentUser.token ? `Bearer ${currentUser.token}` : '',
@@ -16412,7 +16414,27 @@
       return;
     }
 
-    adminUsersList.innerHTML = filtered.map(u => {
+    const totalMatched = filtered.length;
+    const totalPages = Math.max(1, Math.ceil(totalMatched / ADMIN_USERS_PER_PAGE));
+    if (adminUsersCurrentPage > totalPages) {
+      adminUsersCurrentPage = totalPages;
+    }
+    const startIndex = (adminUsersCurrentPage - 1) * ADMIN_USERS_PER_PAGE;
+    const endIndex = Math.min(startIndex + ADMIN_USERS_PER_PAGE, totalMatched);
+    const pagedUsers = filtered.slice(startIndex, endIndex);
+
+    const paginationHtml = totalMatched > ADMIN_USERS_PER_PAGE ? `
+      <div class="admin-pagination-bar">
+        <div class="admin-pagination-info">Showing <strong>${startIndex + 1}–${endIndex}</strong> of <strong>${totalMatched}</strong> users</div>
+        <div class="admin-pagination-controls">
+          <button type="button" class="btn-pagination-nav" id="btnAdminPrevPage" ${adminUsersCurrentPage <= 1 ? 'disabled' : ''}>← Previous</button>
+          <span class="admin-page-indicator">Page ${adminUsersCurrentPage} of ${totalPages}</span>
+          <button type="button" class="btn-pagination-nav" id="btnAdminNextPage" ${adminUsersCurrentPage >= totalPages ? 'disabled' : ''}>Next →</button>
+        </div>
+      </div>
+    ` : '';
+
+    adminUsersList.innerHTML = pagedUsers.map(u => {
       const ADMIN_ROOTS = ['admin@creamicravings.com', 'ahumpo7@gmail.com', 'ahumpo@gmail.com', 'andrew@gmail.com'];
       const userEmail = (u.email || '').toLowerCase();
       const isRootAdmin = ADMIN_ROOTS.includes(userEmail);
@@ -16618,13 +16640,36 @@
         </div>
       </div>
     `;
-  }).join('');
+  }).join('') + paginationHtml;
 
     bindAdminUserCardEvents();
   }
 
   function bindAdminUserCardEvents() {
     if (!adminUsersList) return;
+
+    // Admin Directory Pagination Listeners
+    const prevBtn = adminUsersList.querySelector('#btnAdminPrevPage');
+    if (prevBtn) {
+      prevBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (adminUsersCurrentPage > 1) {
+          adminUsersCurrentPage--;
+          renderAdminUsers();
+          adminUsersList.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    }
+
+    const nextBtn = adminUsersList.querySelector('#btnAdminNextPage');
+    if (nextBtn) {
+      nextBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        adminUsersCurrentPage++;
+        renderAdminUsers();
+        adminUsersList.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
 
     // Toggle expand/collapse when clicking user summary bar
     adminUsersList.querySelectorAll('.admin-user-summary-bar').forEach(bar => {
@@ -18432,6 +18477,7 @@
     if (adminUserSearchInput) {
       adminUserSearchInput.addEventListener('input', (e) => {
         adminSearchQuery = e.target.value;
+        adminUsersCurrentPage = 1;
         renderAdminUsers();
       });
     }
@@ -18443,6 +18489,7 @@
         adminRoleFilterPills.querySelectorAll('button').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         adminFilterRole = btn.dataset.role;
+        adminUsersCurrentPage = 1;
         renderAdminUsers();
       });
     }
