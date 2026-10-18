@@ -4429,9 +4429,11 @@
   }
 
   function togglePantryItem(id) {
+    let action = 'added';
     if (pantryState.has(id)) {
       pantryState.delete(id);
       delete pantryItemQuantities[id];
+      action = 'removed';
     } else {
       pantryState.add(id);
       if (isSingleUseItem(id)) {
@@ -4441,6 +4443,12 @@
     savePantry();
     updatePantryCheckboxVisuals();
     renderRecipes();
+
+    trackAnalyticsEvent('pantry_ingredient_toggled', {
+      ingredient_id: id,
+      action: action,
+      total_in_pantry: pantryState.size
+    });
   }
 
   function updatePantryCheckboxVisuals() {
@@ -4871,6 +4879,14 @@
         emptyState.style.display = 'none';
       } else {
         emptyState.style.display = 'block';
+        if (q || readyOnlyFilter || baseOnlyFilter) {
+          trackAnalyticsEvent('pantry_zero_results', {
+            search_query: q,
+            category: activeCategory,
+            pantry_count: pantryState.size,
+            ready_only: readyOnlyFilter
+          });
+        }
       }
       recipeGrid.style.display = 'none';
       cleanupRecipeGridObserver();
@@ -7660,6 +7676,13 @@
         URL.revokeObjectURL(blobUrl);
       }, 2500);
       showToast(`⬇️ Downloaded ${filename}!`);
+
+      trackAnalyticsEvent('download_story_card', {
+        recipe_id: currentStoryRecipe?.id,
+        recipe_name: currentStoryRecipe?.name,
+        theme: currentStoryTheme,
+        ratio: currentStoryRatio
+      });
     } catch (err) {
       console.error('Download error:', err);
       showToast('📸 Tap & hold (or right-click) the image above to save directly!');
@@ -7690,6 +7713,12 @@
           title: currentStoryRecipe?.name || 'Ninja Creami Recipe'
         });
         showToast('Shared successfully!');
+        trackAnalyticsEvent('share_story_card', {
+          recipe_id: currentStoryRecipe?.id,
+          recipe_name: currentStoryRecipe?.name,
+          theme: currentStoryTheme,
+          ratio: currentStoryRatio
+        });
         return;
       } catch (shareErr) {
         if (shareErr.name === 'AbortError') return; // User tapped Cancel on the share sheet
@@ -13490,7 +13519,7 @@
                   <div class="video-card-sub">Watch ${creator ? creator.name : 'the creator'} spin and review this pint on Instagram</div>
                 </div>
               </div>
-              <a href="${recipe.videoUrl}" target="_blank" rel="noopener noreferrer" class="btn-watch-creator-video" aria-label="Watch ${escapeHtml(recipe.name)} video reel by ${creator ? creator.name : 'creator'}">
+              <a href="${recipe.videoUrl}" target="_blank" rel="noopener noreferrer" class="btn-watch-creator-video" aria-label="Watch ${escapeHtml(recipe.name)} video reel by ${creator ? creator.name : 'creator'}" onclick="trackAnalyticsEvent('click_creator_video', { recipe_id: '${recipe.id}', recipe_name: '${escapeHtml(recipe.name)}', creator: '${creator ? escapeHtml(creator.name) : 'unknown'}', video_url: '${recipe.videoUrl}' });">
                 <span>▶️ Watch Reel ↗</span>
               </a>
             </div>
@@ -16725,6 +16754,15 @@
     } else {
       showToast(`🧪 Published balanced recipe "${title}" to official cookbook "${finalCategory}"!`);
     }
+
+    trackAnalyticsEvent('create_custom_recipe', {
+      recipe_name: title,
+      category: finalCategory,
+      is_personal: isPersonalRecipe,
+      calories: newRecipe.macros ? newRecipe.macros.calories : null,
+      protein: newRecipe.macros ? newRecipe.macros.protein : null,
+      creaminess_score: newRecipe.creaminessScore || null
+    });
   }
 
   // --- Build-A-Pint Custom Ingredient Handlers ---
@@ -17730,17 +17768,21 @@
     }
   }
 
+  let adminAnalyticsState = null;
+
   function switchAdminTab(tab) {
     adminActiveTab = tab;
     const btnUsers = document.getElementById('tabBtnAdminUsers');
     const btnClaims = document.getElementById('tabBtnAdminClaims');
     const btnFeedback = document.getElementById('tabBtnAdminFeedback');
+    const btnAnalytics = document.getElementById('tabBtnAdminAnalytics');
     const panelUsers = document.getElementById('adminPanelUsers');
     const panelClaims = document.getElementById('adminPanelClaims');
     const panelFeedback = document.getElementById('adminPanelFeedback');
+    const panelAnalytics = document.getElementById('adminPanelAnalytics');
 
-    [btnUsers, btnClaims, btnFeedback].forEach(b => b && b.classList.remove('active'));
-    [panelUsers, panelClaims, panelFeedback].forEach(p => p && (p.style.display = 'none'));
+    [btnUsers, btnClaims, btnFeedback, btnAnalytics].forEach(b => b && b.classList.remove('active'));
+    [panelUsers, panelClaims, panelFeedback, panelAnalytics].forEach(p => p && (p.style.display = 'none'));
 
     if (tab === 'users') {
       if (btnUsers) btnUsers.classList.add('active');
@@ -17754,7 +17796,162 @@
       if (btnFeedback) btnFeedback.classList.add('active');
       if (panelFeedback) panelFeedback.style.display = 'block';
       renderAdminFeedback();
+    } else if (tab === 'analytics') {
+      if (btnAnalytics) btnAnalytics.classList.add('active');
+      if (panelAnalytics) panelAnalytics.style.display = 'block';
+      fetchAdminAnalytics();
     }
+  }
+
+  async function fetchAdminAnalytics() {
+    if (!currentUser || currentUser.role !== 'admin') return;
+    const container = document.getElementById('adminAnalyticsContent');
+    if (!adminAnalyticsState && container) {
+      container.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--text-dim);"><div style="font-size: 2rem; margin-bottom: 8px;">📊</div><div>Gathering live platform analytics...</div></div>`;
+    }
+
+    try {
+      const res = await fetch('/api/admin/analytics', {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': currentUser.token ? `Bearer ${currentUser.token}` : '',
+          'X-User-Email': currentUser.email || ''
+        }
+      });
+      const data = await res.json();
+      if (res.ok && data.status === 'ok') {
+        adminAnalyticsState = data;
+        renderAdminAnalytics();
+      } else if (container) {
+        container.innerHTML = `<div style="text-align: center; padding: 30px; color: #f87171;">⚠️ ${data.error || 'Failed to load platform analytics.'}</div>`;
+      }
+    } catch (err) {
+      console.warn('Fetch admin analytics error:', err);
+      if (container) {
+        container.innerHTML = `<div style="text-align: center; padding: 30px; color: #f87171;">⚠️ Connection error loading analytics.</div>`;
+      }
+    }
+  }
+
+  function renderAdminAnalytics() {
+    const container = document.getElementById('adminAnalyticsContent');
+    if (!container || !adminAnalyticsState) return;
+
+    const { summary, topGeos, devices, topPantry, topFavorites } = adminAnalyticsState;
+    const maxPantryCount = topPantry.length > 0 ? topPantry[0].count : 1;
+    const maxFavCount = topFavorites.length > 0 ? topFavorites[0].count : 1;
+
+    container.innerHTML = `
+      <div class="admin-analytics-container">
+        <!-- Hero KPI Cards -->
+        <div class="admin-analytics-hero">
+          <div class="admin-analytics-kpi-card green">
+            <span class="admin-analytics-kpi-title">👥 Registered Accounts</span>
+            <span class="admin-analytics-kpi-val">${summary.totalUsers}</span>
+            <span class="admin-analytics-kpi-sub">Total database users</span>
+          </div>
+          <div class="admin-analytics-kpi-card cyan">
+            <span class="admin-analytics-kpi-title">⚡ 24h Active Users</span>
+            <span class="admin-analytics-kpi-val">${summary.active24h}</span>
+            <span class="admin-analytics-kpi-sub">${summary.active7d} active past 7 days</span>
+          </div>
+          <div class="admin-analytics-kpi-card amber">
+            <span class="admin-analytics-kpi-title">🧑‍🍳 Custom Formulations</span>
+            <span class="admin-analytics-kpi-val">${summary.totalCustomRecipes}</span>
+            <span class="admin-analytics-kpi-sub">Authored in Custom Lab</span>
+          </div>
+          <div class="admin-analytics-kpi-card">
+            <span class="admin-analytics-kpi-title">⭐ Community Reviews</span>
+            <span class="admin-analytics-kpi-val">${summary.totalRatings}</span>
+            <span class="admin-analytics-kpi-sub">Pint ratings &amp; sub notes</span>
+          </div>
+        </div>
+
+        <!-- 2-Column Analytics Grids -->
+        <div class="admin-analytics-grid-two">
+          <!-- Origin Geographies -->
+          <div class="admin-analytics-block">
+            <div class="admin-analytics-block-header">
+              <span class="admin-analytics-block-title">📍 User Origins &amp; Geographies</span>
+              <span style="font-size: 0.74rem; color: var(--text-dim);">By Registered Accounts</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              ${(topGeos && topGeos.length > 0) ? topGeos.map(g => `
+                <div class="admin-analytics-row-item">
+                  <span style="font-weight: 600; color: #f8fafc;">${escapeHtml(g.location)}</span>
+                  <span class="admin-analytics-badge-count">${g.count} user${g.count === 1 ? '' : 's'}</span>
+                </div>
+              `).join('') : '<div style="color: var(--text-dim); padding: 12px; text-align: center;">No geo signals captured yet</div>'}
+            </div>
+          </div>
+
+          <!-- Device Breakdown -->
+          <div class="admin-analytics-block">
+            <div class="admin-analytics-block-header">
+              <span class="admin-analytics-block-title">📱 Device &amp; Platform Spread</span>
+              <span style="font-size: 0.74rem; color: var(--text-dim);">Operating Systems</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              ${(devices && devices.length > 0) ? devices.map(d => `
+                <div class="admin-analytics-row-item">
+                  <span style="font-weight: 600; color: #f8fafc;">${escapeHtml(d.device)}</span>
+                  <span class="admin-analytics-badge-count" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">${d.count} user${d.count === 1 ? '' : 's'}</span>
+                </div>
+              `).join('') : '<div style="color: var(--text-dim); padding: 12px; text-align: center;">No device telemetry yet</div>'}
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-analytics-grid-two">
+          <!-- Top Stocked Pantry Ingredients -->
+          <div class="admin-analytics-block">
+            <div class="admin-analytics-block-header">
+              <span class="admin-analytics-block-title">📦 Top Stocked Pantry Staples</span>
+              <span style="font-size: 0.74rem; color: var(--text-dim);">Most Checked Items</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              ${(topPantry && topPantry.length > 0) ? topPantry.map(p => {
+                const pct = Math.round((p.count / maxPantryCount) * 100);
+                const ingName = p.id.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                return `
+                  <div class="admin-analytics-row-item">
+                    <span style="font-weight: 600; color: #f8fafc; min-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(ingName)}</span>
+                    <div class="admin-analytics-bar-bg">
+                      <div class="admin-analytics-bar-fill" style="width: ${pct}%;"></div>
+                    </div>
+                    <span class="admin-analytics-badge-count">${p.count}</span>
+                  </div>
+                `;
+              }).join('') : '<div style="color: var(--text-dim); padding: 12px; text-align: center;">No pantry items stocked yet</div>'}
+            </div>
+          </div>
+
+          <!-- Top Favorited Recipes -->
+          <div class="admin-analytics-block">
+            <div class="admin-analytics-block-header">
+              <span class="admin-analytics-block-title">💖 Top Favorited Recipes</span>
+              <span style="font-size: 0.74rem; color: var(--text-dim);">User Bookmarks</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              ${(topFavorites && topFavorites.length > 0) ? topFavorites.map(f => {
+                const pct = Math.round((f.count / maxFavCount) * 100);
+                const rec = (typeof allRecipes !== 'undefined') ? allRecipes.find(r => r.id === f.id) : null;
+                const recName = rec ? rec.name : f.id.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                return `
+                  <div class="admin-analytics-row-item">
+                    <span style="font-weight: 600; color: #f8fafc; min-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(recName)}</span>
+                    <div class="admin-analytics-bar-bg">
+                      <div class="admin-analytics-bar-fill" style="width: ${pct}%; background: linear-gradient(90deg, #f43f5e, #fbbf24);"></div>
+                    </div>
+                    <span class="admin-analytics-badge-count" style="background: rgba(244, 63, 94, 0.15); color: #fb7185;">${f.count}</span>
+                  </div>
+                `;
+              }).join('') : '<div style="color: var(--text-dim); padding: 12px; text-align: center;">No favorites saved yet</div>'}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
   }
 
   async function fetchAdminUsers() {
@@ -17947,6 +18144,8 @@
                 <div class="admin-user-email">
                   <span class="admin-email-text" title="${escapeHtml(u.email || '')}">${escapeHtml(u.email || 'No email attached')}</span>
                   ${u.creatorId ? ` • <span style="color: #38bdf8; font-weight: 600;">Creator: ${escapeHtml(u.creatorId)}</span>` : ''}
+                  ${(u.country || u.city) ? ` • <span style="color: #34d399; font-weight: 600;">📍 ${escapeHtml([u.city, u.country].filter(Boolean).join(', '))}</span>` : ''}
+                  ${u.device ? ` • <span style="color: #94a3b8; font-size: 0.72rem;">📱 ${escapeHtml(u.device)}</span>` : ''}
                   <span class="admin-joined-text">• Joined: ${createdDate}</span>
                 </div>
                 ${(u.creatorVips && u.creatorVips.length > 0) ? `
@@ -20071,6 +20270,20 @@
     const tabBtnAdminFeedback = document.getElementById('tabBtnAdminFeedback');
     if (tabBtnAdminFeedback) {
       tabBtnAdminFeedback.addEventListener('click', () => switchAdminTab('feedback'));
+    }
+
+    const tabBtnAdminAnalytics = document.getElementById('tabBtnAdminAnalytics');
+    if (tabBtnAdminAnalytics) {
+      tabBtnAdminAnalytics.addEventListener('click', () => switchAdminTab('analytics'));
+    }
+
+    const adminRefreshAnalyticsBtn = document.getElementById('adminRefreshAnalyticsBtn');
+    if (adminRefreshAnalyticsBtn) {
+      adminRefreshAnalyticsBtn.addEventListener('click', () => {
+        adminAnalyticsState = null;
+        fetchAdminAnalytics();
+        showToast('Refreshing platform telemetry...');
+      });
     }
 
     const adminFeedbackFilterPills = document.getElementById('adminFeedbackFilterPills');

@@ -115,7 +115,7 @@
   <link rel="icon" type="image/png" sizes="144x144" href="icon-144.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=v7.0">
+  <link rel="stylesheet" href="styles.css?v=v7.1">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -2704,6 +2704,10 @@
           <span>💬 User Feedback</span>
           <span class="admin-tab-count" id="adminTabFeedbackBadge">0</span>
         </button>
+        <button type="button" class="admin-tab-btn" id="tabBtnAdminAnalytics">
+          <span>📊 Analytics &amp; Pulse</span>
+          <span class="admin-tab-count" id="adminTabAnalyticsBadge" style="background: rgba(16, 185, 129, 0.25); color: #34d399;">Live</span>
+        </button>
       </div>
 
       <!-- Quick Stats Summary -->
@@ -2816,6 +2820,22 @@
 
         <div class="admin-feedback-list" id="adminFeedbackList">
           <!-- Rendered dynamically by app.js -->
+        </div>
+      </div>
+
+      <!-- PANEL 4: ANALYTICS & PULSE -->
+      <div id="adminPanelAnalytics" class="admin-tab-panel" style="display: none;">
+        <div class="admin-toolbar" style="justify-content: space-between;">
+          <div style="font-size: 0.88rem; color: var(--text-muted);">
+            Real-time platform telemetry, user engagement, and pantry demand.
+          </div>
+          <button type="button" class="btn-secondary" id="adminRefreshAnalyticsBtn" title="Refresh analytics metrics">🔄 Refresh Metrics</button>
+        </div>
+
+        <div id="adminAnalyticsContent" class="admin-analytics-container">
+          <div style="text-align: center; padding: 40px; color: var(--text-dim);">
+            Loading live platform telemetry...
+          </div>
         </div>
       </div>
     </div>
@@ -3468,6 +3488,6 @@
 
   <!-- Scripts -->
   <script src="recipes-data.js?v=v4.3"></script>
-  <script src="app.js?v=v7.0"></script>
+  <script src="app.js?v=v7.1"></script>
 </body>
 </html>

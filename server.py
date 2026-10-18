@@ -132,6 +132,100 @@ def verify_password(stored_hash, password):
     legacy = hashlib.sha256(password.encode('utf-8')).hexdigest()
     return hmac.compare_digest(stored_hash, legacy)
 
+# --- IP Geolocation & Device Tracking Engine ---
+IP_GEO_CACHE = {}
+IP_GEO_CACHE_LOCK = threading.Lock()
+
+def lookup_ip_geo(ip):
+    """Resolve IP to city, country, countryCode with caching and background fallback."""
+    if not ip or ip in ('127.0.0.1', '::1', 'localhost', 'unknown'):
+        return {'city': 'Local', 'country': 'Local', 'countryCode': 'US', 'isp': 'Local'}
+    
+    with IP_GEO_CACHE_LOCK:
+        if ip in IP_GEO_CACHE:
+            return IP_GEO_CACHE[ip]
+
+    try:
+        req = urllib.request.Request(
+            f"http://ip-api.com/json/{ip}?fields=status,country,countryCode,regionName,city,isp",
+            headers={'User-Agent': 'CreamiCravings-Server/1.0'}
+        )
+        with urllib.request.urlopen(req, timeout=2.5) as resp:
+            data = json.loads(resp.read().decode('utf-8'))
+            if data.get('status') == 'success':
+                res = {
+                    'city': data.get('city') or '',
+                    'region': data.get('regionName') or '',
+                    'country': data.get('country') or '',
+                    'countryCode': data.get('countryCode') or '',
+                    'isp': data.get('isp') or ''
+                }
+                with IP_GEO_CACHE_LOCK:
+                    IP_GEO_CACHE[ip] = res
+                return res
+    except Exception as e:
+        logger.debug(f"Geo lookup error for {ip}: {e}")
+
+    fallback = {'city': '', 'region': '', 'country': '', 'countryCode': '', 'isp': ''}
+    with IP_GEO_CACHE_LOCK:
+        IP_GEO_CACHE[ip] = fallback
+    return fallback
+
+def parse_client_device(user_agent):
+    """Detect mobile OS/device from User-Agent string."""
+    ua = user_agent or ''
+    if 'iPhone' in ua:
+        return 'iPhone (iOS)'
+    elif 'iPad' in ua:
+        return 'iPad (iPadOS)'
+    elif 'Android' in ua:
+        return 'Android Mobile' if 'Mobile' in ua else 'Android Tablet'
+    elif 'Macintosh' in ua or 'Mac OS' in ua:
+        return 'Mac (macOS)'
+    elif 'Windows' in ua:
+        return 'Windows PC'
+    elif 'Linux' in ua:
+        return 'Linux'
+    return 'Desktop / Other'
+
+def enrich_user_telemetry(user, ip, user_agent):
+    """Enrich user database record with origin geolocation and device specs."""
+    if not user or not isinstance(user, dict):
+        return
+    now_iso = datetime.utcnow().isoformat()
+    user['last_active'] = now_iso
+    user['last_ip'] = ip
+    user['last_device'] = parse_client_device(user_agent)
+    
+    if not user.get('signup_ip'):
+        user['signup_ip'] = ip
+    if not user.get('signup_device'):
+        user['signup_device'] = parse_client_device(user_agent)
+
+    # Resolve geolocation in background thread if not already set or updated
+    def _resolve_geo_async():
+        geo = lookup_ip_geo(ip)
+        if geo and geo.get('country'):
+            if not user.get('city'):
+                user['city'] = geo.get('city', '')
+            if not user.get('region'):
+                user['region'] = geo.get('region', '')
+            if not user.get('country'):
+                user['country'] = geo.get('country', '')
+            if not user.get('countryCode'):
+                user['countryCode'] = geo.get('countryCode', '')
+            user['last_city'] = geo.get('city', '')
+            user['last_country'] = geo.get('country', '')
+            user['last_countryCode'] = geo.get('countryCode', '')
+            user['last_isp'] = geo.get('isp', '')
+            save_json_file(USERS_DB_FILE, users_db)
+
+    # If user doesn't have country info yet, launch quick worker thread
+    if not user.get('country') and ip and ip not in ('127.0.0.1', '::1', 'localhost'):
+        t = threading.Thread(target=_resolve_geo_async, daemon=True)
+        t.start()
+
+
 SMTP_CONFIG_FILE = os.path.join(DIRECTORY, 'config_smtp.json')
 
 def get_smtp_config():
@@ -1550,7 +1644,12 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                         'pantryCount': len(u.get('pantry', [])),
                         'favoritesCount': len(u.get('favorites', [])),
                         'customCount': len(u.get('customRecipes', [])),
-                        'madeTotal': made_total
+                        'madeTotal': made_total,
+                        'city': u.get('city') or u.get('last_city', ''),
+                        'country': u.get('country') or u.get('last_country', ''),
+                        'countryCode': u.get('countryCode') or u.get('last_countryCode', ''),
+                        'device': u.get('last_device') or u.get('signup_device', 'Desktop / Other'),
+                        'last_ip': u.get('last_ip') or u.get('signup_ip', '')
                     })
 
                 # Sorting
@@ -1617,6 +1716,82 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 return
             feedback_list = stats_db.get('user_feedback', [])
             self._send_json({'status': 'ok', 'feedback': feedback_list})
+
+        elif clean_path == '/api/admin/analytics':
+            user = self._get_user_from_token()
+            if not user or user.get('role') != 'admin':
+                self._send_json({'error': 'Unauthorized admin access'}, 403)
+                return
+
+            now = datetime.utcnow()
+            d24h = now - timedelta(hours=24)
+            d7d = now - timedelta(days=7)
+
+            total_users = len(users_db)
+            active_24h = 0
+            active_7d = 0
+            geo_counts = {}
+            device_counts = {}
+            pantry_freq = {}
+            fav_freq = {}
+            total_custom_recipes = 0
+            total_ratings = 0
+
+            for u in users_db.values():
+                la_str = u.get('last_active') or ''
+                if la_str:
+                    try:
+                        la_dt = datetime.fromisoformat(la_str.replace('Z', ''))
+                        if la_dt >= d24h:
+                            active_24h += 1
+                        if la_dt >= d7d:
+                            active_7d += 1
+                    except Exception:
+                        pass
+
+                # Geolocation
+                c = u.get('country') or u.get('last_country') or 'Unknown'
+                code = u.get('countryCode') or u.get('last_countryCode') or 'XX'
+                city = u.get('city') or u.get('last_city') or ''
+                geo_key = f"{city}, {c}" if city and c != 'Unknown' else c
+                geo_counts[geo_key] = geo_counts.get(geo_key, 0) + 1
+
+                # Device
+                dev = u.get('last_device') or u.get('signup_device') or 'Desktop / Other'
+                device_counts[dev] = device_counts.get(dev, 0) + 1
+
+                # Pantry items
+                for item in u.get('pantry', []):
+                    pantry_freq[item] = pantry_freq.get(item, 0) + 1
+
+                # Favorites
+                for fav in u.get('favorites', []):
+                    fav_freq[fav] = fav_freq.get(fav, 0) + 1
+
+                total_custom_recipes += len(u.get('customRecipes', []))
+                total_ratings += len(u.get('ratings', {}))
+
+            top_pantry = sorted([{'id': k, 'count': v} for k, v in pantry_freq.items()], key=lambda x: x['count'], reverse=True)[:10]
+            top_favs = sorted([{'id': k, 'count': v} for k, v in fav_freq.items()], key=lambda x: x['count'], reverse=True)[:10]
+            top_geos = sorted([{'location': k, 'count': v} for k, v in geo_counts.items()], key=lambda x: x['count'], reverse=True)[:8]
+            devices = sorted([{'device': k, 'count': v} for k, v in device_counts.items()], key=lambda x: x['count'], reverse=True)
+
+            self._send_json({
+                'status': 'ok',
+                'summary': {
+                    'totalUsers': total_users,
+                    'active24h': active_24h,
+                    'active7d': active_7d,
+                    'totalCustomRecipes': total_custom_recipes,
+                    'totalRatings': total_ratings,
+                    'generatedAt': now.isoformat() + 'Z'
+                },
+                'topGeos': top_geos,
+                'devices': devices,
+                'topPantry': top_pantry,
+                'topFavorites': top_favs
+            })
+            return
 
         # Admin: Download Complete Production Database Snapshot (.zip)
         elif self.path.split('?')[0] == '/api/admin/backup/download':
@@ -2102,6 +2277,10 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 if not user.get('ratings'):
                     user['ratings'] = {}
 
+            client_ip = self._get_client_ip()
+            user_agent = self.headers.get('User-Agent', '')
+            enrich_user_telemetry(user, client_ip, user_agent)
+
             save_json_file(USERS_DB_FILE, users_db)
 
             self._send_json({
@@ -2161,7 +2340,10 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
             if 'badges' in data and isinstance(data['badges'], dict):
                 user['badges'] = data['badges']
 
-            user['last_active'] = datetime.utcnow().isoformat()
+            client_ip = self._get_client_ip()
+            user_agent = self.headers.get('User-Agent', '')
+            enrich_user_telemetry(user, client_ip, user_agent)
+
             save_json_file(USERS_DB_FILE, users_db)
             self._send_json({'status': 'ok', 'success': True})
 
@@ -2432,6 +2614,10 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 'last_active': now_iso,
                 'token': token
             }
+            client_ip = self._get_client_ip()
+            user_agent = self.headers.get('User-Agent', '')
+            enrich_user_telemetry(new_user, client_ip, user_agent)
+
             users_db[email] = new_user
             save_json_file(USERS_DB_FILE, users_db)
 
@@ -2477,7 +2663,8 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
 
             token = 'token_em_' + str(uuid.uuid4())
             add_user_token(target_user, token)
-            target_user['last_active'] = datetime.utcnow().isoformat()
+            user_agent = self.headers.get('User-Agent', '')
+            enrich_user_telemetry(target_user, client_ip, user_agent)
             save_json_file(USERS_DB_FILE, users_db)
 
             self._send_json({
