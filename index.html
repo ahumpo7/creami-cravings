@@ -115,7 +115,7 @@
   <link rel="icon" type="image/png" sizes="144x144" href="icon-144.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=v7.1">
+  <link rel="stylesheet" href="styles.css?v=v7.2">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -1417,6 +1417,36 @@
       <div class="spin-log-body">
         <!-- Pint Info Summary Card -->
         <div class="spin-log-summary-card" id="spinLogSummaryCard"></div>
+
+        <!-- 💧 Warm Water Bath Timer Widget -->
+        <div class="spin-log-timer-card" id="spinLogWaterTimerCard">
+          <div class="spin-log-timer-header">
+            <div class="spin-log-timer-info">
+              <span class="spin-log-timer-icon" aria-hidden="true">💧</span>
+              <div>
+                <span class="spin-log-timer-title">Warm Water Bath Timer</span>
+                <span class="spin-log-timer-sub">Thaw outer rim 60s to prevent icy powder &amp; blade drag</span>
+              </div>
+            </div>
+            <div class="spin-log-timer-badge" id="spinLogTimerBadge">60s</div>
+          </div>
+
+          <div class="spin-log-timer-bar-wrap" aria-hidden="true">
+            <div class="spin-log-timer-bar" id="spinLogTimerBar" style="width: 100%;"></div>
+          </div>
+
+          <div class="spin-log-timer-actions">
+            <div class="spin-log-timer-presets" id="spinLogTimerPresets" role="group" aria-label="Timer duration presets">
+              <button type="button" class="timer-preset-btn" data-time="30">30s</button>
+              <button type="button" class="timer-preset-btn active" data-time="60">60s</button>
+              <button type="button" class="timer-preset-btn" data-time="90">90s</button>
+            </div>
+            <div class="spin-log-timer-btns">
+              <button type="button" class="btn-timer-primary" id="spinLogStartTimerBtn">▶️ Start 60s Bath</button>
+              <button type="button" class="btn-timer-ghost" id="spinLogResetTimerBtn" style="display: none;">Reset</button>
+            </div>
+          </div>
+        </div>
 
         <!-- Spin Setting Used -->
         <div class="spin-log-field-group">
@@ -3488,6 +3518,6 @@
 
   <!-- Scripts -->
   <script src="recipes-data.js?v=v4.3"></script>
-  <script src="app.js?v=v7.1"></script>
+  <script src="app.js?v=v7.2"></script>
 </body>
 </html>

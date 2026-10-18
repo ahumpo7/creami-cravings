@@ -12545,6 +12545,128 @@
   let spinLogSelectedRespins = '0';
   let spinLogSelectedRating = 5;
 
+  // Spin Log Warm Water Bath Timer State
+  let spinLogTimerInterval = null;
+  let spinLogTimerRunning = false;
+  let spinLogTimerDuration = 60;
+  let spinLogTimerSeconds = 60;
+
+  function resetSpinLogWaterTimer(newDuration = 60) {
+    if (spinLogTimerInterval) {
+      clearInterval(spinLogTimerInterval);
+      spinLogTimerInterval = null;
+    }
+    spinLogTimerRunning = false;
+    spinLogTimerDuration = Number(newDuration) || 60;
+    spinLogTimerSeconds = spinLogTimerDuration;
+
+    const badge = document.getElementById('spinLogTimerBadge');
+    if (badge) {
+      badge.textContent = `${spinLogTimerSeconds}s`;
+      badge.classList.remove('pulsing', 'done');
+    }
+
+    const bar = document.getElementById('spinLogTimerBar');
+    if (bar) {
+      bar.style.width = '100%';
+      bar.classList.remove('done');
+    }
+
+    const startBtn = document.getElementById('spinLogStartTimerBtn');
+    if (startBtn) {
+      startBtn.textContent = `▶️ Start ${spinLogTimerDuration}s Bath`;
+      startBtn.className = 'btn-timer-primary';
+    }
+
+    const resetBtn = document.getElementById('spinLogResetTimerBtn');
+    if (resetBtn) {
+      resetBtn.style.display = 'none';
+    }
+
+    const presets = document.getElementById('spinLogTimerPresets');
+    if (presets) {
+      presets.querySelectorAll('.timer-preset-btn').forEach(btn => {
+        btn.classList.toggle('active', parseInt(btn.dataset.time, 10) === spinLogTimerDuration);
+      });
+    }
+  }
+
+  function toggleSpinLogWaterTimer() {
+    const startBtn = document.getElementById('spinLogStartTimerBtn');
+    const resetBtn = document.getElementById('spinLogResetTimerBtn');
+    const badge = document.getElementById('spinLogTimerBadge');
+    const bar = document.getElementById('spinLogTimerBar');
+
+    if (spinLogTimerRunning) {
+      // Pause
+      if (spinLogTimerInterval) {
+        clearInterval(spinLogTimerInterval);
+        spinLogTimerInterval = null;
+      }
+      spinLogTimerRunning = false;
+      if (startBtn) {
+        startBtn.textContent = '▶️ Resume Bath';
+        startBtn.className = 'btn-timer-primary';
+      }
+      if (badge) {
+        badge.classList.remove('pulsing');
+      }
+      if (resetBtn) {
+        resetBtn.style.display = 'inline-block';
+      }
+    } else {
+      // Start or Resume
+      if (spinLogTimerSeconds <= 0) {
+        spinLogTimerSeconds = spinLogTimerDuration;
+      }
+      spinLogTimerRunning = true;
+      if (startBtn) {
+        startBtn.textContent = '⏸️ Pause';
+        startBtn.className = 'btn-timer-primary running';
+      }
+      if (badge) {
+        badge.classList.add('pulsing');
+        badge.classList.remove('done');
+      }
+      if (bar) {
+        bar.classList.remove('done');
+      }
+      if (resetBtn) {
+        resetBtn.style.display = 'inline-block';
+      }
+
+      spinLogTimerInterval = setInterval(() => {
+        spinLogTimerSeconds--;
+        if (badge) badge.textContent = `${spinLogTimerSeconds}s`;
+        if (bar) {
+          const pct = Math.max(0, Math.min(100, (spinLogTimerSeconds / spinLogTimerDuration) * 100));
+          bar.style.width = `${pct}%`;
+        }
+        if (spinLogTimerSeconds <= 0) {
+          clearInterval(spinLogTimerInterval);
+          spinLogTimerInterval = null;
+          spinLogTimerRunning = false;
+          if (badge) {
+            badge.textContent = '0s';
+            badge.classList.remove('pulsing');
+            badge.classList.add('done');
+          }
+          if (bar) {
+            bar.style.width = '100%';
+            bar.classList.add('done');
+          }
+          if (startBtn) {
+            startBtn.textContent = '✅ Ready to Spin! ❄️';
+            startBtn.className = 'btn-timer-primary done';
+          }
+          playAudioChime();
+          triggerHaptic([100, 50, 100, 50, 200]);
+          showToast('❄️ 60-second bath complete! Pint edges thawed & ready to spin!');
+        }
+      }, 1000);
+    }
+  }
+
   function openSpinLogModal(pintId) {
     const pint = freezerPintsState.find(p => p.id === pintId);
     if (!pint) {
@@ -12653,13 +12775,14 @@
     }
 
     const modal = document.getElementById('spinLogModalOverlay');
-    if (!modal) return;
+    resetSpinLogWaterTimer(60);
     modal.classList.add('active');
     modal.setAttribute('aria-hidden', 'false');
     lockBackgroundScroll();
   }
 
   function closeSpinLogModal() {
+    resetSpinLogWaterTimer(60);
     const modal = document.getElementById('spinLogModalOverlay');
     if (!modal) return;
     modal.classList.remove('active');
@@ -20932,6 +21055,37 @@
     const btnShareStoryFromLog = document.getElementById('btnShareStoryCardFromLog');
     if (btnShareStoryFromLog) {
       btnShareStoryFromLog.addEventListener('click', shareStoryCardFromSpinLog);
+    }
+
+    // Warm Water Bath Timer event listeners in Spin Log modal
+    const spinLogStartTimerBtn = document.getElementById('spinLogStartTimerBtn');
+    if (spinLogStartTimerBtn) {
+      spinLogStartTimerBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleSpinLogWaterTimer();
+      });
+    }
+
+    const spinLogResetTimerBtn = document.getElementById('spinLogResetTimerBtn');
+    if (spinLogResetTimerBtn) {
+      spinLogResetTimerBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        resetSpinLogWaterTimer(spinLogTimerDuration);
+      });
+    }
+
+    const spinLogTimerPresets = document.getElementById('spinLogTimerPresets');
+    if (spinLogTimerPresets) {
+      spinLogTimerPresets.querySelectorAll('.timer-preset-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const targetSec = parseInt(btn.dataset.time, 10) || 60;
+          resetSpinLogWaterTimer(targetSec);
+        });
+      });
     }
 
     // Initialize PWA Offline Engine & Service Worker
