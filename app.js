@@ -7257,6 +7257,14 @@
     }
   })();
 
+  let currentStoryShowStreak = (function() {
+    try {
+      return localStorage.getItem('creami_story_show_streak') !== 'false';
+    } catch (e) {
+      return true;
+    }
+  })();
+
   const STORY_THEMES = {
     berry: {
       id: 'berry',
@@ -7530,6 +7538,26 @@
     }
   };
 
+  function updateStoryStreakToggleUI() {
+    const btn = document.getElementById('btnToggleStoryStreak');
+    if (!btn) return;
+    const hasStreak = habitStreakState && habitStreakState.currentStreak > 0;
+    const wrapper = document.getElementById('storyOptionsBar');
+    if (wrapper) {
+      wrapper.style.display = hasStreak ? 'flex' : 'none';
+    }
+    btn.classList.toggle('active', currentStoryShowStreak);
+    btn.setAttribute('aria-pressed', currentStoryShowStreak ? 'true' : 'false');
+    const checkEl = btn.querySelector('.option-check');
+    if (checkEl) {
+      checkEl.textContent = currentStoryShowStreak ? '✓' : '✕';
+    }
+    const labelEl = btn.querySelector('.option-label');
+    if (labelEl) {
+      labelEl.textContent = currentStoryShowStreak ? 'Habit Streak: Shown' : 'Habit Streak: Hidden';
+    }
+  }
+
   function openStoryCardModal(recipeInput) {
     if (!recipeInput) return;
     const recipe = typeof recipeInput === 'string'
@@ -7559,6 +7587,9 @@
         btn.classList.toggle('active', btn.dataset.theme === currentStoryTheme);
       });
     }
+
+    // Sync streak toggle pill UI
+    updateStoryStreakToggleUI();
 
     overlay.classList.add('active');
     overlay.setAttribute('aria-hidden', 'false');
@@ -7889,7 +7920,7 @@
     ctx.fillText(subheaderText, width / 2, curY);
 
     // Habit Streak Badge Banner on Story Card (Path A Item 4)
-    if (habitStreakState && habitStreakState.currentStreak > 0) {
+    if (currentStoryShowStreak && habitStreakState && habitStreakState.currentStreak > 0) {
       curY += ratio === 'story' ? 58 : 42;
       const streakText = `🔥 ${habitStreakState.currentStreak} WEEK HABIT STREAK • ${habitStreakState.totalSpins || 1} SPINS`;
       ctx.font = ratio === 'story' ? '800 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' : '800 20px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
@@ -7898,9 +7929,10 @@
       drawRoundedRect(ctx, (width - streakW) / 2, curY - (streakH / 2), streakW, streakH, streakH / 2, 'rgba(234, 88, 12, 0.35)', 'rgba(251, 146, 60, 0.85)', 1.5);
       ctx.fillStyle = '#fed7aa';
       ctx.fillText(streakText, width / 2, curY + (ratio === 'story' ? 8 : 6));
+      curY += ratio === 'story' ? 70 : 48;
+    } else {
+      curY += ratio === 'story' ? 74 : 52;
     }
-
-    curY += ratio === 'story' ? 70 : 48;
 
     // 4. Category Tag Pill
     const cat = (recipe.category || 'High Protein').toUpperCase();
@@ -22147,6 +22179,19 @@
         renderStoryCardGraphic();
       });
     }
+
+    const btnToggleStoryStreak = document.getElementById('btnToggleStoryStreak');
+    if (btnToggleStoryStreak) {
+      btnToggleStoryStreak.addEventListener('click', () => {
+        currentStoryShowStreak = !currentStoryShowStreak;
+        try {
+          localStorage.setItem('creami_story_show_streak', currentStoryShowStreak ? 'true' : 'false');
+        } catch (e) {}
+        updateStoryStreakToggleUI();
+        renderStoryCardGraphic();
+      });
+    }
+
     if (btnShareStoryNative) {
       btnShareStoryNative.addEventListener('click', shareStoryCardNative);
     }

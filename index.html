@@ -115,7 +115,7 @@
   <link rel="icon" type="image/png" sizes="144x144" href="icon-144.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=v7.2">
+  <link rel="stylesheet" href="styles.css?v=v7.3">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -3480,6 +3480,15 @@
         </div>
       </div>
 
+      <!-- Story Card Elements / Options Bar -->
+      <div class="story-options-bar" id="storyOptionsBar">
+        <button type="button" class="story-option-pill active" id="btnToggleStoryStreak" aria-pressed="true" title="Toggle habit streak badge on card">
+          <span class="option-icon" aria-hidden="true">🔥</span>
+          <span class="option-label">Habit Streak Badge: Shown</span>
+          <span class="option-check" aria-hidden="true">✓</span>
+        </button>
+      </div>
+
       <!-- Live Canvas Preview Container -->
       <div class="story-canvas-preview-wrapper" id="storyCanvasPreviewWrapper">
         <div class="story-loading-indicator" id="storyLoadingIndicator">
@@ -3518,6 +3527,6 @@
 
   <!-- Scripts -->
   <script src="recipes-data.js?v=v4.3"></script>
-  <script src="app.js?v=v7.2"></script>
+  <script src="app.js?v=v7.3"></script>
 </body>
 </html>
