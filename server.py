@@ -47,7 +47,7 @@ CREATOR_SETTINGS_FILE = os.path.join(DIRECTORY, 'db_creators_settings.json')
 
 DEFAULT_STAPLES = []
 
-ALL_SUBSCRIPTIONS = ["All-Access", "Base Flavors", "Community Legends", "Fan Favorites", "No Protein", "Keto", "Lactose Free"]
+ALL_SUBSCRIPTIONS = ["All-Access", "Base Flavors", "Community Legends", "Fan Favorites", "No Protein", "Keto", "Lactose Free", "Scoopology"]
 DEFAULT_SUBSCRIPTIONS = ["Community Legends"]
 
 # Admin accounts designated by verified email
@@ -499,7 +499,7 @@ def get_effective_freezer_capacity(u):
         return 12
 
     # 8 Slots: any paid creator cookbook pack or purchased >= 8
-    paid_packs = ['Fan Favorites', 'No Protein', 'Keto', 'Lactose Free', 'TestContent Sampler', 'Volume Pints']
+    paid_packs = ['Fan Favorites', 'No Protein', 'Keto', 'Lactose Free', 'TestContent Sampler', 'Volume Pints', 'Scoopology']
     if any(p in subs for p in paid_packs) or purchased >= 8:
         return 8
 
