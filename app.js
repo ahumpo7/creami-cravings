@@ -3074,10 +3074,8 @@
       { id: 'cardMimicAdmin', role: 'admin', creatorId: null },
       { id: 'cardMimicCreatorEli', role: 'creator', creatorId: 'fitness_product_finder' },
       { id: 'cardMimicCreatorTest', role: 'creator', creatorId: 'test_content' },
-      { id: 'cardMimicCreatorDonald', role: 'creator', creatorId: 'exercise4cheatmeals' },
       { id: 'cardMimicVipEli', role: 'vip', creatorId: 'fitness_product_finder' },
       { id: 'cardMimicVipTest', role: 'vip', creatorId: 'test_content' },
-      { id: 'cardMimicVipDonald', role: 'vip', creatorId: 'exercise4cheatmeals' },
       { id: 'cardMimicMultiSub', role: 'multi_sub', creatorId: null },
       { id: 'cardMimicUser', role: 'user', creatorId: null },
       { id: 'cardMimicGuest', role: 'guest', creatorId: null }
@@ -5990,8 +5988,7 @@
       'No Protein': '💪',
       'All-Access': '👑',
       'TestContent Sampler': '🥣',
-      'Volume Pints': '🔥',
-      'Scoopology': '🍨'
+      'Volume Pints': '🔥'
     };
 
     packsGrid.innerHTML = creatorBooks.map(book => {
