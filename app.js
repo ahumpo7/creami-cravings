@@ -17588,7 +17588,7 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
   // --- Creami Essentials & Gear Guide Engine (Option C) ---
   let currentGearCategory = 'all';
 
-  function openGearGuideModal(category = 'all') {
+  function openGearGuideModal(category = 'all', resetScroll = true) {
     currentGearCategory = category || 'all';
     renderGearGuideModal();
     const modal = document.getElementById('gearModalOverlay');
@@ -17596,6 +17596,14 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
       modal.classList.add('active');
       modal.setAttribute('aria-hidden', 'false');
       lockBackgroundScroll();
+
+      if (resetScroll) {
+        modal.scrollTop = 0;
+        const content = modal.querySelector('.gear-modal-content');
+        if (content) content.scrollTop = 0;
+        const body = document.getElementById('gearModalBody');
+        if (body) body.scrollTop = 0;
+      }
     }
   }
   window.openGearGuideModal = openGearGuideModal;
@@ -17606,6 +17614,13 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
       modal.classList.remove('active');
       modal.setAttribute('aria-hidden', 'true');
       unlockBackgroundScroll();
+
+      // Reset scroll position on close so it always re-opens at the top
+      modal.scrollTop = 0;
+      const content = modal.querySelector('.gear-modal-content');
+      if (content) content.scrollTop = 0;
+      const body = document.getElementById('gearModalBody');
+      if (body) body.scrollTop = 0;
     }
   }
   window.closeGearGuideModal = closeGearGuideModal;
@@ -22533,6 +22548,8 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
         closeCustomRecipeModal();
         closeGoogleAuthModal();
         closeClaimAccessModal();
+        closeGearGuideModal();
+        closeCreatorsDirectoryModal();
         return;
       }
 
