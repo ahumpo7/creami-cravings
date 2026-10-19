@@ -227,6 +227,14 @@ body::before {
   display: none;
 }
 
+.creator-text-desktop {
+  display: inline;
+}
+
+.creator-text-mobile {
+  display: none;
+}
+
 .nav-text-full {
   display: inline;
 }
@@ -5217,6 +5225,14 @@ body.modal-open .cookie-consent-banner {
     display: inline !important;
   }
 
+  .creator-text-desktop {
+    display: none !important;
+  }
+
+  .creator-text-mobile {
+    display: inline !important;
+  }
+
   .badge-text-desktop {
     display: none !important;
   }
@@ -5257,7 +5273,8 @@ body.modal-open .cookie-consent-banner {
     flex-shrink: 0;
   }
 
-  .btn-admin-header {
+  .btn-admin-header,
+  .btn-creator-header {
     padding: 0 7px !important;
     font-size: 0.72rem !important;
     font-weight: 700 !important;
@@ -15657,6 +15674,13 @@ html.is-beta-env .beta-ribbon-bar {
 /* ==========================================================================
    Creator Platform & Storefront Studio (Path B)
    ========================================================================== */
+.btn-creator-header.hidden,
+.btn-creator-header[style*="display: none"],
+#openCreatorPortalBtn.hidden,
+#openCreatorPortalBtn[style*="display: none"] {
+  display: none !important;
+}
+
 .btn-creator-header {
   background: linear-gradient(135deg, rgba(236, 72, 153, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
   border: 1px solid rgba(236, 72, 153, 0.4);

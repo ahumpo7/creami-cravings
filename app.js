@@ -2195,7 +2195,7 @@
     const email = (data.user.email || '').toLowerCase();
     const isAdmin = data.user.role === 'admin' || ADMIN_EMAILS.includes(email);
 
-    currentUser = {
+    const baseUser = {
       id: data.user.id,
       email: data.user.email,
       name: data.user.name,
@@ -2209,9 +2209,17 @@
         : ['Community Legends'],
       token: data.token || (currentUser ? currentUser.token : '')
     };
+
+    currentUser = baseUser;
+
     if (isSuperAdminAccount(currentUser)) {
-      realAdminUser = JSON.parse(JSON.stringify(currentUser));
+      realAdminUser = JSON.parse(JSON.stringify(baseUser));
       try { localStorage.setItem(REAL_ADMIN_STORAGE_KEY, JSON.stringify(realAdminUser)); } catch (e) {}
+      if (currentMimicRole && currentMimicRole !== 'admin') {
+        applyMimicRole(currentMimicRole, false);
+      }
+    } else {
+      realAdminUser = null;
     }
     saveUserAuth();
     trackAnalyticsEvent('login', {
@@ -2475,14 +2483,8 @@
       triggerCloudSync(true);
     }
 
-    if (isSuperAdminAccount(currentUser)) {
-      realAdminUser = JSON.parse(JSON.stringify(currentUser));
-      try { localStorage.setItem(REAL_ADMIN_STORAGE_KEY, JSON.stringify(realAdminUser)); } catch (e) {}
-      if (currentMimicRole && currentMimicRole !== 'admin') {
-        applyMimicRole(currentMimicRole, false);
-      } else {
-        renderMimicUI();
-      }
+    if (isSuperAdminAccount(realAdminUser || currentUser)) {
+      renderMimicUI();
     } else {
       realAdminUser = null;
       renderMimicUI();
@@ -2582,7 +2584,8 @@
         customTab.style.display = (customRecipesState.length > 0) ? 'inline-flex' : 'none';
       }
       if (openAdminPortalBtn) {
-        const isAdmin = !!(currentUser && currentUser.role === 'admin');
+        const isMimickingNonAdmin = Boolean(realAdminUser && currentMimicRole && currentMimicRole !== 'admin');
+        const isAdmin = Boolean(currentUser && currentUser.role === 'admin' && !isMimickingNonAdmin);
         if (isAdmin) {
           openAdminPortalBtn.style.setProperty('display', 'inline-flex', 'important');
           openAdminPortalBtn.classList.remove('hidden');
@@ -2592,11 +2595,18 @@
         }
       }
       if (openCreatorPortalBtn) {
-        const isCreator = !!(currentUser && currentUser.role === 'creator');
+        const isCreator = Boolean(
+          currentUser && (
+            currentUser.role === 'creator' ||
+            (currentMimicRole === 'creator' && isSuperAdminAccount(realAdminUser || currentUser))
+          )
+        );
         if (isCreator) {
           openCreatorPortalBtn.style.setProperty('display', 'inline-flex', 'important');
+          openCreatorPortalBtn.classList.remove('hidden');
         } else {
           openCreatorPortalBtn.style.setProperty('display', 'none', 'important');
+          openCreatorPortalBtn.classList.add('hidden');
         }
       }
     } else {
@@ -2611,6 +2621,7 @@
       }
       if (openCreatorPortalBtn) {
         openCreatorPortalBtn.style.setProperty('display', 'none', 'important');
+        openCreatorPortalBtn.classList.add('hidden');
       }
     }
     renderMimicUI();
@@ -6245,9 +6256,18 @@
   // Creator CMS & Storefront Studio Engine (Path B)
   // ==========================================================================
   function openCreatorPortalModal() {
-    if (!currentUser || currentUser.role !== 'creator') {
+    const isCreator = Boolean(
+      currentUser && (
+        currentUser.role === 'creator' ||
+        (currentMimicRole === 'creator' && isSuperAdminAccount(realAdminUser || currentUser))
+      )
+    );
+    if (!isCreator) {
       showToast('⚠️ Creator Studio is reserved for content creators.');
       return;
+    }
+    if (currentUser && currentUser.role !== 'creator' && currentMimicRole === 'creator') {
+      applyMimicRole('creator', false);
     }
     const modal = document.getElementById('creatorPortalModalOverlay');
     if (!modal) return;
