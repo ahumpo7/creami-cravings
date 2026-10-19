@@ -6459,7 +6459,11 @@
     }
 
     if (toggleBtn) {
-      toggleBtn.textContent = (selectedCount === activeSamplerPints.length) ? 'Deselect All' : 'Select All';
+      const isAll = (selectedCount === activeSamplerPints.length);
+      toggleBtn.innerHTML = isAll
+        ? '<span class="sampler-toggle-icon">✕</span> <span class="sampler-toggle-text">Deselect All</span>'
+        : '<span class="sampler-toggle-icon">✓</span> <span class="sampler-toggle-text">Select All</span>';
+      toggleBtn.title = isAll ? 'Deselect all pints' : 'Select all pints';
     }
   }
 

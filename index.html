@@ -115,7 +115,7 @@
   <link rel="icon" type="image/png" sizes="144x144" href="icon-144.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=v7.8">
+  <link rel="stylesheet" href="styles.css?v=v7.9">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -3853,7 +3853,10 @@
 
         <div class="sampler-preview-actions-bar">
           <div class="sampler-preview-toggle-group">
-            <button type="button" class="btn-text-action" id="btnSamplerToggleAll">Deselect All</button>
+            <button type="button" class="btn-sampler-toggle-all" id="btnSamplerToggleAll" title="Toggle selection for all pints">
+              <span class="sampler-toggle-icon">✕</span>
+              <span class="sampler-toggle-text">Deselect All</span>
+            </button>
           </div>
           <div class="sampler-preview-btn-group">
             <button type="button" class="btn-secondary" id="btnSamplerCancel">Cancel</button>
@@ -3877,6 +3880,6 @@
 
   <!-- Scripts -->
   <script src="recipes-data.js?v=v4.3"></script>
-  <script src="app.js?v=v8.0"></script>
+  <script src="app.js?v=v8.1"></script>
 </body>
 </html>
