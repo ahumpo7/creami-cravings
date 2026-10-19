@@ -852,17 +852,50 @@
           fetchLatestUserData();
         }
       } else if (document.visibilityState === 'hidden') {
-        // Tab being hidden or backgrounded: flush pending cloud sync immediately
-        triggerCloudSync(true);
+        // Tab being hidden or backgrounded: flush pending cloud sync only if a mutation is pending
+        if (syncTimeout !== null) {
+          triggerCloudSync(true);
+        }
       }
     });
 
     window.addEventListener('beforeunload', () => {
-      triggerCloudSync(true);
+      if (syncTimeout !== null) {
+        triggerCloudSync(true);
+      }
     });
 
     window.addEventListener('pagehide', () => {
-      triggerCloudSync(true);
+      if (syncTimeout !== null) {
+        triggerCloudSync(true);
+      }
+    });
+
+    // Cross-tab real-time sync via storage events
+    window.addEventListener('storage', (e) => {
+      if (!e.key) return;
+      const curId = currentUser?.id || '';
+      if (e.key === FREEZER_STORAGE_KEY || (curId && e.key === `${FREEZER_STORAGE_KEY}_${curId}`)) {
+        try {
+          const incoming = JSON.parse(e.newValue || '[]');
+          if (Array.isArray(incoming)) {
+            freezerPintsState = incoming;
+            renderFreezerShelfWidget();
+            if (freezerModalOverlay && freezerModalOverlay.classList.contains('active')) {
+              renderFreezerModal();
+            }
+            updateFreezerBadges();
+          }
+        } catch (err) {}
+      } else if (e.key === RECIPE_MADE_STORAGE_KEY || (curId && e.key === `${RECIPE_MADE_STORAGE_KEY}_${curId}`)) {
+        try {
+          const incoming = JSON.parse(e.newValue || '{}');
+          if (incoming && typeof incoming === 'object') {
+            recipeMadeCounts = incoming;
+            renderRecipes();
+          }
+        } catch (err) {}
+      }
     });
 
     window.addEventListener('focus', () => {
@@ -10705,12 +10738,18 @@
       pintNotifTimers.delete(pintId);
     }
 
-    // Log batch made count for recipe if linked
+    // 1. Immediately remove from local freezer state and re-render first to prevent race conditions
+    freezerPintsState = freezerPintsState.filter(p => p.id !== pintId);
+    saveFreezerPints();
+    renderFreezerShelfWidget();
+    renderFreezerModal();
+
+    // 2. Log batch made count for recipe if linked
     if (pint.recipeId) {
       logRecipeBatch(pint.recipeId, 1, true);
     }
 
-    // Record streak if not already recorded by modal
+    // 3. Record streak if not already recorded by modal
     if (!skipToast) {
       recordHabitStreakSpin({
         recipeId: pint.recipeId,
@@ -10719,11 +10758,8 @@
       });
     }
 
-    // Remove from freezer
-    freezerPintsState = freezerPintsState.filter(p => p.id !== pintId);
-    saveFreezerPints();
-    renderFreezerShelfWidget();
-    renderFreezerModal();
+    // 4. Immediately trigger cloud sync so server updates right away without debounce risk
+    triggerCloudSync(true);
 
     if (!skipToast) {
       showToast(`🍨 Spun & Enjoyed "${pint.recipeName}"! 🔥 Week ${habitStreakState.currentStreak} Streak Active 🎉`);
@@ -13010,7 +13046,25 @@
 
   function shareStoryCardFromSpinLog() {
     if (!spinLogActivePint) return;
-    const rId = spinLogActivePint.recipeId;
+    const pint = spinLogActivePint;
+    const rId = pint.recipeId;
+    const pintId = pint.id;
+
+    // Log the spin and consume the pint from the freezer so sharing doesn't leave pint unspun
+    try {
+      recordHabitStreakSpin({
+        recipeId: pint.recipeId,
+        recipeName: pint.recipeName,
+        cycle: spinLogSelectedCycle,
+        respins: spinLogSelectedRespins,
+        mixins: (document.getElementById('spinMixInsInput')?.value || '').trim(),
+        rating: spinLogSelectedRating
+      });
+      spinAndEnjoyFreezerPint(pintId, true);
+    } catch (e) {
+      console.warn('Error recording spin during story card share:', e);
+    }
+
     closeSpinLogModal();
     if (rId) {
       openStoryCardModal(rId);

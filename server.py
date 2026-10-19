@@ -2317,7 +2317,14 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
             if 'favorites' in data and isinstance(data['favorites'], list):
                 user['favorites'] = data['favorites']
             if 'madeCounts' in data and isinstance(data['madeCounts'], dict):
-                user['madeCounts'] = data['madeCounts']
+                if 'madeCounts' not in user or not isinstance(user['madeCounts'], dict):
+                    user['madeCounts'] = {}
+                for r_id, count in data['madeCounts'].items():
+                    try:
+                        cnt = int(count)
+                        user['madeCounts'][r_id] = max(user['madeCounts'].get(r_id, 0), cnt)
+                    except (ValueError, TypeError):
+                        pass
             if 'ratings' in data and isinstance(data['ratings'], dict):
                 user['ratings'] = data['ratings']
                 # Sync into public ratings_db only for standard community recipes, NOT personal custom ones
