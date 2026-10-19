@@ -20021,9 +20021,24 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
         updateAdminStats();
         renderAdminUsers();
       } else {
-        showToast('Error loading users: ' + (data.error || 'Server error'));
-        if (adminUsersList) {
-          adminUsersList.innerHTML = `<div style="text-align: center; padding: 30px; color: #f87171;">⚠️ ${data.error || 'Failed to load users.'}</div>`;
+        const errorMsg = data.error || (res.status === 403 ? 'Unauthorized admin access' : 'Failed to load users.');
+        if (res.status === 401 || res.status === 403) {
+          showToast('⚠️ Admin session token expired or invalid. Please sign out and sign back in.');
+          if (adminUsersList) {
+            adminUsersList.innerHTML = `
+              <div style="text-align: center; padding: 36px 20px; color: #f87171;">
+                <div style="font-size: 1.8rem; margin-bottom: 8px;">🔒</div>
+                <div style="font-weight: 700; margin-bottom: 6px; font-size: 1.05rem;">Admin Session Expired or Unauthorized</div>
+                <p style="font-size: 0.84rem; color: #94a3b8; max-width: 360px; margin: 0 auto 16px;">Your browser's session token is invalid or out of sync with the database. Please sign out and sign back in to refresh credentials.</p>
+                <button type="button" class="btn-primary" onclick="if (typeof logoutUser === 'function') { logoutUser(); } else { localStorage.clear(); location.reload(); }" style="padding: 8px 18px; font-size: 0.85rem; border-radius: 8px; cursor: pointer;">🔄 Sign Out &amp; Refresh</button>
+              </div>
+            `;
+          }
+        } else {
+          showToast('Error loading users: ' + errorMsg);
+          if (adminUsersList) {
+            adminUsersList.innerHTML = `<div style="text-align: center; padding: 30px; color: #f87171;">⚠️ ${escapeHtml(errorMsg)}</div>`;
+          }
         }
       }
     } catch (err) {
@@ -24188,6 +24203,8 @@ Instructions:
   }
   window.openFeedbackModal = openFeedbackModal;
   window.closeFeedbackModal = closeFeedbackModal;
+  window.logoutUser = logoutUser;
+  window.openAdminPortal = openAdminPortal;
 
   function updateFeedbackStarsUI(rating) {
     const starsRow = document.getElementById('feedbackStarsRow');

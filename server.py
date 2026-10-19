@@ -1129,6 +1129,14 @@ if 'admin' not in users_db:
         'token': 'token_admin_001'
     }
 
+# Auto-sync admin privileges for verified super admin emails
+for admin_email in ADMIN_EMAILS:
+    admin_match = next((u for u in users_db.values() if u.get('email', '').lower() == admin_email.lower()), None)
+    if admin_match:
+        admin_match['role'] = 'admin'
+        if 'All-Access' not in admin_match.get('subscriptions', []):
+            admin_match['subscriptions'] = list(ALL_SUBSCRIPTIONS)
+
 # Ensure official Content Creator account for Eli (FPF) exists
 eli_email = 'eli@fitnessproductfinder.com'
 eli_user = next((u for u in users_db.values() if u.get('email', '').lower() == eli_email or u.get('username', '').lower() == 'eli'), None)
@@ -1414,6 +1422,11 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
 
         return user
 
+    def _is_admin(self, user):
+        if not user or not isinstance(user, dict):
+            return False
+        return user.get('role') == 'admin' or user.get('email', '').lower() in ADMIN_EMAILS
+
     def do_HEAD(self):
         clean_path = urllib.parse.unquote(self.path.split('?')[0]).lower()
         is_well_known = clean_path.startswith('/.well-known/')
@@ -1659,7 +1672,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
         elif clean_path == '/api/admin/users':
             try:
                 user = self._get_user_from_token()
-                if not user or user.get('role') != 'admin':
+                if not self._is_admin(user):
                     self._send_json({'error': 'Unauthorized admin access'}, 403)
                     return
                 
@@ -1779,7 +1792,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
 
         elif self.path == '/api/admin/inquiries':
             user = self._get_user_from_token()
-            if not user or user.get('role') != 'admin':
+            if not self._is_admin(user):
                 self._send_json({'error': 'Unauthorized admin access'}, 403)
                 return
             inquiries = stats_db.get('purchase_inquiries', [])
@@ -1796,7 +1809,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
 
         elif self.path == '/api/admin/feedback':
             user = self._get_user_from_token()
-            if not user or (user.get('role') != 'admin' and user.get('email', '').lower() != 'ahumpo7@gmail.com'):
+            if not self._is_admin(user):
                 self._send_json({'error': 'Unauthorized admin access'}, 403)
                 return
             feedback_list = stats_db.get('user_feedback', [])
@@ -1804,7 +1817,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
 
         elif clean_path == '/api/admin/analytics':
             user = self._get_user_from_token()
-            if not user or user.get('role') != 'admin':
+            if not self._is_admin(user):
                 self._send_json({'error': 'Unauthorized admin access'}, 403)
                 return
 
@@ -1881,7 +1894,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
         # Admin: Download Complete Production Database Snapshot (.zip)
         elif self.path.split('?')[0] == '/api/admin/backup/download':
             user = self._get_user_from_token()
-            if not user or (user.get('role') != 'admin' and user.get('email', '').lower() != 'ahumpo7@gmail.com'):
+            if not self._is_admin(user):
                 self._send_json({'error': 'Unauthorized admin access'}, 403)
                 return
 
@@ -3193,7 +3206,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
         # Admin: Update User Permissions / Role / Subscriptions
         elif self.path == '/api/admin/user/permissions':
             admin_user = self._get_user_from_token(data)
-            if not admin_user or admin_user.get('role') != 'admin':
+            if not self._is_admin(admin_user):
                 self._send_json({'error': 'Unauthorized admin access'}, 403)
                 return
 
@@ -3308,7 +3321,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
         # Admin: Delete User Account
         elif self.path == '/api/admin/user/delete':
             admin_user = self._get_user_from_token(data)
-            if not admin_user or admin_user.get('role') != 'admin':
+            if not self._is_admin(admin_user):
                 self._send_json({'error': 'Unauthorized admin access'}, 403)
                 return
 
@@ -3336,7 +3349,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
         # Admin: Set / Reset Any User's Password Directly
         elif self.path == '/api/admin/user/reset-password':
             admin_user = self._get_user_from_token(data)
-            if not admin_user or admin_user.get('role') != 'admin':
+            if not self._is_admin(admin_user):
                 self._send_json({'error': 'Unauthorized admin access'}, 403)
                 return
 
@@ -3372,7 +3385,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
         # Admin: Create New User Account
         elif self.path == '/api/admin/user/create':
             admin_user = self._get_user_from_token(data)
-            if not admin_user or admin_user.get('role') != 'admin':
+            if not self._is_admin(admin_user):
                 self._send_json({'error': 'Unauthorized admin access'}, 403)
                 return
 
@@ -3471,7 +3484,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
         # Admin: Resolve Access Claim / Inquiry
         elif self.path == '/api/admin/inquiry/resolve':
             admin_user = self._get_user_from_token(data)
-            if not admin_user or admin_user.get('role') != 'admin':
+            if not self._is_admin(admin_user):
                 self._send_json({'error': 'Unauthorized admin access'}, 403)
                 return
 
@@ -3657,7 +3670,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
         # Admin: Update Feedback Status (Reviewed, Implemented, Dismissed)
         elif self.path == '/api/admin/feedback/status':
             user = self._get_user_from_token(data)
-            if not user or (user.get('role') != 'admin' and user.get('email', '').lower() != 'ahumpo7@gmail.com'):
+            if not self._is_admin(user):
                 self._send_json({'error': 'Unauthorized admin access'}, 403)
                 return
 
@@ -3688,8 +3701,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
         # Admin: Toggle Content Creators Visibility
         elif self.path == '/api/admin/creators/status':
             admin_user = self._get_user_from_token(data)
-            is_admin = admin_user and (admin_user.get('role') == 'admin' or admin_user.get('email', '').lower() in ADMIN_EMAILS)
-            if not is_admin:
+            if not self._is_admin(admin_user):
                 self._send_json({'error': 'Unauthorized admin access'}, 403)
                 return
 
