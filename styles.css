@@ -182,6 +182,7 @@ body::before {
   margin-bottom: 22px;
   gap: 12px;
   width: 100%;
+  flex-wrap: nowrap !important;
 }
 
 .header-badge {
@@ -202,7 +203,7 @@ body::before {
   display: flex;
   align-items: center;
   gap: 8px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap !important;
   justify-content: flex-end;
 }
 
@@ -223,6 +224,14 @@ body::before {
 }
 
 .feedback-text-mobile {
+  display: none;
+}
+
+.nav-text-full {
+  display: inline;
+}
+
+.nav-text-short {
   display: none;
 }
 
@@ -458,6 +467,65 @@ body::before {
     width: 100%;
     max-width: 100%;
     min-width: 0;
+  }
+}
+
+/* Responsive Single-Row Header Controls for Narrow Desktop & Laptop Screens */
+@media (max-width: 1400px) and (min-width: 769px) {
+  .nav-text-full {
+    display: none !important;
+  }
+  .nav-text-short {
+    display: inline !important;
+  }
+  .header-actions {
+    gap: 6px !important;
+    flex-wrap: nowrap !important;
+  }
+  .btn-secondary-action,
+  .btn-install-pwa {
+    padding: 0 10px !important;
+    font-size: 0.82rem !important;
+    gap: 5px !important;
+  }
+  .btn-header-icon {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    font-size: 1rem !important;
+  }
+}
+
+@media (max-width: 1140px) and (min-width: 769px) {
+  .header-top-bar {
+    gap: 8px !important;
+    flex-wrap: nowrap !important;
+  }
+  .header-actions {
+    gap: 4px !important;
+    flex-wrap: nowrap !important;
+  }
+  .btn-secondary-action,
+  .btn-install-pwa {
+    padding: 0 8px !important;
+    font-size: 0.76rem !important;
+    gap: 4px !important;
+    height: 36px !important;
+    max-height: 36px !important;
+  }
+  .badge-count {
+    min-width: 17px !important;
+    height: 17px !important;
+    padding: 0 4px !important;
+    font-size: 0.68rem !important;
+  }
+  .btn-header-icon {
+    width: 33px !important;
+    height: 33px !important;
+    min-width: 33px !important;
+    min-height: 33px !important;
+    font-size: 0.92rem !important;
   }
 }
 

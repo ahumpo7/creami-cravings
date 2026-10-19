@@ -115,7 +115,7 @@
   <link rel="icon" type="image/png" sizes="144x144" href="icon-144.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=v7.4">
+  <link rel="stylesheet" href="styles.css?v=v7.5">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -219,21 +219,21 @@
         <!-- Right: Action Controls Group -->
         <div class="header-actions">
           <button id="openBatchPrepHeaderBtn" class="btn-secondary-action header-desktop-only" title="Sunday Batch Prep Planner & Consolidated Grocery List">
-            🍱 Sunday Prep <span class="badge-count" id="batchPrepHeaderBadge" style="display: none;">0</span>
+            <span>🍱</span> <span class="nav-text-full">Sunday Prep</span><span class="nav-text-short">Prep</span> <span class="badge-count" id="batchPrepHeaderBadge" style="display: none;">0</span>
           </button>
           <button id="openFreezerTrackerBtn" class="btn-secondary-action header-desktop-only" title="View Pints in the Freezer & 16-Hour Timer">
-            🧊 Freezer <span class="badge-count" id="freezerBadge">0</span>
+            <span>🧊</span> <span>Freezer</span> <span class="badge-count" id="freezerBadge">0</span>
           </button>
           <button id="openShoppingListBtn" class="btn-secondary-action header-desktop-only" title="View Shopping List for Missing Items">
-            🛒 Shopping List <span class="badge-count" id="shoppingListBadge">0</span>
+            <span>🛒</span> <span class="nav-text-full">Shopping List</span><span class="nav-text-short">List</span> <span class="badge-count" id="shoppingListBadge">0</span>
           </button>
           <button id="openBadgesBtn" class="btn-secondary-action btn-badges-header header-desktop-only" title="Chef Badges &amp; Culinary Milestones">
-            🏆 <span class="badge-text-desktop">Badges</span> <span class="badge-count" id="headerBadgesBadge">0/12</span>
+            <span>🏆</span> <span class="badge-text-desktop">Badges</span> <span class="badge-count" id="headerBadgesBadge">0/12</span>
           </button>
 
           <!-- 1-Tap PWA Install Button (Roadmap Item 19) -->
           <button id="btnInstallPwa" class="btn-install-pwa" title="Install Creami Cravings on this Device">
-            <span class="btn-install-text-desktop">📲 Install App</span>
+            <span class="btn-install-text-desktop"><span class="nav-text-full">📲 Install App</span><span class="nav-text-short">📲 Install</span></span>
             <span class="btn-install-text-mobile">📲</span>
           </button>
 
@@ -245,7 +245,7 @@
 
           <!-- Admin Portal Header Button (Roadmap Item 15) -->
           <button id="openAdminPortalBtn" class="btn-secondary-action btn-admin-header hidden" style="display: none !important;" title="Open Admin Portal (User Management & Tiered Access)">
-            <span class="admin-text-desktop">👑 Admin Portal</span>
+            <span class="admin-text-desktop"><span class="nav-text-full">👑 Admin Portal</span><span class="nav-text-short">👑 Admin</span></span>
             <span class="admin-text-mobile">👑 Admin</span>
           </button>
 
@@ -3528,6 +3528,6 @@
 
   <!-- Scripts -->
   <script src="recipes-data.js?v=v4.3"></script>
-  <script src="app.js?v=v7.3"></script>
+  <script src="app.js?v=v7.5"></script>
 </body>
 </html>
