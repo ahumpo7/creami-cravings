@@ -5761,6 +5761,43 @@
     }).join('');
   }
 
+  // Creator Affiliate & Storefront Click Tracking
+  async function trackCreatorClick(creatorId, eventType) {
+    if (!creatorId) return;
+    try {
+      fetch('/api/creator/track-click', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ creatorId, eventType })
+      }).catch(() => {});
+    } catch (e) {}
+  }
+
+  function filterRecipesByCreatorAndPantry(creatorId) {
+    closeRecipePacksModal();
+    const creator = getCreatorById(creatorId);
+    if (!creator) return;
+
+    // Turn ON Ready-Only pantry filter
+    readyOnlyFilter = true;
+    const readyToggle = document.getElementById('readyOnlyToggle');
+    if (readyToggle) readyToggle.checked = true;
+    const readyPill = document.getElementById('readyOnlyPill');
+    if (readyPill) readyPill.classList.add('checked');
+
+    // Clear search and reset category to all so creator's available recipes show
+    recipeSearchQuery = '';
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) searchInput.value = '';
+
+    renderRecipes();
+    updateCategoryCounts();
+
+    const grid = document.getElementById('recipeGrid');
+    if (grid) grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    showToast(`🥫 Showing recipes you can make right now with your pantry ingredients!`);
+  }
+
   function showCreatorCatalogView(creatorId = 'fitness_product_finder', viewPerksFirst = false, updateHistory = true) {
     if (isCreatorDisabled(creatorId)) {
       showToast('⚠️ This creator is currently unavailable.');
@@ -5772,6 +5809,9 @@
     if (dirView) dirView.style.display = 'none';
     if (catView) catView.style.display = 'block';
     activeStoreCreatorId = creatorId;
+
+    // Track Link-in-Bio View
+    trackCreatorClick(creatorId, 'linkInBioViews');
 
     const creator = getCreatorById(creatorId);
 
@@ -5787,7 +5827,96 @@
       if (storeBtn) {
         storeBtn.href = creator.storeUrl || creator.url;
         storeBtn.innerHTML = `<span>Visit ${creator.name}'s Storefront ↗</span>`;
+        if (!storeBtn._clickTracked) {
+          storeBtn._clickTracked = true;
+          storeBtn.addEventListener('click', () => {
+            trackCreatorClick(activeStoreCreatorId || creator.id, 'storefrontClicks');
+          });
+        }
       }
+
+      // 1. Pinned Store Announcement Banner
+      const bannerEl = document.getElementById('catalogAnnouncementBanner');
+      const bannerTextEl = document.getElementById('catalogAnnouncementText');
+      if (bannerEl && bannerTextEl) {
+        const announcement = (creator && creator.storeAnnouncement) || (serverCreatorProfiles[creatorId] && serverCreatorProfiles[creatorId].storeAnnouncement) || '';
+        if (announcement) {
+          bannerTextEl.textContent = announcement;
+          bannerEl.style.display = 'flex';
+        } else {
+          bannerEl.style.display = 'none';
+        }
+      }
+
+      // 2. Creator Social Pills (Instagram, TikTok, YouTube, Shop)
+      const socialsRow = document.getElementById('catalogCreatorSocials');
+      if (socialsRow) {
+        const sl = (creator && creator.socialLinks) || {};
+        let pillsHtml = '';
+        if (sl.instagram) {
+          const igHandle = sl.instagram.replace(/^@/, '');
+          const igUrl = sl.instagram.startsWith('http') ? sl.instagram : `https://instagram.com/${igHandle}`;
+          pillsHtml += `<a href="${escapeHtml(igUrl)}" target="_blank" rel="noopener noreferrer" class="creator-social-pill ig">📸 @${escapeHtml(igHandle)}</a>`;
+        }
+        if (sl.tiktok) {
+          const ttHandle = sl.tiktok.replace(/^@/, '');
+          const ttUrl = sl.tiktok.startsWith('http') ? sl.tiktok : `https://tiktok.com/@${ttHandle}`;
+          pillsHtml += `<a href="${escapeHtml(ttUrl)}" target="_blank" rel="noopener noreferrer" class="creator-social-pill tiktok">🎵 @${escapeHtml(ttHandle)}</a>`;
+        }
+        if (sl.youtube) {
+          const ytUrl = sl.youtube.startsWith('http') ? sl.youtube : `https://youtube.com/${sl.youtube.replace(/^@/, '')}`;
+          pillsHtml += `<a href="${escapeHtml(ytUrl)}" target="_blank" rel="noopener noreferrer" class="creator-social-pill yt">▶️ YouTube</a>`;
+        }
+        if (sl.website || creator.storeUrl) {
+          const webUrl = sl.website || creator.storeUrl;
+          pillsHtml += `<a href="${escapeHtml(webUrl)}" target="_blank" rel="noopener noreferrer" class="creator-social-pill web">🌐 Official Store</a>`;
+        }
+        socialsRow.innerHTML = pillsHtml;
+      }
+
+      // 3. Match My Pantry Button
+      const matchPantryBtn = document.getElementById('catalogMatchPantryBtn');
+      if (matchPantryBtn && !matchPantryBtn._bound) {
+        matchPantryBtn._bound = true;
+        matchPantryBtn.addEventListener('click', () => {
+          filterRecipesByCreatorAndPantry(activeStoreCreatorId);
+        });
+      }
+
+      // 4. Pint of the Week / Featured Recipe
+      const featCard = document.getElementById('catalogFeaturedPintCard');
+      const featTitle = document.getElementById('catalogFeaturedTitle');
+      const featMacros = document.getElementById('catalogFeaturedMacros');
+      const featSpin = document.getElementById('catalogFeaturedSpinTag');
+      const featIcon = document.getElementById('catalogFeaturedIcon');
+      const featSpins = document.getElementById('catalogFeaturedSpins');
+      const featBtn = document.getElementById('btnCatalogFeaturedView');
+
+      if (featCard) {
+        const creatorRecipes = allRecipes.filter(r => {
+          const cr = getRecipeCreator(r);
+          return cr && cr.id === creatorId;
+        });
+        const topRecipe = creatorRecipes.find(r => r.name.toLowerCase().includes('oreo') || r.name.toLowerCase().includes('birthday')) || creatorRecipes[0];
+        if (topRecipe) {
+          featCard.style.display = 'flex';
+          if (featTitle) featTitle.textContent = topRecipe.name;
+          if (featMacros) featMacros.textContent = `${topRecipe.macros?.calories || 0} kcal • ${topRecipe.macros?.protein || 0}g Pro • ${topRecipe.macros?.carbs || 0}g Carbs • ${topRecipe.macros?.fat || 0}g Fat`;
+          if (featSpin) featSpin.textContent = `🌀 Spin: ${topRecipe.spinSetting || 'Lite Ice Cream'}`;
+          if (featIcon) featIcon.textContent = topRecipe.category === 'Keto' ? '🥑' : (topRecipe.category === 'Lactose Free' ? '🥛' : '🍨');
+          const spinsCount = (communityStats && communityStats.madeCounts && communityStats.madeCounts[topRecipe.id]) || 340;
+          if (featSpins) featSpins.textContent = `🔥 ${spinsCount}+ Community Spins`;
+          if (featBtn) {
+            featBtn.onclick = () => {
+              closeRecipePacksModal();
+              openRecipeModal(topRecipe);
+            };
+          }
+        } else {
+          featCard.style.display = 'none';
+        }
+      }
+
       renderCreatorBooks(creatorId);
       renderCreatorPerks(creator);
 
@@ -5885,6 +6014,7 @@
         const brand = btn ? btn.dataset.brand : '';
         if (!code) return;
         copyTextToClipboard(code);
+        trackCreatorClick(creator.id, 'perkCopies');
         showToast(`📋 Copied code "${code}" for ${brand}!`);
         if (btn) {
           const originalHtml = btn.innerHTML;
@@ -5895,6 +6025,12 @@
             btn.classList.remove('copied');
           }, 1800);
         }
+      });
+    });
+
+    perksGrid.querySelectorAll('.btn-perk-shop').forEach(link => {
+      link.addEventListener('click', () => {
+        trackCreatorClick(creator.id, 'perkClicks');
       });
     });
   }
@@ -6025,6 +6161,9 @@
     // Open the creator's product page in a new window/tab
     window.open(url, '_blank', 'noopener,noreferrer');
     showToast(`🛒 Opening ${bookTitle} on Fitness Product Finder...`);
+
+    const creatorId = book ? book.creatorId : 'fitness_product_finder';
+    trackCreatorClick(creatorId, 'storefrontClicks');
 
     if (currentUser) {
       try {
@@ -6187,6 +6326,9 @@
     if (totalRecEl) totalRecEl.textContent = creatorRecipes.length > 0 ? creatorRecipes.length : '243';
     if (topRecEl) topRecEl.textContent = topRecipe ? topRecipe.name : 'Oreo McFlurry';
 
+    // 2b. Live Telemetry Analytics & Pantry Demand Radar
+    loadCreatorStudioAnalytics(creatorId);
+
     // 3. Digital Collections List
     const collectionsList = document.getElementById('studioCollectionsList');
     if (collectionsList && typeof BOOKS_MASTER !== 'undefined') {
@@ -6238,6 +6380,97 @@
     loadAndRenderCreatorVips(creatorId);
   }
 
+  async function loadCreatorStudioAnalytics(creatorId) {
+    try {
+      const headers = { 'Content-Type': 'application/json' };
+      if (currentUser && currentUser.token) headers['Authorization'] = `Bearer ${currentUser.token}`;
+      if (currentUser && currentUser.email) headers['X-User-Email'] = currentUser.email;
+
+      const res = await fetch(`/api/creator/analytics?creatorId=${encodeURIComponent(creatorId)}`, { headers });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.status !== 'ok') return;
+
+      // Update Spins
+      if (typeof data.totalSpins === 'number' && data.totalSpins > 0) {
+        const spinsEl = document.getElementById('studioTotalSpins');
+        if (spinsEl) spinsEl.textContent = data.totalSpins.toLocaleString();
+      }
+
+      // Update Top Recipe
+      if (data.topRecipes && data.topRecipes.length > 0) {
+        const topRecEl = document.getElementById('studioTopRecipe');
+        if (topRecEl) topRecEl.textContent = data.topRecipes[0].name;
+      }
+
+      // Update Click & Conversion Analytics
+      const clicks = data.clicks || {};
+      const sfClicksEl = document.getElementById('studioStorefrontClicks');
+      const perkCopiesEl = document.getElementById('studioPerkCopies');
+      const perkClicksEl = document.getElementById('studioPerkClicks');
+      const bioViewsEl = document.getElementById('studioLinkInBioViews');
+      if (sfClicksEl) sfClicksEl.textContent = (clicks.storefrontClicks || 0).toLocaleString();
+      if (perkCopiesEl) perkCopiesEl.textContent = (clicks.perkCopies || 0).toLocaleString();
+      if (perkClicksEl) perkClicksEl.textContent = (clicks.perkClicks || 0).toLocaleString();
+      if (bioViewsEl) bioViewsEl.textContent = (clicks.linkInBioViews || 0).toLocaleString();
+
+      // Update Announcement input if available
+      const annInput = document.getElementById('studioAnnouncementInput');
+      if (annInput && !annInput.value && data.announcement) {
+        annInput.value = data.announcement;
+      }
+
+      // Render Audience Pantry Demand Radar
+      if (Array.isArray(data.pantryDemand)) {
+        renderPantryDemandRadar(data.pantryDemand);
+      }
+    } catch (e) {
+      console.warn('Error fetching creator analytics:', e);
+    }
+  }
+
+  function renderPantryDemandRadar(demandList) {
+    const listEl = document.getElementById('studioPantryDemandList');
+    if (!listEl) return;
+    if (!demandList || demandList.length === 0) {
+      listEl.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; color: #94a3b8; font-size: 0.85rem; padding: 16px;">
+          Telemetry gathering in progress... As users stock their virtual pantries, demand bars appear here!
+        </div>
+      `;
+      return;
+    }
+
+    listEl.innerHTML = demandList.map(item => {
+      const pct = item.percent || 0;
+      let badgeClass = 'moderate';
+      let badgeText = '👍 Popular';
+      if (pct >= 65) {
+        badgeClass = 'very-high';
+        badgeText = '🔥 Very High Demand';
+      } else if (pct >= 40) {
+        badgeClass = 'high';
+        badgeText = '✨ High Demand';
+      }
+
+      return `
+        <div class="pantry-demand-item">
+          <div class="pantry-demand-top">
+            <span class="pantry-demand-name" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</span>
+            <span class="pantry-demand-badge ${badgeClass}">${badgeText}</span>
+          </div>
+          <div class="pantry-demand-track">
+            <div class="pantry-demand-fill" style="width: ${Math.min(100, Math.max(8, pct))}%;"></div>
+          </div>
+          <div class="pantry-demand-meta">
+            <span>${pct}% of followers stock this</span>
+            <span>${item.count} user kitchens</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
   function renderStudioRecipesManager(creatorId, searchQuery = '') {
     const listEl = document.getElementById('studioRecipesManageList');
     if (!listEl) return;
@@ -6282,9 +6515,15 @@
             </div>
             <span style="font-size: 0.75rem; color: #94a3b8;">${r.macros?.calories || 0} kcal • ${r.macros?.protein || '0g'} pro • Spin: ${r.spinSetting || 'Lite'}</span>
           </div>
-          <div style="display: flex; gap: 6px; align-items: center;">
+          <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
             <button type="button" class="btn-primary btn-sm btn-studio-edit-recipe" data-recipe-id="${r.id}" style="padding: 6px 14px; font-size: 0.8rem; font-weight: 600;">
-              ✏️ Edit Recipe
+              ✏️ Edit
+            </button>
+            <button type="button" class="btn-studio-caption-copy btn-sm" data-recipe-id="${r.id}" title="Copy formatted Instagram / TikTok caption">
+              📋 Copy Caption
+            </button>
+            <button type="button" class="btn-secondary btn-sm btn-studio-caption-preview" data-recipe-id="${r.id}" title="Preview & Customize caption">
+              👁️ Preview
             </button>
           </div>
         </div>
@@ -6301,6 +6540,372 @@
         }
       });
     });
+
+    listEl.querySelectorAll('.btn-studio-caption-copy').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const rId = btn.dataset.recipeId;
+        const target = allRecipes.find(x => x.id === rId) || (window.RECIPES_MASTER || []).find(x => x.id === rId);
+        if (target) {
+          copySocialCaptionToClipboard(target);
+          const origText = btn.innerHTML;
+          btn.innerHTML = '✓ Copied!';
+          setTimeout(() => { btn.innerHTML = origText; }, 1800);
+        }
+      });
+    });
+
+    listEl.querySelectorAll('.btn-studio-caption-preview').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const rId = btn.dataset.recipeId;
+        const target = allRecipes.find(x => x.id === rId) || (window.RECIPES_MASTER || []).find(x => x.id === rId);
+        if (target) {
+          openSocialCaptionModal(target);
+        }
+      });
+    });
+  }
+
+  // ==========================================================================
+  // 1-Click Social Media Caption Generator Engine
+  // ==========================================================================
+  let activeCaptionRecipe = null;
+  let activeCaptionPlatform = 'instagram';
+
+  function generateSocialCaption(recipe, platform = 'instagram', includeLink = true, includeHashtags = true) {
+    if (!recipe) return '';
+    const creator = getRecipeCreator(recipe) || { name: 'Eli', handle: '@fitnessproductfinder' };
+    const handle = (creator.handle || '@fitnessproductfinder').replace('@', '');
+    const cals = recipe.macros?.calories || 0;
+    const pro = recipe.macros?.protein || 0;
+    const carbs = recipe.macros?.carbs || 0;
+    const fat = recipe.macros?.fat || 0;
+    const spin = recipe.spinSetting || 'Lite Ice Cream';
+
+    const baseIngs = [];
+    const mixinIngs = [];
+    (recipe.ingredients || []).forEach(ing => {
+      const name = ing.name || '';
+      const amount = ing.amount || ing.quantity || '';
+      const unit = ing.unit || '';
+      const str = `${amount ? amount + ' ' : ''}${unit ? unit + ' ' : ''}${name}`.trim();
+      if (ing.isMixIn || /mix-?in/i.test(name)) {
+        mixinIngs.push(str.replace(/\s*\(mix-?in\)/i, ''));
+      } else {
+        baseIngs.push(str);
+      }
+    });
+
+    if (platform === 'clean') {
+      return `${recipe.name} (Ninja Creami Recipe)
+Macros: ${cals} kcal | ${pro}g P | ${carbs}g C | ${fat}g F
+Spin: ${spin}
+
+Ingredients:
+${baseIngs.map(i => '- ' + i).join('\n')}
+${mixinIngs.length > 0 ? '\nMix-ins:\n' + mixinIngs.map(i => '- ' + i).join('\n') : ''}
+
+Instructions:
+1. Whisk base ingredients together and freeze for 16-24 hours.
+2. Spin on "${spin}". Add a splash of liquid and re-spin if needed.
+${mixinIngs.length > 0 ? '3. Add mix-ins and run on Mix-In setting.\n' : ''}
+${includeLink ? `Interactive macro scaling & pantry matching: creamicravings.com/@${handle}\n` : ''}${includeHashtags ? '#ninjacreami #creamicravings #proteinicecream' : ''}`.trim();
+    }
+
+    if (platform === 'tiktok') {
+      return `🍨 ${recipe.name.toUpperCase()} (Ninja Creami Recipe) 🤤
+Hit save for your next late-night protein craving!
+
+🔥 ${cals} CALORIES | 💪 ${pro}g PROTEIN
+🍞 ${carbs}g Carbs | 🥑 ${fat}g Fat
+
+🥣 THE RECIPE:
+${baseIngs.map(i => '• ' + i).join('\n')}
+${mixinIngs.length > 0 ? '\n🍫 MIX-INS:\n' + mixinIngs.map(i => '• ' + i).join('\n') : ''}
+
+🌀 HOW TO SPIN IT:
+1️⃣ Mix base & freeze flat 24 hours
+2️⃣ Spin on ${spin}
+3️⃣ Add 1 tbsp milk & Re-spin if powdery
+${mixinIngs.length > 0 ? '4️⃣ Top with mix-ins on Mix-In setting\n' : ''}
+${includeLink ? `📖 Tap the link in my bio to get all my official cookbook pints & match your pantry ingredients: creamicravings.com/@${handle} 🍦\n` : ''}
+${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprotein #macrofriendly #icecreamhack #creamicravings #fyp #desserthack' : ''}`.trim();
+    }
+
+    // Default: Instagram Post
+    return `🍨 ${recipe.name} | High Protein Ninja Creami Recipe ✨
+Silky, thick, and tastes like real ice cream shop soft-serve without the sugar crash!
+
+📊 MACROS:
+🔥 Calories: ${cals} kcal
+💪 Protein: ${pro}g
+🥑 Fat: ${fat}g
+🍞 Carbs: ${carbs}g
+
+🥣 INGREDIENTS:
+${baseIngs.map(i => '• ' + i).join('\n')}
+${mixinIngs.length > 0 ? '\n🍫 MIX-INS:\n' + mixinIngs.map(i => '• ' + i).join('\n') : ''}
+
+🌀 SPIN DIRECTIONS:
+1️⃣ Whisk base until smooth and freeze flat for 16-24 hours.
+2️⃣ Spin on "${spin}".
+3️⃣ Add a splash of milk & Re-spin once for velvety ribbons.
+${mixinIngs.length > 0 ? '4️⃣ Create a center core, add mix-ins, and hit Mix-In!\n' : ''}
+${includeLink ? `📖 Available in my official cookbook on Creami Cravings!
+Interactive pantry-matching, instant batch scaling & grocery list at:
+🔗 creamicravings.com/@${handle} (Link in bio!)\n` : ''}
+${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprotein #macrofriendly #icecreamlovers #creamicravings #ninjacreamideluxe #iifym #healthydessert' : ''}`.trim();
+  }
+
+  function openSocialCaptionModal(recipe) {
+    if (!recipe) return;
+    activeCaptionRecipe = recipe;
+    const modal = document.getElementById('socialCaptionModalOverlay');
+    const titleEl = document.getElementById('socialCaptionModalTitle');
+    const textEl = document.getElementById('socialCaptionText');
+    const chkLink = document.getElementById('chkCaptionIncludeLink');
+    const chkHash = document.getElementById('chkCaptionIncludeHashtags');
+
+    if (titleEl) titleEl.textContent = `📋 Caption for "${recipe.name}"`;
+    if (textEl) {
+      textEl.value = generateSocialCaption(
+        recipe,
+        activeCaptionPlatform,
+        chkLink ? chkLink.checked : true,
+        chkHash ? chkHash.checked : true
+      );
+    }
+
+    if (modal) {
+      modal.classList.add('active');
+      modal.setAttribute('aria-hidden', 'false');
+      lockBackgroundScroll();
+    }
+  }
+
+  function closeSocialCaptionModal() {
+    const modal = document.getElementById('socialCaptionModalOverlay');
+    if (modal) {
+      modal.classList.remove('active');
+      modal.setAttribute('aria-hidden', 'true');
+      unlockBackgroundScroll();
+    }
+  }
+
+  function copySocialCaptionToClipboard(recipe = null) {
+    const target = recipe || activeCaptionRecipe;
+    if (!target) return;
+    const textEl = document.getElementById('socialCaptionText');
+    const modal = document.getElementById('socialCaptionModalOverlay');
+    const isModalOpen = modal && modal.classList.contains('active');
+    const caption = (textEl && isModalOpen)
+      ? textEl.value
+      : generateSocialCaption(target, 'instagram', true, true);
+
+    copyTextToClipboard(caption).then(() => {
+      showToast('📋 Caption copied to clipboard! Ready to paste into Instagram or TikTok.');
+    }).catch(() => {
+      showToast('📋 Caption copied!');
+    });
+  }
+
+  // ==========================================================================
+  // Smart Recipe Quick-Paste Importer Engine
+  // ==========================================================================
+  function parseRawRecipeText(text) {
+    if (!text || typeof text !== 'string') return null;
+    const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+    if (lines.length === 0) return null;
+
+    let title = '';
+    let calories = '';
+    let protein = '';
+    let carbs = '';
+    let fat = '';
+    let spin = 'Lite Ice Cream';
+    let freezeTime = '16+ HOURS';
+    const ingredients = [];
+    const instructions = [];
+
+    let currentSection = 'meta';
+
+    // Regex matchers
+    const calRegex = /(?:calories|cals?|kcal)\s*[:=-]?\s*(\d+)/i;
+    const proRegex = /(?:protein|pro|p)\s*[:=-]?\s*(\d+(?:\.\d+)?)\s*g?/i;
+    const carbRegex = /(?:carbs?|carbohydrates?|c)\s*[:=-]?\s*(\d+(?:\.\d+)?)\s*g?/i;
+    const fatRegex = /(?:fat|fats?|f)\s*[:=-]?\s*(\d+(?:\.\d+)?)\s*g?/i;
+    const slashMacroRegex = /(?:macros?|nutrition)\s*[:=-]?\s*(\d+)\s*(?:cal|cals?|kcal)?\s*[\/|,]\s*(\d+(?:\.\d+)?)\s*p?\s*[\/|,]\s*(\d+(?:\.\d+)?)\s*c?\s*[\/|,]\s*(\d+(?:\.\d+)?)\s*f?/i;
+
+    // Check full text for slash macro format
+    const slashMatch = text.match(slashMacroRegex);
+    if (slashMatch) {
+      calories = slashMatch[1];
+      protein = slashMatch[2] + 'g';
+      carbs = slashMatch[3] + 'g';
+      fat = slashMatch[4] + 'g';
+    }
+
+    // Check full text for spin setting
+    if (/sorbet/i.test(text)) spin = 'Sorbet';
+    else if (/respin|re-spin/i.test(text) && !/lite ice cream/i.test(text)) spin = 'Respin';
+    else if (/mix-?in/i.test(text) && !/lite ice cream/i.test(text) && !/ice cream/i.test(text)) spin = 'Mix-in';
+    else if (/ice cream/i.test(text) && !/lite/i.test(text)) spin = 'Ice Cream';
+    else spin = 'Lite Ice Cream';
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const lower = line.toLowerCase();
+
+      // Section triggers
+      if (/^(?:ingredients|what you need|recipe|base):?$/i.test(lower) || lower.startsWith('ingredients:')) {
+        currentSection = 'ingredients';
+        const remainder = line.replace(/^ingredients:?\s*/i, '').trim();
+        if (remainder) ingredients.push(remainder);
+        continue;
+      }
+      if (/^(?:instructions|directions|how to make|steps|method):?$/i.test(lower) || lower.startsWith('instructions:')) {
+        currentSection = 'instructions';
+        const remainder = line.replace(/^instructions:?\s*/i, '').trim();
+        if (remainder) instructions.push(remainder);
+        continue;
+      }
+      if (/^(?:mix-?ins?|toppings?):?$/i.test(lower) || lower.startsWith('mix-ins:') || lower.startsWith('mix-in:')) {
+        currentSection = 'mixins';
+        const remainder = line.replace(/^mix-?ins?:?\s*/i, '').trim();
+        if (remainder) ingredients.push(remainder.endsWith('(Mix-in)') ? remainder : remainder + ' (Mix-in)');
+        continue;
+      }
+
+      // Title detection: first non-header, non-macro line
+      if (!title && !calRegex.test(line) && !slashMacroRegex.test(line) && !line.startsWith('http') && !line.startsWith('#')) {
+        title = line.replace(/^[#\*\-•\d\.\s🍨🍦✨🔥💪]+/, '').replace(/[:|].*$/, '').trim();
+        continue;
+      }
+
+      // Macro extraction
+      if (!calories && calRegex.test(line)) {
+        const m = line.match(calRegex);
+        if (m) calories = m[1];
+      }
+      if (!protein && proRegex.test(line)) {
+        const m = line.match(proRegex);
+        if (m) protein = m[1] + 'g';
+      }
+      if (!carbs && carbRegex.test(line)) {
+        const m = line.match(carbRegex);
+        if (m) carbs = m[1] + 'g';
+      }
+      if (!fat && fatRegex.test(line)) {
+        const m = line.match(fatRegex);
+        if (m) fat = m[1] + 'g';
+      }
+
+      // Content parsing by current section
+      if (currentSection === 'ingredients') {
+        const cleanIng = line.replace(/^[-*•\d\.)\s]+/, '').trim();
+        if (cleanIng && !cleanIng.startsWith('#') && !cleanIng.startsWith('http')) {
+          ingredients.push(cleanIng);
+        }
+      } else if (currentSection === 'mixins') {
+        const cleanMix = line.replace(/^[-*•\d\.)\s]+/, '').trim();
+        if (cleanMix && !cleanMix.startsWith('#')) {
+          ingredients.push(cleanMix.endsWith('(Mix-in)') ? cleanMix : cleanMix + ' (Mix-in)');
+        }
+      } else if (currentSection === 'instructions') {
+        const cleanInst = line.replace(/^[-*•\d\.)\s]+/, '').trim();
+        if (cleanInst && !cleanInst.startsWith('#') && !cleanInst.startsWith('http')) {
+          instructions.push(cleanInst);
+        }
+      } else {
+        // Look for ingredient lines even without explicit section header
+        if (/^\d+\s*(?:g|ml|oz|cups?|tbsp|tsp|scoops?)\s+/i.test(line) || /^[•*-]\s*\d+/i.test(line)) {
+          const clean = line.replace(/^[-*•\s]+/, '').trim();
+          ingredients.push(clean);
+        }
+      }
+    }
+
+    if (!title && lines.length > 0) title = lines[0].substring(0, 45);
+
+    return {
+      title,
+      calories: calories || '280',
+      protein: protein || '32g',
+      carbs: carbs || '18g',
+      fat: fat || '4g',
+      spin,
+      freezeTime,
+      ingredients,
+      instructions: instructions.length > 0 ? instructions.join('\n') : 'Whisk all ingredients and freeze flat for 16-24 hours. Spin on ' + spin + ', add a splash of milk and Re-spin if powdery.'
+    };
+  }
+
+  function openSmartPasteModal() {
+    const modal = document.getElementById('smartPasteModalOverlay');
+    if (!modal) return;
+    const rawInput = document.getElementById('smartPasteRawText');
+    const previewSection = document.getElementById('smartPastePreviewSection');
+    if (previewSection) previewSection.style.display = 'none';
+    if (rawInput) rawInput.value = '';
+
+    modal.classList.add('active');
+    modal.setAttribute('aria-hidden', 'false');
+    lockBackgroundScroll();
+  }
+
+  function closeSmartPasteModal() {
+    const modal = document.getElementById('smartPasteModalOverlay');
+    if (!modal) return;
+    modal.classList.remove('active');
+    modal.setAttribute('aria-hidden', 'true');
+    unlockBackgroundScroll();
+  }
+
+  function applySmartParsedRecipe() {
+    const name = document.getElementById('smartParsedName').value.trim();
+    const cals = document.getElementById('smartParsedCalories').value.trim();
+    const protein = document.getElementById('smartParsedProtein').value.trim();
+    const carbs = document.getElementById('smartParsedCarbs').value.trim();
+    const fat = document.getElementById('smartParsedFat').value.trim();
+    const spin = document.getElementById('smartParsedSpin').value.trim();
+    const ings = document.getElementById('smartParsedIngredients').value.trim();
+    const inst = document.getElementById('smartParsedInstructions').value.trim();
+
+    closeSmartPasteModal();
+
+    // Open Custom Recipe Modal
+    openCustomRecipeModal();
+
+    // Switch to Manual Freeform Form
+    const btnManual = document.getElementById('btnModeManual');
+    if (btnManual) btnManual.click();
+
+    // Populate manual form fields
+    const crName = document.getElementById('crName');
+    const crCalories = document.getElementById('crCalories');
+    const crProtein = document.getElementById('crProtein');
+    const crCarbs = document.getElementById('crCarbs');
+    const crFat = document.getElementById('crFat');
+    const crSpinSetting = document.getElementById('crSpinSetting');
+    const crIngredients = document.getElementById('crIngredients');
+    const crInstructions = document.getElementById('crInstructions');
+
+    if (crName && name) crName.value = name;
+    if (crCalories && cals) crCalories.value = cals;
+    if (crProtein && protein) crProtein.value = protein;
+    if (crCarbs && carbs) crCarbs.value = carbs;
+    if (crFat && fat) crFat.value = fat;
+    if (crSpinSetting && spin) {
+      for (let i = 0; i < crSpinSetting.options.length; i++) {
+        if (crSpinSetting.options[i].value.toLowerCase() === spin.toLowerCase()) {
+          crSpinSetting.selectedIndex = i;
+          break;
+        }
+      }
+    }
+    if (crIngredients && ings) crIngredients.value = ings;
+    if (crInstructions && inst) crInstructions.value = inst;
+
+    showToast('✨ Recipe loaded into builder! Review details and click Save Custom Recipe.');
   }
 
   function openStudioPerkEditor(perkToEdit = null) {
@@ -7795,6 +8400,14 @@
   window.openStoryCardModal = openStoryCardModal;
   window.triggerStoryDownload = triggerStoryDownload;
   window.shareStoryCardNative = shareStoryCardNative;
+  window.openCreatorPortalModal = openCreatorPortalModal;
+  window.closeCreatorPortalModal = closeCreatorPortalModal;
+  window.openSmartPasteModal = openSmartPasteModal;
+  window.closeSmartPasteModal = closeSmartPasteModal;
+  window.openSocialCaptionModal = openSocialCaptionModal;
+  window.closeSocialCaptionModal = closeSocialCaptionModal;
+  window.generateSocialCaption = generateSocialCaption;
+  window.parseRawRecipeText = parseRawRecipeText;
 
   function closeStoryCardModal(fromPopState = false) {
     const overlay = document.getElementById('storyCardModalOverlay');
@@ -20955,6 +21568,7 @@
       catalogBreadcrumbsWrap.style.cursor = 'pointer';
       catalogBreadcrumbsWrap.title = 'Back to All Creators';
       catalogBreadcrumbsWrap.addEventListener('click', () => showCreatorDirectoryView());
+    }
     const btnCreatorPartnerInquire = document.getElementById('btnCreatorPartnerInquire');
     if (btnCreatorPartnerInquire) {
       btnCreatorPartnerInquire.addEventListener('click', (e) => {
@@ -21145,6 +21759,7 @@
         const inputTiktok = document.getElementById('studioSocialTiktok');
         const inputYt = document.getElementById('studioSocialYoutube');
         const inputWeb = document.getElementById('studioSocialWebsite');
+        const inputAnn = document.getElementById('studioAnnouncementInput');
 
         const socialLinks = {
           instagram: (inputIg ? inputIg.value.trim() : ''),
@@ -21152,6 +21767,7 @@
           youtube: (inputYt ? inputYt.value.trim() : ''),
           website: (inputWeb ? inputWeb.value.trim() : '')
         };
+        const storeAnnouncement = inputAnn ? inputAnn.value.trim() : '';
 
         const origHtml = btnStudioSaveSocial.innerHTML;
         btnStudioSaveSocial.innerHTML = '<span>Saving...</span>';
@@ -21165,26 +21781,35 @@
               'Authorization': currentUser.token ? `Bearer ${currentUser.token}` : '',
               'X-User-Email': currentUser.email || ''
             },
-            body: JSON.stringify({ socialLinks })
+            body: JSON.stringify({ socialLinks, storeAnnouncement })
           });
           const data = await res.json();
           if (res.ok && data.success) {
             if (!currentUser.socialLinks) currentUser.socialLinks = {};
             currentUser.socialLinks = data.socialLinks || socialLinks;
+            currentUser.storeAnnouncement = data.storeAnnouncement || storeAnnouncement;
+            const cId = (currentUser && currentUser.creatorId) ? currentUser.creatorId : 'fitness_product_finder';
+            const cr = getCreatorById(cId);
+            if (cr) {
+              cr.socialLinks = currentUser.socialLinks;
+              cr.storeAnnouncement = currentUser.storeAnnouncement;
+            }
             saveUserAuth();
-            showToast('✅ Social media links saved! Your shared cards now feature your personal branding.');
+            showToast('✅ Social links & storefront announcement saved!');
           } else {
             if (!currentUser.socialLinks) currentUser.socialLinks = {};
             currentUser.socialLinks = socialLinks;
+            currentUser.storeAnnouncement = storeAnnouncement;
             saveUserAuth();
-            showToast('✅ Social links saved to active profile.');
+            showToast('✅ Profile saved.');
           }
         } catch (err) {
           console.warn('Save creator profile error:', err);
           if (!currentUser.socialLinks) currentUser.socialLinks = {};
           currentUser.socialLinks = socialLinks;
+          currentUser.storeAnnouncement = storeAnnouncement;
           saveUserAuth();
-          showToast('✅ Social links saved.');
+          showToast('✅ Profile saved.');
         } finally {
           btnStudioSaveSocial.innerHTML = origHtml;
           btnStudioSaveSocial.disabled = false;
@@ -21225,6 +21850,166 @@
         openCustomRecipeModal();
       });
     }
+
+    const btnStudioSmartImport = document.getElementById('btnStudioSmartImport');
+    if (btnStudioSmartImport) {
+      btnStudioSmartImport.addEventListener('click', () => {
+        closeCreatorPortalModal();
+        openSmartPasteModal();
+      });
+    }
+
+    const btnModeSmartPaste = document.getElementById('btnModeSmartPaste');
+    if (btnModeSmartPaste) {
+      btnModeSmartPaste.addEventListener('click', () => {
+        openSmartPasteModal();
+      });
+    }
+
+    // Smart Recipe Importer Modal Bindings
+    const closeSmartPasteModalBtn = document.getElementById('closeSmartPasteModalBtn');
+    if (closeSmartPasteModalBtn) {
+      closeSmartPasteModalBtn.addEventListener('click', closeSmartPasteModal);
+    }
+
+    const btnSmartPasteCancel = document.getElementById('btnSmartPasteCancel');
+    if (btnSmartPasteCancel) {
+      btnSmartPasteCancel.addEventListener('click', closeSmartPasteModal);
+    }
+
+    const btnSmartPasteParse = document.getElementById('btnSmartPasteParse');
+    if (btnSmartPasteParse) {
+      btnSmartPasteParse.addEventListener('click', () => {
+        const rawText = document.getElementById('smartPasteRawText') ? document.getElementById('smartPasteRawText').value.trim() : '';
+        if (!rawText) {
+          showToast('⚠️ Please paste recipe text first.');
+          return;
+        }
+        const parsed = parseRawRecipeText(rawText);
+        if (!parsed) {
+          showToast('⚠️ Could not extract recipe details from text.');
+          return;
+        }
+
+        const previewSection = document.getElementById('smartPastePreviewSection');
+        if (previewSection) previewSection.style.display = 'block';
+
+        const nameInput = document.getElementById('smartParsedName');
+        const spinInput = document.getElementById('smartParsedSpin');
+        const calInput = document.getElementById('smartParsedCalories');
+        const proInput = document.getElementById('smartParsedProtein');
+        const carbInput = document.getElementById('smartParsedCarbs');
+        const fatInput = document.getElementById('smartParsedFat');
+        const ingInput = document.getElementById('smartParsedIngredients');
+        const ingCount = document.getElementById('smartParsedIngCount');
+        const instInput = document.getElementById('smartParsedInstructions');
+
+        if (nameInput) nameInput.value = parsed.title;
+        if (spinInput) spinInput.value = parsed.spin;
+        if (calInput) calInput.value = parsed.calories;
+        if (proInput) proInput.value = parsed.protein.replace('g', '');
+        if (carbInput) carbInput.value = parsed.carbs.replace('g', '');
+        if (fatInput) fatInput.value = parsed.fat.replace('g', '');
+        if (ingInput) ingInput.value = parsed.ingredients.join('\n');
+        if (ingCount) ingCount.textContent = parsed.ingredients.length;
+        if (instInput) instInput.value = parsed.instructions;
+
+        showToast(`✨ Extracted ${parsed.ingredients.length} ingredients and nutrition macros!`);
+      });
+    }
+
+    const btnSmartPasteSample = document.getElementById('btnSmartPasteSample');
+    if (btnSmartPasteSample) {
+      btnSmartPasteSample.addEventListener('click', () => {
+        const rawInput = document.getElementById('smartPasteRawText');
+        if (rawInput) {
+          rawInput.value = `High Protein Strawberry Shortcake Pint 🍓
+Macros: 295 cals | 38g protein | 18g carbs | 4g fat
+Spin Setting: Lite Ice Cream
+Freeze Time: 24h
+
+Ingredients:
+360g Fairlife Fat Free Milk
+30g Vanilla Whey Protein Powder
+10g Sugar Free White Chocolate Pudding Mix
+1g Xanthan Gum
+40g Diced Fresh Strawberries (Mix-in)
+15g Crushed Graham Crackers (Mix-in)
+
+Instructions:
+1. Whisk milk, protein powder, pudding mix, and xanthan gum until smooth.
+2. Freeze flat for 24 hours.
+3. Spin on Lite Ice Cream. Add 1 tbsp milk and re-spin once if powdery.
+4. Make a center hole, add strawberries and graham crackers, spin on Mix-in!`;
+          if (btnSmartPasteParse) btnSmartPasteParse.click();
+        }
+      });
+    }
+
+    const btnSmartPasteApply = document.getElementById('btnSmartPasteApply');
+    if (btnSmartPasteApply) {
+      btnSmartPasteApply.addEventListener('click', applySmartParsedRecipe);
+    }
+
+    // Social Caption Modal Bindings
+    const closeSocialCaptionModalBtn = document.getElementById('closeSocialCaptionModalBtn');
+    if (closeSocialCaptionModalBtn) {
+      closeSocialCaptionModalBtn.addEventListener('click', closeSocialCaptionModal);
+    }
+
+    const btnCloseCaptionModal = document.getElementById('btnCloseCaptionModal');
+    if (btnCloseCaptionModal) {
+      btnCloseCaptionModal.addEventListener('click', closeSocialCaptionModal);
+    }
+
+    const btnCopyCaptionToClipboard = document.getElementById('btnCopyCaptionToClipboard');
+    if (btnCopyCaptionToClipboard) {
+      btnCopyCaptionToClipboard.addEventListener('click', () => {
+        copySocialCaptionToClipboard(activeCaptionRecipe);
+      });
+    }
+
+    // Caption Platform Tabs
+    document.querySelectorAll('.caption-tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.caption-tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeCaptionPlatform = btn.dataset.platform || 'instagram';
+        if (activeCaptionRecipe) {
+          const textEl = document.getElementById('socialCaptionText');
+          const chkLink = document.getElementById('chkCaptionIncludeLink');
+          const chkHash = document.getElementById('chkCaptionIncludeHashtags');
+          if (textEl) {
+            textEl.value = generateSocialCaption(
+              activeCaptionRecipe,
+              activeCaptionPlatform,
+              chkLink ? chkLink.checked : true,
+              chkHash ? chkHash.checked : true
+            );
+          }
+        }
+      });
+    });
+
+    const chkCaptionIncludeLink = document.getElementById('chkCaptionIncludeLink');
+    const chkCaptionIncludeHashtags = document.getElementById('chkCaptionIncludeHashtags');
+    [chkCaptionIncludeLink, chkCaptionIncludeHashtags].forEach(chk => {
+      if (chk) {
+        chk.addEventListener('change', () => {
+          if (activeCaptionRecipe) {
+            const textEl = document.getElementById('socialCaptionText');
+            if (textEl) {
+              textEl.value = generateSocialCaption(
+                activeCaptionRecipe,
+                activeCaptionPlatform,
+                chkCaptionIncludeLink ? chkCaptionIncludeLink.checked : true,
+                chkCaptionIncludeHashtags ? chkCaptionIncludeHashtags.checked : true
+              );
+            }
+          }
+        });
+      }
+    });
 
     const btnStudioBatchPrepAll = document.getElementById('btnStudioBatchPrepAll');
     if (btnStudioBatchPrepAll) {

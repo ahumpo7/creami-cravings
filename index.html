@@ -1561,6 +1561,7 @@
       <div class="bap-mode-tabs" role="tablist">
         <button type="button" class="bap-mode-btn active" id="btnModeWizard" role="tab" aria-selected="true">🧪 Build-A-Pint Wizard</button>
         <button type="button" class="bap-mode-btn" id="btnModeManual" role="tab" aria-selected="false">📝 Manual Freeform Form</button>
+        <button type="button" class="bap-mode-btn" id="btnModeSmartPaste" role="tab" aria-selected="false">📋 Smart Paste Importer</button>
       </div>
 
       <!-- WIZARD MODE CONTAINER -->
@@ -2294,6 +2295,44 @@
           </a>
         </div>
 
+        <!-- Creator Storefront Custom Pinned Announcement Banner -->
+        <div class="creator-catalog-announcement-banner" id="catalogAnnouncementBanner" style="display: none;">
+          <div class="announcement-pill-tag">📢 PINNED ANNOUNCEMENT</div>
+          <p class="announcement-content-text" id="catalogAnnouncementText"></p>
+        </div>
+
+        <!-- Creator Link-in-Bio Quick Action & Mini-Hub -->
+        <div class="creator-link-in-bio-hub" id="catalogLinkInBioHub">
+          <!-- Social Link Pills -->
+          <div class="creator-social-pills-row" id="catalogCreatorSocials"></div>
+
+          <!-- Quick Action CTA: Match My Pantry -->
+          <div class="creator-hub-actions-bar">
+            <button type="button" class="btn-primary btn-catalog-match-pantry" id="catalogMatchPantryBtn">
+              <span>🥫 What Can I Make? Match My Pantry &rarr;</span>
+            </button>
+          </div>
+
+          <!-- Featured Pint / Pint of the Week Highlight Card -->
+          <div class="catalog-featured-pint-card" id="catalogFeaturedPintCard" style="display: none;">
+            <div class="featured-pint-header">
+              <span class="featured-pint-badge">🌟 PINT OF THE WEEK</span>
+              <span class="featured-pint-spins" id="catalogFeaturedSpins">🔥 340+ Community Spins</span>
+            </div>
+            <div class="featured-pint-body">
+              <div class="featured-pint-icon" id="catalogFeaturedIcon">🍨</div>
+              <div class="featured-pint-info">
+                <h4 class="featured-pint-title" id="catalogFeaturedTitle">Oreo McFlurry Dupe</h4>
+                <div class="featured-pint-macros" id="catalogFeaturedMacros">295 kcal • 34g Protein • 16g Carbs • 5g Fat</div>
+                <div class="featured-pint-spin-tag" id="catalogFeaturedSpinTag">🌀 Spin: Lite Ice Cream</div>
+              </div>
+              <button type="button" class="btn-primary btn-sm btn-featured-view" id="btnCatalogFeaturedView">
+                <span>View Pint &rarr;</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
         <div class="recipe-packs-grid" id="recipePacksGrid">
           <!-- Fan Favorites Pack -->
           <div class="recipe-pack-card" data-pack="Fan Favorites">
@@ -2536,15 +2575,24 @@
               <input type="text" id="studioSocialWebsite" class="form-input" placeholder="https://yourstore.com" style="width: 100%; box-sizing: border-box; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; padding: 9px 12px; color: #f8fafc; font-size: 0.85rem;" />
             </div>
 
+            <!-- Creator Storefront Pinned Announcement Banner Input -->
+            <div class="form-group-compact" style="grid-column: 1 / -1;">
+              <label for="studioAnnouncementInput" style="font-size: 0.78rem; font-weight: 700; color: #fbbf24; display: flex; align-items: center; gap: 5px; margin-bottom: 4px;">
+                📢 Live Storefront Pinned Announcement (Shown on your /@handle page)
+              </label>
+              <input type="text" id="studioAnnouncementInput" class="form-input" placeholder="e.g. 🎉 Summer Protein Drop is live! Use code FIT15 for 15% off Clean Simple Eats!" maxlength="300" style="width: 100%; box-sizing: border-box; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(251, 191, 36, 0.35); border-radius: 8px; padding: 9px 12px; color: #f8fafc; font-size: 0.85rem;" />
+              <p style="font-size: 0.72rem; color: #94a3b8; margin: 4px 0 0 0;">This pinned banner is displayed prominently at the top of your public storefront page.</p>
+            </div>
+
             <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 8px; margin-top: 2px;">
               <button type="button" class="btn-primary" id="btnStudioSaveSocial" style="padding: 9px 18px; font-weight: 700; font-size: 0.84rem;">
-                💾 Save Social Profile
+                💾 Save Social Profile &amp; Announcement
               </button>
             </div>
           </div>
         </div>
 
-        <!-- Creator Audience Analytics Grid -->
+        <!-- Creator Audience & Monetization Analytics Grid -->
         <div class="creator-analytics-grid">
           <div class="creator-analytic-card">
             <span class="analytic-icon">🍨</span>
@@ -2556,7 +2604,7 @@
             <span class="analytic-icon">📖</span>
             <div class="analytic-num" id="studioTotalRecipes">243</div>
             <div class="analytic-label">Published Recipes</div>
-            <div class="analytic-sub">Across 5 official books</div>
+            <div class="analytic-sub">Across official books</div>
           </div>
           <div class="creator-analytic-card">
             <span class="analytic-icon">⭐</span>
@@ -2570,12 +2618,56 @@
             <div class="analytic-label">#1 Most Spun Pint</div>
             <div class="analytic-sub">Audience favorite</div>
           </div>
+          <div class="creator-analytic-card">
+            <span class="analytic-icon">🛒</span>
+            <div class="analytic-num" id="studioStorefrontClicks">0</div>
+            <div class="analytic-label">Storefront Clicks</div>
+            <div class="analytic-sub">Book store visits</div>
+          </div>
+          <div class="creator-analytic-card">
+            <span class="analytic-icon">🎟️</span>
+            <div class="analytic-num" id="studioPerkCopies">0</div>
+            <div class="analytic-label">Perk Codes Copied</div>
+            <div class="analytic-sub">Sponsor discount codes</div>
+          </div>
+          <div class="creator-analytic-card">
+            <span class="analytic-icon">🔗</span>
+            <div class="analytic-num" id="studioPerkClicks">0</div>
+            <div class="analytic-label">Partner Link Taps</div>
+            <div class="analytic-sub">Outbound sponsor traffic</div>
+          </div>
+          <div class="creator-analytic-card">
+            <span class="analytic-icon">📱</span>
+            <div class="analytic-num" id="studioLinkInBioViews">0</div>
+            <div class="analytic-label">Link-in-Bio Views</div>
+            <div class="analytic-sub">Direct /@handle visitors</div>
+          </div>
+        </div>
+
+        <!-- Audience Pantry Demand Radar Section -->
+        <div class="creator-studio-section" id="studioPantryDemandSection">
+          <div class="creator-studio-section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <div>
+              <h3 class="creator-studio-section-title" style="margin: 0;">📊 Audience Pantry Demand Radar</h3>
+              <p style="font-size: 0.8rem; color: #94a3b8; margin: 3px 0 0 0;">Real-time inventory analysis across active Creami Cravings users. Formulate recipes with high-stock ingredients for maximum spins &amp; book sales!</p>
+            </div>
+            <span class="creator-studio-badge" id="studioPantrySampleBadge">Real-Time Community Telemetry</span>
+          </div>
+          <div class="pantry-demand-insight-banner">
+            💡 <strong>Creator Pro Tip:</strong> Recipes formulated with ingredients that have &gt;60% audience stock get up to <strong>3.4x more community spins</strong> because followers already have them ready in their kitchen!
+          </div>
+          <div class="pantry-demand-radar-grid" id="studioPantryDemandList">
+            <!-- Dynamically populated from /api/creator/analytics -->
+          </div>
         </div>
 
         <!-- Creator Actions Bar -->
         <div class="creator-studio-actions-bar">
           <button type="button" class="btn-primary" id="btnStudioCreateRecipe">
-            <span>✨ Formulate &amp; Publish New Recipe to Your Books</span>
+            <span>✨ Formulate &amp; Publish New Recipe</span>
+          </button>
+          <button type="button" class="btn-secondary" id="btnStudioSmartImport">
+            <span>📝 Smart Recipe Quick-Paste Importer</span>
           </button>
           <button type="button" class="btn-secondary" id="btnStudioBatchPrepAll">
             <span>🍱 Sunday Batch Prep Creator Sampler (4 Pints)</span>
@@ -3545,7 +3637,134 @@
         </button>
         <button type="button" class="btn-secondary" id="btnDownloadStoryImage">
           <span>⬇️ Download PNG</span>
-        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Smart Recipe Quick-Paste Importer Modal -->
+  <div class="modal-overlay" id="smartPasteModalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-content smart-paste-modal-content">
+      <div class="modal-handle-bar" aria-hidden="true"></div>
+      <button class="modal-close" id="closeSmartPasteModalBtn" aria-label="Close smart importer">&times;</button>
+      
+      <div class="modal-header-compact">
+        <div class="modal-title-row">
+          <span class="modal-title-icon">📝</span>
+          <div>
+            <h2 class="modal-title">Smart Recipe Quick-Paste Importer</h2>
+            <p class="modal-subtitle">Paste raw text from notes, Instagram, TikTok, or blogs. Our smart parser auto-extracts title, macros, ingredients, and spin settings!</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="smart-paste-body">
+        <div class="smart-paste-input-section">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <label for="smartPasteRawText" style="font-size: 0.82rem; font-weight: 700; color: #f8fafc;">📋 Raw Recipe Text</label>
+            <button type="button" class="btn-sm btn-secondary" id="btnSmartPasteSample" style="font-size: 0.75rem; padding: 4px 10px;">Load Sample Text</button>
+          </div>
+          <textarea id="smartPasteRawText" rows="7" class="form-input" placeholder="Paste your recipe here... e.g.&#10;High Protein Strawberry Shortcake&#10;Macros: 290 cals, 36g protein, 18g carbs, 4g fat&#10;Spin: Lite Ice Cream&#10;Ingredients:&#10;350g Fairlife Fat Free Milk&#10;30g Vanilla Whey Protein&#10;10g SF Vanilla Pudding Mix&#10;1g Xanthan Gum&#10;15g Graham Cracker Crumbs (Mix-in)&#10;Instructions:&#10;Whisk ingredients and freeze 24h. Spin on Lite Ice Cream, add mix-ins on Mix-In setting." style="width: 100%; box-sizing: border-box; background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; padding: 12px; color: #fff; font-family: monospace; font-size: 0.85rem; resize: vertical;"></textarea>
+          <div style="display: flex; justify-content: flex-end; margin-top: 8px;">
+            <button type="button" class="btn-primary" id="btnSmartPasteParse">
+              <span>✨ Parse Recipe Now</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="smart-paste-preview-section" id="smartPastePreviewSection" style="display: none; margin-top: 14px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 10px; padding: 14px;">
+          <h4 style="margin: 0 0 10px 0; color: #38bdf8; font-size: 0.92rem; display: flex; align-items: center; gap: 6px;">
+            <span>🔍 Parsed Recipe Preview</span>
+            <span style="font-size: 0.72rem; color: #94a3b8; font-weight: normal;">(Review and customize before importing)</span>
+          </h4>
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin-bottom: 10px;">
+            <div>
+              <label style="font-size: 0.74rem; color: #94a3b8; font-weight: 700;">Title</label>
+              <input type="text" id="smartParsedName" class="form-input" style="width: 100%; box-sizing: border-box; padding: 6px 10px; font-size: 0.84rem; background: rgba(0,0,0,0.3); color: #fff; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px;">
+            </div>
+            <div>
+              <label style="font-size: 0.74rem; color: #94a3b8; font-weight: 700;">Spin Setting</label>
+              <input type="text" id="smartParsedSpin" class="form-input" style="width: 100%; box-sizing: border-box; padding: 6px 10px; font-size: 0.84rem; background: rgba(0,0,0,0.3); color: #fff; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px;">
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 10px;">
+            <div>
+              <label style="font-size: 0.72rem; color: #94a3b8; font-weight: 700;">Calories</label>
+              <input type="number" id="smartParsedCalories" class="form-input" style="width: 100%; box-sizing: border-box; padding: 6px 8px; font-size: 0.84rem; background: rgba(0,0,0,0.3); color: #fff; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px;">
+            </div>
+            <div>
+              <label style="font-size: 0.72rem; color: #94a3b8; font-weight: 700;">Protein (g)</label>
+              <input type="text" id="smartParsedProtein" class="form-input" style="width: 100%; box-sizing: border-box; padding: 6px 8px; font-size: 0.84rem; background: rgba(0,0,0,0.3); color: #fff; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px;">
+            </div>
+            <div>
+              <label style="font-size: 0.72rem; color: #94a3b8; font-weight: 700;">Carbs (g)</label>
+              <input type="text" id="smartParsedCarbs" class="form-input" style="width: 100%; box-sizing: border-box; padding: 6px 8px; font-size: 0.84rem; background: rgba(0,0,0,0.3); color: #fff; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px;">
+            </div>
+            <div>
+              <label style="font-size: 0.72rem; color: #94a3b8; font-weight: 700;">Fat (g)</label>
+              <input type="text" id="smartParsedFat" class="form-input" style="width: 100%; box-sizing: border-box; padding: 6px 8px; font-size: 0.84rem; background: rgba(0,0,0,0.3); color: #fff; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px;">
+            </div>
+          </div>
+          <div style="margin-bottom: 10px;">
+            <label style="font-size: 0.74rem; color: #94a3b8; font-weight: 700;">Ingredients (<span id="smartParsedIngCount">0</span> detected)</label>
+            <textarea id="smartParsedIngredients" rows="4" class="form-input" style="width: 100%; box-sizing: border-box; padding: 6px 10px; font-size: 0.82rem; background: rgba(0,0,0,0.3); color: #fff; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; font-family: monospace;"></textarea>
+          </div>
+          <div style="margin-bottom: 12px;">
+            <label style="font-size: 0.74rem; color: #94a3b8; font-weight: 700;">Instructions</label>
+            <textarea id="smartParsedInstructions" rows="3" class="form-input" style="width: 100%; box-sizing: border-box; padding: 6px 10px; font-size: 0.82rem; background: rgba(0,0,0,0.3); color: #fff; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px;"></textarea>
+          </div>
+          <div style="display: flex; justify-content: flex-end; gap: 8px;">
+            <button type="button" class="btn-secondary btn-sm" id="btnSmartPasteCancel">Cancel</button>
+            <button type="button" class="btn-primary btn-sm" id="btnSmartPasteApply" style="font-weight: 700;">
+              <span>🚀 Load into Recipe Builder</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1-Click Social Media Caption Generator Modal -->
+  <div class="modal-overlay" id="socialCaptionModalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-content social-caption-modal-content">
+      <div class="modal-handle-bar" aria-hidden="true"></div>
+      <button class="modal-close" id="closeSocialCaptionModalBtn" aria-label="Close caption generator">&times;</button>
+      
+      <div class="modal-header-compact">
+        <div class="modal-title-row">
+          <span class="modal-title-icon">📱</span>
+          <div>
+            <h2 class="modal-title" id="socialCaptionModalTitle">Social Media Caption Generator</h2>
+            <p class="modal-subtitle">One-click formatted captions with emojis, macros, ingredients, spin guide, and trending tags for TikTok &amp; Instagram.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="social-caption-body">
+        <div class="social-caption-platform-tabs">
+          <button type="button" class="caption-tab-btn active" data-platform="instagram">📸 Instagram Post</button>
+          <button type="button" class="caption-tab-btn" data-platform="tiktok">🎵 TikTok Reel</button>
+          <button type="button" class="caption-tab-btn" data-platform="clean">📋 Minimal / Clean</button>
+        </div>
+
+        <div class="caption-preview-box" style="margin: 12px 0;">
+          <textarea id="socialCaptionText" rows="12" class="form-input caption-textarea" aria-label="Formatted social caption" style="width: 100%; box-sizing: border-box; background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; padding: 12px; color: #fff; font-family: monospace; font-size: 0.85rem; resize: vertical; line-height: 1.5;"></textarea>
+        </div>
+
+        <div class="social-caption-options-row" style="display: flex; gap: 16px; margin-bottom: 14px; flex-wrap: wrap;">
+          <label style="font-size: 0.8rem; color: #cbd5e1; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+            <input type="checkbox" id="chkCaptionIncludeLink" checked> Include Storefront / Link-in-Bio link
+          </label>
+          <label style="font-size: 0.8rem; color: #cbd5e1; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+            <input type="checkbox" id="chkCaptionIncludeHashtags" checked> Include Viral Hashtags
+          </label>
+        </div>
+
+        <div class="social-caption-actions" style="display: flex; justify-content: flex-end; gap: 8px;">
+          <button type="button" class="btn-secondary" id="btnCloseCaptionModal">Close</button>
+          <button type="button" class="btn-primary" id="btnCopyCaptionToClipboard" style="font-weight: 700;">
+            <span>📋 Copy Caption to Clipboard</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>

@@ -1496,7 +1496,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
 
         elif clean_path == '/api/creator/analytics':
             qs = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
-            req_creator = qs.get('creator', [None])[0]
+            req_creator = qs.get('creator', [None])[0] or qs.get('creatorId', [None])[0] or qs.get('c', [None])[0]
 
             user = self._get_user_from_token()
             is_creator_or_admin = user and (user.get('role') in ['creator', 'admin'] or user.get('email', '').lower() == 'ahumpo7@gmail.com')
@@ -1539,13 +1539,53 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
 
             recipe_performance.sort(key=lambda x: x['spins'], reverse=True)
 
+            # Compute Pantry Demand Radar across all active users
+            pantry_counts = {}
+            total_active_users = max(1, len(users_db))
+            for u in users_db.values():
+                u_pantry = u.get('pantry', [])
+                if isinstance(u_pantry, list):
+                    for item in u_pantry:
+                        if isinstance(item, str):
+                            pantry_counts[item] = pantry_counts.get(item, 0) + 1
+
+            pantry_demand_list = []
+            for item_id, count in sorted(pantry_counts.items(), key=lambda x: x[1], reverse=True)[:15]:
+                pct = round((count / total_active_users) * 100)
+                clean_name = item_id.replace('_', ' ').title()
+                pantry_demand_list.append({
+                    'id': item_id,
+                    'name': clean_name,
+                    'count': count,
+                    'percent': pct
+                })
+
+            # Fetch affiliate perk & storefront click analytics for this creator
+            creator_clicks = stats_db.get('creator_clicks', {}).get(creator_id, {
+                'storefrontClicks': 0,
+                'perkCopies': 0,
+                'perkClicks': 0,
+                'linkInBioViews': 0
+            })
+
+            target_user = None
+            for u in users_db.values():
+                if u.get('creatorId') == creator_id:
+                    target_user = u
+                    break
+
+            announcement = target_user.get('storeAnnouncement', '') if target_user else ''
+
             self._send_json({
                 'status': 'ok',
                 'creatorId': creator_id,
                 'totalRecipes': len(recipe_performance),
                 'totalSpins': total_spins,
                 'topRecipes': recipe_performance[:5],
-                'allRecipes': recipe_performance
+                'allRecipes': recipe_performance,
+                'pantryDemand': pantry_demand_list,
+                'clicks': creator_clicks,
+                'announcement': announcement
             })
             return
 
@@ -3054,6 +3094,8 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 }
             if 'brandName' in data and data['brandName']:
                 target_user['brandName'] = str(data['brandName']).strip()
+            if 'storeAnnouncement' in data:
+                target_user['storeAnnouncement'] = str(data.get('storeAnnouncement', '')).strip()[:300]
 
             if 'perks' in data and isinstance(data['perks'], list):
                 sanitized_perks = []
@@ -3077,6 +3119,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 'success': True,
                 'creatorId': target_creator_id,
                 'brandName': target_user.get('brandName', ''),
+                'storeAnnouncement': target_user.get('storeAnnouncement', ''),
                 'socialLinks': target_user.get('socialLinks', {}),
                 'perks': target_user.get('perks', [])
             })
@@ -3468,6 +3511,36 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                     'message': f'Access claim for "{pack}" submitted for verification.',
                     'inquiry': inquiry
                 })
+
+        # Creator Click Analytics Tracking (Storefront, Affiliate Codes, Link-in-Bio)
+        elif self.path == '/api/creator/track-click':
+            creator_id = str(data.get('creatorId') or 'fitness_product_finder').strip()
+            event_type = str(data.get('eventType') or 'storefrontClicks').strip()
+            # Allowed events: storefrontClicks, perkCopies, perkClicks, linkInBioViews
+            allowed_events = ('storefrontClicks', 'perkCopies', 'perkClicks', 'linkInBioViews')
+            if event_type not in allowed_events:
+                event_type = 'storefrontClicks'
+
+            if 'creator_clicks' not in stats_db:
+                stats_db['creator_clicks'] = {}
+            if creator_id not in stats_db['creator_clicks']:
+                stats_db['creator_clicks'][creator_id] = {
+                    'storefrontClicks': 0,
+                    'perkCopies': 0,
+                    'perkClicks': 0,
+                    'linkInBioViews': 0
+                }
+
+            stats_db['creator_clicks'][creator_id][event_type] = stats_db['creator_clicks'][creator_id].get(event_type, 0) + 1
+            save_json_file(STATS_DB_FILE, stats_db)
+            self._send_json({
+                'status': 'ok',
+                'success': True,
+                'creatorId': creator_id,
+                'eventType': event_type,
+                'total': stats_db['creator_clicks'][creator_id][event_type]
+            })
+            return
 
         # User Feedback & Feature Requests (Roadmap Item 21)
         elif self.path == '/api/feedback':
