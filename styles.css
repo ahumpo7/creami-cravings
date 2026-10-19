@@ -18359,10 +18359,11 @@ body.modal-open .btn-back-to-top {
 
 .gear-category-pills {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
-  overflow-x: auto;
-  padding: 4px 0;
-  scrollbar-width: none;
+  padding: 4px 0 6px 0;
+  max-width: 100%;
 }
 
 .gear-category-pills::-webkit-scrollbar {
@@ -18373,17 +18374,20 @@ body.modal-open .btn-back-to-top {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 7px 14px;
+  padding: 6px 13px;
   background: #181d30;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 999px;
   color: #cbd5e1;
   font-family: var(--font-body);
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
+  max-width: 100%;
+  box-sizing: border-box;
   transition: all 0.18s ease;
+  user-select: none;
 }
 
 [data-theme="light"] .gear-cat-pill {
@@ -18408,6 +18412,18 @@ body.modal-open .btn-back-to-top {
   color: #ffffff !important;
   border-color: transparent !important;
   box-shadow: 0 2px 10px rgba(245, 158, 11, 0.35);
+}
+
+@media (max-width: 600px) {
+  .gear-category-pills {
+    gap: 6px;
+    padding: 2px 0 6px 0;
+  }
+  .gear-cat-pill {
+    padding: 5px 10px;
+    font-size: 0.74rem;
+    gap: 4px;
+  }
 }
 
 /* Gear Products Grid & Cards */
@@ -18475,6 +18491,8 @@ body.modal-open .btn-back-to-top {
   flex-direction: column;
   align-items: flex-end;
   gap: 4px;
+  min-width: 0;
+  max-width: calc(100% - 52px);
 }
 
 .gear-badge-pill {
@@ -18483,9 +18501,13 @@ body.modal-open .btn-back-to-top {
   background: rgba(245, 158, 11, 0.18);
   color: #fbbf24;
   border: 1px solid rgba(245, 158, 11, 0.35);
-  padding: 2px 7px;
+  padding: 2px 8px;
   border-radius: 999px;
   white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-sizing: border-box;
 }
 
 [data-theme="light"] .gear-badge-pill {
@@ -18498,6 +18520,10 @@ body.modal-open .btn-back-to-top {
   font-size: 0.68rem;
   color: #94a3b8;
   font-weight: 600;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 [data-theme="light"] .gear-rating-pill {
