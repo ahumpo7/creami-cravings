@@ -185,6 +185,32 @@ body::before {
   flex-wrap: nowrap !important;
 }
 
+.header-top-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.header-desktop-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.header-utility-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-nav-cluster {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .header-badge {
   display: inline-flex;
   align-items: center;
@@ -5192,20 +5218,30 @@ body.modal-open .cookie-consent-banner {
     box-sizing: border-box !important;
   }
 
-  /* Header & Top Bar - Ultra-Compact Single Row */
+  /* Header & Top Bar - Two-Tier Balanced Mobile Header */
   .main-header {
-    margin-bottom: 10px;
+    margin-bottom: 12px;
   }
 
   .header-top-bar {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    margin-bottom: 8px !important;
+    gap: 8px !important;
+    flex-wrap: nowrap !important;
+  }
+
+  /* Row 1: Profile on Left, Sound & Theme on Right */
+  .header-top-row {
     display: flex !important;
     flex-direction: row !important;
     justify-content: space-between !important;
     align-items: center !important;
     width: 100% !important;
-    margin-bottom: 6px !important;
-    gap: 4px !important;
-    flex-wrap: nowrap !important;
+    min-width: 0 !important;
   }
 
   #authHeaderContainer {
@@ -5215,14 +5251,12 @@ body.modal-open .cookie-consent-banner {
     min-width: 0;
   }
 
-  .header-actions {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 4px !important;
-    width: auto;
-    flex-wrap: nowrap !important;
-    flex-shrink: 0;
+  .header-utility-controls {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    margin-left: auto !important;
+    flex-shrink: 0 !important;
   }
 
   .header-desktop-only {
@@ -5235,6 +5269,75 @@ body.modal-open .cookie-consent-banner {
 
   .signin-text-mobile {
     display: inline;
+  }
+
+  /* Row 2: Quick Feature Navigation Pills */
+  .header-nav-cluster {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    justify-content: safe center !important;
+    gap: 4px !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 2px 2px 4px 2px !important;
+    overflow-x: auto !important;
+    scrollbar-width: none !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .header-nav-cluster::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .header-nav-cluster .btn-secondary-action,
+  .header-nav-cluster .btn-install-pwa {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    height: 28px !important;
+    min-height: 28px !important;
+    padding: 0 7px !important;
+    border-radius: 999px !important;
+    font-size: 0.70rem !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    width: auto !important;
+    box-sizing: border-box !important;
+  }
+
+  .header-nav-cluster .btn-install-pwa {
+    background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%) !important;
+    color: #ffffff !important;
+    border: none !important;
+    box-shadow: 0 2px 6px rgba(124, 58, 237, 0.3) !important;
+  }
+
+  .header-nav-cluster .btn-admin-header {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.22) 0%, rgba(217, 119, 6, 0.32) 100%) !important;
+    border: 1px solid rgba(245, 158, 11, 0.5) !important;
+    color: #fbbf24 !important;
+  }
+
+  [data-theme="light"] .header-nav-cluster .btn-admin-header {
+    background: #fef3c7 !important;
+    border-color: #fde68a !important;
+    color: #b45309 !important;
+  }
+
+  @media (max-width: 390px) {
+    .header-nav-cluster {
+      gap: 3px !important;
+    }
+    .header-nav-cluster .btn-secondary-action,
+    .header-nav-cluster .btn-install-pwa {
+      padding: 0 4.5px !important;
+      font-size: 0.65rem !important;
+      gap: 2px !important;
+    }
   }
 
   .btn-install-text-desktop {
@@ -5273,88 +5376,20 @@ body.modal-open .cookie-consent-banner {
     display: inline !important;
   }
 
-  .btn-feedback-header {
-    width: 32px !important;
-    height: 32px !important;
-    min-width: 32px !important;
-    min-height: 32px !important;
-    padding: 0 !important;
-    border-radius: 50% !important;
-    font-size: 0.95rem !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    flex-shrink: 0;
-  }
-
   .creators-text-desktop {
     display: none !important;
   }
 
   .creators-text-mobile {
+    display: inline !important;
+  }
+
+  .gear-text-desktop {
     display: none !important;
   }
 
-  .btn-creators-nav {
-    width: 32px !important;
-    height: 32px !important;
-    min-width: 32px !important;
-    min-height: 32px !important;
-    padding: 0 !important;
-    border-radius: 50% !important;
-    font-size: 0.95rem !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    flex-shrink: 0;
-  }
-
-  .gear-text-desktop,
   .gear-text-mobile {
-    display: none !important;
-  }
-
-  .btn-gear-header {
-    width: 32px !important;
-    height: 32px !important;
-    min-width: 32px !important;
-    min-height: 32px !important;
-    padding: 0 !important;
-    border-radius: 50% !important;
-    font-size: 0.95rem !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    flex-shrink: 0;
-  }
-
-  .btn-install-pwa {
-    width: 32px !important;
-    height: 32px !important;
-    min-width: 32px !important;
-    min-height: 32px !important;
-    padding: 0 !important;
-    font-size: 0.95rem !important;
-    border-radius: 50% !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    flex-shrink: 0;
-  }
-
-  .btn-admin-header,
-  .btn-creator-header {
-    padding: 0 7px !important;
-    font-size: 0.72rem !important;
-    font-weight: 700 !important;
-    height: 32px !important;
-    min-height: 32px !important;
-    white-space: nowrap !important;
-    border-radius: 999px !important;
-    align-items: center;
-    justify-content: center;
-    gap: 2px !important;
-    flex-shrink: 0;
+    display: inline !important;
   }
 
   .install-platform-tabs {
