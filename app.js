@@ -2768,9 +2768,14 @@
 
     if (currentUser) {
       if (signInBtn) signInBtn.style.display = 'none';
-      if (profileWidget) profileWidget.style.display = 'inline-flex';
+      if (profileWidget) {
+        profileWidget.style.display = 'inline-flex';
+        profileWidget.title = currentUser.name ? `Signed in as ${currentUser.name}` : (currentUser.email || 'Profile');
+      }
       if (avatarImg) {
         avatarImg.src = currentUser.picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.name || 'User')}&background=059669&color=fff&bold=true`;
+        avatarImg.title = currentUser.name ? `Signed in as ${currentUser.name}` : (currentUser.email || 'Google Profile');
+        avatarImg.alt = currentUser.name || 'Google Profile';
       }
       if (nameEl) {
         nameEl.textContent = currentUser.name || currentUser.email.split('@')[0];

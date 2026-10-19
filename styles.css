@@ -5404,10 +5404,10 @@ body.modal-open .cookie-consent-banner {
   }
 
   .user-profile-widget {
-    padding: 2px 5px 2px 3px !important;
+    padding: 3px 6px 3px 3px !important;
     height: 32px !important;
     min-height: 32px !important;
-    gap: 4px !important;
+    gap: 5px !important;
     max-width: 100%;
     min-width: 0;
     border-radius: 999px !important;
@@ -5418,21 +5418,13 @@ body.modal-open .cookie-consent-banner {
     height: 24px !important;
   }
 
+  /* Hide person's name on mobile for compact, spacious header */
   .user-meta-col {
-    min-width: 0;
-    max-width: 52px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    display: none !important;
   }
 
   .user-name-text {
-    max-width: 52px !important;
-    font-size: 0.72rem !important;
-    line-height: 1 !important;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    display: none !important;
   }
 
   .user-sync-indicator {
@@ -5440,9 +5432,9 @@ body.modal-open .cookie-consent-banner {
   }
 
   .btn-signout {
-    padding: 2px 5px !important;
-    font-size: 0.65rem !important;
-    height: 20px !important;
+    padding: 2px 7px !important;
+    font-size: 0.68rem !important;
+    height: 22px !important;
     line-height: 1 !important;
   }
 
