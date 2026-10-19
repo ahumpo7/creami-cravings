@@ -115,7 +115,7 @@
   <link rel="icon" type="image/png" sizes="144x144" href="icon-144.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=v7.5">
+  <link rel="stylesheet" href="styles.css?v=v7.6">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -2727,6 +2727,10 @@
           <span>👥 User Directory</span>
           <span class="admin-tab-count" id="adminTabUsersBadge">0</span>
         </button>
+        <button type="button" class="admin-tab-btn" id="tabBtnAdminCreators">
+          <span>🧑‍🍳 Content Creators</span>
+          <span class="admin-tab-count" id="adminTabCreatorsBadge">2 Active</span>
+        </button>
         <button type="button" class="admin-tab-btn" id="tabBtnAdminClaims">
           <span>📬 Access Claims &amp; Inquiries</span>
           <span class="admin-tab-count" id="adminTabClaimsBadge">0</span>
@@ -2867,6 +2871,35 @@
           <div style="text-align: center; padding: 40px; color: var(--text-dim);">
             Loading live platform telemetry...
           </div>
+        </div>
+      </div>
+
+      <!-- PANEL 5: CONTENT CREATORS CONTROLS -->
+      <div id="adminPanelCreators" class="admin-tab-panel" style="display: none;">
+        <div class="admin-creators-hero">
+          <div class="admin-creators-hero-content">
+            <div class="admin-creators-hero-title">
+              <span class="hero-badge-icon">🧑‍🍳</span>
+              <div>
+                <h3>Content Creator Visibility &amp; Catalog Management</h3>
+                <p>Toggle individual content creators on or off. Turning off a creator immediately removes them, all of their cookbooks/packs, and all associated recipes from the public catalog, search, pantry matcher, and storefronts.</p>
+              </div>
+            </div>
+            <div class="admin-creators-master-toggle-card">
+              <div class="master-toggle-info">
+                <div class="master-toggle-title">Platform Content Creators</div>
+                <div class="master-toggle-subtitle" id="adminMasterCreatorsSubtitle">All creators enabled and recipes visible</div>
+              </div>
+              <label class="creator-toggle-switch master-switch" title="Toggle all content creators on or off">
+                <input type="checkbox" id="adminToggleAllCreators" checked>
+                <span class="creator-toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-creators-grid" id="adminCreatorsList">
+          <!-- Dynamically rendered by renderAdminCreators() in app.js -->
         </div>
       </div>
     </div>
@@ -3528,6 +3561,6 @@
 
   <!-- Scripts -->
   <script src="recipes-data.js?v=v4.3"></script>
-  <script src="app.js?v=v7.5"></script>
+  <script src="app.js?v=v7.6"></script>
 </body>
 </html>

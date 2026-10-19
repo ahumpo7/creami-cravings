@@ -417,6 +417,57 @@
     totalUsers: 1
   };
 
+  // Creator Controls State & Persistence
+  const CREATOR_SETTINGS_STORAGE_KEY = 'creami_creator_settings';
+  let creatorSettings = {
+    disabledCreators: [],
+    disableAllCreators: false
+  };
+  try {
+    const savedCreatorSettings = localStorage.getItem(CREATOR_SETTINGS_STORAGE_KEY);
+    if (savedCreatorSettings) {
+      const parsed = JSON.parse(savedCreatorSettings);
+      if (parsed && typeof parsed === 'object') {
+        creatorSettings = {
+          disabledCreators: Array.isArray(parsed.disabledCreators) ? parsed.disabledCreators : [],
+          disableAllCreators: Boolean(parsed.disableAllCreators)
+        };
+      }
+    }
+  } catch (e) {
+    console.warn('Could not parse cached creator settings:', e);
+  }
+
+  function saveCreatorSettings() {
+    try {
+      localStorage.setItem(CREATOR_SETTINGS_STORAGE_KEY, JSON.stringify(creatorSettings));
+    } catch (e) {}
+  }
+
+  function isCreatorDisabled(creatorId) {
+    if (!creatorId) return false;
+    if (creatorSettings.disableAllCreators) return true;
+    const clean = String(creatorId).trim().toLowerCase();
+    return (creatorSettings.disabledCreators || []).some(d => String(d).trim().toLowerCase() === clean);
+  }
+
+  function isRecipeCreatorDisabled(recipe) {
+    if (!recipe) return false;
+    if (
+      recipe.category === 'Community Legends' ||
+      (recipe.categories && recipe.categories.includes('Community Legends')) ||
+      recipe.category === 'Custom' ||
+      recipe.isPersonal ||
+      recipe.sourceFile === 'Community Legends' ||
+      isExactBaseTrio(recipe)
+    ) {
+      return false;
+    }
+    if (creatorSettings.disableAllCreators) return true;
+    const creatorId = recipe.creatorId || 'fitness_product_finder';
+    return isCreatorDisabled(creatorId);
+  }
+
   // Active Filters
   let activeCategory = 'all';
   let activeQuickFilter = 'all';
@@ -898,9 +949,18 @@
             )
           : null;
         if (creator) {
-          setTimeout(() => {
-            openRecipePacksModal(creator.id, false, false);
-          }, 200);
+          if (isCreatorDisabled(creator.id)) {
+            setTimeout(() => {
+              showToast(`⚠️ The creator ${creator.name} is currently unavailable.`);
+              try {
+                history.replaceState({ modal: null }, '', IS_BETA ? '/beta/' : '/');
+              } catch (e) {}
+            }, 300);
+          } else {
+            setTimeout(() => {
+              openRecipePacksModal(creator.id, false, false);
+            }, 200);
+          }
         }
       }
     }
@@ -1532,6 +1592,28 @@
           if (data.creatorProfiles && typeof data.creatorProfiles === 'object') {
             serverCreatorProfiles = data.creatorProfiles;
           }
+
+          // Sync creator enabled/disabled settings from server
+          if (Array.isArray(data.disabledCreators) || typeof data.disableAllCreators === 'boolean') {
+            const serverDisabled = Array.isArray(data.disabledCreators) ? data.disabledCreators : [];
+            const serverDisableAll = Boolean(data.disableAllCreators);
+            const curDisabledStr = JSON.stringify((creatorSettings.disabledCreators || []).slice().sort());
+            const srvDisabledStr = JSON.stringify([...serverDisabled].sort());
+            if (curDisabledStr !== srvDisabledStr || creatorSettings.disableAllCreators !== serverDisableAll) {
+              creatorSettings.disabledCreators = serverDisabled;
+              creatorSettings.disableAllCreators = serverDisableAll;
+              saveCreatorSettings();
+              mergeRecipes();
+              calculateIngredientUsage();
+              needsGridReRender = true;
+              updateCreatorDirectoryUI();
+              updateAdminCreatorsBadge();
+              if (typeof adminActiveTab !== 'undefined' && adminActiveTab === 'creators') {
+                renderAdminCreators();
+              }
+            }
+          }
+
           saveCommunityStats();
           updateCommunityStatsUI();
           if (needsGridReRender) {
@@ -2796,6 +2878,9 @@
       : null;
     const creatorId = book ? book.creatorId : 'fitness_product_finder';
 
+    // If creator is disabled, their category packs are completely locked/hidden
+    if (isCreatorDisabled(creatorId)) return false;
+
     if (currentUser) {
       if (currentUser.role === 'creator' && currentUser.creatorId === creatorId) return true;
       if (currentUser.creatorVips && Array.isArray(currentUser.creatorVips) && currentUser.creatorVips.includes(creatorId)) return true;
@@ -2997,6 +3082,7 @@
       return null;
     }
     const creatorId = recipe.creatorId || 'fitness_product_finder';
+    if (isCreatorDisabled(creatorId)) return null;
     return getCreatorById(creatorId);
   }
 
@@ -3012,6 +3098,8 @@
     ) {
       return null;
     }
+    const creatorId = recipe.creatorId || 'fitness_product_finder';
+    if (isCreatorDisabled(creatorId)) return null;
     const sourceFile = recipe.sourceFile || (recipe.sources && recipe.sources[0]?.sourceFile);
     if (sourceFile) {
       const match = BOOKS_MASTER.find(b => b.sourceFile === sourceFile);
@@ -3712,7 +3800,12 @@
     const baseRecipes = (typeof RECIPES_MASTER !== 'undefined') ? RECIPES_MASTER : [];
     const myRecipes = customRecipesState || [];
     const otherPublished = (serverPublishedRecipes || []).filter(pr => !myRecipes.some(mr => mr.id === pr.id));
-    allRecipes = [...baseRecipes, ...otherPublished, ...myRecipes];
+
+    // Exclude recipes belonging to creators who have been turned off
+    const activeBase = baseRecipes.filter(r => !isRecipeCreatorDisabled(r));
+    const activePublished = otherPublished.filter(r => !isRecipeCreatorDisabled(r));
+
+    allRecipes = [...activeBase, ...activePublished, ...myRecipes];
     migrateOldRecipeKeys();
   }
 
@@ -5528,12 +5621,51 @@
 
   let activeStoreCreatorId = null;
 
+  function updateCreatorDirectoryUI() {
+    const dirGrid = document.getElementById('creatorsDirectoryGrid');
+    if (!dirGrid) return;
+    
+    let visibleCount = 0;
+    dirGrid.querySelectorAll('.creator-directory-card').forEach(card => {
+      const cId = card.getAttribute('data-creator-id');
+      if (cId && isCreatorDisabled(cId)) {
+        card.style.display = 'none';
+      } else {
+        card.style.display = '';
+        visibleCount++;
+      }
+    });
+
+    let emptyNotice = document.getElementById('noCreatorsAvailableNotice');
+    if (visibleCount === 0) {
+      if (!emptyNotice) {
+        emptyNotice = document.createElement('div');
+        emptyNotice.id = 'noCreatorsAvailableNotice';
+        emptyNotice.className = 'empty-creators-notice';
+        emptyNotice.innerHTML = `
+          <div style="text-align: center; padding: 36px 20px; background: rgba(15, 23, 42, 0.4); border: 1px dashed rgba(255, 255, 255, 0.15); border-radius: 12px; margin-bottom: 20px;">
+            <div style="font-size: 2.2rem; margin-bottom: 8px;">🧑‍🍳</div>
+            <h3 style="font-size: 1.1rem; color: #f8fafc; margin-bottom: 6px;">No Creator Cookbooks Currently Available</h3>
+            <p style="color: #94a3b8; font-size: 0.88rem; max-width: 500px; margin: 0 auto;">
+              Content creators have been toggled off by the platform administrator. Universal Community Legends and your personal custom recipes remain fully accessible.
+            </p>
+          </div>
+        `;
+        dirGrid.insertBefore(emptyNotice, dirGrid.firstChild);
+      }
+      emptyNotice.style.display = 'block';
+    } else if (emptyNotice) {
+      emptyNotice.style.display = 'none';
+    }
+  }
+
   function showCreatorDirectoryView(updateHistory = true) {
     const dirView = document.getElementById('creatorsDirectoryView');
     const catView = document.getElementById('creatorCatalogView');
     if (dirView) dirView.style.display = 'block';
     if (catView) catView.style.display = 'none';
     activeStoreCreatorId = null;
+    updateCreatorDirectoryUI();
     if (updateHistory && (window.location.pathname.includes('/@') || window.location.pathname.includes('/creator/'))) {
       try {
         history.pushState({ modal: 'creators_directory' }, '', IS_BETA ? '/beta/' : '/');
@@ -5597,6 +5729,11 @@
   }
 
   function showCreatorCatalogView(creatorId = 'fitness_product_finder', viewPerksFirst = false, updateHistory = true) {
+    if (isCreatorDisabled(creatorId)) {
+      showToast('⚠️ This creator is currently unavailable.');
+      showCreatorDirectoryView(updateHistory);
+      return;
+    }
     const dirView = document.getElementById('creatorsDirectoryView');
     const catView = document.getElementById('creatorCatalogView');
     if (dirView) dirView.style.display = 'none';
@@ -5731,6 +5868,10 @@
 
   function openRecipePacksModal(creatorId = null, viewPerksFirst = false, updateHistory = true) {
     if (!recipePacksModalOverlay) return;
+    if (creatorId && isCreatorDisabled(creatorId)) {
+      showToast('⚠️ This creator is currently unavailable.');
+      creatorId = null;
+    }
     if (creatorId) {
       showCreatorCatalogView(creatorId, viewPerksFirst);
       if (updateHistory) {
@@ -13488,6 +13629,11 @@
 
   // --- Recipe Detail Modal ---
   function openRecipeModal(recipe, isRoulettePick = false, updateHistory = true) {
+    if (!recipe) return;
+    if (isRecipeCreatorDisabled(recipe)) {
+      showToast('⚠️ This recipe is currently unavailable because the creator has been disabled.');
+      return;
+    }
     currentModalRecipe = recipe;
     isCurrentModalRoulette = Boolean(isRoulettePick);
     if (timerInterval) {
@@ -17912,6 +18058,7 @@
       fetchAdminUsers();
       fetchAdminClaims();
       fetchAdminFeedback();
+      updateAdminCreatorsBadge();
     }
   }
 
@@ -17928,21 +18075,27 @@
   function switchAdminTab(tab) {
     adminActiveTab = tab;
     const btnUsers = document.getElementById('tabBtnAdminUsers');
+    const btnCreators = document.getElementById('tabBtnAdminCreators');
     const btnClaims = document.getElementById('tabBtnAdminClaims');
     const btnFeedback = document.getElementById('tabBtnAdminFeedback');
     const btnAnalytics = document.getElementById('tabBtnAdminAnalytics');
     const panelUsers = document.getElementById('adminPanelUsers');
+    const panelCreators = document.getElementById('adminPanelCreators');
     const panelClaims = document.getElementById('adminPanelClaims');
     const panelFeedback = document.getElementById('adminPanelFeedback');
     const panelAnalytics = document.getElementById('adminPanelAnalytics');
 
-    [btnUsers, btnClaims, btnFeedback, btnAnalytics].forEach(b => b && b.classList.remove('active'));
-    [panelUsers, panelClaims, panelFeedback, panelAnalytics].forEach(p => p && (p.style.display = 'none'));
+    [btnUsers, btnCreators, btnClaims, btnFeedback, btnAnalytics].forEach(b => b && b.classList.remove('active'));
+    [panelUsers, panelCreators, panelClaims, panelFeedback, panelAnalytics].forEach(p => p && (p.style.display = 'none'));
 
     if (tab === 'users') {
       if (btnUsers) btnUsers.classList.add('active');
       if (panelUsers) panelUsers.style.display = 'block';
       renderAdminUsers();
+    } else if (tab === 'creators') {
+      if (btnCreators) btnCreators.classList.add('active');
+      if (panelCreators) panelCreators.style.display = 'block';
+      renderAdminCreators();
     } else if (tab === 'claims') {
       if (btnClaims) btnClaims.classList.add('active');
       if (panelClaims) panelClaims.style.display = 'block';
@@ -17956,6 +18109,241 @@
       if (panelAnalytics) panelAnalytics.style.display = 'block';
       fetchAdminAnalytics();
     }
+  }
+
+  function updateAdminCreatorsBadge() {
+    const badge = document.getElementById('adminTabCreatorsBadge');
+    if (!badge) return;
+    const creators = (typeof CREATORS_MASTER !== 'undefined') ? CREATORS_MASTER : [];
+    if (creatorSettings.disableAllCreators) {
+      badge.textContent = 'All Off';
+      badge.style.background = 'rgba(239, 68, 68, 0.2)';
+      badge.style.color = '#f87171';
+    } else {
+      const offCount = (creatorSettings.disabledCreators || []).length;
+      const activeCount = creators.length - offCount;
+      if (offCount === 0) {
+        badge.textContent = `${activeCount} Active`;
+        badge.style.background = 'rgba(16, 185, 129, 0.2)';
+        badge.style.color = '#34d399';
+      } else {
+        badge.textContent = `${activeCount} Active • ${offCount} Off`;
+        badge.style.background = 'rgba(245, 158, 11, 0.2)';
+        badge.style.color = '#fbbf24';
+      }
+    }
+  }
+
+  async function saveCreatorSettingsToServer() {
+    if (!currentUser || (!currentUser.token && !currentUser.email)) return;
+    const headers = { 'Content-Type': 'application/json' };
+    if (currentUser.token) headers['Authorization'] = `Bearer ${currentUser.token}`;
+    if (currentUser.email) headers['X-User-Email'] = currentUser.email;
+
+    try {
+      const res = await fetch('/api/admin/creators/status', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          disabledCreators: creatorSettings.disabledCreators || [],
+          disableAllCreators: Boolean(creatorSettings.disableAllCreators)
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.status === 'ok') {
+          if (Array.isArray(data.disabledCreators)) creatorSettings.disabledCreators = data.disabledCreators;
+          if (typeof data.disableAllCreators === 'boolean') creatorSettings.disableAllCreators = data.disableAllCreators;
+          saveCreatorSettings();
+        }
+      }
+    } catch (e) {
+      console.warn('Could not sync creator settings to server:', e);
+    }
+  }
+
+  async function setCreatorEnabledStatus(creatorId, enabled) {
+    if (!creatorId) return;
+    const currentDisabled = new Set(creatorSettings.disabledCreators || []);
+    if (enabled) {
+      currentDisabled.delete(creatorId);
+    } else {
+      currentDisabled.add(creatorId);
+    }
+    creatorSettings.disabledCreators = Array.from(currentDisabled);
+    saveCreatorSettings();
+
+    saveCreatorSettingsToServer();
+
+    mergeRecipes();
+    calculateIngredientUsage();
+    renderRecipes();
+    updateCategoryCounts();
+    renderAdminCreators();
+    updateCreatorDirectoryUI();
+
+    const creator = (typeof CREATORS_MASTER !== 'undefined') ? CREATORS_MASTER.find(c => c.id === creatorId) : null;
+    const name = creator ? creator.name : creatorId;
+    if (enabled) {
+      showToast(`✅ ${name} enabled. Associated recipes and packs restored.`);
+    } else {
+      showToast(`🚫 ${name} disabled. All associated recipes and content hidden.`);
+    }
+  }
+
+  async function setAllCreatorsEnabledStatus(enabled) {
+    creatorSettings.disableAllCreators = !enabled;
+    saveCreatorSettings();
+
+    saveCreatorSettingsToServer();
+
+    mergeRecipes();
+    calculateIngredientUsage();
+    renderRecipes();
+    updateCategoryCounts();
+    renderAdminCreators();
+    updateCreatorDirectoryUI();
+
+    if (enabled) {
+      showToast('✅ Platform content creators enabled.');
+    } else {
+      showToast('🚫 All content creators disabled. Platform now displays only universal Community Legends & personal recipes.');
+    }
+  }
+
+  function renderAdminCreators() {
+    const listEl = document.getElementById('adminCreatorsList');
+    const masterToggleEl = document.getElementById('adminToggleAllCreators');
+    const masterSubtitleEl = document.getElementById('adminMasterCreatorsSubtitle');
+    if (!listEl) return;
+
+    const creators = (typeof CREATORS_MASTER !== 'undefined') ? CREATORS_MASTER : [];
+    const isMasterOff = Boolean(creatorSettings.disableAllCreators);
+
+    if (masterToggleEl) {
+      masterToggleEl.checked = !isMasterOff;
+    }
+    if (masterSubtitleEl) {
+      if (isMasterOff) {
+        masterSubtitleEl.innerHTML = `<span style="color: #f87171; font-weight: 600;">🚫 Master Off: All third-party creator content and recipes are disabled platform-wide</span>`;
+      } else {
+        const offCount = (creatorSettings.disabledCreators || []).length;
+        if (offCount === 0) {
+          masterSubtitleEl.innerHTML = `<span style="color: #34d399; font-weight: 600;">✅ Master On: All creators enabled and active</span>`;
+        } else {
+          masterSubtitleEl.innerHTML = `<span style="color: #fbbf24; font-weight: 600;">⚠️ Master On: ${offCount} of ${creators.length} creators individually disabled</span>`;
+        }
+      }
+    }
+
+    const baseRecipes = (typeof RECIPES_MASTER !== 'undefined') ? RECIPES_MASTER : [];
+
+    listEl.innerHTML = creators.map(c => {
+      const isIndividuallyOff = (creatorSettings.disabledCreators || []).includes(c.id);
+      const isEffectivelyOff = isMasterOff || isIndividuallyOff;
+
+      // Count recipes belonging to this creator
+      const recipeCount = baseRecipes.filter(r => {
+        if (
+          r.category === 'Community Legends' ||
+          (r.categories && r.categories.includes('Community Legends')) ||
+          r.category === 'Custom' ||
+          r.isPersonal ||
+          r.sourceFile === 'Community Legends' ||
+          isExactBaseTrio(r)
+        ) {
+          return false;
+        }
+        const cId = r.creatorId || 'fitness_product_finder';
+        return cId === c.id;
+      }).length;
+
+      // Count books
+      const books = (typeof BOOKS_MASTER !== 'undefined') ? BOOKS_MASTER.filter(b => b.creatorId === c.id) : [];
+      const booksCount = books.length;
+      const perksCount = (c.perks && Array.isArray(c.perks)) ? c.perks.length : 0;
+
+      // Count VIPs from adminUsersState
+      let vipsCount = 0;
+      if (typeof adminUsersState !== 'undefined' && Array.isArray(adminUsersState)) {
+        vipsCount = adminUsersState.filter(u => u.creatorVips && Array.isArray(u.creatorVips) && u.creatorVips.includes(c.id)).length;
+      }
+
+      const bookPillsHtml = books.map(b => `<span class="creator-book-tag">${escapeHtml(b.shortTitle || b.title)}</span>`).join('');
+
+      return `
+        <div class="admin-creator-card ${isEffectivelyOff ? 'disabled' : ''}" data-creator-id="${c.id}">
+          <div class="creator-card-top-bar">
+            <div class="creator-avatar-badge">${c.id === 'fitness_product_finder' ? '📖' : '🥣'}</div>
+            <div class="creator-id-info">
+              <div class="creator-name-row">
+                <h4 class="creator-name">${escapeHtml(c.name)}</h4>
+                <span class="creator-handle">${escapeHtml(c.handle || `@${c.id}`)}</span>
+                <span class="creator-status-pill ${isEffectivelyOff ? 'pill-disabled' : 'pill-active'}">
+                  ${isEffectivelyOff ? '🚫 Off / Hidden' : '✅ Active &amp; Visible'}
+                </span>
+              </div>
+              <div class="creator-brand-line">${escapeHtml(c.brandName || '')}</div>
+            </div>
+            <div class="creator-card-switch-wrap">
+              <label class="creator-toggle-switch" title="Toggle ${escapeHtml(c.name)} on or off">
+                <input type="checkbox" class="creator-individual-toggle" data-creator-id="${c.id}" ${isIndividuallyOff ? '' : 'checked'} ${isMasterOff ? 'disabled' : ''}>
+                <span class="creator-toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <p class="creator-bio-text">${escapeHtml(c.bio || '')}</p>
+
+          <div class="creator-metrics-row">
+            <div class="creator-metric-pill">
+              <span class="metric-val">${recipeCount}</span>
+              <span class="metric-lbl">Recipes</span>
+            </div>
+            <div class="creator-metric-pill">
+              <span class="metric-val">${booksCount}</span>
+              <span class="metric-lbl">Cookbooks</span>
+            </div>
+            <div class="creator-metric-pill">
+              <span class="metric-val">${perksCount}</span>
+              <span class="metric-lbl">Brand Perks</span>
+            </div>
+            <div class="creator-metric-pill">
+              <span class="metric-val">${vipsCount}</span>
+              <span class="metric-lbl">VIP Users</span>
+            </div>
+          </div>
+
+          <div class="creator-books-preview">
+            <div class="preview-title">Associated Cookbooks &amp; Recipe Packs:</div>
+            <div class="preview-tags">
+              ${bookPillsHtml || '<span style="color: var(--text-muted); font-size: 0.78rem;">No packs configured</span>'}
+            </div>
+          </div>
+
+          ${isEffectivelyOff ? `
+            <div class="creator-disabled-callout">
+              <span>🚫 <strong>${isMasterOff ? 'Turned Off by Master Switch' : 'Creator Turned Off'}:</strong> All ${recipeCount} recipes, ${booksCount} cookbooks, brand perks, and storefront links for ${escapeHtml(c.name)} are currently hidden from recipe search, pantry matching, and public catalog views.</span>
+            </div>
+          ` : `
+            <div class="creator-active-callout">
+              <span>✨ <strong>Active:</strong> All ${recipeCount} recipes and ${booksCount} cookbooks are active, searchable, and available in the library.</span>
+            </div>
+          `}
+        </div>
+      `;
+    }).join('');
+
+    // Attach event listeners to individual toggles
+    listEl.querySelectorAll('.creator-individual-toggle').forEach(chk => {
+      chk.addEventListener('change', async () => {
+        const cId = chk.dataset.creatorId;
+        const enable = chk.checked;
+        await setCreatorEnabledStatus(cId, enable);
+      });
+    });
+
+    updateAdminCreatorsBadge();
   }
 
   async function fetchAdminAnalytics() {
@@ -20349,9 +20737,30 @@
     if (tabBtnAdminUsers) {
       tabBtnAdminUsers.addEventListener('click', () => switchAdminTab('users'));
     }
+    const tabBtnAdminCreators = document.getElementById('tabBtnAdminCreators');
+    if (tabBtnAdminCreators) {
+      tabBtnAdminCreators.addEventListener('click', () => switchAdminTab('creators'));
+    }
     const tabBtnAdminClaims = document.getElementById('tabBtnAdminClaims');
     if (tabBtnAdminClaims) {
       tabBtnAdminClaims.addEventListener('click', () => switchAdminTab('claims'));
+    }
+
+    const adminToggleAllCreators = document.getElementById('adminToggleAllCreators');
+    if (adminToggleAllCreators) {
+      adminToggleAllCreators.addEventListener('change', async (e) => {
+        await setAllCreatorsEnabledStatus(e.target.checked);
+      });
+    }
+
+    const adminTotalCreatorsCard = document.getElementById('adminTotalCreators');
+    if (adminTotalCreatorsCard) {
+      const parentCard = adminTotalCreatorsCard.closest('.admin-stat-card');
+      if (parentCard) {
+        parentCard.style.cursor = 'pointer';
+        parentCard.title = 'Manage Content Creators';
+        parentCard.addEventListener('click', () => switchAdminTab('creators'));
+      }
     }
 
     if (adminUserSearchInput) {

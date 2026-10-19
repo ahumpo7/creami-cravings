@@ -43,6 +43,7 @@ RATINGS_DB_FILE = os.path.join(DIRECTORY, 'db_ratings.json')
 STATS_DB_FILE = os.path.join(DIRECTORY, 'db_recipe_stats.json')
 CREATOR_VIPS_DB_FILE = os.path.join(DIRECTORY, 'db_creator_vips.json')
 RECIPE_OVERRIDES_FILE = os.path.join(DIRECTORY, 'db_recipe_overrides.json')
+CREATOR_SETTINGS_FILE = os.path.join(DIRECTORY, 'db_creators_settings.json')
 
 DEFAULT_STAPLES = []
 
@@ -447,6 +448,7 @@ ratings_db = load_json_file(RATINGS_DB_FILE, {})
 stats_db = load_json_file(STATS_DB_FILE, {})
 creator_vips_db = load_json_file(CREATOR_VIPS_DB_FILE, {})
 recipe_overrides_db = load_json_file(RECIPE_OVERRIDES_FILE, {})
+creator_settings_db = load_json_file(CREATOR_SETTINGS_FILE, {'disabledCreators': [], 'disableAllCreators': False})
 
 def add_user_token(user, token):
     if not user or not isinstance(user, dict) or not token:
@@ -1317,7 +1319,9 @@ def compute_community_stats():
         'totalBatches': total_community_batches,
         'publishedRecipes': published_recipes,
         'recipeOverrides': recipe_overrides_db,
-        'creatorProfiles': creator_profiles
+        'creatorProfiles': creator_profiles,
+        'disabledCreators': creator_settings_db.get('disabledCreators', []),
+        'disableAllCreators': creator_settings_db.get('disableAllCreators', False)
     }
 
 class RecipeServer(http.server.SimpleHTTPRequestHandler):
@@ -1708,6 +1712,15 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 return
             inquiries = stats_db.get('purchase_inquiries', [])
             self._send_json({'status': 'ok', 'inquiries': inquiries})
+
+        elif clean_path == '/api/creators/status':
+            self._send_json({
+                'status': 'ok',
+                'success': True,
+                'disabledCreators': creator_settings_db.get('disabledCreators', []),
+                'disableAllCreators': creator_settings_db.get('disableAllCreators', False)
+            })
+            return
 
         elif self.path == '/api/admin/feedback':
             user = self._get_user_from_token()
@@ -3526,6 +3539,34 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 self._send_json({'status': 'ok', 'success': True})
             else:
                 self._send_json({'error': 'Feedback item not found'}, 404)
+
+        # Admin: Toggle Content Creators Visibility
+        elif self.path == '/api/admin/creators/status':
+            admin_user = self._get_user_from_token(data)
+            is_admin = admin_user and (admin_user.get('role') == 'admin' or admin_user.get('email', '').lower() in ADMIN_EMAILS)
+            if not is_admin:
+                self._send_json({'error': 'Unauthorized admin access'}, 403)
+                return
+
+            if not isinstance(data, dict):
+                self._send_json({'error': 'Invalid JSON'}, 400)
+                return
+
+            disabled_creators = data.get('disabledCreators')
+            if disabled_creators is not None and isinstance(disabled_creators, list):
+                creator_settings_db['disabledCreators'] = [str(c).strip() for c in disabled_creators if str(c).strip()]
+
+            if 'disableAllCreators' in data:
+                creator_settings_db['disableAllCreators'] = bool(data.get('disableAllCreators'))
+
+            save_json_file(CREATOR_SETTINGS_FILE, creator_settings_db)
+            self._send_json({
+                'status': 'ok',
+                'success': True,
+                'disabledCreators': creator_settings_db.get('disabledCreators', []),
+                'disableAllCreators': creator_settings_db.get('disableAllCreators', False)
+            })
+            return
 
         else:
             self._send_json({'error': 'Endpoint not found'}, 404)
