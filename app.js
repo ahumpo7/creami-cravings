@@ -78,6 +78,218 @@
       .replace(/'/g, '&#039;');
   }
 
+  // --- Amazon Associates Monetization Engine (Option C) ---
+  const AMAZON_AFFILIATE_STORE_TAG = 'creamicraving-20';
+  window.AMAZON_AFFILIATE_STORE_TAG = AMAZON_AFFILIATE_STORE_TAG;
+
+  function getAmazonAffiliateUrl(keywordOrAsin, isAsin = false) {
+    const tag = window.AMAZON_AFFILIATE_STORE_TAG || 'creamicraving-20';
+    if (!keywordOrAsin) return `https://www.amazon.com/?tag=${encodeURIComponent(tag)}&linkCode=ll1`;
+    if (isAsin) {
+      return `https://www.amazon.com/dp/${encodeURIComponent(keywordOrAsin)}?tag=${encodeURIComponent(tag)}&linkCode=ll1`;
+    }
+    return `https://www.amazon.com/s?k=${encodeURIComponent(keywordOrAsin)}&tag=${encodeURIComponent(tag)}&linkCode=ll1`;
+  }
+  window.getAmazonAffiliateUrl = getAmazonAffiliateUrl;
+
+  function trackAffiliateAmazonClick(itemName, placement = 'direct') {
+    try {
+      if (typeof gtag === 'function') {
+        gtag('event', 'click_affiliate_amazon', {
+          event_category: 'ecommerce',
+          event_label: itemName,
+          item_name: itemName,
+          placement: placement,
+          affiliate_store: AMAZON_AFFILIATE_STORE_TAG
+        });
+      }
+    } catch (e) {
+      console.warn('GA affiliate tracking failed', e);
+    }
+
+    try {
+      fetch('/api/affiliate/track-click', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ item: itemName, placement: placement })
+      }).catch(() => {});
+    } catch (err) {}
+  }
+  window.trackAffiliateAmazonClick = trackAffiliateAmazonClick;
+
+  // Curated Ninja Creami Hardware, Pints, Precision Tools & Stabilizers
+  const CREAMI_GEAR_CATALOG = [
+    {
+      id: 'ninja_creami_nc301',
+      category: 'machines',
+      categoryLabel: 'Machine',
+      title: 'Ninja NC301 CREAMi 7-in-1 Ice Cream Maker',
+      badge: 'Most Popular',
+      icon: '🍦',
+      query: 'Ninja NC301 CREAMi 7-in-1 Ice Cream Maker',
+      description: 'The original viral sensation that transforms frozen bases into ice cream, gelato, sorbet, smoothie bowls, and milkshakes with 16oz pints.',
+      proTip: 'Perfect for standard single-serve pints and protein ice creams.',
+      rating: '4.7 ★ (18,000+ Reviews)'
+    },
+    {
+      id: 'ninja_creami_deluxe_nc501',
+      category: 'machines',
+      categoryLabel: 'Machine',
+      title: 'Ninja NC501 CREAMi Deluxe 11-in-1 Ice Cream Maker',
+      badge: 'Deluxe 24oz',
+      icon: '👑',
+      query: 'Ninja NC501 CREAMi Deluxe 11-in-1 Ice Cream Maker',
+      description: 'Upgraded 24oz Deluxe capacity with 4 new one-touch programs: Slushi, Italian Ice, Frozen Drink, and CreamiCcino.',
+      proTip: 'Dual-drive motors spin top and bottom halves independently.',
+      rating: '4.6 ★ (12,000+ Reviews)'
+    },
+    {
+      id: 'deluxe_pints_4pack',
+      category: 'pints',
+      categoryLabel: 'Pints & Lids',
+      title: 'Ninja Creami Deluxe 24oz Replacement Pints (4-Pack)',
+      badge: 'Deluxe Multi-Color',
+      icon: '🧊',
+      query: 'ninja creami deluxe replacement pints 24 oz 4 pack color lids',
+      description: 'Heavy-duty, BPA-free 24oz pints with color-coded silicone lids that match our in-app Virtual Freezer color tracker.',
+      proTip: 'Preps 4 full days of batch recipes in advance without running out of tubs.',
+      rating: '4.8 ★'
+    },
+    {
+      id: 'standard_pints_4pack',
+      category: 'pints',
+      categoryLabel: 'Pints & Lids',
+      title: 'Ninja Creami 16oz Replacement Pints (4-Pack with Color Lids)',
+      badge: 'NC300 / NC301 Series',
+      icon: '🥣',
+      query: 'ninja creami replacement pints 16 oz 4 pack with multi color lids',
+      description: 'Official-fit replacement pints compatible with Ninja Creami NC299, NC300, and NC301 series appliances.',
+      proTip: 'Color lids make identifying dairy vs dairy-free bases effortless.',
+      rating: '4.8 ★'
+    },
+    {
+      id: 'silicone_color_lids',
+      category: 'pints',
+      categoryLabel: 'Pints & Lids',
+      title: 'Multi-Color Replacement Silicone Lids (4-Pack)',
+      badge: 'Pint Organizer',
+      icon: '🌈',
+      query: 'silicone replacement lids for ninja creami pints multi color',
+      description: 'Aesthetic, leak-proof silicone replacement lids in Blue, Pink, Green, Yellow, and Purple designed for easy stackability in the freezer.',
+      proTip: 'Matches the 8 color slots in Creami Cravings Virtual Freezer.',
+      rating: '4.7 ★'
+    },
+    {
+      id: 'pocket_scale_01g',
+      category: 'tools',
+      categoryLabel: 'Precision Tool',
+      title: '0.1g Pocket Digital Precision Gram Scale',
+      badge: 'Recipe Critical',
+      icon: '⚖️',
+      query: '0.1g digital food scale precision pocket scale tare',
+      description: 'Kitchen scales measuring only 1g intervals easily overdose guar gum or tara gum. 0.1g micro-precision guarantees smooth, non-slimy pints.',
+      proTip: 'Essential for measuring 0.5g to 1.5g of stabilizers accurately.',
+      rating: '4.7 ★ (25,000+ Reviews)'
+    },
+    {
+      id: 'immersion_blender',
+      category: 'tools',
+      categoryLabel: 'Precision Tool',
+      title: 'High-Speed Cordless Immersion Hand Blender',
+      badge: 'Clump-Free Bases',
+      icon: '🌪️',
+      query: 'hand immersion blender handheld milk frother high speed',
+      description: 'Vortex blender wand fits directly inside Ninja Creami pint tubs to dissolve protein powders, cocoa, and pudding mixes with zero clumps.',
+      proTip: 'Eliminates unblended powder pockets before the 16-hour freeze.',
+      rating: '4.6 ★'
+    },
+    {
+      id: 'long_silicone_spatula',
+      category: 'tools',
+      categoryLabel: 'Precision Tool',
+      title: 'Extra-Long Narrow Silicone Jar & Pint Spatula',
+      badge: 'Zero Waste',
+      icon: '🥄',
+      query: 'extra long narrow silicone jar scraper spatula',
+      description: 'Narrow, flexible heat-resistant silicone scraper that reaches right down to the grooved bottom and sides of pints without scratching acrylic.',
+      proTip: 'Cleanly scrapes down outer icy wall rings before respinning.',
+      rating: '4.8 ★'
+    },
+    {
+      id: 'guar_gum_anthonys',
+      category: 'stabilizers',
+      categoryLabel: 'Stabilizer',
+      title: "Anthony's Premium Pure Guar Gum Powder (Gluten-Free)",
+      badge: 'Cold-Soluble Binder',
+      icon: '🌿',
+      query: "Anthony's Guar Gum Powder Gluten Free",
+      description: 'Cold-soluble natural stabilizer derived from guar beans. Traps ice micro-crystals without requiring heat or cooking.',
+      proTip: 'Use 0.8g–1.0g per pint for a smooth Dairy Queen soft serve texture.',
+      rating: '4.8 ★ (8,000+ Reviews)'
+    },
+    {
+      id: 'tara_gum_kate',
+      category: 'stabilizers',
+      categoryLabel: 'Stabilizer',
+      title: 'Kate Naturals Pure Tara Gum Powder (Food Grade)',
+      badge: 'Chef Secret',
+      icon: '🌟',
+      query: 'Kate Naturals Tara Gum Powder Food Grade',
+      description: 'The gourmet hybrid stabilizer between guar and locust bean gum. Imparts a luxurious custard mouthfeel to ultra-low calorie pints.',
+      proTip: 'Greatest scoopable stability with zero slimy after-feel.',
+      rating: '4.9 ★'
+    },
+    {
+      id: 'allulose_granulated',
+      category: 'stabilizers',
+      categoryLabel: 'Sweetener',
+      title: 'Pure Granulated Allulose Sugar-Free Sweetener',
+      badge: 'Depresses Freeze Point',
+      icon: '🍯',
+      query: 'pure granulated allulose sweetener zero calorie non gmo',
+      description: 'The only zero-calorie rare sugar that depresses the freezing point like real table sugar. Keeps your frozen pints soft-scoopable.',
+      proTip: 'Unlike erythritol, allulose never turns into rock-hard ice crystals.',
+      rating: '4.7 ★'
+    },
+    {
+      id: 'lakanto_monkfruit',
+      category: 'stabilizers',
+      categoryLabel: 'Sweetener',
+      title: 'Lakanto 1:1 Monk Fruit Sweetener with Erythritol',
+      badge: 'Zero Glycemic',
+      icon: '✨',
+      query: 'Lakanto Monkfruit Sweetener 1:1 sugar replacement classic',
+      description: 'Classic 1:1 sugar replacement with clean, neutral sweetness and zero calories. The gold standard for clean high-protein ice creams.',
+      proTip: 'Zero glycemic impact and perfect for keto and low-carb Creami pints.',
+      rating: '4.8 ★ (40,000+ Reviews)'
+    },
+    {
+      id: 'jordans_skinny_syrups',
+      category: 'stabilizers',
+      categoryLabel: 'Flavor Syrups',
+      title: "Jordan's Skinny Syrups Zero Calorie Trio (Caramel, Vanilla, Mocha)",
+      badge: 'Zero Calorie Mix-In',
+      icon: '☕',
+      query: "Jordan's Skinny Syrups zero calorie flavor syrup trio",
+      description: 'Zero calorie, zero carb barista flavoring syrups that impart gourmet dessert aromatics without watering down your base.',
+      proTip: 'Add 1-2 tbsp to cold milk base before freezing for effortless flavor punch.',
+      rating: '4.6 ★'
+    },
+    {
+      id: 'optimum_nutrition_casein',
+      category: 'stabilizers',
+      categoryLabel: 'Protein Base',
+      title: 'Optimum Nutrition Gold Standard 100% Micellar Casein',
+      badge: 'Dense Micro-Crystals',
+      icon: '💪',
+      query: 'Optimum Nutrition Gold Standard 100% Micellar Casein Vanilla',
+      description: 'Slow-digesting micellar casein whips into thicker, richer volume than whey isolate alone, producing dense soft-serve gelato consistency.',
+      proTip: 'Combining 50% casein + 50% whey isolate gives the ultimate Creami texture.',
+      rating: '4.7 ★ (30,000+ Reviews)'
+    }
+  ];
+  window.CREAMI_GEAR_CATALOG = CREAMI_GEAR_CATALOG;
+
   // Default Staples Checked for New Users
   const DEFAULT_STAPLES = [];
 
@@ -15591,6 +15803,36 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
               <div class="trouble-a">Always create a 1.5-inch wide hole down to the bottom of the ice cream with a spoon before adding mix-ins, then use the <strong>Mix-In</strong> button (never Respin).</div>
             </div>
           </div>
+        </div>
+
+        <!-- Kitchen Gear & Precision Tools for this Recipe -->
+        <div class="recipe-gear-callout-card">
+          <div class="recipe-gear-header">
+            <span class="recipe-gear-icon">⚖️</span>
+            <div class="recipe-gear-header-text">
+              <strong>Kitchen Gear &amp; Precision Tools</strong>
+              <span>Tested equipment for perfect micro-crystals and velvety texture</span>
+            </div>
+          </div>
+          <div class="recipe-gear-pills-row">
+            <a href="${getAmazonAffiliateUrl('ninja creami replacement pints')}" target="_blank" rel="noopener noreferrer sponsored" class="recipe-gear-pill" onclick="trackAffiliateAmazonClick('recipe_modal_pints', 'recipe_modal');">
+              <span class="gear-pill-icon">🧊</span>
+              <span>Creami Pints ↗</span>
+            </a>
+            <a href="${getAmazonAffiliateUrl('0.1g digital food scale precision pocket scale')}" target="_blank" rel="noopener noreferrer sponsored" class="recipe-gear-pill" onclick="trackAffiliateAmazonClick('recipe_modal_scale', 'recipe_modal');">
+              <span class="gear-pill-icon">⚖️</span>
+              <span>0.1g Scale ↗</span>
+            </a>
+            <a href="${getAmazonAffiliateUrl('hand immersion blender handheld milk frother')}" target="_blank" rel="noopener noreferrer sponsored" class="recipe-gear-pill" onclick="trackAffiliateAmazonClick('recipe_modal_frother', 'recipe_modal');">
+              <span class="gear-pill-icon">🌪️</span>
+              <span>Hand Blender ↗</span>
+            </a>
+            <button type="button" class="btn-recipe-open-gear-modal" id="btnRecipeOpenGearModal" title="Browse full Creami Essentials & Gear Guide">
+              <span>More Gear &amp; Stabilizers ↗</span>
+            </button>
+          </div>
+        </div>
+
         <!-- Put in Freezer & Batch Prep Action Card (Beta Staging) -->
         <div class="recipe-freezer-action-card" style="margin-bottom: 16px; background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 12px; padding: 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
           <div style="display: flex; align-items: center; gap: 10px;">
@@ -15841,6 +16083,14 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
           }
         }
         openSlotFillModal(targetSlot, recipe);
+      });
+    }
+
+    // Recommended Gear Guide Trigger
+    const btnRecipeOpenGearModal = recipeModalBody.querySelector('#btnRecipeOpenGearModal');
+    if (btnRecipeOpenGearModal) {
+      btnRecipeOpenGearModal.addEventListener('click', () => {
+        openGearGuideModal('all');
       });
     }
 
@@ -16711,7 +16961,12 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
                         <div class="store-item-source" title="${escapeHtml(item.source)}">${escapeHtml(item.source)}</div>
                       </div>
                     </div>
-                    <div class="store-item-tag">+ Got It</div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <a href="${getAmazonAffiliateUrl(item.name)}" target="_blank" rel="noopener noreferrer sponsored" class="store-item-amazon-btn" title="Search ${escapeHtml(item.name)} on Amazon" onclick="event.stopPropagation(); trackAffiliateAmazonClick('${escapeHtml(item.name)}', 'shopping_store');">
+                        <span>🛒 Amazon</span>
+                      </a>
+                      <div class="store-item-tag">+ Got It</div>
+                    </div>
                   </div>
                 `).join('')}
               </div>
@@ -16806,6 +17061,9 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
                       </div>
                     </div>
                     <div class="shopping-item-actions">
+                      <a href="${getAmazonAffiliateUrl(item.name)}" target="_blank" rel="noopener noreferrer sponsored" class="btn-xs btn-amazon-link" title="Search ${escapeHtml(item.name)} on Amazon" onclick="event.stopPropagation(); trackAffiliateAmazonClick('${escapeHtml(item.name)}', 'shopping_list');">
+                        <span>🛒 Amazon ↗</span>
+                      </a>
                       <button type="button" class="btn-xs btn-outline add-bought-btn" data-name="${item.name}">+ In Stock</button>
                       ${item.isManual ? `<button type="button" class="btn-xs remove-shop-item-btn" data-name="${item.name}" style="background: transparent; border: 1px solid var(--border-glass); color: var(--text-dim); border-radius: var(--radius-sm); cursor: pointer;" title="Remove from list">✕</button>` : ''}
                     </div>
@@ -17284,6 +17542,98 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
 
   function printShoppingList() {
     window.print();
+  }
+
+  // --- Creami Essentials & Gear Guide Engine (Option C) ---
+  let currentGearCategory = 'all';
+
+  function openGearGuideModal(category = 'all') {
+    currentGearCategory = category || 'all';
+    renderGearGuideModal();
+    const modal = document.getElementById('gearModalOverlay');
+    if (modal) {
+      modal.classList.add('active');
+      modal.setAttribute('aria-hidden', 'false');
+      lockBackgroundScroll();
+    }
+  }
+  window.openGearGuideModal = openGearGuideModal;
+
+  function closeGearGuideModal() {
+    const modal = document.getElementById('gearModalOverlay');
+    if (modal) {
+      modal.classList.remove('active');
+      modal.setAttribute('aria-hidden', 'true');
+      unlockBackgroundScroll();
+    }
+  }
+  window.closeGearGuideModal = closeGearGuideModal;
+
+  function renderGearGuideModal() {
+    const body = document.getElementById('gearModalBody');
+    if (!body) return;
+
+    // Update Category Counts
+    const allCount = CREAMI_GEAR_CATALOG.length;
+    const machinesCount = CREAMI_GEAR_CATALOG.filter(g => g.category === 'machines').length;
+    const pintsCount = CREAMI_GEAR_CATALOG.filter(g => g.category === 'pints').length;
+    const toolsCount = CREAMI_GEAR_CATALOG.filter(g => g.category === 'tools').length;
+    const stabilizersCount = CREAMI_GEAR_CATALOG.filter(g => g.category === 'stabilizers').length;
+
+    const countAll = document.getElementById('gearCountAll');
+    if (countAll) countAll.textContent = allCount;
+    const countMachines = document.getElementById('gearCountMachines');
+    if (countMachines) countMachines.textContent = machinesCount;
+    const countPints = document.getElementById('gearCountPints');
+    if (countPints) countPints.textContent = pintsCount;
+    const countTools = document.getElementById('gearCountTools');
+    if (countTools) countTools.textContent = toolsCount;
+    const countStab = document.getElementById('gearCountStabilizers');
+    if (countStab) countStab.textContent = stabilizersCount;
+
+    // Update active pill styling
+    document.querySelectorAll('#gearCategoryPills .gear-cat-pill').forEach(pill => {
+      pill.classList.toggle('active', pill.dataset.cat === currentGearCategory);
+    });
+
+    const filtered = currentGearCategory === 'all'
+      ? CREAMI_GEAR_CATALOG
+      : CREAMI_GEAR_CATALOG.filter(item => item.category === currentGearCategory);
+
+    body.innerHTML = `
+      <div class="gear-products-grid">
+        ${filtered.map(item => {
+          const amazonUrl = getAmazonAffiliateUrl(item.query);
+          return `
+            <div class="gear-product-card" data-category="${item.category}">
+              <div class="gear-card-header">
+                <div class="gear-icon-box">
+                  <span class="gear-item-icon">${item.icon}</span>
+                </div>
+                <div class="gear-card-pills-wrap">
+                  <span class="gear-badge-pill">${escapeHtml(item.badge)}</span>
+                  <span class="gear-rating-pill">${escapeHtml(item.rating)}</span>
+                </div>
+              </div>
+              <h3 class="gear-item-title">${escapeHtml(item.title)}</h3>
+              <p class="gear-item-desc">${escapeHtml(item.description)}</p>
+              ${item.proTip ? `
+                <div class="gear-protip-callout">
+                  <strong>💡 Kitchen Pro Tip:</strong>
+                  <span>${escapeHtml(item.proTip)}</span>
+                </div>
+              ` : ''}
+              <div class="gear-card-footer">
+                <a href="${amazonUrl}" target="_blank" rel="noopener noreferrer sponsored" class="btn-amazon-buy" onclick="trackAffiliateAmazonClick('${escapeHtml(item.title)}', 'gear_guide');">
+                  <span class="amazon-cta-icon">🛒</span>
+                  <span>Check Price on Amazon ↗</span>
+                </a>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
   }
 
   // --- Build-A-Pint Balancing Wizard & Creaminess Score (Roadmap Item 18) ---
@@ -21416,12 +21766,13 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
       categoryTabs.addEventListener('click', (e) => {
         const btn = e.target.closest('.tab-btn');
         if (!btn) return;
+        const targetCategory = btn.dataset.category;
+        if (!targetCategory) return;
         if (btn.dataset.category === 'favorites' && !currentUser) {
           openGoogleAuthModal();
           showToast('🔒 Please sign in to view your favorite recipes!');
           return;
         }
-        const targetCategory = btn.dataset.category;
         if (activeCategory === targetCategory && targetCategory !== 'all') {
           activeCategory = 'all';
           categoryTabs.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -21706,6 +22057,14 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
     if (printShoppingListBtn) printShoppingListBtn.addEventListener('click', printShoppingList);
     if (clearShoppingListBtn) clearShoppingListBtn.addEventListener('click', clearShoppingList);
 
+    const btnShoppingOpenGearGuide = document.getElementById('btnShoppingOpenGearGuide');
+    if (btnShoppingOpenGearGuide) {
+      btnShoppingOpenGearGuide.addEventListener('click', () => {
+        closeShoppingListModal();
+        openGearGuideModal('all');
+      });
+    }
+
     const btnShopViewStandard = document.getElementById('btnShopViewStandard');
     const btnShopViewStore = document.getElementById('btnShopViewStore');
     if (btnShopViewStandard) {
@@ -21733,6 +22092,41 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
     if (freezerModalOverlay) {
       freezerModalOverlay.addEventListener('click', (e) => {
         if (e.target === freezerModalOverlay) closeFreezerModal();
+      });
+    }
+
+    // Amazon Pints & Lids Callout in Freezer Modal
+    const btnFreezerBuyPintsAmazon = document.getElementById('btnFreezerBuyPintsAmazon');
+    if (btnFreezerBuyPintsAmazon) {
+      btnFreezerBuyPintsAmazon.addEventListener('click', () => {
+        trackAffiliateAmazonClick('freezer_replacement_pints', 'freezer_modal');
+      });
+    }
+
+    // Creami Essentials & Gear Guide Modal Listeners (Option C)
+    const openGearGuideBtn = document.getElementById('openGearGuideBtn');
+    const footerGearGuideBtn = document.getElementById('footerGearGuideBtn');
+    const gearModalOverlay = document.getElementById('gearModalOverlay');
+    const gearModalCloseBtn = document.getElementById('gearModalCloseBtn');
+    const gearModalCloseFooterBtn = document.getElementById('gearModalCloseFooterBtn');
+
+    if (openGearGuideBtn) openGearGuideBtn.addEventListener('click', () => openGearGuideModal('all'));
+    if (footerGearGuideBtn) footerGearGuideBtn.addEventListener('click', () => openGearGuideModal('all'));
+    if (gearModalCloseBtn) gearModalCloseBtn.addEventListener('click', closeGearGuideModal);
+    if (gearModalCloseFooterBtn) gearModalCloseFooterBtn.addEventListener('click', closeGearGuideModal);
+    if (gearModalOverlay) {
+      gearModalOverlay.addEventListener('click', (e) => {
+        if (e.target === gearModalOverlay) closeGearGuideModal();
+      });
+    }
+
+    const gearCategoryPills = document.getElementById('gearCategoryPills');
+    if (gearCategoryPills) {
+      gearCategoryPills.addEventListener('click', (e) => {
+        const pill = e.target.closest('.gear-cat-pill');
+        if (!pill) return;
+        const cat = pill.dataset.cat || 'all';
+        openGearGuideModal(cat);
       });
     }
 
@@ -22437,10 +22831,11 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
       btnHeaderBrowseCreators.addEventListener('click', () => openRecipePacksModal(null));
     }
 
-    const tabBrowseCreators = document.getElementById('tabBrowseCreators');
-    if (tabBrowseCreators) {
-      tabBrowseCreators.addEventListener('click', (e) => {
+    const btnExploreCreatorsAction = document.getElementById('btnExploreCreatorsAction') || document.getElementById('tabBrowseCreators');
+    if (btnExploreCreatorsAction) {
+      btnExploreCreatorsAction.addEventListener('click', (e) => {
         e.preventDefault();
+        e.stopPropagation();
         openRecipePacksModal(null);
       });
     }

@@ -1887,7 +1887,8 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 'topGeos': top_geos,
                 'devices': devices,
                 'topPantry': top_pantry,
-                'topFavorites': top_favs
+                'topFavorites': top_favs,
+                'affiliateClicks': stats_db.get('affiliate_clicks', {'total': 0, 'by_item': {}, 'by_placement': {}})
             })
             return
 
@@ -3617,6 +3618,34 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 'creatorId': creator_id,
                 'eventType': event_type,
                 'total': stats_db['creator_clicks'][creator_id][event_type]
+            })
+            return
+
+        # Amazon Affiliate Click Analytics Tracking
+        elif self.path == '/api/affiliate/track-click':
+            item_name = str(data.get('item') or 'general_search').strip()[:100]
+            placement = str(data.get('placement') or 'direct').strip()[:50]
+            if 'affiliate_clicks' not in stats_db or not isinstance(stats_db['affiliate_clicks'], dict):
+                stats_db['affiliate_clicks'] = {
+                    'total': 0,
+                    'by_item': {},
+                    'by_placement': {}
+                }
+            aff_stats = stats_db['affiliate_clicks']
+            aff_stats['total'] = aff_stats.get('total', 0) + 1
+            if 'by_item' not in aff_stats or not isinstance(aff_stats['by_item'], dict):
+                aff_stats['by_item'] = {}
+            if 'by_placement' not in aff_stats or not isinstance(aff_stats['by_placement'], dict):
+                aff_stats['by_placement'] = {}
+            aff_stats['by_item'][item_name] = aff_stats['by_item'].get(item_name, 0) + 1
+            aff_stats['by_placement'][placement] = aff_stats['by_placement'].get(placement, 0) + 1
+            save_json_file(STATS_DB_FILE, stats_db)
+            self._send_json({
+                'status': 'ok',
+                'success': True,
+                'item': item_name,
+                'placement': placement,
+                'total': aff_stats['total']
             })
             return
 

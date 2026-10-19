@@ -115,7 +115,7 @@
   <link rel="icon" type="image/png" sizes="144x144" href="icon-144.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=v8.1">
+  <link rel="stylesheet" href="styles.css?v=v8.3">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -242,6 +242,13 @@
             <span class="creators-nav-icon">🧑‍🍳</span>
             <span class="creators-text-desktop"><span class="nav-text-full">Creators</span><span class="nav-text-short">Creators</span></span>
             <span class="creators-text-mobile">Creators</span>
+          </button>
+
+          <!-- Creami Essentials & Gear Guide Header Button -->
+          <button id="openGearGuideBtn" class="btn-secondary-action btn-gear-header" title="Creami Essentials, Replacement Pints, Precision Tools & Stabilizers">
+            <span>⚖️</span>
+            <span class="gear-text-desktop"><span class="nav-text-full">Gear Guide</span><span class="nav-text-short">Gear</span></span>
+            <span class="gear-text-mobile">Gear</span>
           </button>
 
           <!-- Feedback Button -->
@@ -477,6 +484,13 @@
               <span class="roulette-icon">🎰</span>
               <span>Roulette</span>
             </button>
+
+            <!-- Creators Explore Button (Moved from filter tabs to discovery controls) -->
+            <button type="button" id="btnExploreCreatorsAction" class="btn-creators-explore-action" title="Explore Verified Content Creators, Cookbooks & Digital Bundles">
+              <span class="creators-explore-icon">🧑‍🍳</span>
+              <span>Creators</span>
+              <span class="explore-badge">Explore</span>
+            </button>
           </div>
         </div>
 
@@ -522,10 +536,6 @@
             <button class="tab-btn" data-category="Custom" id="tabCustomRecipes" style="display: none;">
               <span>🧑‍🍳 My Recipes</span>
               <span class="tab-count" id="countCustom">0</span>
-            </button>
-            <button type="button" class="tab-btn tab-btn-creators-explore" id="tabBrowseCreators" title="Explore Verified Content Creators, Cookbooks & Digital Bundles">
-              <span>🧑‍🍳 Creators</span>
-              <span class="tab-badge-new">Explore</span>
             </button>
           </div>
         </div>
@@ -801,6 +811,8 @@
           <span class="footer-dot">•</span>
           <a href="/terms.html" class="footer-link">Terms of Service</a>
           <span class="footer-dot">•</span>
+          <button type="button" class="footer-action-btn" id="footerGearGuideBtn">⚖️ Creami Gear Guide</button>
+          <span class="footer-dot">•</span>
           <button type="button" class="footer-action-btn" id="footerFeedbackBtn">💬 Share Feedback</button>
           <span class="footer-dot">•</span>
           <button type="button" class="footer-action-btn" id="footerCookieBtn">🍪 Cookie Preferences</button>
@@ -811,7 +823,8 @@
         </div>
       </div>
       <p class="footer-disclaimer">
-        Creami Cravings is an independent recipe companion and community cookbook. Ninja®, Ninja Creami®, and SharkNinja® are registered trademarks of SharkNinja Operating LLC. Creami Cravings is not affiliated with, endorsed by, or sponsored by SharkNinja Operating LLC. Always follow official manufacturer safety manuals when freezing bases, assembling blades, and spinning pints.
+        Creami Cravings is an independent recipe companion and community cookbook. Ninja®, Ninja Creami®, and SharkNinja® are registered trademarks of SharkNinja Operating LLC. Creami Cravings is not affiliated with, endorsed by, or sponsored by SharkNinja Operating LLC. Always follow official manufacturer safety manuals when freezing bases, assembling blades, and spinning pints.<br>
+        <strong>Amazon Associate Disclosure:</strong> As an Amazon Associate, Creami Cravings earns from qualifying purchases at no additional cost to you.
       </p>
     </footer>
   </div>
@@ -910,6 +923,18 @@
           </div>
         </div>
       </div>
+      <div class="shopping-gear-callout-banner" id="shoppingGearCalloutBanner">
+        <div class="shopping-gear-callout-info">
+          <span class="gear-banner-icon">⚖️</span>
+          <div>
+            <strong>Need Replacement Pints, Silicone Lids, or a 0.1g Scale?</strong>
+            <span>Explore our curated Ninja Creami hardware, containers, and pure stabilizers on Amazon.</span>
+          </div>
+        </div>
+        <button type="button" class="btn-shopping-gear-trigger" id="btnShoppingOpenGearGuide">
+          <span>Browse Gear Guide ↗</span>
+        </button>
+      </div>
       <div id="shoppingModalBody" class="shopping-modal-body"></div>
       <div class="modal-footer shopping-modal-footer">
         <button class="btn-secondary" id="clearShoppingListBtn" style="color: var(--text-dim); margin-right: auto;">🗑️ Clear List</button>
@@ -917,6 +942,56 @@
         <button class="btn-secondary" id="keepShoppingListBtn" title="Send grocery checklist to Google Keep">📝 Google Keep</button>
         <button class="btn-secondary" id="copyShoppingListBtn">📋 Copy Checklist</button>
         <button class="btn-primary" id="printShoppingListBtn">🖨️ Print</button>
+      </div>
+      <div class="shopping-affiliate-ftc-note">
+        <span>As an Amazon Associate, Creami Cravings earns from qualifying purchases.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Creami Essentials & Gear Guide Modal -->
+  <div class="modal-overlay" id="gearModalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-content gear-modal-content">
+      <div class="modal-handle-bar" aria-hidden="true"></div>
+      <button class="modal-close" id="gearModalCloseBtn" aria-label="Close modal">&times;</button>
+      
+      <div class="modal-header gear-modal-header">
+        <div class="gear-title-row">
+          <div class="gear-icon-badge">⚖️</div>
+          <div>
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <h2 class="modal-title">Creami Essentials &amp; Gear Guide</h2>
+              <span class="gear-partner-badge">Amazon Associate</span>
+            </div>
+            <p class="modal-subtitle">Curated machines, replacement pints, precision tools, and ice cream stabilizers tested for smooth, scoopable texture.</p>
+          </div>
+        </div>
+
+        <!-- Category Filter Pills -->
+        <div class="gear-category-pills" id="gearCategoryPills">
+          <button type="button" class="gear-cat-pill active" data-cat="all">🌟 All Gear (<span id="gearCountAll">0</span>)</button>
+          <button type="button" class="gear-cat-pill" data-cat="machines">🍦 Machines (<span id="gearCountMachines">0</span>)</button>
+          <button type="button" class="gear-cat-pill" data-cat="pints">🧊 Pints &amp; Lids (<span id="gearCountPints">0</span>)</button>
+          <button type="button" class="gear-cat-pill" data-cat="tools">⚖️ Precision Tools (<span id="gearCountTools">0</span>)</button>
+          <button type="button" class="gear-cat-pill" data-cat="stabilizers">🌿 Stabilizers &amp; Sweeteners (<span id="gearCountStabilizers">0</span>)</button>
+        </div>
+      </div>
+
+      <div class="gear-modal-body" id="gearModalBody">
+        <!-- Rendered dynamically via JavaScript -->
+      </div>
+
+      <!-- Mandatory FTC Legal Disclosure Card -->
+      <div class="gear-ftc-card">
+        <span class="gear-ftc-icon">⚖️</span>
+        <div class="gear-ftc-text">
+          <strong>Amazon Associates Program Disclosure</strong>
+          <span>Creami Cravings is an independent recipe companion and participates in the Amazon Services LLC Associates Program. When you click our links and make a purchase on Amazon, we may earn an affiliate commission at no additional cost to you. We only recommend equipment, containers, and ingredients tested in our test kitchen.</span>
+        </div>
+      </div>
+
+      <div class="modal-footer gear-modal-footer">
+        <button type="button" class="btn-secondary" id="gearModalCloseFooterBtn">Close</button>
       </div>
     </div>
   </div>
@@ -982,6 +1057,20 @@
           </div>
         </div>
         <button type="button" class="btn-primary btn-freezer-upgrade-action" id="btnFreezerModalUpgrade">⚡ Expand to 8 or 12 Slots →</button>
+      </div>
+
+      <!-- Replacement Pints & Color Lids Amazon Affiliate Banner -->
+      <div class="freezer-amazon-pints-callout" id="freezerAmazonPintsCallout">
+        <div class="freezer-amazon-pints-info">
+          <span class="freezer-amazon-pints-icon">🎨</span>
+          <div>
+            <strong>Need Extra Pints or Color-Coded Silicone Lids?</strong>
+            <span>Official &amp; compatible 4-packs fit NC301 &amp; NC501 Deluxe machines. Match your freezer slots with Amazon.</span>
+          </div>
+        </div>
+        <a href="https://www.amazon.com/s?k=ninja+creami+replacement+pints+with+color+lids&tag=creamicraving-20&linkCode=ll1" target="_blank" rel="noopener noreferrer sponsored" class="btn-amazon-pints-action" id="btnFreezerBuyPintsAmazon">
+          <span>Find on Amazon ↗</span>
+        </a>
       </div>
 
       <!-- Quick Add / Log a Chilling Pint Card -->
@@ -3899,6 +3988,6 @@
 
   <!-- Scripts -->
   <script src="recipes-data.js?v=v4.3"></script>
-  <script src="app.js?v=v8.4"></script>
+  <script src="app.js?v=v8.6"></script>
 </body>
 </html>
