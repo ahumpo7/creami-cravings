@@ -115,7 +115,7 @@
   <link rel="icon" type="image/png" sizes="144x144" href="icon-144.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=v8.3">
+  <link rel="stylesheet" href="styles.css?v=v8.4">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -484,13 +484,6 @@
               <span class="roulette-icon">🎰</span>
               <span>Roulette</span>
             </button>
-
-            <!-- Creators Explore Button (Moved from filter tabs to discovery controls) -->
-            <button type="button" id="btnExploreCreatorsAction" class="btn-creators-explore-action" title="Explore Verified Content Creators, Cookbooks & Digital Bundles">
-              <span class="creators-explore-icon">🧑‍🍳</span>
-              <span>Creators</span>
-              <span class="explore-badge">Explore</span>
-            </button>
           </div>
         </div>
 
@@ -665,6 +658,10 @@
             <div class="active-pantry-hint" id="activePantryHint"></div>
           </div>
           <div class="access-filter-wrap">
+            <button type="button" id="btnExploreCreatorsAction" class="btn-creators-explore-action" title="Explore Verified Content Creators, Cookbooks & Digital Bundles">
+              <span class="creators-explore-icon">🧑‍🍳</span>
+              <span>Creators</span>
+            </button>
             <button type="button" class="btn-available-packs" id="btnAvailablePacksBadge" title="View recipe packs available for purchase">
               <span class="btn-packs-icon">🛍️</span>
               <span class="btn-packs-label"><strong id="lockedCountBadge">137</strong> Available for Purchase</span>
@@ -3988,6 +3985,6 @@
 
   <!-- Scripts -->
   <script src="recipes-data.js?v=v4.3"></script>
-  <script src="app.js?v=v8.6"></script>
+  <script src="app.js?v=v8.7"></script>
 </body>
 </html>

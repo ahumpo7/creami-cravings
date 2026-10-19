@@ -4982,6 +4982,16 @@
     const tabRecipeCount = document.getElementById('mobileTabRecipeCount');
     if (tabRecipeCount) tabRecipeCount.textContent = accessibleTotal;
 
+    // Guard: Ensure activeCategory is always valid, never undefined or 'creators'
+    if (!activeCategory || typeof activeCategory !== 'string' || activeCategory === 'undefined' || activeCategory === 'creators') {
+      activeCategory = 'all';
+      if (categoryTabs) {
+        categoryTabs.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        const allTab = categoryTabs.querySelector('[data-category="all"]');
+        if (allTab) allTab.classList.add('active');
+      }
+    }
+
     // Guard: if activeCategory is a locked pack the current user can't access,
     // reset to 'all' NOW before the filter runs (not after inside updateCategoryCounts)
     const lockedPackCats = ['Fan Favorites', 'Keto', 'Lactose Free', 'No Protein'];
@@ -6028,24 +6038,44 @@
     const creator = getCreatorById(creatorId);
     if (!creator) return;
 
-    // Turn ON Ready-Only pantry filter
-    readyOnlyFilter = true;
-    const readyToggle = document.getElementById('readyOnlyToggle');
-    if (readyToggle) readyToggle.checked = true;
-    const readyPill = document.getElementById('readyOnlyPill');
-    if (readyPill) readyPill.classList.add('checked');
-
-    // Clear search and reset category to all so creator's available recipes show
+    // Clear search and ensure category is all
     recipeSearchQuery = '';
     const searchInput = document.getElementById('searchInput');
     if (searchInput) searchInput.value = '';
+    activeCategory = 'all';
+    if (categoryTabs) {
+      categoryTabs.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      const allTab = categoryTabs.querySelector('[data-category="all"]');
+      if (allTab) allTab.classList.add('active');
+    }
+
+    // Check if user has ready recipes with current pantry
+    const hasReady = scoredRecipes.some(({ recipe, match }) => isRecipeAccessible(recipe) && match.isReady);
+    if (hasReady) {
+      readyOnlyFilter = true;
+      const readyToggle = document.getElementById('readyOnlyToggle');
+      if (readyToggle) readyToggle.checked = true;
+      const readyPill = document.getElementById('readyOnlyPill');
+      if (readyPill) readyPill.classList.add('checked');
+      showToast(`🥫 Showing recipes you can make right now with your pantry ingredients!`);
+    } else {
+      // Never filter out all recipes to zero! Show closest pantry matches instead.
+      readyOnlyFilter = false;
+      const readyToggle = document.getElementById('readyOnlyToggle');
+      if (readyToggle) readyToggle.checked = false;
+      const readyPill = document.getElementById('readyOnlyPill');
+      if (readyPill) readyPill.classList.remove('checked');
+      sortBy = 'match_desc';
+      const sortSelect = document.getElementById('sortSelect');
+      if (sortSelect) sortSelect.value = 'match_desc';
+      showToast(`🥫 Showing recipes sorted by highest pantry match! Check pantry items to unlock 100% ready pints.`);
+    }
 
     renderRecipes();
     updateCategoryCounts();
 
     const grid = document.getElementById('recipeGrid');
     if (grid) grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    showToast(`🥫 Showing recipes you can make right now with your pantry ingredients!`);
   }
 
   function renderStorefrontSamplers(creatorId) {
@@ -6384,6 +6414,17 @@
         history.pushState({ modal: null }, '', IS_BETA ? '/beta/' : '/');
       } catch (e) {}
       document.title = 'Creami Cravings';
+    }
+
+    // Safety guard: Ensure recipes are never left hidden or in zero-matching state when closing creators
+    if (!activeCategory || activeCategory === 'creators' || activeCategory === 'undefined') {
+      activeCategory = 'all';
+      if (categoryTabs) {
+        categoryTabs.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        const allTab = categoryTabs.querySelector('[data-category="all"]');
+        if (allTab) allTab.classList.add('active');
+      }
+      renderRecipes();
     }
   }
 
@@ -21767,7 +21808,7 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
         const btn = e.target.closest('.tab-btn');
         if (!btn) return;
         const targetCategory = btn.dataset.category;
-        if (!targetCategory) return;
+        if (!targetCategory || targetCategory === 'creators' || targetCategory === 'undefined') return;
         if (btn.dataset.category === 'favorites' && !currentUser) {
           openGoogleAuthModal();
           showToast('🔒 Please sign in to view your favorite recipes!');

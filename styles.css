@@ -5695,16 +5695,6 @@ body.modal-open .cookie-consent-banner {
     white-space: nowrap;
   }
 
-  .controls-actions-cluster .btn-creators-explore-action {
-    flex: 1 1 auto;
-    justify-content: center;
-    width: auto;
-    min-height: 44px;
-    padding: 8px 12px;
-    font-size: 0.88rem;
-    font-weight: 700;
-    white-space: nowrap;
-  }
 
   .filter-toggles-row {
     width: 100%;
@@ -17683,52 +17673,53 @@ body.modal-open .btn-back-to-top {
   transform: translateY(-1px);
 }
 
-/* Creators Explore Action Button (Controls Bar) */
+/* Creators Explore Action Button (Results Header / Access Bar) */
 .btn-creators-explore-action {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  padding: 8px 14px;
-  background: linear-gradient(135deg, #7c3aed 0%, #9333ea 100%);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: var(--radius-md, 10px);
-  color: #ffffff !important;
+  padding: 6px 14px;
+  background: rgba(168, 85, 247, 0.15);
+  border: 1px solid rgba(168, 85, 247, 0.45);
+  border-radius: 999px;
+  color: #c084fc !important;
   font-family: var(--font-body);
-  font-size: 0.86rem;
+  font-size: 0.82rem;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 3px 12px rgba(124, 58, 237, 0.32);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   user-select: none;
   white-space: nowrap;
 }
 
 .btn-creators-explore-action:hover {
-  background: linear-gradient(135deg, #6d28d9 0%, #7e22ce 100%);
-  border-color: rgba(255, 255, 255, 0.45);
-  color: #ffffff !important;
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.45);
+  background: rgba(168, 85, 247, 0.28);
+  border-color: #a855f7;
+  color: #f3e8ff !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(168, 85, 247, 0.35);
 }
 
 .btn-creators-explore-action:active {
   transform: translateY(0) scale(0.98);
 }
 
-.btn-creators-explore-action .explore-badge {
-  padding: 2px 7px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.24);
-  color: #ffffff;
-  font-size: 0.65rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+.btn-creators-explore-action .creators-explore-icon {
+  font-size: 0.95rem;
 }
 
-.btn-creators-explore-action .creators-explore-icon {
-  font-size: 1.05rem;
+[data-theme="light"] .btn-creators-explore-action {
+  background: #f5f3ff;
+  border-color: #ddd6fe;
+  color: #7c3aed !important;
+  box-shadow: 0 1px 4px rgba(124, 58, 237, 0.1);
+}
+
+[data-theme="light"] .btn-creators-explore-action:hover {
+  background: #ede9fe;
+  border-color: #c4b5fd;
+  color: #6d28d9 !important;
 }
 
 /* Creator Studio Signature 4-Pint Sampler Editor */
