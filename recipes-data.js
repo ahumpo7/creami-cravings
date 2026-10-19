@@ -112,6 +112,43 @@ const CREATORS_MASTER = [
         "url": "https://creamicravings.com/beta/@testcontent"
       }
     ]
+  },
+  {
+    "id": "exercise4cheatmeals",
+    "name": "Donald",
+    "brandName": "Exercise4CheatMeals",
+    "handle": "@exercise4cheatmeals",
+    "url": "https://exercise4cheatmeals.com",
+    "storeUrl": "https://exercise4cheatmeals.com",
+    "socialLinks": {
+      "instagram": "@exercise4cheatmeals",
+      "tiktok": "@exercise4cheatmeals",
+      "youtube": "@Exercise4CheatMeals",
+      "website": "https://exercise4cheatmeals.com"
+    },
+    "bio": "Author of Scoopology (A Creami Cookbook) and host of YouTube's #1 Ninja Creami channel. Specializing in decadent, macro-friendly copycat pints and ice cream science.",
+    "isBeta": true,
+    "storeAnnouncement": "🍨 Beta Preview: Scoopology cookbook integration & interactive pantry matching!",
+    "perks": [
+      {
+        "id": "e4cm_amazon",
+        "brand": "Donald's Amazon Storefront",
+        "category": "Creami Essentials & Scales",
+        "code": null,
+        "discount": "Curated Kitchen",
+        "description": "Donald's tested gear: 0.1g digital gram scales, extra Deluxe & standard pints, and immersion blenders.",
+        "url": "https://exercise4cheatmeals.com"
+      },
+      {
+        "id": "e4cm_protein",
+        "brand": "Whey/Casein Blend Protein",
+        "category": "Optimal Creami Powder",
+        "code": "CHEATMEALS",
+        "discount": "Special Discount",
+        "description": "50/50 Whey & Casein blend formulated to eliminate iciness and deliver soft-serve micro-crystal consistency.",
+        "url": "https://exercise4cheatmeals.com"
+      }
+    ]
   }
 ];
 
@@ -213,6 +250,20 @@ const BOOKS_MASTER = [
     "imageUrl": "https://creamicravings.com/icon-512.png",
     "recipeCount": 4,
     "description": "Massive volume low-calorie pints formulated for cutting phases and maximum satiety."
+  },
+  {
+    "id": "e4cm_scoopology",
+    "creatorId": "exercise4cheatmeals",
+    "title": "Scoopology: A Ninja Creami Cookbook",
+    "shortTitle": "Scoopology",
+    "bookKey": "Scoopology",
+    "categoryKey": "Scoopology",
+    "sourceFile": "Scoopology.pdf",
+    "price": "$24.99",
+    "url": "https://exercise4cheatmeals.com",
+    "imageUrl": "https://creamicravings.com/icon-512.png",
+    "recipeCount": 75,
+    "description": "Donald's definitive collection of 70+ decadent, high-protein Ninja Creami recipes, mix-in formulas, and spin settings."
   }
 ];
 
@@ -26656,5 +26707,459 @@ const RECIPES_MASTER = [
       "banana_cream_pie_mega_volume"
     ],
     "videoUrl": "https://www.instagram.com/p/DQxMcEBEg4B/"
+  },
+  {
+    "id": "e4cm_wendys_frosty",
+    "name": "Wendy's High-Protein Chocolate Frosty",
+    "category": "Scoopology",
+    "categories": [
+      "Scoopology",
+      "Copycat Dupes",
+      "High Protein"
+    ],
+    "creatorId": "exercise4cheatmeals",
+    "sources": [
+      {
+        "book": "Scoopology",
+        "page": 1,
+        "sourceFile": "Scoopology.pdf"
+      }
+    ],
+    "sourceFile": "Scoopology.pdf",
+    "page": 1,
+    "macros": {
+      "calories": "295",
+      "protein": "37g",
+      "carbs": "19g",
+      "fat": "4g",
+      "sugar": "4g",
+      "fiber": "2g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "3 MIN",
+    "freezeTime": "24 HOURS",
+    "makes": "1 PINT",
+    "proTip": "For authentic Wendy's maltiness and velvety texture, add a splash of cold chocolate milk and run 1 Re-Spin cycle after the initial spin.",
+    "ingredients": [
+      {
+        "id": "fat_free_ultra_filtered_milk",
+        "name": "Chocolate Fairlife Ultra-Filtered Milk",
+        "quantity": "300",
+        "unit": "g",
+        "raw": "300G CHOCOLATE FAIRLIFE MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "chocolate_protein_powder",
+        "name": "Chocolate Whey/Casein Powder",
+        "quantity": "30",
+        "unit": "g",
+        "raw": "30G CHOCOLATE WHEY/CASEIN POWDER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "chocolate_jello_pudding_mix",
+        "name": "Sugar-Free Chocolate Fudge Pudding Mix",
+        "quantity": "10",
+        "unit": "g",
+        "raw": "10G SF CHOCOLATE FUDGE PUDDING MIX",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Monk Fruit Sweetener",
+        "quantity": "10",
+        "unit": "g",
+        "raw": "10G MONK FRUIT SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sea_salt",
+        "name": "Pinch of Sea Salt",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G SEA SALT",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      }
+    ],
+    "instructions": [
+      "WHISK CHOCOLATE FAIRLIFE, CHOCOLATE PROTEIN, PUDDING MIX, SWEETENER, XANTHAN GUM, AND SALT UNTIL SMOOTH",
+      "POUR INTO NINJA CREAMI PINT AND FREEZE ON LEVEL FREEZER SURFACE FOR 24 HOURS",
+      "RUN ON LITE ICE CREAM SETTING",
+      "ADD 1 TBSP COLD CHOCOLATE MILK AND RUN A RE-SPIN FOR AUTHENTIC VELVETY FROSTY TEXTURE"
+    ],
+    "aliases": [
+      "wendys_high_protein_chocolate_frosty",
+      "exercise4cheatmeals_wendys_frosty"
+    ],
+    "videoUrl": "https://youtube.com/@Exercise4CheatMeals"
+  },
+  {
+    "id": "e4cm_reeses_pb_cup",
+    "name": "Reese's Peanut Butter Cup Protein Pint",
+    "category": "Scoopology",
+    "categories": [
+      "Scoopology",
+      "Fan Favorites",
+      "High Protein"
+    ],
+    "creatorId": "exercise4cheatmeals",
+    "sources": [
+      {
+        "book": "Scoopology",
+        "page": 2,
+        "sourceFile": "Scoopology.pdf"
+      }
+    ],
+    "sourceFile": "Scoopology.pdf",
+    "page": 2,
+    "macros": {
+      "calories": "330",
+      "protein": "38g",
+      "carbs": "18g",
+      "fat": "6g",
+      "sugar": "3g",
+      "fiber": "3g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "4 MIN",
+    "freezeTime": "24 HOURS",
+    "makes": "1 PINT",
+    "proTip": "Chop the Reese's cup into small bits and freeze them for 10 minutes prior to running the Mix-In cycle so they maintain crunch.",
+    "ingredients": [
+      {
+        "id": "fat_free_ultra_filtered_milk",
+        "name": "Fat Free Ultra-Filtered Milk",
+        "quantity": "320",
+        "unit": "g",
+        "raw": "320G FAT FREE ULTRA-FILTERED MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "vanilla_protein_powder",
+        "name": "Vanilla/PB Whey-Casein Protein",
+        "quantity": "30",
+        "unit": "g",
+        "raw": "30G VANILLA OR PB WHEY-CASEIN POWDER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "peanut_butter_powder",
+        "name": "Powdered Peanut Butter (PB2)",
+        "quantity": "15",
+        "unit": "g",
+        "raw": "15G POWDERED PEANUT BUTTER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "chocolate_jello_pudding_mix",
+        "name": "Sugar-Free Chocolate Fudge Pudding Mix",
+        "quantity": "8",
+        "unit": "g",
+        "raw": "8G SF CHOCOLATE FUDGE PUDDING MIX",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Monk Fruit Sweetener",
+        "quantity": "10",
+        "unit": "g",
+        "raw": "10G MONK FRUIT SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "mini_reeses_pb_cups",
+        "name": "Mini Reese's Peanut Butter Cups",
+        "quantity": "14",
+        "unit": "g",
+        "raw": "14G CHILLED MINI REESE'S CUPS",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": ""
+      }
+    ],
+    "instructions": [
+      "BLEND MILK, PROTEIN POWDER, PB2, PUDDING MIX, SWEETENER, AND XANTHAN GUM UNTIL HOMOGENEOUS",
+      "POUR INTO CREAMI PINT CONTAINER AND FREEZE SOLID FOR 24 HOURS",
+      "PROCESS ON LITE ICE CREAM CYCLE",
+      "DIG A CENTER CHANNEL TO THE BOTTOM, DROP IN CHILLED REESE'S PIECES, AND RUN MIX-IN CYCLE"
+    ],
+    "aliases": [
+      "reeses_peanut_butter_cup_protein_pint",
+      "exercise4cheatmeals_reeses_cup"
+    ],
+    "videoUrl": "https://youtube.com/@Exercise4CheatMeals"
+  },
+  {
+    "id": "e4cm_biscoff_cookie_butter",
+    "name": "Lotus Biscoff Cookie Butter Swirl",
+    "category": "Scoopology",
+    "categories": [
+      "Scoopology",
+      "Fan Favorites",
+      "High Protein"
+    ],
+    "creatorId": "exercise4cheatmeals",
+    "sources": [
+      {
+        "book": "Scoopology",
+        "page": 3,
+        "sourceFile": "Scoopology.pdf"
+      }
+    ],
+    "sourceFile": "Scoopology.pdf",
+    "page": 3,
+    "macros": {
+      "calories": "340",
+      "protein": "32g",
+      "carbs": "26g",
+      "fat": "7g",
+      "sugar": "6g",
+      "fiber": "1g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "3 MIN",
+    "freezeTime": "24 HOURS",
+    "makes": "1 PINT",
+    "proTip": "Microwave the Biscoff spread for 10 seconds before drizzling into the tunnel for an authentic bakery ribbon swirl.",
+    "ingredients": [
+      {
+        "id": "fat_free_ultra_filtered_milk",
+        "name": "Vanilla Fairlife Ultra-Filtered Milk",
+        "quantity": "340",
+        "unit": "g",
+        "raw": "340G VANILLA FAIRLIFE MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "vanilla_protein_powder",
+        "name": "Vanilla Whey/Casein Powder",
+        "quantity": "30",
+        "unit": "g",
+        "raw": "30G VANILLA WHEY/CASEIN POWDER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "vanilla_pudding_mix",
+        "name": "Sugar-Free Vanilla Pudding Mix",
+        "quantity": "10",
+        "unit": "g",
+        "raw": "10G SF VANILLA PUDDING MIX",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Monk Fruit Sweetener",
+        "quantity": "10",
+        "unit": "g",
+        "raw": "10G MONK FRUIT SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "biscoff_cookie_butter",
+        "name": "Lotus Biscoff Cookie Butter Spread",
+        "quantity": "15",
+        "unit": "g",
+        "raw": "15G WARMED BISCOFF SPREAD",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": ""
+      },
+      {
+        "id": "lotus_biscoff_cookies",
+        "name": "Crushed Biscoff Cookie",
+        "quantity": "8",
+        "unit": "g",
+        "raw": "8G CRUSHED BISCOFF COOKIE",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": ""
+      }
+    ],
+    "instructions": [
+      "WHISK MILK, VANILLA PROTEIN, PUDDING MIX, SWEETENER, AND XANTHAN GUM UNTIL SILKY",
+      "FREEZE FOR 24 HOURS ON LEVEL FREEZER SHELF",
+      "SPIN ON LITE ICE CREAM SETTING",
+      "MICROWAVE BISCOFF FOR 10 SECONDS, POUR INTO CORE WITH CRUSHED BISCOFF COOKIE, AND RUN MIX-IN CYCLE"
+    ],
+    "aliases": [
+      "lotus_biscoff_cookie_butter_swirl",
+      "exercise4cheatmeals_biscoff_swirl"
+    ],
+    "videoUrl": "https://youtube.com/@Exercise4CheatMeals"
+  },
+  {
+    "id": "e4cm_strawberry_cheesecake",
+    "name": "High-Protein Strawberry Cheesecake Pint",
+    "category": "Scoopology",
+    "categories": [
+      "Scoopology",
+      "Real Fruit Sorbets",
+      "High Protein"
+    ],
+    "creatorId": "exercise4cheatmeals",
+    "sources": [
+      {
+        "book": "Scoopology",
+        "page": 4,
+        "sourceFile": "Scoopology.pdf"
+      }
+    ],
+    "sourceFile": "Scoopology.pdf",
+    "page": 4,
+    "macros": {
+      "calories": "290",
+      "protein": "35g",
+      "carbs": "22g",
+      "fat": "3g",
+      "sugar": "5g",
+      "fiber": "2g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "4 MIN",
+    "freezeTime": "24 HOURS",
+    "makes": "1 PINT",
+    "proTip": "Using real sugar-free cheesecake pudding mix with a touch of light cream cheese yields an ultra-rich bakery cheesecake flavor.",
+    "ingredients": [
+      {
+        "id": "fat_free_ultra_filtered_milk",
+        "name": "Fat Free Ultra-Filtered Milk",
+        "quantity": "320",
+        "unit": "g",
+        "raw": "320G FAT FREE ULTRA-FILTERED MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "vanilla_protein_powder",
+        "name": "Vanilla Whey/Casein Powder",
+        "quantity": "30",
+        "unit": "g",
+        "raw": "30G VANILLA WHEY/CASEIN POWDER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "cheesecake_jello_pudding_mix",
+        "name": "Sugar-Free Cheesecake Instant Pudding Mix",
+        "quantity": "10",
+        "unit": "g",
+        "raw": "10G SF CHEESECAKE PUDDING MIX",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "strawberries",
+        "name": "Frozen Diced Strawberries",
+        "quantity": "50",
+        "unit": "g",
+        "raw": "50G FROZEN DICED STRAWBERRIES",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "sweetener",
+        "name": "Monk Fruit Sweetener",
+        "quantity": "10",
+        "unit": "g",
+        "raw": "10G MONK FRUIT SWEETENER",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "xanthan_gum",
+        "name": "Xanthan Gum",
+        "quantity": "1",
+        "unit": "g",
+        "raw": "1G XANTHAN GUM",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "graham_crackers",
+        "name": "Crushed Graham Cracker Sheet",
+        "quantity": "8",
+        "unit": "g",
+        "raw": "8G CRUSHED GRAHAM CRACKER",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": ""
+      }
+    ],
+    "instructions": [
+      "BLEND MILK, PROTEIN, CHEESECAKE PUDDING MIX, STRAWBERRIES, SWEETENER, AND XANTHAN GUM",
+      "POUR INTO CREAM CONTAINER AND FREEZE FOR 24 HOURS",
+      "SPIN ON LITE ICE CREAM SETTING",
+      "TUNNEL CENTER, INSERT CRUSHED GRAHAM CRACKER CRUMBS, AND PROCESS ON MIX-IN"
+    ],
+    "aliases": [
+      "high_protein_strawberry_cheesecake_pint",
+      "exercise4cheatmeals_strawberry_cheesecake"
+    ],
+    "videoUrl": "https://youtube.com/@Exercise4CheatMeals"
   }
 ];
