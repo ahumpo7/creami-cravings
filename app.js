@@ -20955,6 +20955,15 @@
       catalogBreadcrumbsWrap.style.cursor = 'pointer';
       catalogBreadcrumbsWrap.title = 'Back to All Creators';
       catalogBreadcrumbsWrap.addEventListener('click', () => showCreatorDirectoryView());
+    const btnCreatorPartnerInquire = document.getElementById('btnCreatorPartnerInquire');
+    if (btnCreatorPartnerInquire) {
+      btnCreatorPartnerInquire.addEventListener('click', (e) => {
+        e.preventDefault();
+        const u = 'andrew';
+        const d = 'creamicravings.com';
+        const subj = encodeURIComponent('Creator Partnership Inquiry - Creami Cravings');
+        window.location.href = `mailto:${u}@${d}?subject=${subj}`;
+      });
     }
 
     if (recipePacksModalOverlay) {
