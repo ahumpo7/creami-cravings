@@ -3103,6 +3103,9 @@
       if (Array.isArray(serverProfile.samplerPints) && serverProfile.samplerPints.length > 0) {
         result.samplerPints = [...serverProfile.samplerPints];
       }
+      if (Array.isArray(serverProfile.samplers) && serverProfile.samplers.length > 0) {
+        result.samplers = JSON.parse(JSON.stringify(serverProfile.samplers));
+      }
     }
 
     if (userOverride) {
@@ -3114,10 +3117,25 @@
       if (Array.isArray(userOverride.samplerPints) && userOverride.samplerPints.length > 0) {
         result.samplerPints = [...userOverride.samplerPints];
       }
+      if (Array.isArray(userOverride.samplers) && userOverride.samplers.length > 0) {
+        result.samplers = JSON.parse(JSON.stringify(userOverride.samplers));
+      }
     }
 
     if (!result.samplerPints) {
       result.samplerPints = (base && Array.isArray(base.samplerPints)) ? [...base.samplerPints] : [];
+    }
+
+    if (!Array.isArray(result.samplers) || result.samplers.length === 0) {
+      if (result.samplerPints && result.samplerPints.length > 0) {
+        result.samplers = [{
+          id: 'sampler_1',
+          name: 'Signature 4-Pint Sampler',
+          pints: [...result.samplerPints]
+        }];
+      } else {
+        result.samplers = [];
+      }
     }
 
     return result;
@@ -4956,7 +4974,6 @@
     if (purchaseAvailableBanner) {
       if (lockedTotal > 0 && activeCategory === 'all') {
         purchaseAvailableBanner.style.display = 'block';
-        if (bannerLockedCount) bannerLockedCount.textContent = lockedTotal;
       } else {
         purchaseAvailableBanner.style.display = 'none';
       }
@@ -5819,6 +5836,33 @@
     showToast(`🥫 Showing recipes you can make right now with your pantry ingredients!`);
   }
 
+  function renderStorefrontSamplers(creatorId) {
+    const creator = getCreatorById(creatorId);
+    const samplersContainer = document.getElementById('catalogSamplersContainer');
+    if (!samplersContainer) return;
+
+    const creatorSamplers = (creator && Array.isArray(creator.samplers) && creator.samplers.length > 0)
+      ? creator.samplers
+      : [{ id: 'sampler_1', name: 'Signature 4-Pint Sampler', pints: (creator && creator.samplerPints) || [] }];
+
+    samplersContainer.innerHTML = creatorSamplers.map((s, sIdx) => {
+      const sName = s.name || `Sampler ${sIdx + 1}`;
+      return `
+        <button type="button" class="btn-catalog-sampler-card" data-sampler-index="${sIdx}" data-sampler-id="${escapeHtml(s.id)}" title="Preview ${escapeHtml(sName)} with live macros">
+          <span class="sampler-card-name">🍨 ${escapeHtml(sName)}</span>
+          <span class="sampler-card-tag">4 Pints ↗</span>
+        </button>
+      `;
+    }).join('');
+
+    samplersContainer.querySelectorAll('.btn-catalog-sampler-card').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const sIdx = parseInt(btn.dataset.samplerIndex, 10) || 0;
+        openSamplerPreviewModal(null, activeStoreCreatorId || creatorId, sIdx);
+      });
+    });
+  }
+
   function showCreatorCatalogView(creatorId = 'fitness_product_finder', viewPerksFirst = false, updateHistory = true) {
     if (isCreatorDisabled(creatorId)) {
       showToast('⚠️ This creator is currently unavailable.');
@@ -5895,14 +5939,35 @@
         socialsRow.innerHTML = pillsHtml;
       }
 
-      // 3. 4-Pint Sampler Preview & Match My Pantry Buttons
-      const samplerPreviewBtn = document.getElementById('catalogSamplerPreviewBtn');
-      if (samplerPreviewBtn && !samplerPreviewBtn._bound) {
-        samplerPreviewBtn._bound = true;
-        samplerPreviewBtn.addEventListener('click', () => {
-          openSamplerPreviewModal(null, activeStoreCreatorId || creatorId);
-        });
-      }
+      // 3. 4-Pint Sampler Showcase (Up to 3 Samplers) & Match My Pantry Buttons
+      renderStorefrontSamplers(creatorId);
+
+      // Fetch live creator profile for updated samplers & announcement
+      fetch(`/api/creator/profile?creatorId=${encodeURIComponent(creatorId)}`)
+        .then(r => r.json())
+        .then(data => {
+          if (data && data.status === 'ok') {
+            if (!serverCreatorProfiles[creatorId]) serverCreatorProfiles[creatorId] = {};
+            if (data.brandName) serverCreatorProfiles[creatorId].brandName = data.brandName;
+            if (data.socialLinks) serverCreatorProfiles[creatorId].socialLinks = data.socialLinks;
+            if (data.perks) serverCreatorProfiles[creatorId].perks = data.perks;
+            if (data.storeAnnouncement) {
+              serverCreatorProfiles[creatorId].storeAnnouncement = data.storeAnnouncement;
+              if (bannerTextEl && bannerEl) {
+                bannerTextEl.textContent = data.storeAnnouncement;
+                bannerEl.style.display = 'flex';
+              }
+            }
+            if (Array.isArray(data.samplers) && data.samplers.length > 0) {
+              serverCreatorProfiles[creatorId].samplers = data.samplers;
+              if (data.samplerPints) serverCreatorProfiles[creatorId].samplerPints = data.samplerPints;
+              if (activeStoreCreatorId === creatorId) {
+                renderStorefrontSamplers(creatorId);
+              }
+            }
+          }
+        })
+        .catch(e => console.warn('Live creator profile fetch:', e));
 
       const matchPantryBtn = document.getElementById('catalogMatchPantryBtn');
       if (matchPantryBtn && !matchPantryBtn._bound) {
@@ -6224,7 +6289,7 @@
   const btnSamplerToggleAll = document.getElementById('btnSamplerToggleAll');
   const btnSamplerPreviewConfirm = document.getElementById('btnSamplerPreviewConfirm');
 
-  function getSamplerPintsForCreatorOrPack(packId = null, creatorId = null) {
+  function getSamplerPintsForCreatorOrPack(packId = null, creatorId = null, chosenSampler = null) {
     let targetCreatorId = creatorId;
     if (!targetCreatorId && packId) {
       const book = (typeof BOOKS_MASTER !== 'undefined')
@@ -6240,7 +6305,21 @@
 
     const creator = getCreatorById(targetCreatorId);
 
-    // 1. If this creator has explicitly curated samplerPints, try to use those
+    // 1. If chosenSampler has explicit pints, use those
+    if (chosenSampler && Array.isArray(chosenSampler.pints) && chosenSampler.pints.length > 0) {
+      const curated = [];
+      chosenSampler.pints.forEach(rId => {
+        const rec = allRecipes.find(r => r.id === rId);
+        if (rec && !curated.some(c => c.id === rec.id)) {
+          curated.push(rec);
+        }
+      });
+      if (curated.length > 0) {
+        return curated.slice(0, 4);
+      }
+    }
+
+    // 2. If this creator has explicitly curated samplerPints, try to use those
     if (creator && Array.isArray(creator.samplerPints) && creator.samplerPints.length > 0) {
       const curated = [];
       creator.samplerPints.forEach(rId => {
@@ -6254,7 +6333,7 @@
       }
     }
 
-    // 2. If a specific packId was requested (not All-Access), get top recipes from this pack
+    // 3. If a specific packId was requested (not All-Access), get top recipes from this pack
     if (packId && packId !== 'All-Access') {
       const packRecipes = allRecipes.filter(r => {
         return r.category === packId || (Array.isArray(r.categories) && r.categories.includes(packId));
@@ -6269,7 +6348,7 @@
       }
     }
 
-    // 3. Creator-wide top recipes
+    // 4. Creator-wide top recipes
     const creatorRecipes = allRecipes.filter(r => {
       const cr = getRecipeCreator(r);
       return cr && cr.id === targetCreatorId;
@@ -6283,12 +6362,12 @@
       return sorted.slice(0, 4);
     }
 
-    // 4. Fallback to accessible top community recipes
+    // 5. Fallback to accessible top community recipes
     const fallback = allRecipes.filter(r => isRecipeAccessible(r)).slice(0, 4);
     return fallback;
   }
 
-  function openSamplerPreviewModal(packId = null, creatorId = null) {
+  function openSamplerPreviewModal(packId = null, creatorId = null, samplerIndexOrId = 0) {
     if (!samplerPreviewModalOverlay) return;
 
     let targetCreatorId = creatorId || activeStoreCreatorId;
@@ -6303,7 +6382,24 @@
     const creator = getCreatorById(targetCreatorId);
     const creatorName = creator ? creator.name : 'Creator';
 
-    const pints = getSamplerPintsForCreatorOrPack(packId, targetCreatorId);
+    let chosenSampler = null;
+    const isStudioModalOpen = document.getElementById('creatorPortalModalOverlay')?.classList.contains('active');
+    if (isStudioModalOpen && Array.isArray(studioSamplersState) && studioSamplersState.length > 0) {
+      if (typeof samplerIndexOrId === 'number' && studioSamplersState[samplerIndexOrId]) {
+        chosenSampler = studioSamplersState[samplerIndexOrId];
+      } else if (typeof samplerIndexOrId === 'string') {
+        chosenSampler = studioSamplersState.find(s => s.id === samplerIndexOrId);
+      }
+    }
+    if (!chosenSampler && creator && Array.isArray(creator.samplers) && creator.samplers.length > 0) {
+      if (typeof samplerIndexOrId === 'number') {
+        chosenSampler = creator.samplers[samplerIndexOrId] || creator.samplers[0];
+      } else if (typeof samplerIndexOrId === 'string') {
+        chosenSampler = creator.samplers.find(s => s.id === samplerIndexOrId) || creator.samplers[0];
+      }
+    }
+
+    const pints = getSamplerPintsForCreatorOrPack(packId, targetCreatorId, chosenSampler);
     if (!pints || pints.length === 0) {
       showToast('No recipes found for this sampler collection.');
       return;
@@ -6316,12 +6412,17 @@
     const titleEl = document.getElementById('samplerPreviewModalTitle');
     const subtitleEl = document.getElementById('samplerPreviewModalSubtitle');
     if (titleEl) {
-      titleEl.textContent = packId
-        ? `${packId} — 4-Pint Sampler Preview`
-        : `${creatorName}'s Signature 4-Pint Sampler`;
+      if (packId) {
+        titleEl.textContent = `${packId} — 4-Pint Sampler Preview`;
+      } else if (chosenSampler && chosenSampler.name) {
+        titleEl.textContent = `${creatorName}'s ${chosenSampler.name}`;
+      } else {
+        titleEl.textContent = `${creatorName}'s 4-Pint Sampler`;
+      }
     }
     if (subtitleEl) {
-      subtitleEl.textContent = `Review the handpicked pints by ${creatorName} below. Choose which recipes to add to your visual freezer queue & Sunday Batch Prep.`;
+      const samplerLabel = (chosenSampler && chosenSampler.name) ? `"${chosenSampler.name}"` : 'sampler collection';
+      subtitleEl.textContent = `Review the handpicked pints for ${samplerLabel} by ${creatorName} below. Choose which recipes to add to your visual freezer queue & Sunday Batch Prep.`;
     }
 
     renderSamplerPreviewList();
@@ -6514,9 +6615,36 @@
   }
 
   // ==========================================================================
-  // Creator Studio: Curate & Edit Signature 4-Pint Sampler
+  // Creator Studio: Curate & Edit Signature 4-Pint Samplers (Up to 3)
   // ==========================================================================
-  function renderStudioSamplerEditor(creatorId, currentSamplerPints = null) {
+  let studioSamplersState = [];
+  let activeStudioSamplerIdx = 0;
+
+  function syncCurrentStudioSamplerFromDOM() {
+    if (!studioSamplersState || studioSamplersState.length === 0) return;
+    const curIdx = activeStudioSamplerIdx;
+    if (curIdx < 0 || curIdx >= studioSamplersState.length) return;
+
+    const nameInput = document.getElementById('studioSamplerNameInput');
+    if (nameInput) {
+      const val = nameInput.value.trim();
+      if (val) {
+        studioSamplersState[curIdx].name = val.substring(0, 60);
+      }
+    }
+
+    const grid = document.getElementById('studioSamplerSlotsGrid');
+    if (grid) {
+      const selects = grid.querySelectorAll('.sampler-slot-select');
+      const pints = [];
+      selects.forEach(s => {
+        if (s.value) pints.push(s.value);
+      });
+      studioSamplersState[curIdx].pints = pints.slice(0, 4);
+    }
+  }
+
+  function renderStudioSamplerEditor(creatorId, currentSamplersInput = null) {
     const grid = document.getElementById('studioSamplerSlotsGrid');
     if (!grid) return;
 
@@ -6524,25 +6652,178 @@
       const cr = getRecipeCreator(r);
       return cr && cr.id === creatorId;
     });
-
     const pool = (creatorRecipes.length > 0) ? creatorRecipes : allRecipes.filter(r => isRecipeAccessible(r));
     const sortedPool = [...pool].sort((a, b) => a.name.localeCompare(b.name));
 
-    let selectedIds = [];
-    if (Array.isArray(currentSamplerPints) && currentSamplerPints.length > 0) {
-      selectedIds = currentSamplerPints.slice(0, 4);
-    } else if (currentUser && Array.isArray(currentUser.samplerPints) && currentUser.samplerPints.length > 0) {
-      selectedIds = currentUser.samplerPints.slice(0, 4);
-    } else if (serverCreatorProfiles[creatorId] && Array.isArray(serverCreatorProfiles[creatorId].samplerPints) && serverCreatorProfiles[creatorId].samplerPints.length > 0) {
-      selectedIds = serverCreatorProfiles[creatorId].samplerPints.slice(0, 4);
-    } else {
-      const popular = [...pool].sort((a, b) => {
-        const aMade = (communityStats && communityStats.madeCounts && communityStats.madeCounts[a.id]) || 0;
-        const bMade = (communityStats && communityStats.madeCounts && communityStats.madeCounts[b.id]) || 0;
-        return bMade - aMade;
-      });
-      selectedIds = popular.slice(0, 4).map(r => r.id);
+    // Resolve initial or incoming samplers
+    if (Array.isArray(currentSamplersInput) && currentSamplersInput.length > 0) {
+      if (typeof currentSamplersInput[0] === 'string') {
+        studioSamplersState = [{
+          id: 'sampler_1',
+          name: 'Signature 4-Pint Sampler',
+          pints: currentSamplersInput.slice(0, 4)
+        }];
+      } else {
+        studioSamplersState = currentSamplersInput.slice(0, 3).map((s, idx) => ({
+          id: s.id || `sampler_${idx + 1}`,
+          name: s.name || `Sampler Pack #${idx + 1}`,
+          pints: Array.isArray(s.pints) ? s.pints.slice(0, 4) : []
+        }));
+      }
+    } else if (studioSamplersState.length === 0) {
+      const cr = getCreatorById(creatorId);
+      const existing = (currentUser && Array.isArray(currentUser.samplers) && currentUser.samplers.length > 0)
+        ? currentUser.samplers
+        : ((serverCreatorProfiles[creatorId] && Array.isArray(serverCreatorProfiles[creatorId].samplers) && serverCreatorProfiles[creatorId].samplers.length > 0)
+          ? serverCreatorProfiles[creatorId].samplers
+          : (cr && Array.isArray(cr.samplers) && cr.samplers.length > 0 ? cr.samplers : null));
+
+      if (existing) {
+        studioSamplersState = existing.slice(0, 3).map((s, idx) => ({
+          id: s.id || `sampler_${idx + 1}`,
+          name: s.name || `Sampler Pack #${idx + 1}`,
+          pints: Array.isArray(s.pints) ? s.pints.slice(0, 4) : []
+        }));
+      } else {
+        const legacyPints = (currentUser && Array.isArray(currentUser.samplerPints) && currentUser.samplerPints.length > 0)
+          ? currentUser.samplerPints
+          : ((serverCreatorProfiles[creatorId] && Array.isArray(serverCreatorProfiles[creatorId].samplerPints) && serverCreatorProfiles[creatorId].samplerPints.length > 0)
+            ? serverCreatorProfiles[creatorId].samplerPints
+            : (cr && Array.isArray(cr.samplerPints) && cr.samplerPints.length > 0 ? cr.samplerPints : null));
+
+        if (legacyPints && legacyPints.length > 0) {
+          studioSamplersState = [{
+            id: 'sampler_1',
+            name: 'Signature 4-Pint Sampler',
+            pints: legacyPints.slice(0, 4)
+          }];
+        } else {
+          const popular = [...pool].sort((a, b) => {
+            const aMade = (communityStats && communityStats.madeCounts && communityStats.madeCounts[a.id]) || 0;
+            const bMade = (communityStats && communityStats.madeCounts && communityStats.madeCounts[b.id]) || 0;
+            return bMade - aMade;
+          });
+          studioSamplersState = [{
+            id: 'sampler_1',
+            name: 'Signature 4-Pint Sampler',
+            pints: popular.slice(0, 4).map(r => r.id)
+          }];
+        }
+      }
     }
+
+    if (!Array.isArray(studioSamplersState) || studioSamplersState.length === 0) {
+      studioSamplersState = [{
+        id: 'sampler_1',
+        name: 'Signature 4-Pint Sampler',
+        pints: []
+      }];
+    }
+
+    if (activeStudioSamplerIdx >= studioSamplersState.length) {
+      activeStudioSamplerIdx = Math.max(0, studioSamplersState.length - 1);
+    }
+
+    const curSampler = studioSamplersState[activeStudioSamplerIdx] || studioSamplersState[0];
+
+    // 1. Render Tabs Bar
+    const tabsBar = document.getElementById('studioSamplerTabsBar');
+    if (tabsBar) {
+      let tabsHtml = studioSamplersState.map((sampler, idx) => {
+        const isActive = idx === activeStudioSamplerIdx;
+        const validCount = Array.isArray(sampler.pints) ? sampler.pints.filter(Boolean).length : 0;
+        return `
+          <button type="button" class="studio-sampler-tab-btn ${isActive ? 'active' : ''}" data-sampler-idx="${idx}">
+            <span class="tab-label">🍨 ${escapeHtml(sampler.name || `Sampler #${idx + 1}`)}</span>
+            <span class="tab-badge" style="font-size: 0.72rem; opacity: 0.85; background: rgba(0,0,0,0.25); padding: 1px 6px; border-radius: 999px;">${validCount}/4</span>
+          </button>
+        `;
+      }).join('');
+
+      if (studioSamplersState.length < 3) {
+        tabsHtml += `
+          <button type="button" id="btnStudioAddSampler" class="btn-studio-add-sampler" title="Add another sampler pack (up to 3)">
+            ➕ Add Sampler (${studioSamplersState.length}/3)
+          </button>
+        `;
+      }
+      tabsBar.innerHTML = tabsHtml;
+
+      // Bind Tab Switchers
+      tabsBar.querySelectorAll('.studio-sampler-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          syncCurrentStudioSamplerFromDOM();
+          const targetIdx = parseInt(btn.dataset.samplerIdx, 10);
+          if (!isNaN(targetIdx) && targetIdx !== activeStudioSamplerIdx) {
+            activeStudioSamplerIdx = targetIdx;
+            renderStudioSamplerEditor(creatorId);
+          }
+        });
+      });
+
+      // Bind Add Sampler Button
+      const btnAdd = document.getElementById('btnStudioAddSampler');
+      if (btnAdd) {
+        btnAdd.addEventListener('click', () => {
+          syncCurrentStudioSamplerFromDOM();
+          if (studioSamplersState.length >= 3) {
+            showToast('⚠️ Maximum of 3 samplers reached.');
+            return;
+          }
+          const newNum = studioSamplersState.length + 1;
+          const defaultNames = ['Signature Protein Classics', 'Weekend Dessert Dupes', 'Keto & Low Carb Cravers'];
+          const newName = defaultNames[newNum - 1] || `Sampler Pack #${newNum}`;
+          studioSamplersState.push({
+            id: `sampler_${Date.now()}_${newNum}`,
+            name: newName,
+            pints: []
+          });
+          activeStudioSamplerIdx = studioSamplersState.length - 1;
+          renderStudioSamplerEditor(creatorId);
+          showToast(`✨ Created "${newName}". Select 4 pints and save!`);
+          const nameInput = document.getElementById('studioSamplerNameInput');
+          if (nameInput) {
+            nameInput.focus();
+            nameInput.select();
+          }
+        });
+      }
+    }
+
+    // 2. Sampler Name Input
+    const nameInput = document.getElementById('studioSamplerNameInput');
+    if (nameInput) {
+      nameInput.value = curSampler.name || '';
+      nameInput.oninput = () => {
+        curSampler.name = nameInput.value.trim() || `Sampler #${activeStudioSamplerIdx + 1}`;
+        if (tabsBar) {
+          const tabLabel = tabsBar.querySelector(`.studio-sampler-tab-btn[data-sampler-idx="${activeStudioSamplerIdx}"] .tab-label`);
+          if (tabLabel) {
+            tabLabel.textContent = `🍨 ${curSampler.name}`;
+          }
+        }
+      };
+    }
+
+    // 3. Delete Sampler Button
+    const btnDelete = document.getElementById('btnStudioDeleteSampler');
+    if (btnDelete) {
+      if (studioSamplersState.length > 1) {
+        btnDelete.style.display = 'inline-flex';
+        btnDelete.onclick = () => {
+          const nameToRemove = curSampler.name || `Sampler #${activeStudioSamplerIdx + 1}`;
+          studioSamplersState.splice(activeStudioSamplerIdx, 1);
+          activeStudioSamplerIdx = Math.max(0, activeStudioSamplerIdx - 1);
+          renderStudioSamplerEditor(creatorId);
+          showToast(`🗑️ Removed "${nameToRemove}".`);
+        };
+      } else {
+        btnDelete.style.display = 'none';
+      }
+    }
+
+    // 4. Slots Grid
+    const selectedIds = Array.isArray(curSampler.pints) ? curSampler.pints.slice(0, 4) : [];
 
     grid.innerHTML = [0, 1, 2, 3].map(idx => {
       const currentId = selectedIds[idx] || '';
@@ -6579,11 +6860,21 @@
       `;
     }).join('');
 
-    // Bind change listener on all 4 selects to update their preview card
+    // Bind change listener on all 4 selects to update their preview card and state
     grid.querySelectorAll('.sampler-slot-select').forEach(sel => {
       sel.addEventListener('change', () => {
-        const slotIdx = sel.dataset.slot;
+        const slotIdx = parseInt(sel.dataset.slot, 10);
         const recId = sel.value;
+        if (!Array.isArray(curSampler.pints)) curSampler.pints = [];
+        curSampler.pints[slotIdx] = recId;
+
+        // Update tab badge count
+        if (tabsBar) {
+          const validCount = curSampler.pints.filter(Boolean).length;
+          const badge = tabsBar.querySelector(`.studio-sampler-tab-btn[data-sampler-idx="${activeStudioSamplerIdx}"] .tab-badge`);
+          if (badge) badge.textContent = `${validCount}/4`;
+        }
+
         const rec = allRecipes.find(r => r.id === recId);
         const prevEl = document.getElementById(`samplerSlotPreview_${slotIdx}`);
         if (prevEl) {
@@ -6615,16 +6906,20 @@
   }
 
   async function handleSaveStudioSampler(creatorId) {
-    const grid = document.getElementById('studioSamplerSlotsGrid');
-    if (!grid) return;
+    syncCurrentStudioSamplerFromDOM();
+    if (!studioSamplersState || studioSamplersState.length === 0) {
+      showToast('⚠️ No samplers to save.');
+      return;
+    }
 
-    const selects = grid.querySelectorAll('.sampler-slot-select');
-    const selectedIds = [];
-    selects.forEach(s => {
-      if (s.value) selectedIds.push(s.value);
+    // Validate and clean samplers
+    studioSamplersState.forEach((s, idx) => {
+      s.pints = (s.pints || []).filter(Boolean).slice(0, 4);
+      if (!s.name || !s.name.trim()) s.name = `Sampler #${idx + 1}`;
     });
 
-    if (selectedIds.length === 0) {
+    const hasAnyPints = studioSamplersState.some(s => s.pints && s.pints.length > 0);
+    if (!hasAnyPints) {
       showToast('Please select at least 1 hero pint for your sampler.');
       return;
     }
@@ -6636,6 +6931,8 @@
       saveBtn.disabled = true;
     }
 
+    const primaryPints = (studioSamplersState[0] && studioSamplersState[0].pints) ? studioSamplersState[0].pints : [];
+
     try {
       const headers = {
         'Content-Type': 'application/json'
@@ -6646,39 +6943,61 @@
       const res = await fetch('/api/creator/profile', {
         method: 'POST',
         headers,
-        body: JSON.stringify({ samplerPints: selectedIds })
+        body: JSON.stringify({
+          samplers: studioSamplersState,
+          samplerPints: primaryPints
+        })
       });
       const data = await res.json();
 
       if (res.ok && data.success) {
-        if (!currentUser.samplerPints) currentUser.samplerPints = [];
-        currentUser.samplerPints = data.samplerPints || selectedIds;
+        const savedSamplers = data.samplers || studioSamplersState;
+        if (!currentUser.samplers) currentUser.samplers = [];
+        currentUser.samplers = savedSamplers;
+        currentUser.samplerPints = data.samplerPints || primaryPints;
+
         if (!serverCreatorProfiles[creatorId]) serverCreatorProfiles[creatorId] = {};
+        serverCreatorProfiles[creatorId].samplers = savedSamplers;
         serverCreatorProfiles[creatorId].samplerPints = currentUser.samplerPints;
+
         const cr = getCreatorById(creatorId);
-        if (cr) cr.samplerPints = currentUser.samplerPints;
+        if (cr) {
+          cr.samplers = savedSamplers;
+          cr.samplerPints = currentUser.samplerPints;
+        }
         saveUserAuth();
-        showToast('🍨 Signature 4-Pint Sampler saved! Followers will see these in your store sampler.');
+        showToast(`🍨 ${savedSamplers.length} 4-Pint Sampler Pack${savedSamplers.length === 1 ? '' : 's'} saved! Visible on your storefront.`);
+        renderStudioSamplerEditor(creatorId);
       } else {
-        if (!currentUser.samplerPints) currentUser.samplerPints = [];
-        currentUser.samplerPints = selectedIds;
+        currentUser.samplers = studioSamplersState;
+        currentUser.samplerPints = primaryPints;
         if (!serverCreatorProfiles[creatorId]) serverCreatorProfiles[creatorId] = {};
-        serverCreatorProfiles[creatorId].samplerPints = selectedIds;
+        serverCreatorProfiles[creatorId].samplers = studioSamplersState;
+        serverCreatorProfiles[creatorId].samplerPints = primaryPints;
         const cr = getCreatorById(creatorId);
-        if (cr) cr.samplerPints = selectedIds;
+        if (cr) {
+          cr.samplers = studioSamplersState;
+          cr.samplerPints = primaryPints;
+        }
         saveUserAuth();
-        showToast('🍨 Signature Sampler saved.');
+        showToast(`🍨 Sampler Packs saved.`);
+        renderStudioSamplerEditor(creatorId);
       }
     } catch (err) {
       console.warn('Error saving sampler pints:', err);
-      if (!currentUser.samplerPints) currentUser.samplerPints = [];
-      currentUser.samplerPints = selectedIds;
+      currentUser.samplers = studioSamplersState;
+      currentUser.samplerPints = primaryPints;
       if (!serverCreatorProfiles[creatorId]) serverCreatorProfiles[creatorId] = {};
-      serverCreatorProfiles[creatorId].samplerPints = selectedIds;
+      serverCreatorProfiles[creatorId].samplers = studioSamplersState;
+      serverCreatorProfiles[creatorId].samplerPints = primaryPints;
       const cr = getCreatorById(creatorId);
-      if (cr) cr.samplerPints = selectedIds;
+      if (cr) {
+        cr.samplers = studioSamplersState;
+        cr.samplerPints = primaryPints;
+      }
       saveUserAuth();
-      showToast('🍨 Signature Sampler saved.');
+      showToast(`🍨 Sampler Packs saved.`);
+      renderStudioSamplerEditor(creatorId);
     } finally {
       if (saveBtn) {
         saveBtn.innerHTML = origHtml;
@@ -6688,8 +7007,9 @@
   }
 
   function handleAutofillStudioSampler(creatorId) {
-    const grid = document.getElementById('studioSamplerSlotsGrid');
-    if (!grid) return;
+    syncCurrentStudioSamplerFromDOM();
+    const curSampler = studioSamplersState[activeStudioSamplerIdx];
+    if (!curSampler) return;
 
     const creatorRecipes = allRecipes.filter(r => {
       const cr = getRecipeCreator(r);
@@ -6703,16 +7023,14 @@
       return bMade - aMade;
     });
 
-    const top4 = popular.slice(0, 4);
-    const selects = grid.querySelectorAll('.sampler-slot-select');
-    selects.forEach((sel, idx) => {
-      if (top4[idx]) {
-        sel.value = top4[idx].id;
-        sel.dispatchEvent(new Event('change'));
-      }
-    });
+    const offset = (activeStudioSamplerIdx * 4) % Math.max(1, popular.length);
+    let top4 = popular.slice(offset, offset + 4);
+    if (top4.length < 4) top4 = popular.slice(0, 4);
 
-    showToast('⚡ Autofilled your 4 top-made community favorites! Click "Save Sampler" to publish.');
+    curSampler.pints = top4.map(r => r.id);
+    renderStudioSamplerEditor(creatorId);
+
+    showToast(`⚡ Autofilled "${curSampler.name}" with 4 community favorites! Click "Save Samplers" to publish.`);
   }
 
   // Expose key modal and navigation functions globally
@@ -6919,14 +7237,29 @@
         renderPantryDemandRadar(data.pantryDemand);
       }
 
-      // Update Sampler Pints if returned by server
-      if (Array.isArray(data.samplerPints) && data.samplerPints.length > 0) {
+      // Update Samplers if returned by server
+      if (Array.isArray(data.samplers) && data.samplers.length > 0) {
+        if (!currentUser.samplers || currentUser.samplers.length === 0) {
+          currentUser.samplers = data.samplers;
+        }
+        if (!serverCreatorProfiles[creatorId]) serverCreatorProfiles[creatorId] = {};
+        serverCreatorProfiles[creatorId].samplers = data.samplers;
+        if (data.samplerPints) {
+          currentUser.samplerPints = data.samplerPints;
+          serverCreatorProfiles[creatorId].samplerPints = data.samplerPints;
+        }
+        if (studioSamplersState.length <= 1) {
+          renderStudioSamplerEditor(creatorId, data.samplers);
+        }
+      } else if (Array.isArray(data.samplerPints) && data.samplerPints.length > 0) {
         if (!currentUser.samplerPints || currentUser.samplerPints.length === 0) {
           currentUser.samplerPints = data.samplerPints;
         }
         if (!serverCreatorProfiles[creatorId]) serverCreatorProfiles[creatorId] = {};
         serverCreatorProfiles[creatorId].samplerPints = data.samplerPints;
-        renderStudioSamplerEditor(creatorId, data.samplerPints);
+        if (studioSamplersState.length <= 1) {
+          renderStudioSamplerEditor(creatorId, data.samplerPints);
+        }
       }
     } catch (e) {
       console.warn('Error fetching creator analytics:', e);
@@ -22554,7 +22887,8 @@ Instructions:
     if (btnStudioBatchPrepAll) {
       btnStudioBatchPrepAll.addEventListener('click', () => {
         const cId = (currentUser && currentUser.creatorId) ? currentUser.creatorId : 'fitness_product_finder';
-        openSamplerPreviewModal(null, cId);
+        syncCurrentStudioSamplerFromDOM();
+        openSamplerPreviewModal(null, cId, activeStudioSamplerIdx);
       });
     }
 

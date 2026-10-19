@@ -123,9 +123,47 @@
       "Lactose Free"
     ],
     "created_at": "2026-10-07T17:45:10.671690",
-    "last_active": "2026-10-07T17:45:10.671690",
+    "last_active": "2026-10-19T17:14:14.293598",
     "token": "token_creator_eli_001",
-    "freezerCapacity": 12
+    "freezerCapacity": 12,
+    "samplers": [
+      {
+        "id": "sampler_1",
+        "name": "Signature Protein Classics",
+        "pints": [
+          "almond_joy",
+          "americone_dream",
+          "apple_pie",
+          "baked_alaska"
+        ]
+      },
+      {
+        "id": "sampler_2",
+        "name": "Weekend Treats & Dupes",
+        "pints": [
+          "banana",
+          "banana_bread_matcha",
+          "banana_pudding",
+          "berry_crumble"
+        ]
+      },
+      {
+        "id": "sampler_3",
+        "name": "Keto Cravers",
+        "pints": [
+          "birthday_cake",
+          "biscoff_cookie_butter",
+          "blueberry_pie",
+          "brown_butter_banana_bread"
+        ]
+      }
+    ],
+    "samplerPints": [
+      "almond_joy",
+      "americone_dream",
+      "apple_pie",
+      "baked_alaska"
+    ]
   },
   "testcontent@creamicravings.com": {
     "id": "user_creator_testcontent",

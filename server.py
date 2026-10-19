@@ -1576,6 +1576,13 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
 
             announcement = target_user.get('storeAnnouncement', '') if target_user else ''
             sampler_pints = target_user.get('samplerPints', []) if target_user else []
+            samplers = target_user.get('samplers', []) if target_user else []
+            if not samplers and sampler_pints:
+                samplers = [{
+                    'id': 'sampler_1',
+                    'name': 'Signature 4-Pint Sampler',
+                    'pints': sampler_pints
+                }]
 
             self._send_json({
                 'status': 'ok',
@@ -1587,7 +1594,8 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 'pantryDemand': pantry_demand_list,
                 'clicks': creator_clicks,
                 'announcement': announcement,
-                'samplerPints': sampler_pints
+                'samplerPints': sampler_pints,
+                'samplers': samplers
             })
             return
 
@@ -1606,17 +1614,36 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
             return
 
         elif clean_path in ('/api/creator/profile', '/api/creator/perks'):
+            qs = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+            req_creator = (qs.get('creator', [None])[0] or qs.get('creatorId', [None])[0] or qs.get('c', [None])[0] or '').strip().lower()
+
             user = self._get_user_from_token()
-            if not user or user.get('role') != 'creator':
+            is_creator = user and (user.get('role') in ['creator', 'admin'] or user.get('email', '').lower() == 'ahumpo7@gmail.com')
+
+            if not is_creator and not req_creator:
                 self._send_json({'error': 'Unauthorized: Content creator access required'}, 403)
                 return
-            target_creator_id = user.get('creatorId') or 'fitness_product_finder'
+
+            target_creator_id = req_creator or (user.get('creatorId') if user else 'fitness_product_finder') or 'fitness_product_finder'
+            if target_creator_id in ['eli', 'fitnessproductfinder', 'fitness_product_finder']:
+                target_creator_id = 'fitness_product_finder'
+            elif target_creator_id in ['testcontent', 'test_content']:
+                target_creator_id = 'test_content'
+
             target_user = user
-            if user.get('email', '').lower() == 'ahumpo7@gmail.com':
+            if req_creator or (user and user.get('email', '').lower() == 'ahumpo7@gmail.com'):
                 for u in users_db.values():
                     if u.get('creatorId') == target_creator_id:
                         target_user = u
                         break
+
+            samplers = target_user.get('samplers', []) if target_user else []
+            if not samplers and target_user and target_user.get('samplerPints'):
+                samplers = [{
+                    'id': 'sampler_1',
+                    'name': 'Signature 4-Pint Sampler',
+                    'pints': target_user.get('samplerPints', [])
+                }]
             self._send_json({
                 'status': 'ok',
                 'creatorId': target_creator_id,
@@ -1624,7 +1651,8 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 'socialLinks': target_user.get('socialLinks', {}),
                 'perks': target_user.get('perks', []),
                 'storeAnnouncement': target_user.get('storeAnnouncement', ''),
-                'samplerPints': target_user.get('samplerPints', [])
+                'samplerPints': target_user.get('samplerPints', []),
+                'samplers': samplers
             })
             return
 
@@ -3100,8 +3128,37 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 target_user['brandName'] = str(data['brandName']).strip()
             if 'storeAnnouncement' in data:
                 target_user['storeAnnouncement'] = str(data.get('storeAnnouncement', '')).strip()[:300]
-            if 'samplerPints' in data and isinstance(data['samplerPints'], list):
-                target_user['samplerPints'] = [str(r).strip() for r in data['samplerPints'] if str(r).strip()][:4]
+            if 'samplers' in data and isinstance(data['samplers'], list):
+                sanitized_samplers = []
+                for idx, s in enumerate(data['samplers'][:3]):
+                    if isinstance(s, dict):
+                        s_id = str(s.get('id') or f"sampler_{idx+1}").strip()[:64]
+                        s_name = str(s.get('name') or f"Sampler {idx+1}").strip()[:60] or f"Sampler {idx+1}"
+                        raw_p = s.get('pints', [])
+                        s_pints = [str(r).strip() for r in raw_p if str(r).strip()][:4] if isinstance(raw_p, list) else []
+                        sanitized_samplers.append({
+                            'id': s_id,
+                            'name': s_name,
+                            'pints': s_pints
+                        })
+                target_user['samplers'] = sanitized_samplers
+                if sanitized_samplers and sanitized_samplers[0].get('pints'):
+                    target_user['samplerPints'] = sanitized_samplers[0]['pints']
+                elif not sanitized_samplers:
+                    target_user['samplerPints'] = []
+            elif 'samplerPints' in data and isinstance(data['samplerPints'], list):
+                clean_pints = [str(r).strip() for r in data['samplerPints'] if str(r).strip()][:4]
+                target_user['samplerPints'] = clean_pints
+                cur_samplers = target_user.get('samplers', [])
+                if cur_samplers and isinstance(cur_samplers, list) and len(cur_samplers) > 0:
+                    cur_samplers[0]['pints'] = clean_pints
+                    target_user['samplers'] = cur_samplers
+                else:
+                    target_user['samplers'] = [{
+                        'id': 'sampler_1',
+                        'name': str(data.get('samplerName') or 'Signature 4-Pint Sampler').strip()[:60],
+                        'pints': clean_pints
+                    }]
 
             if 'perks' in data and isinstance(data['perks'], list):
                 sanitized_perks = []
@@ -3128,7 +3185,8 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 'storeAnnouncement': target_user.get('storeAnnouncement', ''),
                 'socialLinks': target_user.get('socialLinks', {}),
                 'perks': target_user.get('perks', []),
-                'samplerPints': target_user.get('samplerPints', [])
+                'samplerPints': target_user.get('samplerPints', []),
+                'samplers': target_user.get('samplers', [])
             })
             return
 

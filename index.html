@@ -115,7 +115,7 @@
   <link rel="icon" type="image/png" sizes="144x144" href="icon-144.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=v7.9">
+  <link rel="stylesheet" href="styles.css?v=v8.0">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -703,7 +703,7 @@
             <div class="purchase-banner-icon">🛍️</div>
             <div class="purchase-banner-text">
               <div class="purchase-banner-title">
-                <span>Unlock <strong id="bannerLockedCount">137</strong> More Recipes</span>
+                <span id="bannerUnlockTitle">Unlock More Recipes</span>
                 <span class="purchase-banner-tag">Available for Purchase</span>
               </div>
               <p class="purchase-banner-desc">
@@ -2323,9 +2323,11 @@
 
           <!-- Quick Action CTAs: 4-Pint Sampler & Match My Pantry -->
           <div class="creator-hub-actions-bar" style="display: flex; gap: 10px; flex-wrap: wrap;">
-            <button type="button" class="btn-secondary btn-catalog-sampler" id="catalogSamplerPreviewBtn" style="flex: 1; min-width: 200px;">
-              <span>🍨 4-Pint Sampler Preview &rarr;</span>
-            </button>
+            <div id="catalogSamplersContainer" class="catalog-samplers-row" style="display: flex; gap: 8px; flex-wrap: wrap; flex: 2; min-width: 220px;">
+              <button type="button" class="btn-secondary btn-catalog-sampler" id="catalogSamplerPreviewBtn" style="flex: 1; min-width: 200px;">
+                <span>🍨 4-Pint Sampler Preview &rarr;</span>
+              </button>
+            </div>
             <button type="button" class="btn-primary btn-catalog-match-pantry" id="catalogMatchPantryBtn" style="flex: 1; min-width: 200px;">
               <span>🥫 What Can I Make? Match My Pantry &rarr;</span>
             </button>
@@ -2703,19 +2705,36 @@
           </div>
         </div>
 
-        <!-- Creator Signature 4-Pint Sampler Editor -->
+        <!-- Creator Signature 4-Pint Sampler Editor (Up to 3 Samplers with Custom Names) -->
         <div class="creator-studio-section" id="studioSamplerEditorSection">
           <div class="creator-studio-section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
             <div>
-              <h3 class="creator-studio-section-title" style="margin: 0;">🍨 Curate Your Signature 4-Pint Sampler</h3>
-              <p style="font-size: 0.8rem; color: #94a3b8; margin: 3px 0 0 0;">Select the 4 hero pints that represent your cookbook collection. Followers preview these pints with macros before 1-tap adding them to Sunday Batch Prep.</p>
+              <h3 class="creator-studio-section-title" style="margin: 0;">🍨 Curate Your 4-Pint Samplers (Up to 3)</h3>
+              <p style="font-size: 0.8rem; color: #94a3b8; margin: 3px 0 0 0;">Create and name up to 3 custom 4-pint samplers (e.g. "Signature Protein Classics", "Weekend Treats", "Keto Cravers"). Followers can preview each sampler and 1-tap add them to Sunday Batch Prep.</p>
             </div>
             <div style="display: flex; gap: 8px;">
-              <button type="button" class="btn-secondary btn-sm" id="btnStudioSamplerAutofill" title="Auto-select your 4 top-made community favorites">⚡ Autofill Top 4</button>
-              <button type="button" class="btn-primary btn-sm" id="btnStudioSaveSampler" style="font-weight: 700;">💾 Save Sampler</button>
+              <button type="button" class="btn-secondary btn-sm" id="btnStudioSamplerAutofill" title="Auto-select your 4 top-made community favorites for this sampler">⚡ Autofill Top 4</button>
+              <button type="button" class="btn-primary btn-sm" id="btnStudioSaveSampler" style="font-weight: 700;">💾 Save Samplers</button>
             </div>
           </div>
-          <div class="creator-sampler-slots-grid" id="studioSamplerSlotsGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 14px;">
+
+          <!-- Sampler Tabs & Manager Bar -->
+          <div class="creator-sampler-tabs-bar" id="studioSamplerTabsBar">
+            <!-- Dynamically populated in app.js -->
+          </div>
+
+          <!-- Current Sampler Name & Actions Row -->
+          <div class="creator-sampler-meta-row" style="display: flex; gap: 10px; align-items: flex-end; margin-top: 12px; margin-bottom: 12px; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 260px;">
+              <label for="studioSamplerNameInput" style="font-size: 0.78rem; font-weight: 700; color: #cbd5e1; display: block; margin-bottom: 4px;">Sampler Name *</label>
+              <input type="text" id="studioSamplerNameInput" class="form-input" placeholder="e.g. Signature Protein Classics, Cheat Day Dupes, Keto Cravers..." style="width: 100%; box-sizing: border-box; background: rgba(12, 14, 23, 0.8); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; padding: 8px 12px; color: #fff; font-size: 0.86rem;" />
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <button type="button" class="btn-secondary btn-sm" id="btnStudioDeleteSampler" style="color: #f87171; border-color: rgba(248, 113, 113, 0.3); display: none;" title="Remove this sampler">🗑️ Remove Sampler</button>
+            </div>
+          </div>
+
+          <div class="creator-sampler-slots-grid" id="studioSamplerSlotsGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 10px;">
             <!-- Dynamically rendered in app.js -->
           </div>
         </div>
@@ -3880,6 +3899,6 @@
 
   <!-- Scripts -->
   <script src="recipes-data.js?v=v4.3"></script>
-  <script src="app.js?v=v8.1"></script>
+  <script src="app.js?v=v8.2"></script>
 </body>
 </html>
