@@ -3100,6 +3100,9 @@
       if (Array.isArray(serverProfile.perks) && serverProfile.perks.length > 0) {
         result.perks = JSON.parse(JSON.stringify(serverProfile.perks));
       }
+      if (Array.isArray(serverProfile.samplerPints) && serverProfile.samplerPints.length > 0) {
+        result.samplerPints = [...serverProfile.samplerPints];
+      }
     }
 
     if (userOverride) {
@@ -3108,6 +3111,13 @@
       if (Array.isArray(userOverride.perks)) {
         result.perks = JSON.parse(JSON.stringify(userOverride.perks));
       }
+      if (Array.isArray(userOverride.samplerPints) && userOverride.samplerPints.length > 0) {
+        result.samplerPints = [...userOverride.samplerPints];
+      }
+    }
+
+    if (!result.samplerPints) {
+      result.samplerPints = (base && Array.isArray(base.samplerPints)) ? [...base.samplerPints] : [];
     }
 
     return result;
@@ -5885,7 +5895,15 @@
         socialsRow.innerHTML = pillsHtml;
       }
 
-      // 3. Match My Pantry Button
+      // 3. 4-Pint Sampler Preview & Match My Pantry Buttons
+      const samplerPreviewBtn = document.getElementById('catalogSamplerPreviewBtn');
+      if (samplerPreviewBtn && !samplerPreviewBtn._bound) {
+        samplerPreviewBtn._bound = true;
+        samplerPreviewBtn.addEventListener('click', () => {
+          openSamplerPreviewModal(null, activeStoreCreatorId || creatorId);
+        });
+      }
+
       const matchPantryBtn = document.getElementById('catalogMatchPantryBtn');
       if (matchPantryBtn && !matchPantryBtn._bound) {
         matchPantryBtn._bound = true;
@@ -6128,8 +6146,8 @@
           btn.style.opacity = '1';
           btn.style.cursor = 'pointer';
           btn.className = 'btn-primary btn-sm btn-action-pack btn-batch-prep-pack';
-          btn.innerHTML = '<span>🍱 Batch Prep Pack (Top 4) →</span>';
-          btn.title = 'Add 4 signature pints from this collection directly to Sunday Batch Prep';
+          btn.innerHTML = '<span>🍱 View 4-Pint Sampler →</span>';
+          btn.title = 'Preview the 4 signature pints and customize before adding to Sunday Batch Prep';
           btn.dataset.batchPack = packId;
         } else {
           btn.disabled = false;
@@ -6196,61 +6214,508 @@
   }
 
   // ==========================================================================
-  // Hybrid Feature: 1-Click Creator Pack Unlock into Freezer Queue (Path B)
+  // Signature 4-Pint Sampler Engine (Preview Modal & Creator Curation)
   // ==========================================================================
-  function batchPrepCreatorPack(packId) {
-    if (!currentUser) {
-      showToast('🔒 Please sign in to use Sunday Batch Prep & Grocery List.');
-      openGoogleAuthModal();
+  let activeSamplerPints = [];
+  let selectedSamplerPintIds = new Set();
+  const samplerPreviewModalOverlay = document.getElementById('samplerPreviewModalOverlay');
+  const closeSamplerPreviewModalBtn = document.getElementById('closeSamplerPreviewModalBtn');
+  const btnSamplerCancel = document.getElementById('btnSamplerCancel');
+  const btnSamplerToggleAll = document.getElementById('btnSamplerToggleAll');
+  const btnSamplerPreviewConfirm = document.getElementById('btnSamplerPreviewConfirm');
+
+  function getSamplerPintsForCreatorOrPack(packId = null, creatorId = null) {
+    let targetCreatorId = creatorId;
+    if (!targetCreatorId && packId) {
+      const book = (typeof BOOKS_MASTER !== 'undefined')
+        ? BOOKS_MASTER.find(b => b.bookKey === packId || b.categoryKey === packId || b.id === packId)
+        : null;
+      if (book && book.creatorId) {
+        targetCreatorId = book.creatorId;
+      }
+    }
+    if (!targetCreatorId) {
+      targetCreatorId = activeStoreCreatorId || 'fitness_product_finder';
+    }
+
+    const creator = getCreatorById(targetCreatorId);
+
+    // 1. If this creator has explicitly curated samplerPints, try to use those
+    if (creator && Array.isArray(creator.samplerPints) && creator.samplerPints.length > 0) {
+      const curated = [];
+      creator.samplerPints.forEach(rId => {
+        const rec = allRecipes.find(r => r.id === rId);
+        if (rec && !curated.some(c => c.id === rec.id)) {
+          curated.push(rec);
+        }
+      });
+      if (curated.length > 0) {
+        return curated.slice(0, 4);
+      }
+    }
+
+    // 2. If a specific packId was requested (not All-Access), get top recipes from this pack
+    if (packId && packId !== 'All-Access') {
+      const packRecipes = allRecipes.filter(r => {
+        return r.category === packId || (Array.isArray(r.categories) && r.categories.includes(packId));
+      });
+      if (packRecipes.length > 0) {
+        const sorted = [...packRecipes].sort((a, b) => {
+          const aMade = (communityStats && communityStats.madeCounts && communityStats.madeCounts[a.id]) || 0;
+          const bMade = (communityStats && communityStats.madeCounts && communityStats.madeCounts[b.id]) || 0;
+          return bMade - aMade;
+        });
+        return sorted.slice(0, 4);
+      }
+    }
+
+    // 3. Creator-wide top recipes
+    const creatorRecipes = allRecipes.filter(r => {
+      const cr = getRecipeCreator(r);
+      return cr && cr.id === targetCreatorId;
+    });
+    if (creatorRecipes.length > 0) {
+      const sorted = [...creatorRecipes].sort((a, b) => {
+        const aMade = (communityStats && communityStats.madeCounts && communityStats.madeCounts[a.id]) || 0;
+        const bMade = (communityStats && communityStats.madeCounts && communityStats.madeCounts[b.id]) || 0;
+        return bMade - aMade;
+      });
+      return sorted.slice(0, 4);
+    }
+
+    // 4. Fallback to accessible top community recipes
+    const fallback = allRecipes.filter(r => isRecipeAccessible(r)).slice(0, 4);
+    return fallback;
+  }
+
+  function openSamplerPreviewModal(packId = null, creatorId = null) {
+    if (!samplerPreviewModalOverlay) return;
+
+    let targetCreatorId = creatorId || activeStoreCreatorId;
+    if (!targetCreatorId && packId) {
+      const book = (typeof BOOKS_MASTER !== 'undefined')
+        ? BOOKS_MASTER.find(b => b.bookKey === packId || b.categoryKey === packId || b.id === packId)
+        : null;
+      if (book) targetCreatorId = book.creatorId;
+    }
+    if (!targetCreatorId) targetCreatorId = 'fitness_product_finder';
+
+    const creator = getCreatorById(targetCreatorId);
+    const creatorName = creator ? creator.name : 'Creator';
+
+    const pints = getSamplerPintsForCreatorOrPack(packId, targetCreatorId);
+    if (!pints || pints.length === 0) {
+      showToast('No recipes found for this sampler collection.');
       return;
     }
-    let targetRecipes = [];
 
-    // Filter recipes that belong to this pack/category
-    const packRecipes = allRecipes.filter(r => {
-      if (packId === 'All-Access') {
-        const cat = r.category || '';
-        return ['Fan Favorites', 'Keto', 'Lactose Free', 'No Protein'].includes(cat);
+    activeSamplerPints = pints;
+    selectedSamplerPintIds = new Set(pints.map(p => p.id));
+
+    // Update Header
+    const titleEl = document.getElementById('samplerPreviewModalTitle');
+    const subtitleEl = document.getElementById('samplerPreviewModalSubtitle');
+    if (titleEl) {
+      titleEl.textContent = packId
+        ? `${packId} — 4-Pint Sampler Preview`
+        : `${creatorName}'s Signature 4-Pint Sampler`;
+    }
+    if (subtitleEl) {
+      subtitleEl.textContent = `Review the handpicked pints by ${creatorName} below. Choose which recipes to add to your visual freezer queue & Sunday Batch Prep.`;
+    }
+
+    renderSamplerPreviewList();
+    updateSamplerMacroSummary();
+
+    samplerPreviewModalOverlay.classList.add('active');
+    samplerPreviewModalOverlay.setAttribute('aria-hidden', 'false');
+    lockBackgroundScroll();
+  }
+
+  function closeSamplerPreviewModal() {
+    if (!samplerPreviewModalOverlay) return;
+    samplerPreviewModalOverlay.classList.remove('active');
+    samplerPreviewModalOverlay.setAttribute('aria-hidden', 'true');
+    if (!recipePacksModalOverlay || !recipePacksModalOverlay.classList.contains('active')) {
+      unlockBackgroundScroll();
+    }
+  }
+
+  function renderSamplerPreviewList() {
+    const listEl = document.getElementById('samplerPintsList');
+    if (!listEl) return;
+
+    if (activeSamplerPints.length === 0) {
+      listEl.innerHTML = '<div style="text-align: center; color: #94a3b8; padding: 20px;">No pints available in this sampler.</div>';
+      return;
+    }
+
+    listEl.innerHTML = activeSamplerPints.map((rec, idx) => {
+      const isSelected = selectedSamplerPintIds.has(rec.id);
+      const isAlreadyInPrep = isRecipeInBatchPrep(rec.id);
+      const cals = rec.macros?.calories || 0;
+      const pro = rec.macros?.protein || 0;
+      const carbs = rec.macros?.carbs || 0;
+      const fat = rec.macros?.fat || 0;
+      const spin = rec.spinSetting || 'Lite Ice Cream';
+      const category = rec.category || 'Dessert';
+
+      let ingText = '';
+      if (Array.isArray(rec.ingredients) && rec.ingredients.length > 0) {
+        ingText = rec.ingredients.slice(0, 3).map(i => i.name).join(', ');
+        if (rec.ingredients.length > 3) ingText += '...';
       }
-      return r.category === packId || (Array.isArray(r.categories) && r.categories.includes(packId));
+
+      return `
+        <div class="sampler-pint-card ${isSelected ? 'selected' : ''}" data-recipe-id="${escapeHtml(rec.id)}">
+          <input type="checkbox" class="sampler-pint-checkbox" id="chkSamplerPint_${idx}" data-recipe-id="${escapeHtml(rec.id)}" ${isSelected ? 'checked' : ''} aria-label="Select ${escapeHtml(rec.name)}">
+          <div class="sampler-pint-thumb">
+            ${rec.imageUrl ? `<img src="${escapeHtml(rec.imageUrl)}" alt="${escapeHtml(rec.name)}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">` : '🍨'}
+          </div>
+          <div class="sampler-pint-details">
+            <div class="sampler-pint-title-row">
+              <span class="sampler-pint-title" title="${escapeHtml(rec.name)}">${escapeHtml(rec.name)}</span>
+              <button type="button" class="sampler-pint-link btn-view-sampler-rec" data-recipe-id="${escapeHtml(rec.id)}" title="View complete ingredients, instructions and tips">Recipe details ↗</button>
+            </div>
+            <div class="sampler-pint-meta">
+              <span class="sampler-pint-macros">${cals} kcal • ${pro}g P • ${carbs}g C • ${fat}g F</span>
+              <span class="sampler-pint-badge">🌀 ${escapeHtml(spin)}</span>
+              <span class="sampler-pint-badge">${escapeHtml(category)}</span>
+              ${isAlreadyInPrep ? '<span class="sampler-pint-badge" style="color: #4ade80; background: rgba(74, 222, 128, 0.15);">✅ In Prep Queue</span>' : ''}
+            </div>
+            ${ingText ? `<div style="font-size: 0.71rem; color: #64748b; margin-top: 2px;">Key ingredients: ${escapeHtml(ingText)}</div>` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Bind item card click (toggle selection) and recipe details
+    listEl.querySelectorAll('.sampler-pint-card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('.btn-view-sampler-rec')) {
+          e.stopPropagation();
+          const rId = e.target.closest('.btn-view-sampler-rec').dataset.recipeId;
+          const rec = allRecipes.find(r => r.id === rId);
+          if (rec) {
+            closeSamplerPreviewModal();
+            closeRecipePacksModal();
+            openRecipeModal(rec);
+          }
+          return;
+        }
+
+        const chk = card.querySelector('.sampler-pint-checkbox');
+        if (e.target !== chk) {
+          chk.checked = !chk.checked;
+        }
+        const rId = chk.dataset.recipeId;
+        if (chk.checked) {
+          selectedSamplerPintIds.add(rId);
+          card.classList.add('selected');
+        } else {
+          selectedSamplerPintIds.delete(rId);
+          card.classList.remove('selected');
+        }
+        updateSamplerMacroSummary();
+      });
+    });
+  }
+
+  function updateSamplerMacroSummary() {
+    let totCals = 0;
+    let totPro = 0;
+    let totCarbs = 0;
+    let totFat = 0;
+    let selectedCount = 0;
+
+    activeSamplerPints.forEach(rec => {
+      if (selectedSamplerPintIds.has(rec.id)) {
+        selectedCount++;
+        totCals += parseInt(rec.macros?.calories, 10) || 0;
+        totPro += parseInt(rec.macros?.protein, 10) || 0;
+        totCarbs += parseInt(rec.macros?.carbs, 10) || 0;
+        totFat += parseInt(rec.macros?.fat, 10) || 0;
+      }
     });
 
-    // Pick top 4 recipes (sort by community madeCounts if available)
-    const sorted = [...packRecipes].sort((a, b) => {
+    const countEl = document.getElementById('samplerSummaryPintCount');
+    const calsEl = document.getElementById('samplerSummaryCalories');
+    const proEl = document.getElementById('samplerSummaryProtein');
+    const carbsEl = document.getElementById('samplerSummaryCarbs');
+    const fatEl = document.getElementById('samplerSummaryFat');
+    const confirmBtn = document.getElementById('btnSamplerPreviewConfirm');
+    const toggleBtn = document.getElementById('btnSamplerToggleAll');
+
+    if (countEl) countEl.textContent = `${selectedCount} Pint${selectedCount === 1 ? '' : 's'}`;
+    if (calsEl) calsEl.textContent = totCals.toLocaleString();
+    if (proEl) proEl.textContent = `${totPro}g`;
+    if (carbsEl) carbsEl.textContent = `${totCarbs}g`;
+    if (fatEl) fatEl.textContent = `${totFat}g`;
+
+    if (confirmBtn) {
+      confirmBtn.innerHTML = `<span>📥 Add Selected (${selectedCount}) to Sunday Prep</span>`;
+      confirmBtn.disabled = selectedCount === 0;
+      confirmBtn.style.opacity = selectedCount === 0 ? '0.5' : '1';
+    }
+
+    if (toggleBtn) {
+      toggleBtn.textContent = (selectedCount === activeSamplerPints.length) ? 'Deselect All' : 'Select All';
+    }
+  }
+
+  function handleConfirmSamplerAddToBatch() {
+    if (selectedSamplerPintIds.size === 0) {
+      showToast('Please select at least one pint to add to batch prep.');
+      return;
+    }
+
+    if (selectedSamplerPintIds.size === 0) {
+      showToast('Please select at least one pint to add to batch prep.');
+      return;
+    }
+
+    let addedCount = 0;
+    let alreadyInPrepCount = 0;
+
+    activeSamplerPints.forEach(rec => {
+      if (selectedSamplerPintIds.has(rec.id)) {
+        if (!isRecipeInBatchPrep(rec.id)) {
+          batchPrepQueueState.push({
+            recipeId: rec.id,
+            recipeName: rec.name,
+            scale: 1.0
+          });
+          addedCount++;
+        } else {
+          alreadyInPrepCount++;
+        }
+      }
+    });
+
+    saveBatchPrepQueue();
+    closeSamplerPreviewModal();
+    closeRecipePacksModal();
+    openBatchPrepModal();
+
+    if (addedCount > 0) {
+      showToast(`🍱 Added ${addedCount} selected pint${addedCount === 1 ? '' : 's'} to Sunday Batch Prep!`);
+    } else if (alreadyInPrepCount > 0) {
+      showToast(`All selected pints are already in your Sunday Batch Prep queue!`);
+    }
+  }
+
+  // Backwards compatibility for any legacy callers: route through preview modal
+  function batchPrepCreatorPack(packId) {
+    openSamplerPreviewModal(packId);
+  }
+
+  // ==========================================================================
+  // Creator Studio: Curate & Edit Signature 4-Pint Sampler
+  // ==========================================================================
+  function renderStudioSamplerEditor(creatorId, currentSamplerPints = null) {
+    const grid = document.getElementById('studioSamplerSlotsGrid');
+    if (!grid) return;
+
+    const creatorRecipes = allRecipes.filter(r => {
+      const cr = getRecipeCreator(r);
+      return cr && cr.id === creatorId;
+    });
+
+    const pool = (creatorRecipes.length > 0) ? creatorRecipes : allRecipes.filter(r => isRecipeAccessible(r));
+    const sortedPool = [...pool].sort((a, b) => a.name.localeCompare(b.name));
+
+    let selectedIds = [];
+    if (Array.isArray(currentSamplerPints) && currentSamplerPints.length > 0) {
+      selectedIds = currentSamplerPints.slice(0, 4);
+    } else if (currentUser && Array.isArray(currentUser.samplerPints) && currentUser.samplerPints.length > 0) {
+      selectedIds = currentUser.samplerPints.slice(0, 4);
+    } else if (serverCreatorProfiles[creatorId] && Array.isArray(serverCreatorProfiles[creatorId].samplerPints) && serverCreatorProfiles[creatorId].samplerPints.length > 0) {
+      selectedIds = serverCreatorProfiles[creatorId].samplerPints.slice(0, 4);
+    } else {
+      const popular = [...pool].sort((a, b) => {
+        const aMade = (communityStats && communityStats.madeCounts && communityStats.madeCounts[a.id]) || 0;
+        const bMade = (communityStats && communityStats.madeCounts && communityStats.madeCounts[b.id]) || 0;
+        return bMade - aMade;
+      });
+      selectedIds = popular.slice(0, 4).map(r => r.id);
+    }
+
+    grid.innerHTML = [0, 1, 2, 3].map(idx => {
+      const currentId = selectedIds[idx] || '';
+      const rec = allRecipes.find(r => r.id === currentId);
+      const cals = rec?.macros?.calories || 0;
+      const pro = rec?.macros?.protein || 0;
+      const spin = rec?.spinSetting || 'Lite Ice Cream';
+
+      const optionsHtml = sortedPool.map(r => {
+        const isSel = r.id === currentId ? 'selected' : '';
+        return `<option value="${escapeHtml(r.id)}" ${isSel}>${escapeHtml(r.name)} (${r.macros?.calories || 0} kcal, ${r.macros?.protein || 0}g Pro)</option>`;
+      }).join('');
+
+      return `
+        <div class="sampler-slot-card" data-slot="${idx}">
+          <div class="sampler-slot-header">
+            <span class="sampler-slot-badge">🍨 Hero Pint #${idx + 1}</span>
+            <span style="font-size: 0.72rem; color: #94a3b8;">Slot ${idx + 1} of 4</span>
+          </div>
+          <select class="form-input sampler-slot-select" data-slot="${idx}" aria-label="Select hero pint ${idx + 1}">
+            <option value="">-- Choose a Recipe --</option>
+            ${optionsHtml}
+          </select>
+          <div class="sampler-slot-preview" id="samplerSlotPreview_${idx}">
+            <div class="sampler-slot-thumb">
+              ${rec?.imageUrl ? `<img src="${escapeHtml(rec.imageUrl)}" alt="${escapeHtml(rec.name)}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px;">` : '🍨'}
+            </div>
+            <div class="sampler-slot-info">
+              <div class="sampler-slot-name">${escapeHtml(rec ? rec.name : 'No recipe selected')}</div>
+              <div class="sampler-slot-meta">${rec ? `${cals} kcal • ${pro}g P • 🌀 ${escapeHtml(spin)}` : 'Choose a recipe from the dropdown'}</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Bind change listener on all 4 selects to update their preview card
+    grid.querySelectorAll('.sampler-slot-select').forEach(sel => {
+      sel.addEventListener('change', () => {
+        const slotIdx = sel.dataset.slot;
+        const recId = sel.value;
+        const rec = allRecipes.find(r => r.id === recId);
+        const prevEl = document.getElementById(`samplerSlotPreview_${slotIdx}`);
+        if (prevEl) {
+          if (rec) {
+            const cals = rec.macros?.calories || 0;
+            const pro = rec.macros?.protein || 0;
+            const spin = rec.spinSetting || 'Lite Ice Cream';
+            prevEl.innerHTML = `
+              <div class="sampler-slot-thumb">
+                ${rec.imageUrl ? `<img src="${escapeHtml(rec.imageUrl)}" alt="${escapeHtml(rec.name)}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px;">` : '🍨'}
+              </div>
+              <div class="sampler-slot-info">
+                <div class="sampler-slot-name">${escapeHtml(rec.name)}</div>
+                <div class="sampler-slot-meta">${cals} kcal • ${pro}g P • 🌀 ${escapeHtml(spin)}</div>
+              </div>
+            `;
+          } else {
+            prevEl.innerHTML = `
+              <div class="sampler-slot-thumb">🍨</div>
+              <div class="sampler-slot-info">
+                <div class="sampler-slot-name">No recipe selected</div>
+                <div class="sampler-slot-meta">Choose a recipe from the dropdown</div>
+              </div>
+            `;
+          }
+        }
+      });
+    });
+  }
+
+  async function handleSaveStudioSampler(creatorId) {
+    const grid = document.getElementById('studioSamplerSlotsGrid');
+    if (!grid) return;
+
+    const selects = grid.querySelectorAll('.sampler-slot-select');
+    const selectedIds = [];
+    selects.forEach(s => {
+      if (s.value) selectedIds.push(s.value);
+    });
+
+    if (selectedIds.length === 0) {
+      showToast('Please select at least 1 hero pint for your sampler.');
+      return;
+    }
+
+    const saveBtn = document.getElementById('btnStudioSaveSampler');
+    const origHtml = saveBtn ? saveBtn.innerHTML : '';
+    if (saveBtn) {
+      saveBtn.innerHTML = '<span>Saving...</span>';
+      saveBtn.disabled = true;
+    }
+
+    try {
+      const headers = {
+        'Content-Type': 'application/json'
+      };
+      if (currentUser && currentUser.token) headers['Authorization'] = `Bearer ${currentUser.token}`;
+      if (currentUser && currentUser.email) headers['X-User-Email'] = currentUser.email;
+
+      const res = await fetch('/api/creator/profile', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ samplerPints: selectedIds })
+      });
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        if (!currentUser.samplerPints) currentUser.samplerPints = [];
+        currentUser.samplerPints = data.samplerPints || selectedIds;
+        if (!serverCreatorProfiles[creatorId]) serverCreatorProfiles[creatorId] = {};
+        serverCreatorProfiles[creatorId].samplerPints = currentUser.samplerPints;
+        const cr = getCreatorById(creatorId);
+        if (cr) cr.samplerPints = currentUser.samplerPints;
+        saveUserAuth();
+        showToast('🍨 Signature 4-Pint Sampler saved! Followers will see these in your store sampler.');
+      } else {
+        if (!currentUser.samplerPints) currentUser.samplerPints = [];
+        currentUser.samplerPints = selectedIds;
+        if (!serverCreatorProfiles[creatorId]) serverCreatorProfiles[creatorId] = {};
+        serverCreatorProfiles[creatorId].samplerPints = selectedIds;
+        const cr = getCreatorById(creatorId);
+        if (cr) cr.samplerPints = selectedIds;
+        saveUserAuth();
+        showToast('🍨 Signature Sampler saved.');
+      }
+    } catch (err) {
+      console.warn('Error saving sampler pints:', err);
+      if (!currentUser.samplerPints) currentUser.samplerPints = [];
+      currentUser.samplerPints = selectedIds;
+      if (!serverCreatorProfiles[creatorId]) serverCreatorProfiles[creatorId] = {};
+      serverCreatorProfiles[creatorId].samplerPints = selectedIds;
+      const cr = getCreatorById(creatorId);
+      if (cr) cr.samplerPints = selectedIds;
+      saveUserAuth();
+      showToast('🍨 Signature Sampler saved.');
+    } finally {
+      if (saveBtn) {
+        saveBtn.innerHTML = origHtml;
+        saveBtn.disabled = false;
+      }
+    }
+  }
+
+  function handleAutofillStudioSampler(creatorId) {
+    const grid = document.getElementById('studioSamplerSlotsGrid');
+    if (!grid) return;
+
+    const creatorRecipes = allRecipes.filter(r => {
+      const cr = getRecipeCreator(r);
+      return cr && cr.id === creatorId;
+    });
+    const pool = (creatorRecipes.length > 0) ? creatorRecipes : allRecipes.filter(r => isRecipeAccessible(r));
+
+    const popular = [...pool].sort((a, b) => {
       const aMade = (communityStats && communityStats.madeCounts && communityStats.madeCounts[a.id]) || 0;
       const bMade = (communityStats && communityStats.madeCounts && communityStats.madeCounts[b.id]) || 0;
       return bMade - aMade;
     });
 
-    targetRecipes = sorted.slice(0, 4);
-
-    if (targetRecipes.length === 0) {
-      showToast('No recipes found for this collection.');
-      return;
-    }
-
-    let addedCount = 0;
-    targetRecipes.forEach(rec => {
-      if (!isRecipeInBatchPrep(rec.id)) {
-        batchPrepQueueState.push({
-          recipeId: rec.id,
-          recipeName: rec.name,
-          scale: 1.0
-        });
-        addedCount++;
+    const top4 = popular.slice(0, 4);
+    const selects = grid.querySelectorAll('.sampler-slot-select');
+    selects.forEach((sel, idx) => {
+      if (top4[idx]) {
+        sel.value = top4[idx].id;
+        sel.dispatchEvent(new Event('change'));
       }
     });
 
-    saveBatchPrepQueue();
-    closeRecipePacksModal();
-    openBatchPrepModal();
-
-    if (addedCount > 0) {
-      showToast(`🍱 Added ${addedCount} signature pints from "${packId}" to Sunday Batch Prep!`);
-    } else {
-      showToast(`All signature pints from "${packId}" are already in Sunday Batch Prep!`);
-    }
+    showToast('⚡ Autofilled your 4 top-made community favorites! Click "Save Sampler" to publish.');
   }
+
+  // Expose key modal and navigation functions globally
+  window.openSamplerPreviewModal = openSamplerPreviewModal;
+  window.closeSamplerPreviewModal = closeSamplerPreviewModal;
+  window.showCreatorCatalogView = showCreatorCatalogView;
+  window.showCreatorDirectoryView = showCreatorDirectoryView;
 
   // ==========================================================================
   // Creator CMS & Storefront Studio Engine (Path B)
@@ -6290,6 +6755,8 @@
     modal.setAttribute('aria-hidden', 'true');
     unlockBackgroundScroll();
   }
+  window.openCreatorPortalModal = openCreatorPortalModal;
+  window.closeCreatorPortalModal = closeCreatorPortalModal;
 
   function renderCreatorPortalContent() {
     const isMimicCreator = (realAdminUser && currentMimicRole === 'creator');
@@ -6382,6 +6849,9 @@
       });
     }
 
+    // 3a. Curate & Edit Signature 4-Pint Sampler
+    renderStudioSamplerEditor(creatorId);
+
     // 3b. Manage & Edit Recipes in Your Books
     renderStudioRecipesManager(creatorId);
 
@@ -6443,6 +6913,16 @@
       // Render Audience Pantry Demand Radar
       if (Array.isArray(data.pantryDemand)) {
         renderPantryDemandRadar(data.pantryDemand);
+      }
+
+      // Update Sampler Pints if returned by server
+      if (Array.isArray(data.samplerPints) && data.samplerPints.length > 0) {
+        if (!currentUser.samplerPints || currentUser.samplerPints.length === 0) {
+          currentUser.samplerPints = data.samplerPints;
+        }
+        if (!serverCreatorProfiles[creatorId]) serverCreatorProfiles[creatorId] = {};
+        serverCreatorProfiles[creatorId].samplerPints = data.samplerPints;
+        renderStudioSamplerEditor(creatorId, data.samplerPints);
       }
     } catch (e) {
       console.warn('Error fetching creator analytics:', e);
@@ -21600,6 +22080,41 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
       });
     }
 
+    const btnHeaderBrowseCreators = document.getElementById('btnHeaderBrowseCreators');
+    if (btnHeaderBrowseCreators) {
+      btnHeaderBrowseCreators.addEventListener('click', () => openRecipePacksModal(null));
+    }
+
+    const tabBrowseCreators = document.getElementById('tabBrowseCreators');
+    if (tabBrowseCreators) {
+      tabBrowseCreators.addEventListener('click', (e) => {
+        e.preventDefault();
+        openRecipePacksModal(null);
+      });
+    }
+
+    const creatorsSearchInput = document.getElementById('creatorsDirectorySearchInput');
+    if (creatorsSearchInput) {
+      creatorsSearchInput.addEventListener('input', () => {
+        const q = creatorsSearchInput.value.trim().toLowerCase();
+        const dirGrid = document.getElementById('creatorsDirectoryGrid');
+        if (!dirGrid) return;
+        dirGrid.querySelectorAll('.creator-directory-card').forEach(card => {
+          const cId = card.getAttribute('data-creator-id');
+          if (cId && isCreatorDisabled(cId)) {
+            card.style.display = 'none';
+            return;
+          }
+          if (!q) {
+            card.style.display = '';
+          } else {
+            const text = (card.textContent || '').toLowerCase();
+            card.style.display = text.includes(q) ? '' : 'none';
+          }
+        });
+      });
+    }
+
     if (recipePacksModalOverlay) {
       recipePacksModalOverlay.addEventListener('click', (e) => {
         if (e.target === recipePacksModalOverlay) {
@@ -22034,12 +22549,52 @@ Instructions:
     const btnStudioBatchPrepAll = document.getElementById('btnStudioBatchPrepAll');
     if (btnStudioBatchPrepAll) {
       btnStudioBatchPrepAll.addEventListener('click', () => {
-        closeCreatorPortalModal();
         const cId = (currentUser && currentUser.creatorId) ? currentUser.creatorId : 'fitness_product_finder';
-        if (cId === 'test_content') {
-          batchPrepCreatorPack('TestContent Sampler');
+        openSamplerPreviewModal(null, cId);
+      });
+    }
+
+    const btnStudioSaveSampler = document.getElementById('btnStudioSaveSampler');
+    if (btnStudioSaveSampler) {
+      btnStudioSaveSampler.addEventListener('click', () => {
+        const cId = (currentUser && currentUser.creatorId) ? currentUser.creatorId : 'fitness_product_finder';
+        handleSaveStudioSampler(cId);
+      });
+    }
+
+    const btnStudioSamplerAutofill = document.getElementById('btnStudioSamplerAutofill');
+    if (btnStudioSamplerAutofill) {
+      btnStudioSamplerAutofill.addEventListener('click', () => {
+        const cId = (currentUser && currentUser.creatorId) ? currentUser.creatorId : 'fitness_product_finder';
+        handleAutofillStudioSampler(cId);
+      });
+    }
+
+    // Sampler Preview Modal Listeners
+    if (closeSamplerPreviewModalBtn) {
+      closeSamplerPreviewModalBtn.addEventListener('click', closeSamplerPreviewModal);
+    }
+    if (btnSamplerCancel) {
+      btnSamplerCancel.addEventListener('click', closeSamplerPreviewModal);
+    }
+    if (btnSamplerToggleAll) {
+      btnSamplerToggleAll.addEventListener('click', () => {
+        if (selectedSamplerPintIds.size === activeSamplerPints.length) {
+          selectedSamplerPintIds.clear();
         } else {
-          batchPrepCreatorPack('All-Access');
+          selectedSamplerPintIds = new Set(activeSamplerPints.map(p => p.id));
+        }
+        renderSamplerPreviewList();
+        updateSamplerMacroSummary();
+      });
+    }
+    if (btnSamplerPreviewConfirm) {
+      btnSamplerPreviewConfirm.addEventListener('click', handleConfirmSamplerAddToBatch);
+    }
+    if (samplerPreviewModalOverlay) {
+      samplerPreviewModalOverlay.addEventListener('click', (e) => {
+        if (e.target === samplerPreviewModalOverlay) {
+          closeSamplerPreviewModal();
         }
       });
     }

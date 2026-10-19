@@ -1575,6 +1575,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                     break
 
             announcement = target_user.get('storeAnnouncement', '') if target_user else ''
+            sampler_pints = target_user.get('samplerPints', []) if target_user else []
 
             self._send_json({
                 'status': 'ok',
@@ -1585,7 +1586,8 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 'allRecipes': recipe_performance,
                 'pantryDemand': pantry_demand_list,
                 'clicks': creator_clicks,
-                'announcement': announcement
+                'announcement': announcement,
+                'samplerPints': sampler_pints
             })
             return
 
@@ -1620,7 +1622,9 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 'creatorId': target_creator_id,
                 'brandName': target_user.get('brandName', ''),
                 'socialLinks': target_user.get('socialLinks', {}),
-                'perks': target_user.get('perks', [])
+                'perks': target_user.get('perks', []),
+                'storeAnnouncement': target_user.get('storeAnnouncement', ''),
+                'samplerPints': target_user.get('samplerPints', [])
             })
             return
 
@@ -3096,6 +3100,8 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 target_user['brandName'] = str(data['brandName']).strip()
             if 'storeAnnouncement' in data:
                 target_user['storeAnnouncement'] = str(data.get('storeAnnouncement', '')).strip()[:300]
+            if 'samplerPints' in data and isinstance(data['samplerPints'], list):
+                target_user['samplerPints'] = [str(r).strip() for r in data['samplerPints'] if str(r).strip()][:4]
 
             if 'perks' in data and isinstance(data['perks'], list):
                 sanitized_perks = []
@@ -3121,7 +3127,8 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 'brandName': target_user.get('brandName', ''),
                 'storeAnnouncement': target_user.get('storeAnnouncement', ''),
                 'socialLinks': target_user.get('socialLinks', {}),
-                'perks': target_user.get('perks', [])
+                'perks': target_user.get('perks', []),
+                'samplerPints': target_user.get('samplerPints', [])
             })
             return
 

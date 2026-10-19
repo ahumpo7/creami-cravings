@@ -115,7 +115,7 @@
   <link rel="icon" type="image/png" sizes="144x144" href="icon-144.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=v7.6">
+  <link rel="stylesheet" href="styles.css?v=v7.7">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -235,6 +235,13 @@
           <button id="btnInstallPwa" class="btn-install-pwa" title="Install Creami Cravings on this Device">
             <span class="btn-install-text-desktop"><span class="nav-text-full">📲 Install App</span><span class="nav-text-short">📲 Install</span></span>
             <span class="btn-install-text-mobile">📲</span>
+          </button>
+
+          <!-- Public Creators Directory Header Button -->
+          <button id="btnHeaderBrowseCreators" class="btn-secondary-action btn-creators-nav" title="Explore Verified Content Creators & Cookbooks">
+            <span class="creators-nav-icon">🧑‍🍳</span>
+            <span class="creators-text-desktop"><span class="nav-text-full">Creators</span><span class="nav-text-short">Creators</span></span>
+            <span class="creators-text-mobile">Creators</span>
           </button>
 
           <!-- Feedback Button -->
@@ -515,6 +522,10 @@
             <button class="tab-btn" data-category="Custom" id="tabCustomRecipes" style="display: none;">
               <span>🧑‍🍳 My Recipes</span>
               <span class="tab-count" id="countCustom">0</span>
+            </button>
+            <button type="button" class="tab-btn tab-btn-creators-explore" id="tabBrowseCreators" title="Explore Verified Content Creators, Cookbooks & Digital Bundles">
+              <span>🧑‍🍳 Creators</span>
+              <span class="tab-badge-new">Explore</span>
             </button>
           </div>
         </div>
@@ -2186,6 +2197,8 @@
               <p class="modal-subtitle">Handcrafted collections from verified fitness and dessert creators. Choose a creator to browse their official recipe books.</p>
             </div>
           </div>
+        <div class="creators-directory-search-row" style="margin: 14px 0 16px 0;">
+          <input type="text" id="creatorsDirectorySearchInput" placeholder="🔍 Search creators by name, handle, or style (e.g. Eli, Keto, High Protein)..." class="form-input" style="width: 100%; box-sizing: border-box; background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 10px; padding: 10px 14px; color: #fff; font-size: 0.88rem;">
         </div>
 
         <div class="creators-directory-grid" id="creatorsDirectoryGrid">
@@ -2306,9 +2319,12 @@
           <!-- Social Link Pills -->
           <div class="creator-social-pills-row" id="catalogCreatorSocials"></div>
 
-          <!-- Quick Action CTA: Match My Pantry -->
-          <div class="creator-hub-actions-bar">
-            <button type="button" class="btn-primary btn-catalog-match-pantry" id="catalogMatchPantryBtn">
+          <!-- Quick Action CTAs: 4-Pint Sampler & Match My Pantry -->
+          <div class="creator-hub-actions-bar" style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button type="button" class="btn-secondary btn-catalog-sampler" id="catalogSamplerPreviewBtn" style="flex: 1; min-width: 200px;">
+              <span>🍨 4-Pint Sampler Preview &rarr;</span>
+            </button>
+            <button type="button" class="btn-primary btn-catalog-match-pantry" id="catalogMatchPantryBtn" style="flex: 1; min-width: 200px;">
               <span>🥫 What Can I Make? Match My Pantry &rarr;</span>
             </button>
           </div>
@@ -2682,6 +2698,23 @@
           </div>
           <div class="creator-collections-list" id="studioCollectionsList">
             <!-- Dynamically populated in app.js -->
+          </div>
+        </div>
+
+        <!-- Creator Signature 4-Pint Sampler Editor -->
+        <div class="creator-studio-section" id="studioSamplerEditorSection">
+          <div class="creator-studio-section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <div>
+              <h3 class="creator-studio-section-title" style="margin: 0;">🍨 Curate Your Signature 4-Pint Sampler</h3>
+              <p style="font-size: 0.8rem; color: #94a3b8; margin: 3px 0 0 0;">Select the 4 hero pints that represent your cookbook collection. Followers preview these pints with macros before 1-tap adding them to Sunday Batch Prep.</p>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button type="button" class="btn-secondary btn-sm" id="btnStudioSamplerAutofill" title="Auto-select your 4 top-made community favorites">⚡ Autofill Top 4</button>
+              <button type="button" class="btn-primary btn-sm" id="btnStudioSaveSampler" style="font-weight: 700;">💾 Save Sampler</button>
+            </div>
+          </div>
+          <div class="creator-sampler-slots-grid" id="studioSamplerSlotsGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 14px;">
+            <!-- Dynamically rendered in app.js -->
           </div>
         </div>
 
@@ -3769,6 +3802,68 @@
     </div>
   </div>
 
+  <!-- Signature 4-Pint Sampler Preview Modal -->
+  <div class="modal-overlay" id="samplerPreviewModalOverlay" role="dialog" aria-modal="true" aria-hidden="true" style="z-index: 10006;">
+    <div class="modal-content sampler-preview-modal-content">
+      <div class="modal-handle-bar" aria-hidden="true"></div>
+      <button class="modal-close" id="closeSamplerPreviewModalBtn" aria-label="Close sampler preview">&times;</button>
+      
+      <div class="modal-header-compact">
+        <div class="modal-title-row">
+          <span class="modal-title-icon" id="samplerPreviewTitleIcon">🍨</span>
+          <div>
+            <h2 class="modal-title" id="samplerPreviewModalTitle">Signature 4-Pint Sampler Preview</h2>
+            <p class="modal-subtitle" id="samplerPreviewModalSubtitle">Review the handpicked recipes below. Select the pints you want to prep and add them to your freezer queue.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="sampler-preview-body">
+        <!-- Live Batch Macro Summary Bar -->
+        <div class="sampler-macro-summary-bar" id="samplerMacroSummaryBar">
+          <div class="sampler-macro-stat">
+            <span class="sampler-macro-val" id="samplerSummaryPintCount">4 Pints</span>
+            <span class="sampler-macro-lbl">Selected</span>
+          </div>
+          <div class="sampler-macro-divider"></div>
+          <div class="sampler-macro-stat">
+            <span class="sampler-macro-val" id="samplerSummaryCalories">0</span>
+            <span class="sampler-macro-lbl">Total Cals</span>
+          </div>
+          <div class="sampler-macro-stat">
+            <span class="sampler-macro-val" id="samplerSummaryProtein">0g</span>
+            <span class="sampler-macro-lbl">Total Protein</span>
+          </div>
+          <div class="sampler-macro-stat">
+            <span class="sampler-macro-val" id="samplerSummaryCarbs">0g</span>
+            <span class="sampler-macro-lbl">Total Carbs</span>
+          </div>
+          <div class="sampler-macro-stat">
+            <span class="sampler-macro-val" id="samplerSummaryFat">0g</span>
+            <span class="sampler-macro-lbl">Total Fat</span>
+          </div>
+        </div>
+
+        <!-- Pints List Container -->
+        <div class="sampler-pints-list" id="samplerPintsList">
+          <!-- Dynamically populated in app.js -->
+        </div>
+
+        <div class="sampler-preview-actions-bar">
+          <div class="sampler-preview-toggle-group">
+            <button type="button" class="btn-text-action" id="btnSamplerToggleAll">Deselect All</button>
+          </div>
+          <div class="sampler-preview-btn-group">
+            <button type="button" class="btn-secondary" id="btnSamplerCancel">Cancel</button>
+            <button type="button" class="btn-primary" id="btnSamplerPreviewConfirm" style="font-weight: 700;">
+              <span>📥 Add Selected Pints to Batch Prep</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Floating Back to Top Button -->
   <button type="button" class="btn-back-to-top" id="btnBackToTop" aria-label="Scroll back to top" title="Back to top">
     <span class="btt-icon" aria-hidden="true">↑</span>
@@ -3780,6 +3875,6 @@
 
   <!-- Scripts -->
   <script src="recipes-data.js?v=v4.3"></script>
-  <script src="app.js?v=v7.8"></script>
+  <script src="app.js?v=v7.9"></script>
 </body>
 </html>

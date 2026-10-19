@@ -22,7 +22,8 @@
       "Keto",
       "Lactose-Free"
     ],
-    "token": "token_admin_001"
+    "token": "token_admin_001",
+    "freezerCapacity": 12
   },
   "testuser@gmail.com": {
     "id": "user_g_google_1",
@@ -52,7 +53,8 @@
       "Keto",
       "Lactose-Free"
     ],
-    "token": "token_g_282b5ab8-2077-4e4a-93c6-380b30a65d7d"
+    "token": "token_g_282b5ab8-2077-4e4a-93c6-380b30a65d7d",
+    "freezerCapacity": 8
   },
   "ahumpo7@gmail.com": {
     "id": "user_g_564593bf",
@@ -86,7 +88,8 @@
     ],
     "created_at": "2026-10-04T19:09:44.349639",
     "last_active": "2026-10-05T02:08:35.799627",
-    "token": "token_g_c4553eb1-e954-4258-bd86-dbedbb4b7547"
+    "token": "token_g_c4553eb1-e954-4258-bd86-dbedbb4b7547",
+    "freezerCapacity": 12
   },
   "eli@fitnessproductfinder.com": {
     "id": "user_creator_eli",
@@ -121,7 +124,8 @@
     ],
     "created_at": "2026-10-07T17:45:10.671690",
     "last_active": "2026-10-07T17:45:10.671690",
-    "token": "token_creator_eli_001"
+    "token": "token_creator_eli_001",
+    "freezerCapacity": 12
   },
   "testcontent@creamicravings.com": {
     "id": "user_creator_testcontent",
@@ -158,6 +162,7 @@
     ],
     "created_at": "2026-10-12T14:40:00.000000",
     "last_active": "2026-10-12T14:40:00.000000",
-    "token": "token_creator_testcontent_001"
+    "token": "token_creator_testcontent_001",
+    "freezerCapacity": 12
   }
 }
