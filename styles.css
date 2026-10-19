@@ -12230,10 +12230,84 @@ body.modal-open .cookie-consent-banner {
   cursor: pointer;
 }
 
-/* User Feedback Modal */
+/* User Feedback Modal — High Opacity, High Contrast, Solid UI */
+#feedbackModalOverlay {
+  background: rgba(4, 6, 12, 0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.feedback-modal-content,
 .feedback-modal-dialog {
+  background: #131728 !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  border-radius: var(--radius-xl, 16px) !important;
+  box-shadow: 0 25px 65px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.08) !important;
   max-width: 540px;
   width: 92%;
+  padding: 30px 26px;
+  box-sizing: border-box;
+  color: #f8fafc;
+  opacity: 1 !important;
+  transform: translateY(0);
+}
+
+.feedback-modal-content .modal-title {
+  color: #ffffff !important;
+  font-size: 1.25rem !important;
+  font-weight: 800 !important;
+  margin: 0 !important;
+  letter-spacing: -0.01em;
+}
+
+.feedback-modal-content .modal-subtitle {
+  color: #94a3b8 !important;
+  font-size: 0.85rem !important;
+  margin: 6px 0 0 !important;
+  line-height: 1.45 !important;
+}
+
+.feedback-form .admin-form-label {
+  font-size: 0.82rem !important;
+  font-weight: 700 !important;
+  color: #e2e8f0 !important;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.feedback-category-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.feedback-category-pills .btn-time-preset {
+  background: #1e2538 !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: #cbd5e1 !important;
+  font-size: 0.8rem !important;
+  font-weight: 600 !important;
+  padding: 8px 14px !important;
+  border-radius: 8px !important;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  font-family: inherit;
+}
+
+.feedback-category-pills .btn-time-preset:hover {
+  background: #2a344d !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  color: #ffffff !important;
+  transform: translateY(-1px);
+}
+
+.feedback-category-pills .btn-time-preset.active {
+  background: linear-gradient(135deg, #ec4899 0%, #db2777 100%) !important;
+  border-color: transparent !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(236, 72, 153, 0.35) !important;
+  font-weight: 700 !important;
 }
 
 .feedback-stars-row {
@@ -12245,8 +12319,8 @@ body.modal-open .cookie-consent-banner {
 .feedback-star-btn {
   background: none;
   border: none;
-  font-size: 1.8rem;
-  color: #4b5563;
+  font-size: 1.85rem;
+  color: #334155;
   cursor: pointer;
   transition: color 0.15s ease, transform 0.15s ease;
   padding: 2px 4px;
@@ -12254,11 +12328,86 @@ body.modal-open .cookie-consent-banner {
 }
 
 .feedback-star-btn:hover {
-  transform: scale(1.2);
+  transform: scale(1.22);
 }
 
 .feedback-star-btn.active {
   color: #fbbf24;
+  text-shadow: 0 0 12px rgba(251, 191, 36, 0.45);
+}
+
+.feedback-form .admin-form-input {
+  background: #181d30 !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  border-radius: 10px !important;
+  color: #ffffff !important;
+  font-size: 0.9rem !important;
+  padding: 12px 14px !important;
+  box-sizing: border-box;
+  width: 100%;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  font-family: inherit;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.feedback-form .admin-form-input::placeholder {
+  color: #64748b !important;
+  opacity: 1 !important;
+}
+
+.feedback-form .admin-form-input:focus {
+  border-color: #ec4899 !important;
+  background: #1d233a !important;
+  box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.22), inset 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+  outline: none !important;
+}
+
+.feedback-modal-content .modal-close {
+  color: #94a3b8;
+  font-size: 1.7rem;
+  transition: color 0.15s ease, transform 0.15s ease;
+  top: 16px;
+  right: 18px;
+}
+
+.feedback-modal-content .modal-close:hover {
+  color: #ffffff;
+  transform: scale(1.12);
+}
+
+#feedbackModalOverlay .btn-secondary {
+  background: #1e2538;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #cbd5e1;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.88rem;
+  transition: all 0.18s ease;
+}
+
+#feedbackModalOverlay .btn-secondary:hover {
+  background: #2a344d;
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+#feedbackModalOverlay .btn-primary {
+  background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+  color: #ffffff;
+  border: none;
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  box-shadow: 0 4px 14px rgba(236, 72, 153, 0.35);
+  transition: all 0.18s ease;
+}
+
+#feedbackModalOverlay .btn-primary:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 6px 18px rgba(236, 72, 153, 0.45);
+  transform: translateY(-1px);
 }
 
 /* Admin Portal Feedback Cards */

@@ -24186,6 +24186,8 @@ Instructions:
     }
     unlockBackgroundScroll();
   }
+  window.openFeedbackModal = openFeedbackModal;
+  window.closeFeedbackModal = closeFeedbackModal;
 
   function updateFeedbackStarsUI(rating) {
     const starsRow = document.getElementById('feedbackStarsRow');
