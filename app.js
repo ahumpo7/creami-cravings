@@ -7202,6 +7202,7 @@
         method: 'POST',
         headers,
         body: JSON.stringify({
+          creatorId: creatorId,
           samplers: studioSamplersState,
           samplerPints: primaryPints
         })
