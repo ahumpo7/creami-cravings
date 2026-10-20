@@ -459,7 +459,7 @@
     s = s.replace(/\(code[^\)]*\)/gi, '');
     s = s.replace(/\((mix-in|base|topping|optional|garnish|divided)\)/gi, '');
     s = s.replace(/^(optional|mix-in|topping|garnish|base):\s*/gi, '');
-    s = s.replace(/^(\d+[\/\-]\d+|\d+(\.\d+)?|a pinch of|a dash of|a splash of)\s*(cups?|c|tbsp|tsp|tbs|t|scoops?|scoop|grams?|g|oz|ml|fl\s*oz|can|cans|pinch|dash|drop|drops)?\s*(of)?\s*/gi, '');
+    s = s.replace(/^(a pinch of|a dash of|a splash of|(\d+[\/\-]\d+|\d+(\.\d+)?)(?!\s*%)\s*(cups?|c|tbsp|tsp|tbs|t|scoops?|scoop|grams?|g|oz|ml|fl\s*oz|can|cans|pinch|dash|drop|drops)?\s*(of)?\s*)/gi, '');
     s = s.replace(/,\s*(crumbled|melted|chopped|divided|crushed|to taste|for topping|as needed).*$/gi, '');
     s = s.replace(/\s*\((crumbled|melted|chopped|divided|crushed|optional).*?\)/gi, '');
     s = s.trim();
