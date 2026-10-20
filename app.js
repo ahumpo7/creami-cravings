@@ -2880,7 +2880,7 @@
         subscriptions: cId === 'fitness_product_finder'
           ? ['All-Access', 'Base Flavors', 'Community Legends', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free']
           : (cId === 'exercise4cheatmeals'
-              ? ['Community Legends', 'Scoopology', 'Donald All-Access']
+              ? ['Community Legends', 'Scoopology', 'Nick All-Access', 'Donald All-Access']
               : ['Community Legends', 'TestContent Sampler', 'Volume Pints', 'TestContent All-Access'])
       };
     } else if (currentMimicRole === 'vip') {
@@ -3076,10 +3076,10 @@
       { id: 'cardMimicAdmin', role: 'admin', creatorId: null },
       { id: 'cardMimicCreatorEli', role: 'creator', creatorId: 'fitness_product_finder' },
       { id: 'cardMimicCreatorTest', role: 'creator', creatorId: 'test_content' },
-      { id: 'cardMimicCreatorDonald', role: 'creator', creatorId: 'exercise4cheatmeals' },
+      { id: 'cardMimicCreatorNick', role: 'creator', creatorId: 'exercise4cheatmeals' },
       { id: 'cardMimicVipEli', role: 'vip', creatorId: 'fitness_product_finder' },
       { id: 'cardMimicVipTest', role: 'vip', creatorId: 'test_content' },
-      { id: 'cardMimicVipDonald', role: 'vip', creatorId: 'exercise4cheatmeals' },
+      { id: 'cardMimicVipNick', role: 'vip', creatorId: 'exercise4cheatmeals' },
       { id: 'cardMimicMultiSub', role: 'multi_sub', creatorId: null },
       { id: 'cardMimicUser', role: 'user', creatorId: null },
       { id: 'cardMimicGuest', role: 'guest', creatorId: null }
@@ -3156,7 +3156,7 @@
     // Check creator-scoped all-access
     if (creatorId === 'fitness_product_finder' && (subs.includes('All-Access') || subs.includes('Eli All-Access') || subs.includes('fitness_product_finder:all_access'))) return true;
     if (creatorId === 'test_content' && (subs.includes('TestContent All-Access') || subs.includes('test_content:all_access'))) return true;
-    if (creatorId === 'exercise4cheatmeals' && (subs.includes('Scoopology') || subs.includes('Donald All-Access') || subs.includes('exercise4cheatmeals:all_access'))) return true;
+    if (creatorId === 'exercise4cheatmeals' && (subs.includes('Scoopology') || subs.includes('Nick All-Access') || subs.includes('Donald All-Access') || subs.includes('exercise4cheatmeals:all_access'))) return true;
     if (subs.includes(creatorId + ':all_access')) return true;
 
     const norm = normalizeCategoryName(categoryName);
@@ -3263,7 +3263,7 @@
     if (creatorId === 'test_content' && (subs.includes('TestContent All-Access') || subs.includes('test_content:all_access'))) {
       return true;
     }
-    if (creatorId === 'exercise4cheatmeals' && (subs.includes('Scoopology') || subs.includes('Donald All-Access') || subs.includes('exercise4cheatmeals:all_access'))) {
+    if (creatorId === 'exercise4cheatmeals' && (subs.includes('Scoopology') || subs.includes('Nick All-Access') || subs.includes('Donald All-Access') || subs.includes('exercise4cheatmeals:all_access'))) {
       return true;
     }
     if (subs.includes(creatorId + ':all_access')) {
@@ -5446,7 +5446,7 @@
         tagsHtml = accessibleCategories.map(c => `<span class="book-tag ${getCategoryClass(c)}">${c}</span>`).join('');
       }
       if (creator) {
-        tagsHtml += `<span class="creator-badge-tag" title="Recipe by ${creator.name} (${creator.brandName})">📖 ${creator.name} (FPF)</span>`;
+        tagsHtml += `<span class="creator-badge-tag" title="Recipe by ${creator.name} (${creator.brandName})">📖 ${creator.id === 'fitness_product_finder' ? `${creator.name} (FPF)` : creator.name}</span>`;
       }
       if (!isAccessible) {
         if (isClaimPending) {
@@ -5612,7 +5612,7 @@
         <div class="recipe-card-top">
           <div class="card-book-tags">
             ${isPersonal ? `<span class="book-tag custom" title="Personal custom recipe saved to your Google account">🔒 Personal Recipe</span>` : accessibleCategories.map(c => `<span class="book-tag ${getCategoryClass(c)}">${c}</span>`).join('')}
-            ${creator ? `<span class="creator-badge-tag" title="Recipe by ${creator.name} (${creator.brandName})">📖 ${creator.name} (FPF)</span>` : ''}
+            ${creator ? `<span class="creator-badge-tag" title="Recipe by ${creator.name} (${creator.brandName})">📖 ${creator.id === 'fitness_product_finder' ? `${creator.name} (FPF)` : creator.name}</span>` : ''}
             ${!isAccessible ? (
               isClaimPending 
                 ? `<span class="badge-claim-pending" title="Your access request is currently pending verification">⏳ ${requiredTier} Pending</span>`

@@ -47,7 +47,7 @@ CREATOR_SETTINGS_FILE = os.path.join(DIRECTORY, 'db_creators_settings.json')
 
 DEFAULT_STAPLES = []
 
-ALL_SUBSCRIPTIONS = ["All-Access", "Base Flavors", "Community Legends", "Fan Favorites", "No Protein", "Keto", "Lactose Free", "TestContent Sampler", "Volume Pints", "TestContent All-Access", "Scoopology", "Donald All-Access"]
+ALL_SUBSCRIPTIONS = ["All-Access", "Base Flavors", "Community Legends", "Fan Favorites", "No Protein", "Keto", "Lactose Free", "TestContent Sampler", "Volume Pints", "TestContent All-Access", "Scoopology", "Nick All-Access", "Donald All-Access"]
 DEFAULT_SUBSCRIPTIONS = ["Community Legends"]
 
 # Admin accounts designated by verified email
@@ -3129,7 +3129,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 req_creator = 'fitness_product_finder'
             elif req_creator in ['testcontent', 'test_content']:
                 req_creator = 'test_content'
-            elif req_creator in ['donald', 'exercise4cheatmeals']:
+            elif req_creator in ['nick', 'donald', 'exercise4cheatmeals']:
                 req_creator = 'exercise4cheatmeals'
 
             target_creator_id = req_creator or (user.get('creatorId') if user else 'fitness_product_finder') or 'fitness_product_finder'

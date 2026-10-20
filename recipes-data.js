@@ -145,7 +145,7 @@ const CREATORS_MASTER = [
   },
   {
     "id": "exercise4cheatmeals",
-    "name": "Donald",
+    "name": "Nick",
     "brandName": "Exercise4CheatMeals",
     "handle": "@exercise4cheatmeals",
     "url": "https://dietcheatcodes.com?utm_source=creamicravings&utm_medium=referral&ref=creamicravings",
@@ -162,11 +162,11 @@ const CREATORS_MASTER = [
     "perks": [
       {
         "id": "e4cm_amazon",
-        "brand": "Donald's Amazon Storefront",
+        "brand": "Nick's Amazon Storefront",
         "category": "Creami Essentials & Scales",
         "code": null,
         "discount": "Curated Kitchen",
-        "description": "Donald's tested gear: 0.1g digital gram scales, extra Deluxe & standard pints, and immersion blenders.",
+        "description": "Nick's tested gear: 0.1g digital gram scales, extra Deluxe & standard pints, and immersion blenders.",
         "url": "https://dietcheatcodes.com"
       },
       {
@@ -189,7 +189,7 @@ const CREATORS_MASTER = [
       {
         "id": "e4cm_cheatmeal_classics",
         "name": "Cheat Meal Copycats 4-Pint Sampler",
-        "description": "Donald's signature macro copycats: Wendy's Frosty, Reese's PB Cup, Biscoff Swirl, and Strawberry Cheesecake.",
+        "description": "Nick's signature macro copycats: Wendy's Frosty, Reese's PB Cup, Biscoff Swirl, and Strawberry Cheesecake.",
         "pints": [
           "e4cm_wendys_frosty",
           "e4cm_reeses_pb_cup",
@@ -313,7 +313,7 @@ const BOOKS_MASTER = [
     "purchaseUrl": "https://dietcheatcodes.com/b/t6wRq",
     "imageUrl": "https://creamicravings.com/icon-512.png",
     "recipeCount": 75,
-    "description": "Donald's definitive collection of 70+ decadent, high-protein Ninja Creami recipes, mix-in formulas, and spin settings."
+    "description": "Nick's definitive collection of 70+ decadent, high-protein Ninja Creami recipes, mix-in formulas, and spin settings."
   }
 ];
 
