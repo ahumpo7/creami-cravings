@@ -1203,6 +1203,39 @@ else:
     if 'All-Access' not in tc_user.get('subscriptions', []):
         tc_user['subscriptions'] = list(ALL_SUBSCRIPTIONS) + ['TestContent Sampler', 'Volume Pints']
 
+# Ensure official Content Creator account for Nick (Exercise4CheatMeals) exists
+nick_email = 'nick@exercise4cheatmeals.com'
+nick_user = next((u for u in users_db.values() if u.get('email', '').lower() in [nick_email, 'contact@exercise4cheatmeals.com', 'exercise4cheatmeals@creamicravings.com'] or u.get('username', '').lower() in ['nick', 'exercise4cheatmeals']), None)
+if not nick_user:
+    nick_hash = hash_password('creami2026!')
+    users_db[nick_email] = {
+        'id': 'user_creator_nick',
+        'username': 'nick',
+        'name': 'Nick (Exercise4CheatMeals)',
+        'email': nick_email,
+        'password': nick_hash,
+        'role': 'creator',
+        'creatorId': 'exercise4cheatmeals',
+        'pantry': list(DEFAULT_STAPLES),
+        'favorites': [],
+        'madeCounts': {},
+        'ratings': {},
+        'customRecipes': [],
+        'shoppingList': [],
+        'freezerPints': [],
+        'freezerCapacity': 12,
+        'subscriptions': list(ALL_SUBSCRIPTIONS) + ['Scoopology', 'Nick All-Access'],
+        'created_at': datetime.utcnow().isoformat(),
+        'last_active': datetime.utcnow().isoformat(),
+        'token': 'token_creator_nick_001'
+    }
+else:
+    nick_user['role'] = 'creator'
+    nick_user['creatorId'] = 'exercise4cheatmeals'
+    nick_user['freezerCapacity'] = 12
+    if 'Nick All-Access' not in nick_user.get('subscriptions', []):
+        nick_user['subscriptions'] = list(set(nick_user.get('subscriptions', []) + list(ALL_SUBSCRIPTIONS) + ['Scoopology', 'Nick All-Access']))
+
 # Auto-sync freezer shelf capacity for all creators, admins, and all-access holders across users_db
 for u in users_db.values():
     if isinstance(u, dict):
@@ -2753,6 +2786,8 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 if u.get('email', '').lower() == login_id or u.get('username', '').lower() == login_id:
                     target_user = u
                     break
+            if not target_user and login_id in ['contact@exercise4cheatmeals.com', 'exercise4cheatmeals@creamicravings.com', 'exercise4cheatmeals']:
+                target_user = users_db.get('nick@exercise4cheatmeals.com')
 
             if not target_user:
                 self._send_json({'error': 'No account found with this email. Please check your spelling or create an account.'}, 404)
