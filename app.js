@@ -8282,7 +8282,7 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
           </div>
           ${p.description ? `<p style="margin: 2px 0 0 0; font-size: 0.76rem; color: #94a3b8; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">${escapeHtml(p.description)}</p>` : ''}
           <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px; flex-wrap: wrap;">
-            ${p.code ? `<span class="perk-compact-code">CODE: ${escapeHtml(p.code)}</span>` : '<span style="font-size: 0.74rem; color: #94a3b8;">(Direct link deal)</span>'}
+            ${p.code ? `<span class="perk-compact-code">CODE: ${escapeHtml(p.code)}</span>` : ''}
             ${p.url ? `<a href="${escapeHtml(p.url)}" target="_blank" rel="noopener noreferrer" style="font-size: 0.74rem; color: #ec4899; text-decoration: underline;">Test Link ↗</a>` : ''}
           </div>
         </div>
@@ -15803,7 +15803,7 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
             <div class="recipe-creator-perks-callout">
               <span class="perks-callout-icon">🎁</span>
               <div class="perks-callout-body">
-                <strong>${creator.name}'s Ingredient Discounts Available:</strong>
+                <strong>${escapeHtml(creator.name)}'s ${creator.perks.some(p => p && p.code) ? 'Ingredient Discounts' : 'Creator Perks'} Available:</strong>
                 <span>${(() => {
                   const perksWithCodes = creator.perks.filter(p => p && p.code);
                   const perksToShow = perksWithCodes.length > 0 ? perksWithCodes.slice(0, 2) : creator.perks.slice(0, 2);
@@ -15821,7 +15821,7 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
                 })()}</span>
               </div>
               <button type="button" class="btn-view-creator-perks" id="btnModalViewCreatorPerks" data-creator-id="${creator.id}">
-                <span>View All Perks &amp; Codes ↗</span>
+                <span>View All ${creator.perks.some(p => p && p.code) ? 'Perks &amp; Codes' : 'Perks'} ↗</span>
               </button>
             </div>
           `;
