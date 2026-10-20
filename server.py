@@ -1660,11 +1660,11 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
             self._send_json({
                 'status': 'ok',
                 'creatorId': target_creator_id,
-                'brandName': target_user.get('brandName', ''),
-                'socialLinks': target_user.get('socialLinks', {}),
-                'perks': target_user.get('perks', []),
-                'storeAnnouncement': target_user.get('storeAnnouncement', ''),
-                'samplerPints': target_user.get('samplerPints', []),
+                'brandName': target_user.get('brandName', '') if target_user else '',
+                'socialLinks': target_user.get('socialLinks', {}) if target_user else {},
+                'perks': target_user.get('perks', []) if target_user else [],
+                'storeAnnouncement': target_user.get('storeAnnouncement', '') if target_user else '',
+                'samplerPints': target_user.get('samplerPints', []) if target_user else [],
                 'samplers': samplers
             })
             return
@@ -3138,6 +3138,19 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 if u.get('creatorId') == target_creator_id:
                     target_user = u
                     break
+            if not target_user:
+                c_email = f"{target_creator_id}@creamicravings.com"
+                users_db[c_email] = {
+                    'id': f"user_creator_{target_creator_id}",
+                    'username': target_creator_id,
+                    'name': target_creator_id.capitalize(),
+                    'email': c_email,
+                    'role': 'creator',
+                    'creatorId': target_creator_id,
+                    'samplers': [],
+                    'samplerPints': []
+                }
+                target_user = users_db[c_email]
 
             if 'socialLinks' in data and isinstance(data['socialLinks'], dict):
                 target_user['socialLinks'] = {
