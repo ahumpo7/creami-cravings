@@ -20035,8 +20035,10 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
       badge.style.background = 'rgba(239, 68, 68, 0.2)';
       badge.style.color = '#f87171';
     } else {
-      const offCount = (creatorSettings.disabledCreators || []).length;
-      const activeCount = creators.length - offCount;
+      const activeCreators = creators.filter(c => !(creatorSettings.disabledCreators || []).includes(c.id));
+      const offCreators = creators.filter(c => (creatorSettings.disabledCreators || []).includes(c.id));
+      const activeCount = activeCreators.length;
+      const offCount = offCreators.length;
       if (offCount === 0) {
         badge.textContent = `${activeCount} Active`;
         badge.style.background = 'rgba(16, 185, 129, 0.2)';
@@ -20142,7 +20144,7 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
       if (isMasterOff) {
         masterSubtitleEl.innerHTML = `<span style="color: #f87171; font-weight: 600;">🚫 Master Off: All third-party creator content and recipes are disabled platform-wide</span>`;
       } else {
-        const offCount = (creatorSettings.disabledCreators || []).length;
+        const offCount = creators.filter(c => (creatorSettings.disabledCreators || []).includes(c.id)).length;
         if (offCount === 0) {
           masterSubtitleEl.innerHTML = `<span style="color: #34d399; font-weight: 600;">✅ Master On: All creators enabled and active</span>`;
         } else {
