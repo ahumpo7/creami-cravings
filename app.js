@@ -2879,7 +2879,9 @@
         freezerCapacity: 12,
         subscriptions: cId === 'fitness_product_finder'
           ? ['All-Access', 'Base Flavors', 'Community Legends', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free']
-          : ['Community Legends', 'TestContent Sampler', 'Volume Pints', 'TestContent All-Access']
+          : (cId === 'exercise4cheatmeals'
+              ? ['Community Legends', 'Scoopology', 'Donald All-Access']
+              : ['Community Legends', 'TestContent Sampler', 'Volume Pints', 'TestContent All-Access'])
       };
     } else if (currentMimicRole === 'vip') {
       const cId = targetCreatorId || currentMimicCreatorId || 'fitness_product_finder';
@@ -3154,6 +3156,7 @@
     // Check creator-scoped all-access
     if (creatorId === 'fitness_product_finder' && (subs.includes('All-Access') || subs.includes('Eli All-Access') || subs.includes('fitness_product_finder:all_access'))) return true;
     if (creatorId === 'test_content' && (subs.includes('TestContent All-Access') || subs.includes('test_content:all_access'))) return true;
+    if (creatorId === 'exercise4cheatmeals' && (subs.includes('Scoopology') || subs.includes('Donald All-Access') || subs.includes('exercise4cheatmeals:all_access'))) return true;
     if (subs.includes(creatorId + ':all_access')) return true;
 
     const norm = normalizeCategoryName(categoryName);
@@ -3207,6 +3210,7 @@
       if (norm.includes('noprot')) return 'No Protein';
       if (norm.includes('sampler')) return 'TestContent Sampler';
       if (norm.includes('volume')) return 'Volume Pints';
+      if (norm.includes('scoop')) return 'Scoopology';
     }
     if (cats.some(c => normalizeCategoryName(c).includes('base'))) {
       return 'All-Access';
@@ -3257,6 +3261,9 @@
       return true;
     }
     if (creatorId === 'test_content' && (subs.includes('TestContent All-Access') || subs.includes('test_content:all_access'))) {
+      return true;
+    }
+    if (creatorId === 'exercise4cheatmeals' && (subs.includes('Scoopology') || subs.includes('Donald All-Access') || subs.includes('exercise4cheatmeals:all_access'))) {
       return true;
     }
     if (subs.includes(creatorId + ':all_access')) {

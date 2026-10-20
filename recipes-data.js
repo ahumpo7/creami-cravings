@@ -148,6 +148,25 @@ const CREATORS_MASTER = [
         "description": "50/50 Whey & Casein blend formulated to eliminate iciness and deliver soft-serve micro-crystal consistency.",
         "url": "https://exercise4cheatmeals.com"
       }
+    ],
+    "samplerPints": [
+      "e4cm_wendys_frosty",
+      "e4cm_reeses_pb_cup",
+      "e4cm_biscoff_cookie_butter",
+      "e4cm_strawberry_cheesecake"
+    ],
+    "samplers": [
+      {
+        "id": "e4cm_cheatmeal_classics",
+        "name": "Cheat Meal Copycats 4-Pint Sampler",
+        "description": "Donald's signature macro copycats: Wendy's Frosty, Reese's PB Cup, Biscoff Swirl, and Strawberry Cheesecake.",
+        "pints": [
+          "e4cm_wendys_frosty",
+          "e4cm_reeses_pb_cup",
+          "e4cm_biscoff_cookie_butter",
+          "e4cm_strawberry_cheesecake"
+        ]
+      }
     ]
   }
 ];
