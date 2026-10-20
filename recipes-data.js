@@ -148,13 +148,13 @@ const CREATORS_MASTER = [
     "name": "Donald",
     "brandName": "Exercise4CheatMeals",
     "handle": "@exercise4cheatmeals",
-    "url": "https://exercise4cheatmeals.com",
-    "storeUrl": "https://exercise4cheatmeals.com",
+    "url": "https://dietcheatcodes.com",
+    "storeUrl": "https://dietcheatcodes.com",
     "socialLinks": {
       "instagram": "@exercise4cheatmeals",
       "tiktok": "@exercise4cheatmeals",
       "youtube": "@Exercise4CheatMeals",
-      "website": "https://exercise4cheatmeals.com"
+      "website": "https://dietcheatcodes.com"
     },
     "bio": "Author of Scoopology (A Creami Cookbook) and host of YouTube's #1 Ninja Creami channel. Specializing in decadent, macro-friendly copycat pints and ice cream science.",
     "isBeta": true,
@@ -167,7 +167,7 @@ const CREATORS_MASTER = [
         "code": null,
         "discount": "Curated Kitchen",
         "description": "Donald's tested gear: 0.1g digital gram scales, extra Deluxe & standard pints, and immersion blenders.",
-        "url": "https://exercise4cheatmeals.com"
+        "url": "https://dietcheatcodes.com"
       },
       {
         "id": "e4cm_protein",
@@ -176,7 +176,7 @@ const CREATORS_MASTER = [
         "code": "CHEATMEALS",
         "discount": "Special Discount",
         "description": "50/50 Whey & Casein blend formulated to eliminate iciness and deliver soft-serve micro-crystal consistency.",
-        "url": "https://exercise4cheatmeals.com"
+        "url": "https://dietcheatcodes.com"
       }
     ],
     "samplerPints": [
@@ -309,7 +309,8 @@ const BOOKS_MASTER = [
     "categoryKey": "Scoopology",
     "sourceFile": "Scoopology.pdf",
     "price": "$24.99",
-    "url": "https://exercise4cheatmeals.com",
+    "url": "https://dietcheatcodes.com/b/t6wRq",
+    "purchaseUrl": "https://dietcheatcodes.com/b/t6wRq",
     "imageUrl": "https://creamicravings.com/icon-512.png",
     "recipeCount": 75,
     "description": "Donald's definitive collection of 70+ decadent, high-protein Ninja Creami recipes, mix-in formulas, and spin settings."

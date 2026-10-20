@@ -6522,7 +6522,9 @@
 
     // Open the creator's product page in a new window/tab
     window.open(url, '_blank', 'noopener,noreferrer');
-    showToast(`🛒 Opening ${bookTitle} on Fitness Product Finder...`);
+    const creator = book ? getCreatorById(book.creatorId) : null;
+    const storeLabel = creator ? `${creator.name}'s store` : 'official store';
+    showToast(`🛒 Opening ${bookTitle} on ${storeLabel}...`);
 
     const creatorId = book ? book.creatorId : 'fitness_product_finder';
     trackCreatorClick(creatorId, 'storefrontClicks');
