@@ -11533,7 +11533,11 @@ body.modal-open .cookie-consent-banner {
   flex-wrap: wrap;
 }
 
-.btn-preset-all-access {
+.btn-preset-all-access,
+.btn-preset-grant-creator,
+.btn-preset-grant-eli,
+.btn-preset-grant-test,
+.btn-preset-grant-all {
   padding: 4px 10px;
   font-size: 0.74rem;
   font-weight: 700;
