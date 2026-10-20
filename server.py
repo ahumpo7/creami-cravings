@@ -3119,17 +3119,25 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
         # Creator: Update Creator Profile, Social Links & Perks/Sponsors
         elif self.path in ('/api/creator/profile', '/api/creator/perks'):
             user = self._get_user_from_token(data)
-            if not user or user.get('role') != 'creator':
+            is_creator = user and (user.get('role') in ['creator', 'admin'] or user.get('email', '').lower() == 'ahumpo7@gmail.com')
+            if not is_creator:
                 self._send_json({'error': 'Unauthorized: Content creator access required'}, 403)
                 return
 
-            target_creator_id = user.get('creatorId') or 'fitness_product_finder'
+            req_creator = str(data.get('creatorId') or '').strip().lower() if isinstance(data, dict) else ''
+            if req_creator in ['eli', 'fitnessproductfinder', 'fitness_product_finder']:
+                req_creator = 'fitness_product_finder'
+            elif req_creator in ['testcontent', 'test_content']:
+                req_creator = 'test_content'
+            elif req_creator in ['donald', 'exercise4cheatmeals']:
+                req_creator = 'exercise4cheatmeals'
+
+            target_creator_id = req_creator or (user.get('creatorId') if user else 'fitness_product_finder') or 'fitness_product_finder'
             target_user = user
-            if user.get('email', '').lower() == 'ahumpo7@gmail.com':
-                for u in users_db.values():
-                    if u.get('creatorId') == target_creator_id:
-                        target_user = u
-                        break
+            for u in users_db.values():
+                if u.get('creatorId') == target_creator_id:
+                    target_user = u
+                    break
 
             if 'socialLinks' in data and isinstance(data['socialLinks'], dict):
                 target_user['socialLinks'] = {

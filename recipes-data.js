@@ -111,6 +111,36 @@ const CREATORS_MASTER = [
         "description": "Concentrated monk fruit flavoring drops in Cinnamon Roll, Birthday Batter, and Salted Caramel.",
         "url": "https://creamicravings.com/beta/@testcontent"
       }
+    ],
+    "samplerPints": [
+      "tc_salted_caramel_swirl",
+      "tc_strawberry_shortcake_crisp",
+      "tc_cookies_and_cream_blitz",
+      "tc_cinnamon_roll_dough"
+    ],
+    "samplers": [
+      {
+        "id": "sampler_1",
+        "name": "TestContent Studio Hero Sampler",
+        "description": "High-protein dessert copycats: Salted Caramel Pretzel, Strawberry Shortcake, Cookies & Cream, and Cinnamon Roll.",
+        "pints": [
+          "tc_salted_caramel_swirl",
+          "tc_strawberry_shortcake_crisp",
+          "tc_cookies_and_cream_blitz",
+          "tc_cinnamon_roll_dough"
+        ]
+      },
+      {
+        "id": "sampler_2",
+        "name": "Mega-Volume High-Protein 4-Pack",
+        "description": "Massive volume pints formulated for low-calorie satiety: Dark Chocolate Fudge, Blueberry Lemon, Peanut Butter Cup, and Banana Cream Pie.",
+        "pints": [
+          "tc_dark_chocolate_fudge",
+          "tc_blueberry_lemon_bliss",
+          "tc_peanut_butter_power",
+          "tc_banana_cream_dream"
+        ]
+      }
     ]
   },
   {
