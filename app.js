@@ -1157,7 +1157,7 @@
         }, 150);
       }
     } else {
-      const pathMatch = window.location.pathname.match(/^\/recipe\/([a-zA-Z0-9_\-]+)/);
+      const pathMatch = window.location.pathname.match(/(?:\/beta)?\/recipe\/([a-zA-Z0-9_\-]+)/);
       if (pathMatch) {
         initialRecipeId = decodeURIComponent(pathMatch[1]);
       } else if (urlParams.has('recipe')) {
@@ -6439,6 +6439,15 @@
     if (modalContent) modalContent.scrollTop = 0;
     recipePacksModalOverlay.scrollTop = 0;
     lockBackgroundScroll();
+
+    if (viewPerksFirst) {
+      setTimeout(() => {
+        const perksSection = document.getElementById('creatorPerksSection');
+        if (perksSection) {
+          perksSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    }
   }
 
   function closeRecipePacksModal(updateHistory = true) {
@@ -16314,13 +16323,25 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
     }
 
     // View Creator Perks from Recipe Modal
-    const btnModalPerks = recipeModalBody.querySelector('#btnModalViewCreatorPerks');
-    if (btnModalPerks) {
-      btnModalPerks.addEventListener('click', () => {
-        const creatorId = btnModalPerks.dataset.creatorId || 'fitness_product_finder';
-        closeRecipeModal();
-        openRecipePacksModal(creatorId, true);
-      });
+    const perksCallout = recipeModalBody.querySelector('.recipe-creator-perks-callout');
+    if (perksCallout) {
+      perksCallout.style.cursor = 'pointer';
+      const handleOpenPerks = (e) => {
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        const btn = perksCallout.querySelector('#btnModalViewCreatorPerks') || perksCallout;
+        const creatorId = btn.dataset.creatorId || (recipe ? recipe.creatorId : null) || 'fitness_product_finder';
+        closeRecipeModal(false);
+        openRecipePacksModal(creatorId, true, true);
+      };
+
+      perksCallout.addEventListener('click', handleOpenPerks);
+      const btnModalPerks = perksCallout.querySelector('#btnModalViewCreatorPerks');
+      if (btnModalPerks) {
+        btnModalPerks.addEventListener('click', handleOpenPerks);
+      }
     }
 
     // Step Item Cross Off
