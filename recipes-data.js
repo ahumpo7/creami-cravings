@@ -21,13 +21,13 @@ const CREATORS_MASTER = [
     "name": "Eli",
     "brandName": "Fitness Product Finder",
     "handle": "@fitnessproductfinder",
-    "url": "https://fitnessproductfinder.com",
-    "storeUrl": "https://fitnessproductfinder.com/collections/creami-cravings-recipe-books",
+    "url": "https://fitnessproductfinder.com?utm_source=creamicravings&utm_medium=referral&ref=creamicravings",
+    "storeUrl": "https://fitnessproductfinder.com/collections/creami-cravings-recipe-books?utm_source=creamicravings&utm_medium=referral&ref=creamicravings",
     "socialLinks": {
       "instagram": "@fitnessproductfinder",
       "tiktok": "@fitnessproductfinder",
       "youtube": "@fitnessproductfinder",
-      "website": "https://fitnessproductfinder.com"
+      "website": "https://fitnessproductfinder.com?utm_source=creamicravings&utm_medium=referral&ref=creamicravings"
     },
     "bio": "Creator of the original best-selling Creami Cravings high-protein and low-calorie recipe books.",
     "perks": [
@@ -89,7 +89,7 @@ const CREATORS_MASTER = [
       "instagram": "@testcontent",
       "tiktok": "@testcontent",
       "youtube": "@testcontent",
-      "website": "https://testcontent.com"
+      "website": "https://testcontent.com?utm_source=creamicravings&utm_medium=referral&ref=creamicravings"
     },
     "bio": "Official test creator profile for multi-creator storefronts, batch prep packs, and audience analytics.",
     "perks": [
@@ -148,13 +148,13 @@ const CREATORS_MASTER = [
     "name": "Donald",
     "brandName": "Exercise4CheatMeals",
     "handle": "@exercise4cheatmeals",
-    "url": "https://dietcheatcodes.com",
-    "storeUrl": "https://dietcheatcodes.com",
+    "url": "https://dietcheatcodes.com?utm_source=creamicravings&utm_medium=referral&ref=creamicravings",
+    "storeUrl": "https://dietcheatcodes.com?utm_source=creamicravings&utm_medium=referral&ref=creamicravings",
     "socialLinks": {
       "instagram": "@exercise4cheatmeals",
       "tiktok": "@exercise4cheatmeals",
       "youtube": "@Exercise4CheatMeals",
-      "website": "https://dietcheatcodes.com"
+      "website": "https://dietcheatcodes.com?utm_source=creamicravings&utm_medium=referral&ref=creamicravings"
     },
     "bio": "Author of Scoopology (A Creami Cookbook) and host of YouTube's #1 Ninja Creami channel. Specializing in decadent, macro-friendly copycat pints and ice cream science.",
     "isBeta": true,

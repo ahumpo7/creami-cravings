@@ -6036,6 +6036,29 @@
     }).join('');
   }
 
+  // Append Creami Cravings referral tracking to creator homepages/storefronts
+  function appendCreatorTracking(url) {
+    if (!url || typeof url !== 'string') return url;
+    const trimmed = url.trim();
+    if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) return trimmed;
+    try {
+      const u = new URL(trimmed);
+      if (!u.searchParams.has('utm_source')) {
+        u.searchParams.set('utm_source', 'creamicravings');
+      }
+      if (!u.searchParams.has('utm_medium')) {
+        u.searchParams.set('utm_medium', 'referral');
+      }
+      if (!u.searchParams.has('ref')) {
+        u.searchParams.set('ref', 'creamicravings');
+      }
+      return u.toString();
+    } catch (e) {
+      const sep = trimmed.includes('?') ? '&' : '?';
+      return `${trimmed}${sep}utm_source=creamicravings&utm_medium=referral&ref=creamicravings`;
+    }
+  }
+
   // Creator Affiliate & Storefront Click Tracking
   async function trackCreatorClick(creatorId, eventType) {
     if (!creatorId) return;
@@ -6147,7 +6170,7 @@
       if (nameEl) nameEl.textContent = `${creator.name}'s Recipe Books`;
       if (subEl) subEl.textContent = `${creator.brandName} • Official e-books & bundles`;
       if (storeBtn) {
-        storeBtn.href = creator.storeUrl || creator.url;
+        storeBtn.href = appendCreatorTracking(creator.storeUrl || creator.url);
         storeBtn.innerHTML = `<span>Visit ${creator.name}'s Storefront ↗</span>`;
         if (!storeBtn._clickTracked) {
           storeBtn._clickTracked = true;
@@ -6190,7 +6213,7 @@
           pillsHtml += `<a href="${escapeHtml(ytUrl)}" target="_blank" rel="noopener noreferrer" class="creator-social-pill yt">▶️ YouTube</a>`;
         }
         if (sl.website || creator.storeUrl) {
-          const webUrl = sl.website || creator.storeUrl;
+          const webUrl = appendCreatorTracking(sl.website || creator.storeUrl);
           pillsHtml += `<a href="${escapeHtml(webUrl)}" target="_blank" rel="noopener noreferrer" class="creator-social-pill web">🌐 Official Store</a>`;
         }
         socialsRow.innerHTML = pillsHtml;
@@ -22955,7 +22978,7 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
           const creator = activeStoreCreatorId ? getCreatorById(activeStoreCreatorId) : getCreatorById('fitness_product_finder');
           const targetUrl = storeVisitBtn.getAttribute('href') || (creator ? (creator.storeUrl || creator.url) : 'https://fitnessproductfinder.com/collections/creami-cravings-recipe-books');
           if (targetUrl && targetUrl !== '#' && !targetUrl.startsWith('javascript:')) {
-            window.open(targetUrl, '_blank', 'noopener,noreferrer');
+            window.open(appendCreatorTracking(targetUrl), '_blank', 'noopener,noreferrer');
           }
           return;
         }
@@ -22972,7 +22995,7 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
               const creator = activeStoreCreatorId ? getCreatorById(activeStoreCreatorId) : getCreatorById('fitness_product_finder');
               const targetUrl = bannerStoreBtn.getAttribute('href') || (creator ? (creator.storeUrl || creator.url) : 'https://fitnessproductfinder.com/collections/creami-cravings-recipe-books');
               if (targetUrl && targetUrl !== '#' && !targetUrl.startsWith('javascript:')) {
-                window.open(targetUrl, '_blank', 'noopener,noreferrer');
+                window.open(appendCreatorTracking(targetUrl), '_blank', 'noopener,noreferrer');
               }
               return;
             }
@@ -22987,7 +23010,7 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
           const targetUrl = websiteLink.getAttribute('href');
           if (targetUrl && targetUrl !== '#' && !targetUrl.startsWith('javascript:')) {
             if (targetUrl.startsWith('http://') || targetUrl.startsWith('https://')) {
-              window.open(targetUrl, '_blank', 'noopener,noreferrer');
+              window.open(appendCreatorTracking(targetUrl), '_blank', 'noopener,noreferrer');
             } else {
               window.location.href = targetUrl;
             }
@@ -23016,7 +23039,7 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
               const targetUrl = storefrontBtn.getAttribute('href');
               if (targetUrl && targetUrl !== '#' && !targetUrl.startsWith('javascript:')) {
                 if (targetUrl.startsWith('http://') || targetUrl.startsWith('https://')) {
-                  window.open(targetUrl, '_blank', 'noopener,noreferrer');
+                  window.open(appendCreatorTracking(targetUrl), '_blank', 'noopener,noreferrer');
                 } else {
                   window.location.href = targetUrl;
                 }
@@ -23043,7 +23066,7 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
               const targetUrl = storefrontBtn.getAttribute('href');
               if (targetUrl && targetUrl !== '#' && !targetUrl.startsWith('javascript:')) {
                 if (targetUrl.startsWith('http://') || targetUrl.startsWith('https://')) {
-                  window.open(targetUrl, '_blank', 'noopener,noreferrer');
+                  window.open(appendCreatorTracking(targetUrl), '_blank', 'noopener,noreferrer');
                 } else {
                   window.location.href = targetUrl;
                 }
