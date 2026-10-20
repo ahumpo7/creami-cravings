@@ -15814,7 +15814,21 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
               <span class="perks-callout-icon">🎁</span>
               <div class="perks-callout-body">
                 <strong>${creator.name}'s Ingredient Discounts Available:</strong>
-                <span>Get 15% off Lakanto Monk Fruit Sweetener (code <code>ELI15</code>) and 15% off Prime Bites &amp; FUUL (code <code>FPF</code>).</span>
+                <span>${(() => {
+                  const perksWithCodes = creator.perks.filter(p => p && p.code);
+                  const perksToShow = perksWithCodes.length > 0 ? perksWithCodes.slice(0, 2) : creator.perks.slice(0, 2);
+                  const perkParts = perksToShow.map(p => {
+                    const brand = escapeHtml(p.brand || 'Partner');
+                    const codePart = p.code ? ` (code <code>${escapeHtml(p.code)}</code>)` : '';
+                    if (p.discount) {
+                      const d = escapeHtml(p.discount);
+                      const joinWord = d.toLowerCase().includes('off') ? ' ' : ' on ';
+                      return `${d}${joinWord}${brand}${codePart}`;
+                    }
+                    return `${brand}${codePart}`;
+                  });
+                  return perkParts.length > 0 ? perkParts.join(' and ') : `Exclusive creator discounts and perks from ${escapeHtml(creator.name)}.`;
+                })()}</span>
               </div>
               <button type="button" class="btn-view-creator-perks" id="btnModalViewCreatorPerks" data-creator-id="${creator.id}">
                 <span>View All Perks &amp; Codes ↗</span>
