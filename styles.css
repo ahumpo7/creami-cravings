@@ -180,16 +180,17 @@ body::before {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 22px;
-  gap: 12px;
+  gap: 12px 16px;
   width: 100%;
-  flex-wrap: nowrap !important;
+  flex-wrap: wrap;
 }
 
 .header-top-row {
   display: flex;
   align-items: center;
   gap: 12px;
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: min-content;
 }
 
 .header-desktop-actions {
@@ -197,18 +198,22 @@ body::before {
   align-items: center;
   gap: 8px;
   margin-left: auto;
+  flex-wrap: wrap;
 }
 
 .header-utility-controls {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 .header-nav-cluster {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
+  margin-left: auto;
 }
 
 .header-badge {
@@ -561,12 +566,16 @@ body::before {
 
 @media (max-width: 1140px) and (min-width: 769px) {
   .header-top-bar {
-    gap: 8px !important;
-    flex-wrap: nowrap !important;
+    gap: 10px 12px !important;
+    flex-wrap: wrap !important;
   }
   .header-actions {
-    gap: 4px !important;
-    flex-wrap: nowrap !important;
+    gap: 6px !important;
+    flex-wrap: wrap !important;
+  }
+  .header-nav-cluster {
+    width: 100% !important;
+    justify-content: flex-end !important;
   }
   .btn-secondary-action,
   .btn-install-pwa {
@@ -5274,17 +5283,16 @@ body.modal-open .cookie-consent-banner {
   /* Row 2: Quick Feature Navigation Pills */
   .header-nav-cluster {
     display: flex !important;
-    flex-wrap: nowrap !important;
+    flex-wrap: wrap !important;
     align-items: center !important;
-    justify-content: flex-start !important;
-    justify-content: safe center !important;
-    gap: 4px !important;
+    justify-content: center !important;
+    gap: 6px 4px !important;
     width: 100% !important;
-    margin: 0 !important;
-    padding: 2px 2px 4px 2px !important;
-    overflow-x: auto !important;
-    scrollbar-width: none !important;
-    -webkit-overflow-scrolling: touch !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    padding: 2px 0 4px 0 !important;
+    overflow-x: visible !important;
+    overflow-y: visible !important;
   }
 
   .header-nav-cluster::-webkit-scrollbar {
@@ -5330,13 +5338,13 @@ body.modal-open .cookie-consent-banner {
 
   @media (max-width: 390px) {
     .header-nav-cluster {
-      gap: 3px !important;
+      gap: 5px 3px !important;
     }
     .header-nav-cluster .btn-secondary-action,
     .header-nav-cluster .btn-install-pwa {
-      padding: 0 4.5px !important;
-      font-size: 0.65rem !important;
-      gap: 2px !important;
+      padding: 0 5px !important;
+      font-size: 0.68rem !important;
+      gap: 3px !important;
     }
   }
 
