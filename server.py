@@ -47,7 +47,7 @@ CREATOR_SETTINGS_FILE = os.path.join(DIRECTORY, 'db_creators_settings.json')
 
 DEFAULT_STAPLES = []
 
-ALL_SUBSCRIPTIONS = ["All-Access", "Base Flavors", "Community Legends", "Fan Favorites", "No Protein", "Keto", "Lactose Free"]
+ALL_SUBSCRIPTIONS = ["All-Access", "Base Flavors", "Community Legends", "Fan Favorites", "No Protein", "Keto", "Lactose Free", "TestContent Sampler", "Volume Pints", "TestContent All-Access", "Scoopology", "Donald All-Access"]
 DEFAULT_SUBSCRIPTIONS = ["Community Legends"]
 
 # Admin accounts designated by verified email

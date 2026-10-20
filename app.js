@@ -19977,6 +19977,26 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
   }
 
   // --- Admin Portal & User Management (Roadmap Item 15) ---
+  function getCreatorSubscriptionPacks(creatorId) {
+    if (creatorId === 'fitness_product_finder') {
+      return ['All-Access', 'Base Flavors', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free'];
+    }
+    const cr = (typeof CREATORS_MASTER !== 'undefined') ? CREATORS_MASTER.find(c => c.id === creatorId) : null;
+    const allAccess = cr ? `${cr.name} All-Access` : `${creatorId} All-Access`;
+    const books = (typeof BOOKS_MASTER !== 'undefined') ? BOOKS_MASTER.filter(b => b.creatorId === creatorId) : [];
+    const bookKeys = books.map(b => b.bookKey || b.categoryKey || b.shortTitle || b.title).filter(Boolean);
+    return Array.from(new Set([allAccess, ...bookKeys]));
+  }
+
+  function getAllPlatformSubscriptions() {
+    const creators = (typeof CREATORS_MASTER !== 'undefined') ? CREATORS_MASTER : [];
+    const all = ['Community Legends'];
+    creators.forEach(c => {
+      all.push(...getCreatorSubscriptionPacks(c.id));
+    });
+    return Array.from(new Set(all));
+  }
+
   const ELI_SUBSCRIPTIONS = ['All-Access', 'Base Flavors', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free'];
   const TEST_CONTENT_SUBSCRIPTIONS = ['TestContent All-Access', 'TestContent Sampler', 'Volume Pints'];
   const UNIVERSAL_SUBSCRIPTIONS = ['Community Legends'];
@@ -20678,8 +20698,10 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
                 </select>
                 ${u.role === 'creator' ? `
                   <select class="admin-creator-select" data-user-id="${u.id}" title="Assign Creator Storefront Profile" style="font-size: 0.78rem; background: rgba(15, 23, 42, 0.85); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 6px; padding: 6px 8px; font-weight: 600;">
-                    <option value="fitness_product_finder" ${(u.creatorId === 'fitness_product_finder' || !u.creatorId) ? 'selected' : ''}>🧑‍🍳 Eli (FPF)</option>
-                    <option value="test_content" ${u.creatorId === 'test_content' ? 'selected' : ''}>🧪 TestContent</option>
+                    ${((typeof CREATORS_MASTER !== 'undefined') ? CREATORS_MASTER : []).map(c => {
+                      const icon = c.id === 'fitness_product_finder' ? '🧑‍🍳' : (c.id === 'test_content' ? '🧪' : '🍨');
+                      return `<option value="${c.id}" ${(u.creatorId === c.id || (!u.creatorId && c.id === 'fitness_product_finder')) ? 'selected' : ''}>${icon} ${escapeHtml(c.name)} (${escapeHtml(c.brandName || c.handle)})</option>`;
+                    }).join('')}
                   </select>
                 ` : ''}
                 <select class="admin-freezer-select" data-user-id="${u.id}" title="Grant or change freezer shelf container capacity" style="font-size: 0.78rem; background: rgba(15, 23, 42, 0.85); color: ${(effectiveCap >= 12 ? '#fbbf24' : (effectiveCap >= 8 ? '#38bdf8' : '#cbd5e1'))}; border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 6px; padding: 6px 8px; font-weight: 600;">
@@ -20725,12 +20747,14 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;">
               <div class="admin-subs-title">📦 Recipe Pack Permissions:</div>
               <div class="admin-presets-row" style="display: flex; gap: 6px; flex-wrap: wrap;">
-                <button type="button" class="btn-preset-grant-eli" data-user-id="${u.id}" title="Grant Eli All-Access Bundle">
-                  👑 Eli All-Access
-                </button>
-                <button type="button" class="btn-preset-grant-test" data-user-id="${u.id}" title="Grant TestContent All-Access">
-                  🧪 TestContent All-Access
-                </button>
+                ${((typeof CREATORS_MASTER !== 'undefined') ? CREATORS_MASTER : []).map(c => {
+                  const icon = c.id === 'fitness_product_finder' ? '👑' : (c.id === 'test_content' ? '🧪' : '🍨');
+                  return `
+                    <button type="button" class="btn-preset-grant-creator" data-user-id="${u.id}" data-creator-id="${c.id}" title="Grant ${escapeHtml(c.name)} All-Access">
+                      ${icon} ${escapeHtml(c.name)} All-Access
+                    </button>
+                  `;
+                }).join('')}
                 <button type="button" class="btn-preset-grant-all" data-user-id="${u.id}" title="Grant Everything Across All Creators">
                   ✨ All Creators
                 </button>
@@ -20759,47 +20783,35 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
               </div>
             </div>
 
-            <!-- Eli (FPF) Packs -->
-            <div style="margin-bottom: 8px;">
-              <div style="font-size: 0.72rem; color: #f59e0b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">🧑‍🍳 Eli (Fitness Product Finder):</div>
-              <div class="admin-subs-chips-wrap">
-                ${ELI_SUBSCRIPTIONS.map(subName => {
-                  const hasEliAll = subs.includes('All-Access') || subs.includes('Eli All-Access');
-                  const isActive = hasEliAll || subs.includes(subName);
-                  const isAllAccessChip = (subName === 'All-Access');
-                  return `
-                    <button type="button" 
-                      class="btn-sub-chip ${isActive ? 'active' : ''} ${isAllAccessChip ? 'all-access' : ''}" 
-                      data-user-id="${u.id}" 
-                      data-sub="${subName}"
-                      title="${isActive ? 'Click to revoke ' + subName : 'Click to grant ' + subName}">
-                      ${isAllAccessChip ? '👑 ' : ''}${subName} ${isActive ? '✓' : '+'}
-                    </button>
-                  `;
-                }).join('')}
-              </div>
-            </div>
-
-            <!-- TestContent Studio Packs -->
-            <div>
-              <div style="font-size: 0.72rem; color: #38bdf8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">🧪 TestContent Studio:</div>
-              <div class="admin-subs-chips-wrap">
-                ${TEST_CONTENT_SUBSCRIPTIONS.map(subName => {
-                  const hasTestAll = subs.includes('TestContent All-Access');
-                  const isActive = hasTestAll || subs.includes(subName);
-                  const isAllAccessChip = (subName === 'TestContent All-Access');
-                  return `
-                    <button type="button" 
-                      class="btn-sub-chip ${isActive ? 'active' : ''} ${isAllAccessChip ? 'all-access' : ''}" 
-                      data-user-id="${u.id}" 
-                      data-sub="${subName}"
-                      title="${isActive ? 'Click to revoke ' + subName : 'Click to grant ' + subName}">
-                      ${isAllAccessChip ? '🧪 ' : ''}${subName} ${isActive ? '✓' : '+'}
-                    </button>
-                  `;
-                }).join('')}
-              </div>
-            </div>
+            <!-- Dynamic Creator Packs for Every Creator in CREATORS_MASTER -->
+            ${((typeof CREATORS_MASTER !== 'undefined') ? CREATORS_MASTER : []).map(c => {
+              const creatorPacks = getCreatorSubscriptionPacks(c.id);
+              const allAccessKey = (c.id === 'fitness_product_finder') ? 'All-Access' : `${c.name} All-Access`;
+              const hasAll = subs.includes(allAccessKey) || (c.id === 'fitness_product_finder' && subs.includes('Eli All-Access'));
+              const colorHex = (c.id === 'fitness_product_finder') ? '#f59e0b' : (c.id === 'test_content' ? '#38bdf8' : '#ec4899');
+              const icon = (c.id === 'fitness_product_finder') ? '🧑‍🍳' : (c.id === 'test_content' ? '🧪' : '🍨');
+              return `
+                <div style="margin-bottom: 8px;">
+                  <div style="font-size: 0.72rem; color: ${colorHex}; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">${icon} ${escapeHtml(c.name)} (${escapeHtml(c.brandName || c.handle)}):</div>
+                  <div class="admin-subs-chips-wrap">
+                    ${creatorPacks.map(subName => {
+                      const isAllAccessChip = (subName === allAccessKey || subName === 'All-Access');
+                      const isActive = hasAll || subs.includes(subName);
+                      return `
+                        <button type="button" 
+                          class="btn-sub-chip ${isActive ? 'active' : ''} ${isAllAccessChip ? 'all-access' : ''}" 
+                          data-user-id="${u.id}" 
+                          data-sub="${subName}"
+                          data-creator-id="${c.id}"
+                          title="${isActive ? 'Click to revoke ' + subName : 'Click to grant ' + subName}">
+                          ${isAllAccessChip ? `${icon} ` : ''}${subName} ${isActive ? '✓' : '+'}
+                        </button>
+                      `;
+                    }).join('')}
+                  </div>
+                </div>
+              `;
+            }).join('')}
           </div>
         </div>
       </div>
@@ -20913,26 +20925,16 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
       });
     });
 
-    // Preset: Grant Eli All-Access
-    adminUsersList.querySelectorAll('.btn-preset-grant-eli').forEach(btn => {
+    // Preset: Grant Specific Creator All-Access
+    adminUsersList.querySelectorAll('.btn-preset-grant-creator, .btn-preset-grant-eli, .btn-preset-grant-test').forEach(btn => {
       btn.addEventListener('click', async () => {
         const userId = btn.dataset.userId;
+        const cId = btn.dataset.creatorId || (btn.classList.contains('btn-preset-grant-eli') ? 'fitness_product_finder' : 'test_content');
         const user = adminUsersState.find(u => u.id === userId);
         if (!user) return;
-        const existingOther = (user.subscriptions || []).filter(s => !ELI_SUBSCRIPTIONS.includes(s));
-        const newSubs = Array.from(new Set([...existingOther, ...ELI_SUBSCRIPTIONS, 'Community Legends']));
-        await updateUserPermissions(user.id, user.email, newSubs, user.role || 'user', user.creatorId);
-      });
-    });
-
-    // Preset: Grant TestContent All-Access
-    adminUsersList.querySelectorAll('.btn-preset-grant-test').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const userId = btn.dataset.userId;
-        const user = adminUsersState.find(u => u.id === userId);
-        if (!user) return;
-        const existingOther = (user.subscriptions || []).filter(s => !TEST_CONTENT_SUBSCRIPTIONS.includes(s));
-        const newSubs = Array.from(new Set([...existingOther, ...TEST_CONTENT_SUBSCRIPTIONS, 'Community Legends']));
+        const creatorPacks = getCreatorSubscriptionPacks(cId);
+        const existingOther = (user.subscriptions || []).filter(s => !creatorPacks.includes(s));
+        const newSubs = Array.from(new Set([...existingOther, ...creatorPacks, 'Community Legends']));
         await updateUserPermissions(user.id, user.email, newSubs, user.role || 'user', user.creatorId);
       });
     });
@@ -20943,7 +20945,7 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
         const userId = btn.dataset.userId;
         const user = adminUsersState.find(u => u.id === userId);
         if (!user) return;
-        const newSubs = [...ALL_CATEGORY_SUBSCRIPTIONS];
+        const newSubs = getAllPlatformSubscriptions();
         await updateUserPermissions(user.id, user.email, newSubs, user.role || 'user', user.creatorId);
       });
     });
@@ -20994,19 +20996,16 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
 
         let curSubs = Array.isArray(user.subscriptions) ? [...user.subscriptions] : ['Community Legends'];
 
-        if (subName === 'All-Access') {
-          if (curSubs.includes('All-Access')) {
-            curSubs = curSubs.filter(s => !ELI_SUBSCRIPTIONS.includes(s));
+        const cId = chip.dataset.creatorId;
+        const isAllAccess = (subName === 'All-Access' || subName.endsWith('All-Access'));
+
+        if (isAllAccess) {
+          const creatorPacks = cId ? getCreatorSubscriptionPacks(cId) : getCreatorSubscriptionPacks('fitness_product_finder');
+          if (curSubs.includes(subName)) {
+            curSubs = curSubs.filter(s => !creatorPacks.includes(s));
             if (!curSubs.includes('Community Legends')) curSubs.push('Community Legends');
           } else {
-            curSubs = Array.from(new Set([...curSubs, ...ELI_SUBSCRIPTIONS]));
-          }
-        } else if (subName === 'TestContent All-Access') {
-          if (curSubs.includes('TestContent All-Access')) {
-            curSubs = curSubs.filter(s => !TEST_CONTENT_SUBSCRIPTIONS.includes(s));
-            if (!curSubs.includes('Community Legends')) curSubs.push('Community Legends');
-          } else {
-            curSubs = Array.from(new Set([...curSubs, ...TEST_CONTENT_SUBSCRIPTIONS]));
+            curSubs = Array.from(new Set([...curSubs, ...creatorPacks]));
           }
         } else {
           if (curSubs.includes(subName)) {
@@ -21015,21 +21014,20 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
               return;
             }
             curSubs = curSubs.filter(s => s !== subName);
-            if (ELI_SUBSCRIPTIONS.includes(subName)) {
-              curSubs = curSubs.filter(s => s !== 'All-Access');
-            }
-            if (TEST_CONTENT_SUBSCRIPTIONS.includes(subName)) {
-              curSubs = curSubs.filter(s => s !== 'TestContent All-Access');
+            if (cId) {
+              const creatorPacks = getCreatorSubscriptionPacks(cId);
+              const allAccessKey = creatorPacks[0];
+              curSubs = curSubs.filter(s => s !== allAccessKey);
             }
           } else {
             curSubs.push(subName);
-            const nonAllEli = ELI_SUBSCRIPTIONS.filter(s => s !== 'All-Access');
-            if (nonAllEli.every(s => curSubs.includes(s))) {
-              if (!curSubs.includes('All-Access')) curSubs.push('All-Access');
-            }
-            const nonAllTest = TEST_CONTENT_SUBSCRIPTIONS.filter(s => s !== 'TestContent All-Access');
-            if (nonAllTest.every(s => curSubs.includes(s))) {
-              if (!curSubs.includes('TestContent All-Access')) curSubs.push('TestContent All-Access');
+            if (cId) {
+              const creatorPacks = getCreatorSubscriptionPacks(cId);
+              const allAccessKey = creatorPacks[0];
+              const nonAll = creatorPacks.filter(s => s !== allAccessKey);
+              if (nonAll.length > 0 && nonAll.every(s => curSubs.includes(s))) {
+                if (!curSubs.includes(allAccessKey)) curSubs.push(allAccessKey);
+              }
             }
           }
         }
