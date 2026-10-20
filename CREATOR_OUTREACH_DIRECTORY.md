@@ -13,7 +13,7 @@ Not all influencers are equal. Below is the ranked order of creators based on **
 
 ---
 
-### 🥇 Rank 1: Donald — *Exercise4CheatMeals*
+### 🥇 Rank 1: Nick — *Exercise4CheatMeals*
 * **Why #1 Best Fit:** He is the undisputed king of dedicated Ninja Creami YouTube tutorials and author of *Scoopology*. Virtually 100% of his viewers own or want a Creami.
 * **The Strategic Hook:** Pitch him on claiming his official creator badge in **Creami Cravings Creator Studio** and featuring a few of his cookbook teasers with a direct link to purchase his full e-book.
 * **Contact:** `contact@exercise4cheatmeals.com`
@@ -63,7 +63,7 @@ Not all influencers are equal. Below is the ranked order of creators based on **
 
 | Creator / Brand | Platforms & Handles | Niche & Focus | Best Contact / Business Email |
 | :--- | :--- | :--- | :--- |
-| **Donald (Exercise4CheatMeals)** | • **IG:** `@exercise4cheatmeals`<br>• **YT:** `@Exercise4CheatMeals`<br>• **TikTok:** `@exercise4cheatmeals` | Author of *Scoopology (A Creami Cookbook)*. The largest dedicated Creami recipe channel on YouTube. | `contact@exercise4cheatmeals.com` |
+| **Nick (Exercise4CheatMeals)** | • **IG:** `@exercise4cheatmeals`<br>• **YT:** `@Exercise4CheatMeals`<br>• **TikTok:** `@exercise4cheatmeals` | Author of *Scoopology (A Creami Cookbook)*. The largest dedicated Creami recipe channel on YouTube. | `contact@exercise4cheatmeals.com` |
 | **Zach Rocheleau**<br>*(Flexible Dieting Lifestyle)* | • **IG:** `@theflexibledietinglifestyle`<br>• **TikTok:** `@theflexibledietinglifestyle`<br>• **Web:** `flexibledietinglifestyle.com` | Pioneer in high-protein desserts, protein soft-serve, and Creami macro formulations. | `orders@flexibledietinglifestyle.com`<br>`Help@FlexibleDietingLifestyle.com` |
 | **Matt Rosenman**<br>*(Cheat Day Design)* | • **IG:** `@cheatdaydesign`<br>• **Web:** `cheatdaydesign.com` | Known for low-calorie, high-protein Ninja Creami copycats (Fairlife bases, Ben & Jerry's dupes). | Contact via [cheatdaydesign.com/contact](https://cheatdaydesign.com/contact/) or IG DM |
 | **Derek Howes**<br>*(The Protein Chef)* | • **YT:** `@TheProteinChef`<br>• **IG:** `@theproteinchef`<br>• **Web:** `theproteinchef.co` | Long-time macro dessert creator with numerous viral protein ice cream videos. | Via [theproteinchef.co](https://theproteinchef.co/) / Business inquiries tab on YouTube |

@@ -5437,7 +5437,7 @@
         tagsHtml = accessibleCategories.map(c => `<span class="book-tag ${getCategoryClass(c)}">${c}</span>`).join('');
       }
       if (creator) {
-        tagsHtml += `<span class="creator-badge-tag" title="Recipe by ${creator.name} (${creator.brandName})">📖 ${creator.name} (FPF)</span>`;
+        tagsHtml += `<span class="creator-badge-tag" title="Recipe by ${creator.name} (${creator.brandName})">📖 ${creator.id === 'fitness_product_finder' ? `${creator.name} (FPF)` : creator.name}</span>`;
       }
       if (!isAccessible) {
         if (isClaimPending) {
@@ -5603,7 +5603,7 @@
         <div class="recipe-card-top">
           <div class="card-book-tags">
             ${isPersonal ? `<span class="book-tag custom" title="Personal custom recipe saved to your Google account">🔒 Personal Recipe</span>` : accessibleCategories.map(c => `<span class="book-tag ${getCategoryClass(c)}">${c}</span>`).join('')}
-            ${creator ? `<span class="creator-badge-tag" title="Recipe by ${creator.name} (${creator.brandName})">📖 ${creator.name} (FPF)</span>` : ''}
+            ${creator ? `<span class="creator-badge-tag" title="Recipe by ${creator.name} (${creator.brandName})">📖 ${creator.id === 'fitness_product_finder' ? `${creator.name} (FPF)` : creator.name}</span>` : ''}
             ${!isAccessible ? (
               isClaimPending 
                 ? `<span class="badge-claim-pending" title="Your access request is currently pending verification">⏳ ${requiredTier} Pending</span>`
@@ -6535,7 +6535,9 @@
 
     // Open the creator's product page in a new window/tab
     window.open(url, '_blank', 'noopener,noreferrer');
-    showToast(`🛒 Opening ${bookTitle} on Fitness Product Finder...`);
+    const creator = book ? getCreatorById(book.creatorId) : null;
+    const storeLabel = creator ? `${creator.name}'s store` : 'official store';
+    showToast(`🛒 Opening ${bookTitle} on ${storeLabel}...`);
 
     const creatorId = book ? book.creatorId : 'fitness_product_finder';
     trackCreatorClick(creatorId, 'storefrontClicks');
