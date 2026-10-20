@@ -176,39 +176,76 @@ body::before {
 }
 
 .header-top-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 22px;
-  gap: 12px;
-  width: 100%;
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 20px !important;
+  gap: 6px !important;
+  width: 100% !important;
   flex-wrap: nowrap !important;
 }
 
 .header-top-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex: 1;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  flex: 0 0 auto !important;
+  min-width: 0 !important;
 }
 
 .header-desktop-actions {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin-left: auto;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  margin-left: auto !important;
+  flex-shrink: 0 !important;
+  flex-wrap: nowrap !important;
 }
 
 .header-utility-controls {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  flex-shrink: 0 !important;
 }
 
 .header-nav-cluster {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  margin-left: auto !important;
+  flex-shrink: 0 !important;
+  flex-wrap: nowrap !important;
+}
+
+.btn-secondary-action,
+.btn-install-pwa {
+  height: 31px !important;
+  min-height: 31px !important;
+  padding: 0 7px !important;
+  font-size: 0.74rem !important;
+  font-weight: 600 !important;
+  white-space: nowrap !important;
+  gap: 4px !important;
+}
+
+.btn-header-icon {
+  width: 31px !important;
+  height: 31px !important;
+  min-width: 31px !important;
+  min-height: 31px !important;
+  font-size: 0.92rem !important;
+  padding: 0 !important;
+}
+
+.btn-google-signin {
+  height: 31px !important;
+  min-height: 31px !important;
+  padding: 0 8px !important;
+  font-size: 0.75rem !important;
+  gap: 5px !important;
+  font-weight: 600 !important;
 }
 
 .header-badge {
@@ -561,33 +598,88 @@ body::before {
 
 @media (max-width: 1140px) and (min-width: 769px) {
   .header-top-bar {
-    gap: 8px !important;
+    gap: 4px !important;
     flex-wrap: nowrap !important;
   }
-  .header-actions {
+  .header-top-row {
     gap: 4px !important;
+  }
+  .header-desktop-actions {
+    gap: 3px !important;
+  }
+  .header-utility-controls {
+    gap: 3px !important;
+  }
+  .header-nav-cluster {
+    gap: 3px !important;
+    width: auto !important;
+    justify-content: flex-end !important;
     flex-wrap: nowrap !important;
   }
   .btn-secondary-action,
   .btn-install-pwa {
-    padding: 0 8px !important;
-    font-size: 0.76rem !important;
+    padding: 0 5px !important;
+    font-size: 0.68rem !important;
+    gap: 3px !important;
+    height: 28px !important;
+    min-height: 28px !important;
+    max-height: 28px !important;
+  }
+  .btn-google-signin {
+    padding: 0 6px !important;
+    font-size: 0.70rem !important;
+    height: 28px !important;
+    min-height: 28px !important;
     gap: 4px !important;
-    height: 36px !important;
-    max-height: 36px !important;
   }
   .badge-count {
-    min-width: 17px !important;
-    height: 17px !important;
-    padding: 0 4px !important;
-    font-size: 0.68rem !important;
+    min-width: 15px !important;
+    height: 15px !important;
+    padding: 0 3px !important;
+    font-size: 0.62rem !important;
   }
   .btn-header-icon {
-    width: 33px !important;
-    height: 33px !important;
-    min-width: 33px !important;
-    min-height: 33px !important;
-    font-size: 0.92rem !important;
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    min-height: 28px !important;
+    font-size: 0.86rem !important;
+  }
+}
+
+@media (max-width: 960px) and (min-width: 769px) {
+  .header-top-bar {
+    gap: 3px !important;
+  }
+  .header-top-row {
+    gap: 3px !important;
+  }
+  .header-desktop-actions {
+    gap: 2px !important;
+  }
+  .header-nav-cluster {
+    gap: 2px !important;
+  }
+  .btn-secondary-action,
+  .btn-install-pwa {
+    padding: 0 4px !important;
+    font-size: 0.64rem !important;
+    gap: 2px !important;
+    height: 27px !important;
+    min-height: 27px !important;
+  }
+  .btn-google-signin {
+    padding: 0 4px !important;
+    font-size: 0.65rem !important;
+    height: 27px !important;
+    min-height: 27px !important;
+  }
+  .btn-header-icon {
+    width: 27px !important;
+    height: 27px !important;
+    min-width: 27px !important;
+    min-height: 27px !important;
+    font-size: 0.82rem !important;
   }
 }
 
@@ -5274,17 +5366,16 @@ body.modal-open .cookie-consent-banner {
   /* Row 2: Quick Feature Navigation Pills */
   .header-nav-cluster {
     display: flex !important;
-    flex-wrap: nowrap !important;
+    flex-wrap: wrap !important;
     align-items: center !important;
-    justify-content: flex-start !important;
-    justify-content: safe center !important;
-    gap: 4px !important;
+    justify-content: center !important;
+    gap: 6px 4px !important;
     width: 100% !important;
-    margin: 0 !important;
-    padding: 2px 2px 4px 2px !important;
-    overflow-x: auto !important;
-    scrollbar-width: none !important;
-    -webkit-overflow-scrolling: touch !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    padding: 2px 0 4px 0 !important;
+    overflow-x: visible !important;
+    overflow-y: visible !important;
   }
 
   .header-nav-cluster::-webkit-scrollbar {
@@ -5330,13 +5421,13 @@ body.modal-open .cookie-consent-banner {
 
   @media (max-width: 390px) {
     .header-nav-cluster {
-      gap: 3px !important;
+      gap: 5px 3px !important;
     }
     .header-nav-cluster .btn-secondary-action,
     .header-nav-cluster .btn-install-pwa {
-      padding: 0 4.5px !important;
-      font-size: 0.65rem !important;
-      gap: 2px !important;
+      padding: 0 5px !important;
+      font-size: 0.68rem !important;
+      gap: 3px !important;
     }
   }
 
@@ -19027,3 +19118,10 @@ body.modal-open .btn-back-to-top {
 
 
 
+
+
+/* Production safety guard: never display beta ribbon on live */
+body:not(.is-beta-env) #betaSandboxRibbon,
+#betaSandboxRibbon.hidden {
+  display: none !important;
+}
