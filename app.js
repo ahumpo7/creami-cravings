@@ -15731,11 +15731,17 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
               return `
                 <div class="locked-creator-store-box">
                   <a href="${bookUrl}" target="_blank" rel="noopener noreferrer" class="btn-creator-store-direct">
-                    <span>📖 Buy ${bookTitle} (${bookPrice}) on Fitness Product Finder ↗</span>
+                    <span>📖 Buy ${bookTitle} (${bookPrice}) on ${escapeHtml(!creator || creator.id === 'fitness_product_finder' ? 'Fitness Product Finder' : (creator.brandName || (creator.name + "'s Storefront")))} ↗</span>
                   </a>
-                  <a href="https://fitnessproductfinder.com/products/complete-4-book-bundle" target="_blank" rel="noopener noreferrer" class="btn-creator-bundle-direct">
-                    <span>✨ Get All 4 E-Books for $49.99 ($112 Value) ↗</span>
-                  </a>
+                  ${(!creator || creator.id === 'fitness_product_finder') ? `
+                    <a href="https://fitnessproductfinder.com/products/complete-4-book-bundle" target="_blank" rel="noopener noreferrer" class="btn-creator-bundle-direct">
+                      <span>✨ Get All 4 E-Books for $49.99 ($112 Value) ↗</span>
+                    </a>
+                  ` : (creator && (creator.storeUrl || creator.url) ? `
+                    <a href="${creator.storeUrl || creator.url}" target="_blank" rel="noopener noreferrer" class="btn-creator-bundle-direct">
+                      <span>🛒 Visit ${escapeHtml(creator.name)}'s Storefront ↗</span>
+                    </a>
+                  ` : '')}
                   ${isClaimPending ? `
                     <div class="claim-pending-indicator-card">
                       <span class="claim-pending-icon">⏳</span>
