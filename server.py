@@ -449,7 +449,7 @@ def send_admin_notification(subject, text_body, html_body=None):
     """
     def _worker():
         # 1. Always log to stdout for systemd journal
-        print(f"[ADMIN ALERT] {subject}\n{text_body}")
+        print(f"[ADMIN ALERT] {subject}\n{text_body}", flush=True)
 
         # 2. Try SMTP
         smtp = get_smtp_config()
@@ -478,9 +478,9 @@ def send_admin_notification(subject, text_body, html_body=None):
                     server.login(smtp['user'], smtp['password'])
                     server.sendmail(smtp['sender'], [target], msg.as_string())
                     server.quit()
-                    print(f"[ADMIN ALERT EMAIL SENT] to {target}")
+                    print(f"[ADMIN ALERT EMAIL SENT] to {target}", flush=True)
             except Exception as e:
-                print(f"[ADMIN ALERT EMAIL ERROR] {e}")
+                print(f"[ADMIN ALERT EMAIL ERROR] {e}", flush=True)
 
         # 3. Try Webhook (Discord / Slack) if configured
         webhook_url = os.environ.get('ADMIN_ALERT_WEBHOOK_URL') or os.environ.get('OFFSITE_BACKUP_WEBHOOK_URL')
@@ -500,9 +500,9 @@ def send_admin_notification(subject, text_body, html_body=None):
                 )
                 with urllib.request.urlopen(req, timeout=8) as resp:
                     pass
-                print(f"[ADMIN ALERT WEBHOOK SENT]")
+                print(f"[ADMIN ALERT WEBHOOK SENT]", flush=True)
             except Exception as e:
-                print(f"[ADMIN ALERT WEBHOOK ERROR] {e}")
+                print(f"[ADMIN ALERT WEBHOOK ERROR] {e}", flush=True)
 
     thread = threading.Thread(target=_worker, daemon=True)
     thread.start()
