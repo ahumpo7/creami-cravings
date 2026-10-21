@@ -442,6 +442,72 @@ https://creamicravings.com
         print(f"[AUTH MAGIC LINK ERROR] Could not send email to {to_email}: {e}")
         return False, str(e)
 
+def send_admin_notification(subject, text_body, html_body=None):
+    """
+    Dispatches asynchronous notification to admin (email + webhook if configured).
+    Runs in background thread so it never blocks or delays HTTP response.
+    """
+    def _worker():
+        # 1. Always log to stdout for systemd journal
+        print(f"[ADMIN ALERT] {subject}\n{text_body}")
+
+        # 2. Try SMTP
+        smtp = get_smtp_config()
+        admin_recipients = [e for e in ADMIN_EMAILS if '@' in e and not e.startswith('admin@')]
+        if not admin_recipients:
+            admin_recipients = ['ahumpo7@gmail.com']
+
+        if smtp:
+            try:
+                for target in admin_recipients:
+                    msg = MIMEMultipart('alternative')
+                    msg['Subject'] = f"🍨 Creami Alert: {subject}"
+                    msg['From'] = smtp['sender']
+                    msg['To'] = target
+
+                    msg.attach(MIMEText(text_body, 'plain'))
+                    if html_body:
+                        msg.attach(MIMEText(html_body, 'html'))
+
+                    if smtp.get('port') == 465:
+                        server = smtplib.SMTP_SSL(smtp['host'], smtp['port'], timeout=10)
+                    else:
+                        server = smtplib.SMTP(smtp['host'], smtp['port'], timeout=10)
+                        if smtp.get('use_tls'):
+                            server.starttls()
+                    server.login(smtp['user'], smtp['password'])
+                    server.sendmail(smtp['sender'], [target], msg.as_string())
+                    server.quit()
+                    print(f"[ADMIN ALERT EMAIL SENT] to {target}")
+            except Exception as e:
+                print(f"[ADMIN ALERT EMAIL ERROR] {e}")
+
+        # 3. Try Webhook (Discord / Slack) if configured
+        webhook_url = os.environ.get('ADMIN_ALERT_WEBHOOK_URL') or os.environ.get('OFFSITE_BACKUP_WEBHOOK_URL')
+        if not webhook_url:
+            cfg = load_json_file(SMTP_CONFIG_FILE, {})
+            webhook_url = cfg.get('webhook_url') or cfg.get('alert_webhook_url')
+
+        if webhook_url:
+            try:
+                payload = {
+                    'content': f"🍨 **Creami Cravings Alert:** {subject}\n```{text_body[:1800]}```"
+                }
+                req = urllib.request.Request(
+                    webhook_url,
+                    data=json.dumps(payload).encode('utf-8'),
+                    headers={'Content-Type': 'application/json', 'User-Agent': 'CreamiCravingsAlert/1.0'}
+                )
+                with urllib.request.urlopen(req, timeout=8) as resp:
+                    pass
+                print(f"[ADMIN ALERT WEBHOOK SENT]")
+            except Exception as e:
+                print(f"[ADMIN ALERT WEBHOOK ERROR] {e}")
+
+    thread = threading.Thread(target=_worker, daemon=True)
+    thread.start()
+
+
 # Load DBs
 users_db = load_json_file(USERS_DB_FILE, {})
 ratings_db = load_json_file(RATINGS_DB_FILE, {})
@@ -3604,6 +3670,14 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 }
                 stats_db['purchase_inquiries'].append(inquiry)
                 save_json_file(STATS_DB_FILE, stats_db)
+
+                # Automated Admin Alert (Roadmap Item 21)
+                try:
+                    inq_subj = f"New Purchase Inquiry / Claim: {pack} from {email}"
+                    inq_body = f"Pack: {pack}\nEmail: {email}\nUser ID: {user_id or 'Guest'}\nOrder ID: {order_id or 'None'}\nCheckout Email: {checkout_email or 'None'}\nNotes: {notes or 'None'}\nSubmitted: {datetime.utcnow().isoformat()}Z"
+                    send_admin_notification(inq_subj, inq_body)
+                except Exception as _inq_err:
+                    print(f"[Warning] Failed triggering inquiry alert: {_inq_err}")
                 self._send_json({
                     'status': 'ok',
                     'success': True,
@@ -3709,6 +3783,14 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
 
             stats_db['user_feedback'].append(feedback_item)
             save_json_file(STATS_DB_FILE, stats_db)
+
+            # Automated Admin Alert (Roadmap Item 21)
+            try:
+                fb_subj = f"New Feedback ({category.replace('_', ' ').title()}) from {user_name}"
+                fb_body = f"Category: {category}\nFrom: {user_name} ({user_email or 'No email provided'})\nRating: {data.get('rating') or 'N/A'}\nRecipe ID: {data.get('recipeId') or 'N/A'}\n\nMessage:\n{message}\n\nTimestamp: {feedback_item['timestamp']}"
+                send_admin_notification(fb_subj, fb_body)
+            except Exception as _fb_err:
+                print(f"[Warning] Failed triggering feedback alert: {_fb_err}")
 
             self._send_json({
                 'status': 'ok',
