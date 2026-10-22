@@ -3161,7 +3161,7 @@
   }
 
   function isCategoryUnlocked(categoryName) {
-    if (!categoryName || categoryName === 'all' || categoryName === 'Community Legends' || categoryName === 'Ninja Creami' || categoryName === 'favorites' || categoryName === 'Custom') {
+    if (!categoryName || categoryName === 'all' || categoryName === 'Community Legends' || categoryName === 'favorites' || categoryName === 'Custom') {
       return true;
     }
     const book = (typeof BOOKS_MASTER !== 'undefined') 
@@ -3183,6 +3183,7 @@
     if (creatorId === 'fitness_product_finder' && (subs.includes('All-Access') || subs.includes('Eli All-Access') || subs.includes('fitness_product_finder:all_access'))) return true;
     if (creatorId === 'test_content' && (subs.includes('TestContent All-Access') || subs.includes('test_content:all_access'))) return true;
     if (creatorId === 'exercise4cheatmeals' && (subs.includes('Scoopology') || subs.includes('Nick All-Access') || subs.includes('Donald All-Access') || subs.includes('exercise4cheatmeals:all_access'))) return true;
+    if (creatorId === 'sharkninja' && (subs.includes('Ninja Creami') || subs.includes('Ninja Test Kitchen All-Access') || subs.includes('sharkninja:all_access'))) return true;
     if (subs.includes(creatorId + ':all_access')) return true;
 
     const norm = normalizeCategoryName(categoryName);
@@ -3211,7 +3212,7 @@
       : [recipe.category || 'Base Flavors'];
 
     return cats.filter(c => {
-      if (c === 'Community Legends' || c === 'Ninja Creami') return true;
+      if (c === 'Community Legends') return true;
       if (c === 'Base Flavors') {
         return isRecipeAccessible(recipe);
       }
@@ -3237,6 +3238,7 @@
       if (norm.includes('sampler')) return 'TestContent Sampler';
       if (norm.includes('volume')) return 'Volume Pints';
       if (norm.includes('scoop')) return 'Scoopology';
+      if (norm.includes('ninjacreami')) return 'Ninja Creami';
     }
     if (cats.some(c => normalizeCategoryName(c).includes('base'))) {
       return 'All-Access';
@@ -3253,13 +3255,17 @@
     if (isExactBaseTrio(recipe)) {
       return true;
     }
-    // Free community & Ninja Creami recipes
+
+    // If the creator of this recipe is disabled in Admin Portal, hide all their recipes
+    if (isRecipeCreatorDisabled(recipe)) {
+      return false;
+    }
+
+    // Free community recipes
     if (
       recipe.category === 'Community Legends' ||
-      recipe.category === 'Ninja Creami' ||
       recipe.sourceFile === 'Community Legends' ||
-      recipe.sourceFile === 'sharkninja.com' ||
-      (recipe.categories && (recipe.categories.includes('Community Legends') || recipe.categories.includes('Ninja Creami')))
+      (recipe.categories && recipe.categories.includes('Community Legends'))
     ) {
       return true;
     }
@@ -3292,6 +3298,9 @@
       return true;
     }
     if (creatorId === 'exercise4cheatmeals' && (subs.includes('Scoopology') || subs.includes('Nick All-Access') || subs.includes('Donald All-Access') || subs.includes('exercise4cheatmeals:all_access'))) {
+      return true;
+    }
+    if (creatorId === 'sharkninja' && (subs.includes('Ninja Creami') || subs.includes('Ninja Test Kitchen All-Access') || subs.includes('sharkninja:all_access'))) {
       return true;
     }
     if (subs.includes(creatorId + ':all_access')) {
@@ -5061,7 +5070,7 @@
 
     // Guard: if activeCategory is a locked pack the current user can't access,
     // reset to 'all' NOW before the filter runs (not after inside updateCategoryCounts)
-    const lockedPackCats = ['Fan Favorites', 'Keto', 'Lactose Free', 'No Protein'];
+    const lockedPackCats = ['Fan Favorites', 'Keto', 'Lactose Free', 'No Protein', 'Ninja Creami', 'Scoopology'];
     if (lockedPackCats.includes(activeCategory) && !isCategoryUnlocked(activeCategory) && !activeSeoLanding) {
       activeCategory = 'all';
       if (categoryTabs) {
@@ -8714,7 +8723,7 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
     }
 
     // Update category tab visibility based on access
-    const lockedCategories = ['Fan Favorites', 'Keto', 'Lactose Free', 'No Protein'];
+    const lockedCategories = ['Fan Favorites', 'Keto', 'Lactose Free', 'No Protein', 'Ninja Creami', 'Scoopology'];
     lockedCategories.forEach(cat => {
       const tab = categoryTabs ? categoryTabs.querySelector(`[data-category="${cat}"]`) : null;
       if (tab) {
@@ -8728,11 +8737,13 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
     const lockKeto = document.getElementById('lockKeto');
     const lockLactose = document.getElementById('lockLactose');
     const lockNoPro = document.getElementById('lockNoProtein');
+    const lockNinja = document.getElementById('lockNinjaCreami');
 
     if (lockFan) lockFan.style.display = isCategoryUnlocked('Fan Favorites') ? 'none' : 'inline';
     if (lockKeto) lockKeto.style.display = isCategoryUnlocked('Keto') ? 'none' : 'inline';
     if (lockLactose) lockLactose.style.display = isCategoryUnlocked('Lactose Free') ? 'none' : 'inline';
     if (lockNoPro) lockNoPro.style.display = isCategoryUnlocked('No Protein') ? 'none' : 'inline';
+    if (lockNinja) lockNinja.style.display = isCategoryUnlocked('Ninja Creami') ? 'none' : 'inline';
 
     // Conditionally hide Keto / Low Carb filters & pantry preset if user has no access to Keto
     const isKetoUnlocked = isCategoryUnlocked('Keto');
