@@ -495,37 +495,61 @@
     return (normalizeIngName(str) || '').replace(/\s+/g, '');
   }
 
+  // --- High-Performance Pre-Indexed Master Ingredients & Matching Cache ---
+  const masterIngLookup = new Map();
+  function buildMasterIngLookup() {
+    if (typeof INGREDIENTS_MASTER === 'undefined' || !Array.isArray(INGREDIENTS_MASTER)) return;
+    masterIngLookup.clear();
+    INGREDIENTS_MASTER.forEach(m => {
+      if (m.id) masterIngLookup.set(m.id, m);
+      if (m.name) {
+        masterIngLookup.set(m.name.toLowerCase(), m);
+        const n = normalizeIngName(m.name);
+        if (n) masterIngLookup.set(n, m);
+        const c = collapseName(m.name);
+        if (c) masterIngLookup.set(c, m);
+      }
+    });
+  }
+
+  const pantryCheckCache = new Map();
+  const recipeMatchCache = new Map();
+
+  function invalidatePantryCheckCache() {
+    pantryCheckCache.clear();
+    recipeMatchCache.clear();
+  }
+
   function isItemInPantry(ing) {
     if (!ing) return false;
     const id = typeof ing === 'string' ? ing : (ing.id || '');
-    if (id && pantryState.has(id)) return true;
-    if (id) {
-      const equivs = INGREDIENT_EQUIVALENTS[id];
-      if (equivs && equivs.some(eqId => pantryState.has(eqId))) return true;
-    }
+    if (id && pantryCheckCache.has(id)) return pantryCheckCache.get(id);
 
-    const rawName = typeof ing === 'object' ? (ing.name || '') : (typeof ing === 'string' ? ing : '');
-    if (rawName) {
-      const clean = sanitizeShoppingItemName(rawName);
-      const slug = clean.toLowerCase().replace(/[^a-z0-9]+/g, '_').trim();
-      if (slug && pantryState.has(slug)) return true;
-
-      const norm = normalizeIngName(clean);
-      const col = collapseName(clean);
-      if (typeof INGREDIENTS_MASTER !== 'undefined' && Array.isArray(INGREDIENTS_MASTER)) {
-        const masterMatch = INGREDIENTS_MASTER.find(m => 
-          m.id === slug ||
-          m.name.toLowerCase() === clean.toLowerCase() ||
-          (norm && normalizeIngName(m.name) === norm) ||
-          (col && collapseName(m.name) === col)
-        );
-        if (masterMatch && (pantryState.has(masterMatch.id) || (INGREDIENT_EQUIVALENTS[masterMatch.id] && INGREDIENT_EQUIVALENTS[masterMatch.id].some(eqId => pantryState.has(eqId))))) {
-          return true;
+    let result = false;
+    if (id && pantryState.has(id)) {
+      result = true;
+    } else if (id && INGREDIENT_EQUIVALENTS[id] && INGREDIENT_EQUIVALENTS[id].some(eqId => pantryState.has(eqId))) {
+      result = true;
+    } else {
+      const rawName = typeof ing === 'object' ? (ing.name || '') : (typeof ing === 'string' ? ing : '');
+      if (rawName) {
+        const clean = sanitizeShoppingItemName(rawName);
+        const slug = clean.toLowerCase().replace(/[^a-z0-9]+/g, '_').trim();
+        if (slug && pantryState.has(slug)) {
+          result = true;
+        } else {
+          if (masterIngLookup.size === 0) buildMasterIngLookup();
+          const norm = normalizeIngName(clean);
+          const masterMatch = masterIngLookup.get(slug) || masterIngLookup.get(clean.toLowerCase()) || (norm ? masterIngLookup.get(norm) : null);
+          if (masterMatch && (pantryState.has(masterMatch.id) || (INGREDIENT_EQUIVALENTS[masterMatch.id] && INGREDIENT_EQUIVALENTS[masterMatch.id].some(eqId => pantryState.has(eqId))))) {
+            result = true;
+          }
         }
       }
     }
 
-    return false;
+    if (id) pantryCheckCache.set(id, result);
+    return result;
   }
 
   function getIngredientCategoryKey(nameOrId, stepHint) {
@@ -1343,6 +1367,7 @@
     } else {
       pantryItemQuantities = {};
     }
+    invalidatePantryCheckCache();
   }
 
   function loadShoppingListForCurrentSession() {
@@ -1604,6 +1629,7 @@
   }
 
   function savePantry() {
+    invalidatePantryCheckCache();
     lastLocalMutationTime = Date.now();
     const key = getPantryStorageKey();
     localStorage.setItem(key, JSON.stringify(Array.from(pantryState)));
@@ -4900,8 +4926,7 @@
 
   // --- Recipe Matching Engine ---
   function computeRecipeMatch(recipe) {
-    const ingredients = recipe.ingredients || [];
-    if (ingredients.length === 0) {
+    if (!recipe || !recipe.id) {
       return {
         totalCount: 0,
         inPantryCount: 0,
@@ -4912,6 +4937,27 @@
         matchPercent: 0,
         missing: []
       };
+    }
+
+    const hasSwaps = Boolean(activeRecipeSwaps[recipe.id] && Object.keys(activeRecipeSwaps[recipe.id]).length > 0);
+    if (!hasSwaps && recipeMatchCache.has(recipe.id)) {
+      return recipeMatchCache.get(recipe.id);
+    }
+
+    const ingredients = recipe.ingredients || [];
+    if (ingredients.length === 0) {
+      const emptyMatch = {
+        totalCount: 0,
+        inPantryCount: 0,
+        baseTotal: 0,
+        baseInPantry: 0,
+        isReady: false,
+        isBaseReady: false,
+        matchPercent: 0,
+        missing: []
+      };
+      if (!hasSwaps) recipeMatchCache.set(recipe.id, emptyMatch);
+      return emptyMatch;
     }
 
     let baseTotal = 0;
@@ -4943,7 +4989,7 @@
     const isBaseReady = (baseTotal > 0 && baseInPantry === baseTotal);
     const matchPercent = Math.round((inPantryCount / ingredients.length) * 100);
 
-    return {
+    const matchResult = {
       totalCount: ingredients.length,
       inPantryCount,
       baseTotal,
@@ -4953,6 +4999,11 @@
       matchPercent,
       missing
     };
+
+    if (!hasSwaps) {
+      recipeMatchCache.set(recipe.id, matchResult);
+    }
+    return matchResult;
   }
 
   // --- Recipe Grid Rendering ---
