@@ -3135,7 +3135,7 @@
   }
 
   function isCategoryUnlocked(categoryName) {
-    if (!categoryName || categoryName === 'all' || categoryName === 'Community Legends' || categoryName === 'favorites' || categoryName === 'Custom') {
+    if (!categoryName || categoryName === 'all' || categoryName === 'Community Legends' || categoryName === 'Ninja Creami' || categoryName === 'favorites' || categoryName === 'Custom') {
       return true;
     }
     const book = (typeof BOOKS_MASTER !== 'undefined') 
@@ -3185,7 +3185,7 @@
       : [recipe.category || 'Base Flavors'];
 
     return cats.filter(c => {
-      if (c === 'Community Legends') return true;
+      if (c === 'Community Legends' || c === 'Ninja Creami') return true;
       if (c === 'Base Flavors') {
         return isRecipeAccessible(recipe);
       }
@@ -3227,11 +3227,13 @@
     if (isExactBaseTrio(recipe)) {
       return true;
     }
-    // Free community recipes
+    // Free community & Ninja Creami recipes
     if (
       recipe.category === 'Community Legends' ||
+      recipe.category === 'Ninja Creami' ||
       recipe.sourceFile === 'Community Legends' ||
-      (recipe.categories && recipe.categories.includes('Community Legends'))
+      recipe.sourceFile === 'sharkninja.com' ||
+      (recipe.categories && (recipe.categories.includes('Community Legends') || recipe.categories.includes('Ninja Creami')))
     ) {
       return true;
     }
@@ -5838,6 +5840,7 @@
   function getCategoryClass(category) {
     if (!category) return '';
     const c = category.toLowerCase();
+    if (c.includes('ninja') || c.includes('creami')) return 'ninja-creami';
     if (c.includes('base')) return 'base-flavors';
     if (c.includes('legend') || c.includes('community')) return 'community-legends';
     if (c.includes('fan')) return 'fan-favorites';
@@ -8616,6 +8619,7 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
       all: accessible.length,
       'Base Flavors': 0,
       'Community Legends': 0,
+      'Ninja Creami': 0,
       'Fan Favorites': 0,
       'Keto': 0,
       'Lactose Free': 0,
@@ -8635,6 +8639,7 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
     const elAll = document.getElementById('countAll');
     const elBase = document.getElementById('countBase');
     const elLegends = document.getElementById('countLegends');
+    const elNinjaCreami = document.getElementById('countNinjaCreami');
     const elFan = document.getElementById('countFan');
     const elKeto = document.getElementById('countKeto');
     const elLactose = document.getElementById('countLactose');
@@ -8646,6 +8651,7 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
     if (elAll) elAll.textContent = counts.all;
     if (elBase) elBase.textContent = counts['Base Flavors'] || 0;
     if (elLegends) elLegends.textContent = counts['Community Legends'] || 0;
+    if (elNinjaCreami) elNinjaCreami.textContent = counts['Ninja Creami'] || 0;
     if (elFan) elFan.textContent = counts['Fan Favorites'] || 0;
     if (elKeto) elKeto.textContent = counts['Keto'] || 0;
     if (elLactose) elLactose.textContent = counts['Lactose Free'] || 0;
