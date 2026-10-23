@@ -227,10 +227,25 @@ def enrich_user_telemetry(user, ip, user_agent):
         t.start()
 
 
-SMTP_CONFIG_FILE = os.path.join(DIRECTORY, 'config_smtp.json')
+SECURE_SMTP_PATHS = [
+    '/etc/creami/smtp.json',
+    '/etc/creami/config_smtp.json',
+    os.path.join(DIRECTORY, 'config_smtp.json')
+]
+
+def load_smtp_file_config():
+    for p in SECURE_SMTP_PATHS:
+        if os.path.exists(p):
+            try:
+                cfg = load_json_file(p, {})
+                if cfg:
+                    return cfg
+            except Exception:
+                pass
+    return {}
 
 def get_smtp_config():
-    cfg = load_json_file(SMTP_CONFIG_FILE, {})
+    cfg = load_smtp_file_config()
     host = os.environ.get('SMTP_HOST') or cfg.get('host') or cfg.get('smtp_host')
     port_val = os.environ.get('SMTP_PORT') or cfg.get('port') or cfg.get('smtp_port') or 587
     try:
@@ -485,7 +500,7 @@ def send_admin_notification(subject, text_body, html_body=None):
         # 3. Try Webhook (Discord / Slack) if configured
         webhook_url = os.environ.get('ADMIN_ALERT_WEBHOOK_URL') or os.environ.get('OFFSITE_BACKUP_WEBHOOK_URL')
         if not webhook_url:
-            cfg = load_json_file(SMTP_CONFIG_FILE, {})
+            cfg = load_smtp_file_config()
             webhook_url = cfg.get('webhook_url') or cfg.get('alert_webhook_url')
 
         if webhook_url:

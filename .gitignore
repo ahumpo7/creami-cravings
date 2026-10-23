@@ -31,3 +31,6 @@ backups/
 *.zip
 *.mp4
 generate_screencast.js
+
+config_smtp.json
+*smtp*.json
