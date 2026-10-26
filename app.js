@@ -5078,7 +5078,7 @@
 
     // Guard: if activeCategory is a locked pack the current user can't access,
     // reset to 'all' NOW before the filter runs (not after inside updateCategoryCounts)
-    const lockedPackCats = ['Fan Favorites', 'Keto', 'Lactose Free', 'No Protein', 'Ninja Creami', 'Scoopology'];
+    const lockedPackCats = ['Fan Favorites', 'Keto', 'Lactose Free', 'No Protein', 'Ninja Creami', 'Scoopology', 'The Creami Cookbook'];
     if (lockedPackCats.includes(activeCategory) && !isCategoryUnlocked(activeCategory) && !activeSeoLanding) {
       activeCategory = 'all';
       if (categoryTabs) {
@@ -6069,7 +6069,9 @@
       'All-Access': '👑',
       'TestContent Sampler': '🥣',
       'Volume Pints': '🔥',
-      'Scoopology': '🍨'
+      'Scoopology': '🍨',
+      'The Creami Cookbook': '🥄',
+      'Creami Cookbook Vol 1': '📖'
     };
 
     packsGrid.innerHTML = creatorBooks.map(book => {
@@ -8692,6 +8694,8 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
       'Keto': 0,
       'Lactose Free': 0,
       'No Protein': 0,
+      'Scoopology': 0,
+      'The Creami Cookbook': 0,
       favorites: favoritesState.size
     };
 
@@ -8712,6 +8716,8 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
     const elKeto = document.getElementById('countKeto');
     const elLactose = document.getElementById('countLactose');
     const elNoPro = document.getElementById('countNoProtein');
+    const elScoopology = document.getElementById('countScoopology');
+    const elCreamiCookbook = document.getElementById('countCreamiCookbook');
     const elFav = document.getElementById('countFavorites');
     const elCustom = document.getElementById('countCustom');
     const tabCustom = document.getElementById('tabCustomRecipes');
@@ -8724,6 +8730,8 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
     if (elKeto) elKeto.textContent = counts['Keto'] || 0;
     if (elLactose) elLactose.textContent = counts['Lactose Free'] || 0;
     if (elNoPro) elNoPro.textContent = counts['No Protein'] || 0;
+    if (elScoopology) elScoopology.textContent = counts['Scoopology'] || 0;
+    if (elCreamiCookbook) elCreamiCookbook.textContent = counts['The Creami Cookbook'] || 0;
     if (elFav) elFav.textContent = counts.favorites;
     if (elCustom) elCustom.textContent = customRecipesState.length;
     if (tabCustom) {
@@ -8731,7 +8739,7 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
     }
 
     // Update category tab visibility based on access
-    const lockedCategories = ['Fan Favorites', 'Keto', 'Lactose Free', 'No Protein', 'Ninja Creami', 'Scoopology'];
+    const lockedCategories = ['Fan Favorites', 'Keto', 'Lactose Free', 'No Protein', 'Ninja Creami', 'Scoopology', 'The Creami Cookbook'];
     lockedCategories.forEach(cat => {
       const tab = categoryTabs ? categoryTabs.querySelector(`[data-category="${cat}"]`) : null;
       if (tab) {
@@ -8752,6 +8760,10 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
     if (lockLactose) lockLactose.style.display = isCategoryUnlocked('Lactose Free') ? 'none' : 'inline';
     if (lockNoPro) lockNoPro.style.display = isCategoryUnlocked('No Protein') ? 'none' : 'inline';
     if (lockNinja) lockNinja.style.display = isCategoryUnlocked('Ninja Creami') ? 'none' : 'inline';
+    const lockScoopology = document.getElementById('lockScoopology');
+    const lockCreamiCookbook = document.getElementById('lockCreamiCookbook');
+    if (lockScoopology) lockScoopology.style.display = isCategoryUnlocked('Scoopology') ? 'none' : 'inline';
+    if (lockCreamiCookbook) lockCreamiCookbook.style.display = isCategoryUnlocked('The Creami Cookbook') ? 'none' : 'inline';
 
     // Conditionally hide Keto / Low Carb filters & pantry preset if user has no access to Keto
     const isKetoUnlocked = isCategoryUnlocked('Keto');
@@ -20364,7 +20376,7 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
       return `
         <div class="admin-creator-card ${isEffectivelyOff ? 'disabled' : ''}" data-creator-id="${c.id}">
           <div class="creator-card-top-bar">
-            <div class="creator-avatar-badge">${c.id === 'fitness_product_finder' ? '📖' : '🥣'}</div>
+            <div class="creator-avatar-badge">${c.id === 'fitness_product_finder' ? '📖' : (c.id === 'exercise4cheatmeals' ? '🍨' : (c.id === 'shandi_lynn_martin' ? '🥄' : '🥣'))}</div>
             <div class="creator-id-info">
               <div class="creator-name-row">
                 <h4 class="creator-name">${escapeHtml(c.name)}</h4>
