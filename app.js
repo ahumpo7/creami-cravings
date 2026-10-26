@@ -2907,7 +2907,9 @@
           ? ['All-Access', 'Base Flavors', 'Community Legends', 'Fan Favorites', 'No Protein', 'Keto', 'Lactose Free']
           : (cId === 'exercise4cheatmeals'
               ? ['Community Legends', 'Scoopology', 'Nick All-Access', 'Donald All-Access']
-              : ['Community Legends', 'TestContent Sampler', 'Volume Pints', 'TestContent All-Access'])
+              : (cId === 'shandi_lynn_martin'
+                  ? ['Community Legends', 'The Creami Cookbook', 'Creami Cookbook Vol 1', 'Shandi All-Access']
+                  : ['Community Legends', 'TestContent Sampler', 'Volume Pints', 'TestContent All-Access']))
       };
     } else if (currentMimicRole === 'vip') {
       const cId = targetCreatorId || currentMimicCreatorId || 'fitness_product_finder';
@@ -3103,9 +3105,11 @@
       { id: 'cardMimicCreatorEli', role: 'creator', creatorId: 'fitness_product_finder' },
       { id: 'cardMimicCreatorTest', role: 'creator', creatorId: 'test_content' },
       { id: 'cardMimicCreatorNick', role: 'creator', creatorId: 'exercise4cheatmeals' },
+      { id: 'cardMimicCreatorShandi', role: 'creator', creatorId: 'shandi_lynn_martin' },
       { id: 'cardMimicVipEli', role: 'vip', creatorId: 'fitness_product_finder' },
       { id: 'cardMimicVipTest', role: 'vip', creatorId: 'test_content' },
       { id: 'cardMimicVipNick', role: 'vip', creatorId: 'exercise4cheatmeals' },
+      { id: 'cardMimicVipShandi', role: 'vip', creatorId: 'shandi_lynn_martin' },
       { id: 'cardMimicMultiSub', role: 'multi_sub', creatorId: null },
       { id: 'cardMimicUser', role: 'user', creatorId: null },
       { id: 'cardMimicGuest', role: 'guest', creatorId: null }
@@ -3183,6 +3187,7 @@
     if (creatorId === 'fitness_product_finder' && (subs.includes('All-Access') || subs.includes('Eli All-Access') || subs.includes('fitness_product_finder:all_access'))) return true;
     if (creatorId === 'test_content' && (subs.includes('TestContent All-Access') || subs.includes('test_content:all_access'))) return true;
     if (creatorId === 'exercise4cheatmeals' && (subs.includes('Scoopology') || subs.includes('Nick All-Access') || subs.includes('Donald All-Access') || subs.includes('exercise4cheatmeals:all_access'))) return true;
+    if (creatorId === 'shandi_lynn_martin' && (subs.includes('The Creami Cookbook') || subs.includes('Creami Cookbook Vol 1') || subs.includes('Shandi All-Access') || subs.includes('shandi_lynn_martin:all_access'))) return true;
     if (creatorId === 'sharkninja' && (subs.includes('Ninja Creami') || subs.includes('Ninja Test Kitchen All-Access') || subs.includes('sharkninja:all_access'))) return true;
     if (subs.includes(creatorId + ':all_access')) return true;
 
@@ -3298,6 +3303,9 @@
       return true;
     }
     if (creatorId === 'exercise4cheatmeals' && (subs.includes('Scoopology') || subs.includes('Nick All-Access') || subs.includes('Donald All-Access') || subs.includes('exercise4cheatmeals:all_access'))) {
+      return true;
+    }
+    if (creatorId === 'shandi_lynn_martin' && (subs.includes('The Creami Cookbook') || subs.includes('Creami Cookbook Vol 1') || subs.includes('Shandi All-Access') || subs.includes('shandi_lynn_martin:all_access'))) {
       return true;
     }
     if (creatorId === 'sharkninja' && (subs.includes('Ninja Creami') || subs.includes('Ninja Test Kitchen All-Access') || subs.includes('sharkninja:all_access'))) {
@@ -20820,7 +20828,7 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
                 ${u.role === 'creator' ? `
                   <select class="admin-creator-select" data-user-id="${u.id}" title="Assign Creator Storefront Profile" style="font-size: 0.78rem; background: rgba(15, 23, 42, 0.85); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 6px; padding: 6px 8px; font-weight: 600;">
                     ${((typeof CREATORS_MASTER !== 'undefined') ? CREATORS_MASTER : []).map(c => {
-                      const icon = c.id === 'fitness_product_finder' ? '🧑‍🍳' : (c.id === 'test_content' ? '🧪' : '🍨');
+                      const icon = c.id === 'fitness_product_finder' ? '🧑‍🍳' : (c.id === 'test_content' ? '🧪' : (c.id === 'shandi_lynn_martin' ? '🥄' : '🍨'));
                       return `<option value="${c.id}" ${(u.creatorId === c.id || (!u.creatorId && c.id === 'fitness_product_finder')) ? 'selected' : ''}>${icon} ${escapeHtml(c.name)} (${escapeHtml(c.brandName || c.handle)})</option>`;
                     }).join('')}
                   </select>
@@ -20869,7 +20877,7 @@ ${includeHashtags ? '#ninjacreami #ninjacreamirecipe #proteinicecream #highprote
               <div class="admin-subs-title">📦 Recipe Pack Permissions:</div>
               <div class="admin-presets-row" style="display: flex; gap: 6px; flex-wrap: wrap;">
                 ${((typeof CREATORS_MASTER !== 'undefined') ? CREATORS_MASTER : []).map(c => {
-                  const icon = c.id === 'fitness_product_finder' ? '👑' : (c.id === 'test_content' ? '🧪' : '🍨');
+                  const icon = c.id === 'fitness_product_finder' ? '👑' : (c.id === 'test_content' ? '🧪' : (c.id === 'shandi_lynn_martin' ? '🥄' : '🍨'));
                   return `
                     <button type="button" class="btn-preset-grant-creator" data-user-id="${u.id}" data-creator-id="${c.id}" title="Grant ${escapeHtml(c.name)} All-Access">
                       ${icon} ${escapeHtml(c.name)} All-Access

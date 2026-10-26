@@ -47,7 +47,7 @@ CREATOR_SETTINGS_FILE = os.path.join(DIRECTORY, 'db_creators_settings.json')
 
 DEFAULT_STAPLES = []
 
-ALL_SUBSCRIPTIONS = ["All-Access", "Base Flavors", "Community Legends", "Fan Favorites", "No Protein", "Keto", "Lactose Free", "TestContent Sampler", "Volume Pints", "TestContent All-Access", "Scoopology", "Nick All-Access", "Donald All-Access"]
+ALL_SUBSCRIPTIONS = ["All-Access", "Base Flavors", "Community Legends", "Fan Favorites", "No Protein", "Keto", "Lactose Free", "TestContent Sampler", "Volume Pints", "TestContent All-Access", "Scoopology", "Nick All-Access", "Donald All-Access", "The Creami Cookbook", "Creami Cookbook Vol 1", "Shandi All-Access"]
 DEFAULT_SUBSCRIPTIONS = ["Community Legends"]
 
 # Admin accounts designated by verified email
@@ -580,7 +580,7 @@ def get_effective_freezer_capacity(u):
         return 12
 
     # 8 Slots: any paid creator cookbook pack or purchased >= 8
-    paid_packs = ['Fan Favorites', 'No Protein', 'Keto', 'Lactose Free', 'TestContent Sampler', 'Volume Pints', 'Scoopology']
+    paid_packs = ['Fan Favorites', 'No Protein', 'Keto', 'Lactose Free', 'TestContent Sampler', 'Volume Pints', 'Scoopology', 'The Creami Cookbook', 'Creami Cookbook Vol 1']
     if any(p in subs for p in paid_packs) or purchased >= 8:
         return 8
 
@@ -1316,6 +1316,40 @@ else:
     nick_user['freezerCapacity'] = 12
     if 'Nick All-Access' not in nick_user.get('subscriptions', []):
         nick_user['subscriptions'] = list(set(nick_user.get('subscriptions', []) + list(ALL_SUBSCRIPTIONS) + ['Scoopology', 'Nick All-Access']))
+
+
+# Ensure official Content Creator account for Shandi (Shandi Lynn Martin) exists
+shandi_email = 'slmcookbook@gmail.com'
+shandi_user = next((u for u in users_db.values() if u.get('email', '').lower() in [shandi_email, 'shandi@shandilynnmartin.com', 'shandi@creamicravings.com'] or u.get('username', '').lower() in ['shandi', 'shandilynnmartin', 'slmcookbook']), None)
+if not shandi_user:
+    shandi_hash = hash_password('creami2026!')
+    users_db[shandi_email] = {
+        'id': 'user_creator_shandi',
+        'username': 'shandi',
+        'name': 'Shandi Lynn Martin',
+        'email': shandi_email,
+        'password': shandi_hash,
+        'role': 'creator',
+        'creatorId': 'shandi_lynn_martin',
+        'pantry': list(DEFAULT_STAPLES),
+        'favorites': [],
+        'madeCounts': {},
+        'ratings': {},
+        'customRecipes': [],
+        'shoppingList': [],
+        'freezerPints': [],
+        'freezerCapacity': 12,
+        'subscriptions': list(ALL_SUBSCRIPTIONS) + ['The Creami Cookbook', 'Creami Cookbook Vol 1', 'Shandi All-Access'],
+        'created_at': datetime.utcnow().isoformat(),
+        'last_active': datetime.utcnow().isoformat(),
+        'token': 'token_creator_shandi_001'
+    }
+else:
+    shandi_user['role'] = 'creator'
+    shandi_user['creatorId'] = 'shandi_lynn_martin'
+    shandi_user['freezerCapacity'] = 12
+    if 'Shandi All-Access' not in shandi_user.get('subscriptions', []):
+        shandi_user['subscriptions'] = list(set(shandi_user.get('subscriptions', []) + list(ALL_SUBSCRIPTIONS) + ['The Creami Cookbook', 'Creami Cookbook Vol 1', 'Shandi All-Access']))
 
 # Auto-sync freezer shelf capacity for all creators, admins, and all-access holders across users_db
 for u in users_db.values():
@@ -2869,6 +2903,8 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                     break
             if not target_user and login_id in ['contact@exercise4cheatmeals.com', 'exercise4cheatmeals@creamicravings.com', 'exercise4cheatmeals']:
                 target_user = users_db.get('nick@exercise4cheatmeals.com')
+            if not target_user and login_id in ['shandi@shandilynnmartin.com', 'shandi@creamicravings.com', 'shandi', 'shandilynnmartin', 'slmcookbook']:
+                target_user = users_db.get('slmcookbook@gmail.com')
 
             if not target_user:
                 self._send_json({'error': 'No account found with this email. Please check your spelling or create an account.'}, 404)
@@ -3247,6 +3283,8 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
                 req_creator = 'test_content'
             elif req_creator in ['nick', 'donald', 'exercise4cheatmeals']:
                 req_creator = 'exercise4cheatmeals'
+            elif req_creator in ['shandi', 'shandilynnmartin', 'shandi_lynn_martin']:
+                req_creator = 'shandi_lynn_martin'
 
             target_creator_id = req_creator or (user.get('creatorId') if user else 'fitness_product_finder') or 'fitness_product_finder'
             target_user = user

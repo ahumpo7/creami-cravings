@@ -194,6 +194,55 @@ const CREATORS_MASTER = [
     ]
   },
   {
+    "id": "shandi_lynn_martin",
+    "name": "Shandi Lynn Martin",
+    "brandName": "Shandi Lynn Martin",
+    "handle": "@shandi.lynn.martin",
+    "url": "https://shandilynnmartin.com?utm_source=creamicravings&utm_medium=referral&ref=creamicravings",
+    "storeUrl": "https://shandilynnmartin.com?utm_source=creamicravings&utm_medium=referral&ref=creamicravings",
+    "socialLinks": {
+      "instagram": "@shandi.lynn.martin",
+      "tiktok": "@shandi.lynn.martin",
+      "website": "https://shandilynnmartin.com?utm_source=creamicravings&utm_medium=referral&ref=creamicravings"
+    },
+    "bio": "RN, mom of 4, creator of The Creami Spoon™️, and author of The Creami Cookbook collection. Specializing in macro-balanced, high-protein Ninja Creami recipes.",
+    "isBeta": true,
+    "storeAnnouncement": "🍨 Beta Preview: The Creami Spoon™️ and Creami Cookbook integration with interactive meal prep!",
+    "perks": [
+      {
+        "id": "slm_creami_spoon",
+        "brand": "The Creami Spoon™️",
+        "category": "Official Long Pint Spoon",
+        "code": null,
+        "discount": "Custom Pint Gear",
+        "description": "Shandi's custom-designed long-handled spoon engineered specifically to reach the bottom of Ninja Creami pints without messy knuckles.",
+        "url": "https://shandilynnmartin.com"
+      },
+      {
+        "id": "slm_clean_simple_eats",
+        "brand": "Clean Simple Eats Protein",
+        "category": "Macro Protein Powder",
+        "code": "SHANDI",
+        "discount": "10% Off",
+        "description": "Shandi's favorite protein powders and flavors used across her high-protein Creami recipes.",
+        "url": "https://shandilynnmartin.com"
+      }
+    ],
+    "samplerPints": [
+      "slm_chocolate_cookie_dough_oreo"
+    ],
+    "samplers": [
+      {
+        "id": "slm_signature_sampler",
+        "name": "Chocolate Cookie Dough Blast Sampler",
+        "description": "Shandi's verified 32g protein chocolate cookie dough & Oreo blast pint.",
+        "pints": [
+          "slm_chocolate_cookie_dough_oreo"
+        ]
+      }
+    ]
+  },
+  {
     "id": "sharkninja",
     "name": "Ninja Test Kitchen",
     "brandName": "SharkNinja",
@@ -324,6 +373,21 @@ const BOOKS_MASTER = [
     "imageUrl": "https://creamicravings.com/icon-512.png",
     "recipeCount": 75,
     "description": "Nick's definitive collection of 70+ decadent, high-protein Ninja Creami recipes, mix-in formulas, and spin settings."
+  },
+  {
+    "id": "slm_creami_cookbook_vol1",
+    "creatorId": "shandi_lynn_martin",
+    "title": "The Creami Cookbook: Volume 1",
+    "shortTitle": "Creami Cookbook Vol 1",
+    "bookKey": "The Creami Cookbook",
+    "categoryKey": "The Creami Cookbook",
+    "sourceFile": "shandilynnmartin.com",
+    "price": "$29.99",
+    "url": "https://shandilynnmartin.com",
+    "purchaseUrl": "https://shandilynnmartin.com",
+    "imageUrl": "https://creamicravings.com/icon-512.png",
+    "recipeCount": 50,
+    "description": "Shandi's best-selling high-protein, macro-balanced Ninja Creami recipes with QR codes to video reels."
   },
   {
     "id": "ninja_creami_official",
@@ -26974,6 +27038,103 @@ const RECIPES_MASTER = [
     "aliases": [
       "birthday_cake_cookie_dough_protein_ice_cream",
       "exercise4cheatmeals_birthday_cake"
+    ]
+  },
+  {
+    "id": "slm_chocolate_cookie_dough_oreo",
+    "name": "Chocolate Cookie Dough Oreo Protein Ice Cream",
+    "category": "The Creami Cookbook",
+    "categories": [
+      "The Creami Cookbook",
+      "High Protein",
+      "Decadent"
+    ],
+    "creatorId": "shandi_lynn_martin",
+    "sources": [
+      {
+        "book": "The Creami Cookbook: Volume 1",
+        "sourceFile": "https://shandilynnmartin.com",
+        "url": "https://shandilynnmartin.com"
+      }
+    ],
+    "sourceFile": "https://www.instagram.com/shandi.lynn.martin/",
+    "videoUrl": "https://www.instagram.com/shandi.lynn.martin/",
+    "macros": {
+      "calories": "385",
+      "protein": "42g",
+      "carbs": "36g",
+      "fat": "8g",
+      "sugar": "9g",
+      "fiber": "5g"
+    },
+    "spinSetting": "Lite Ice Cream",
+    "prepTime": "5 MIN",
+    "freezeTime": "24 HOURS",
+    "makes": "1 PINT",
+    "proTip": "Shandi recommends spinning on Lite Ice Cream, adding 1-2 tbsp unsweetened almond milk for a quick Respin, then mixing in crushed Oreos and cookie dough chunks. Dig in with The Creami Spoon™️ to easily get every bite at the bottom!",
+    "ingredients": [
+      {
+        "id": "fairlife_chocolate_milk",
+        "name": "Fairlife 2% Chocolate Milk",
+        "quantity": "300",
+        "unit": "g",
+        "raw": "300G FAIRLIFE 2% CHOCOLATE MILK",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "clean_simple_eats_brownie_batter",
+        "name": "Clean Simple Eats Brownie Batter Protein",
+        "quantity": "32",
+        "unit": "g",
+        "raw": "32G CLEAN SIMPLE EATS BROWNIE BATTER PROTEIN",
+        "section": "Base",
+        "isMixin": false,
+        "notes": "Code SHANDI for 10% off"
+      },
+      {
+        "id": "sf_chocolate_pudding_mix",
+        "name": "Sugar-Free Chocolate Fudge Pudding Mix",
+        "quantity": "7",
+        "unit": "g",
+        "raw": "7G SF CHOCOLATE FUDGE PUDDING MIX",
+        "section": "Base",
+        "isMixin": false,
+        "notes": ""
+      },
+      {
+        "id": "crushed_oreo_cookies",
+        "name": "Crushed Oreo Cookies",
+        "quantity": "10",
+        "unit": "g",
+        "raw": "10G CRUSHED OREOS",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": ""
+      },
+      {
+        "id": "chocolate_chip_cookie_dough_chunks",
+        "name": "Chocolate Chip Cookie Dough Chunks",
+        "quantity": "25",
+        "unit": "g",
+        "raw": "25G EDIBLE COOKIE DOUGH CHUNKS",
+        "section": "Mix-in",
+        "isMixin": true,
+        "notes": ""
+      }
+    ],
+    "instructions": [
+      "WHISK FAIRLIFE CHOCOLATE MILK, CLEAN SIMPLE EATS BROWNIE BATTER PROTEIN, AND SF PUDDING MIX IN PINT UNTIL DISSOLVED",
+      "FREEZE ON A LEVEL SURFACE FOR 24 HOURS",
+      "SPIN ON LITE ICE CREAM SETTING",
+      "ADD 1-2 TBSP ALMOND MILK AND PRESS RESPIN IF POWDERY",
+      "HOLLOW CENTER, ADD CRUSHED OREOS AND COOKIE DOUGH CHUNKS, AND RUN MIX-IN CYCLE",
+      "ENJOY WITH THE CREAMI SPOON™️!"
+    ],
+    "aliases": [
+      "chocolate_cookie_dough_oreo_protein_ice_cream",
+      "shandi_chocolate_cookie_dough_oreo"
     ]
   },
   {
