@@ -27055,12 +27055,10 @@ const RECIPES_MASTER = [
       {
         "book": "The Creami Cookbook: Volume 1",
         "page": 33,
-        "sourceFile": "The Creami Cookbook (Page 33)",
-        "url": "https://www.instagram.com/reel/Cq9BFkarlQT/"
+        "sourceFile": "The Creami Cookbook (Page 33)"
       }
     ],
     "sourceFile": "The Creami Cookbook: Volume 1 (Page 33)",
-    "videoUrl": "https://www.instagram.com/reel/Cq9BFkarlQT/",
     "macros": {
       "calories": "442",
       "protein": "36g",
