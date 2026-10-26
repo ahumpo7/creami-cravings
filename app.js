@@ -1200,7 +1200,7 @@
       }
 
       // Creator Storefront Deep-Link Routing (Path B)
-      const creatorPathMatch = window.location.pathname.match(/(?:\/beta)?\/@([a-zA-Z0-9_\-]+)/);
+      const creatorPathMatch = window.location.pathname.match(/(?:\/beta)?\/@([a-zA-Z0-9_\.\-]+)/);
       const creatorQuery = urlParams.get('creator') || urlParams.get('c');
       let targetCreatorSlug = null;
       if (creatorPathMatch) {

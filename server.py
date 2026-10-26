@@ -1595,7 +1595,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
             self.path.startswith('/category/') or 
             self.path.startswith('/ninja-creami-') or 
             self.path in ['/freeze-guide', '/guide/freeze-time', '/guide/ninja-creami-freeze-time'] or
-            re.match(r'^/(?:@|creator/)[a-zA-Z0-9_\-]+/?$', self.path.split('?')[0])):
+            re.match(r'^/(?:@|creator/)[a-zA-Z0-9_\.\-]+/?$', self.path.split('?')[0])):
             clean_url = self.path.split('?')[0]
             if re.search(r'\.(css|js|png|jpg|jpeg|svg|ico|json|woff2?|ttf|webp|map)$', clean_url, re.I):
                 self.path = '/' + clean_url.split('/')[-1]
@@ -2177,7 +2177,7 @@ class RecipeServer(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(html.encode('utf-8'))
             return
 
-        elif re.match(r'^/(?:@|creator/)[a-zA-Z0-9_\-]+/?$', self.path.split('?')[0]):
+        elif re.match(r'^/(?:@|creator/)[a-zA-Z0-9_\.\-]+/?$', self.path.split('?')[0]):
             clean_url = self.path.split('?')[0]
             if re.search(r'\.(css|js|png|jpg|jpeg|svg|ico|json|woff2?|ttf|webp|map)$', clean_url, re.I):
                 self.path = '/' + clean_url.split('/')[-1]
