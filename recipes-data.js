@@ -27042,7 +27042,7 @@ const RECIPES_MASTER = [
   },
   {
     "id": "slm_chocolate_cookie_dough_oreo",
-    "name": "Chocolate Cookie Dough Oreo Protein Ice Cream",
+    "name": "Chocolate Cookie Dough Oreo",
     "category": "The Creami Cookbook",
     "categories": [
       "The Creami Cookbook",
@@ -27050,90 +27050,96 @@ const RECIPES_MASTER = [
       "Decadent"
     ],
     "creatorId": "shandi_lynn_martin",
+    "page": 33,
     "sources": [
       {
         "book": "The Creami Cookbook: Volume 1",
-        "sourceFile": "https://shandilynnmartin.com",
-        "url": "https://shandilynnmartin.com"
+        "page": 33,
+        "sourceFile": "The Creami Cookbook (Page 33)",
+        "url": "https://www.instagram.com/reel/Cq9BFkarlQT/"
       }
     ],
-    "sourceFile": "https://www.instagram.com/shandi.lynn.martin/",
-    "videoUrl": "https://www.instagram.com/shandi.lynn.martin/",
+    "sourceFile": "The Creami Cookbook: Volume 1 (Page 33)",
+    "videoUrl": "https://www.instagram.com/reel/Cq9BFkarlQT/",
     "macros": {
-      "calories": "385",
-      "protein": "42g",
-      "carbs": "36g",
-      "fat": "8g",
-      "sugar": "9g",
-      "fiber": "5g"
+      "calories": "442",
+      "protein": "36g",
+      "carbs": "46g",
+      "fat": "14g",
+      "sugar": "",
+      "fiber": ""
     },
     "spinSetting": "Lite Ice Cream",
     "prepTime": "5 MIN",
-    "freezeTime": "24 HOURS",
+    "freezeTime": "8 HOURS OR OVERNIGHT",
     "makes": "1 PINT",
-    "proTip": "Shandi recommends spinning on Lite Ice Cream, adding 1-2 tbsp unsweetened almond milk for a quick Respin, then mixing in crushed Oreos and cookie dough chunks. Dig in with The Creami Spoon™️ to easily get every bite at the bottom!",
+    "proTip": "Create small hole in center with spoon; add 1-2 T. milk (1 for thicker, 2 for softer). Place back in machine and hit Respin. Break 1 ball of cookie dough into 3rds and place in hole with 1 Oreo thin, run Mix-In, then top with remaining crumbled Oreo thin!",
     "ingredients": [
       {
-        "id": "fairlife_chocolate_milk",
-        "name": "Fairlife 2% Chocolate Milk",
-        "quantity": "300",
-        "unit": "g",
-        "raw": "300G FAIRLIFE 2% CHOCOLATE MILK",
+        "id": "chocolate_fairlife_milk",
+        "name": "Chocolate Fairlife Milk (Not the shakes)",
+        "quantity": "8",
+        "unit": "oz",
+        "raw": "8 oz. Chocolate Fairlife Milk (Not the shakes)",
         "section": "Base",
         "isMixin": false,
-        "notes": ""
+        "notes": "1 cup"
       },
       {
-        "id": "clean_simple_eats_brownie_batter",
-        "name": "Clean Simple Eats Brownie Batter Protein",
-        "quantity": "32",
-        "unit": "g",
-        "raw": "32G CLEAN SIMPLE EATS BROWNIE BATTER PROTEIN",
+        "id": "cse_chocolate_brownie_batter_protein",
+        "name": "CSE Chocolate Brownie Batter Protein Powder",
+        "quantity": "1",
+        "unit": "scoop",
+        "raw": "1 scoop CSE Chocolate Brownie Batter Protein Powder",
         "section": "Base",
         "isMixin": false,
-        "notes": "Code SHANDI for 10% off"
+        "notes": "Clean Simple Eats"
       },
       {
-        "id": "sf_chocolate_pudding_mix",
-        "name": "Sugar-Free Chocolate Fudge Pudding Mix",
-        "quantity": "7",
-        "unit": "g",
-        "raw": "7G SF CHOCOLATE FUDGE PUDDING MIX",
-        "section": "Base",
+        "id": "milk_of_choice_respin",
+        "name": "Milk of Choice (2% Fairlife Milk)",
+        "quantity": "1-2",
+        "unit": "tbsp",
+        "raw": "1-2 tablespoons milk of choice (I use 2% Fairlife Milk)",
+        "section": "Respin Liquid",
         "isMixin": false,
-        "notes": ""
+        "notes": "1 T. for thicker, 2 T. for softer"
       },
       {
-        "id": "crushed_oreo_cookies",
-        "name": "Crushed Oreo Cookies",
-        "quantity": "10",
-        "unit": "g",
-        "raw": "10G CRUSHED OREOS",
+        "id": "sweet_lorens_cookie_dough",
+        "name": "Sweet Loren's Chocolate Chip Cookie Dough (Raw)",
+        "quantity": "1",
+        "unit": "cookie",
+        "raw": "1 (raw) Sweet Loren's Chocolate Chip Cookie Dough Cookie (safe to eat raw)",
         "section": "Mix-in",
         "isMixin": true,
-        "notes": ""
+        "notes": "Break 1 ball into 3rds before Mix-In"
       },
       {
-        "id": "chocolate_chip_cookie_dough_chunks",
-        "name": "Chocolate Chip Cookie Dough Chunks",
-        "quantity": "25",
-        "unit": "g",
-        "raw": "25G EDIBLE COOKIE DOUGH CHUNKS",
+        "id": "oreo_thins",
+        "name": "Oreo Thins",
+        "quantity": "2",
+        "unit": "cookies",
+        "raw": "2 Oreo Thins",
         "section": "Mix-in",
         "isMixin": true,
-        "notes": ""
+        "notes": "1 inside Mix-In, 1 crumbled on top"
       }
     ],
     "instructions": [
-      "WHISK FAIRLIFE CHOCOLATE MILK, CLEAN SIMPLE EATS BROWNIE BATTER PROTEIN, AND SF PUDDING MIX IN PINT UNTIL DISSOLVED",
-      "FREEZE ON A LEVEL SURFACE FOR 24 HOURS",
-      "SPIN ON LITE ICE CREAM SETTING",
-      "ADD 1-2 TBSP ALMOND MILK AND PRESS RESPIN IF POWDERY",
-      "HOLLOW CENTER, ADD CRUSHED OREOS AND COOKIE DOUGH CHUNKS, AND RUN MIX-IN CYCLE",
-      "ENJOY WITH THE CREAMI SPOON™️!"
+      "Add 1 c. chocolate milk and protein powder in Creami container. Whisk until smooth.",
+      "Freeze for 8 hours or preferably overnight.",
+      "Remove from freezer and place in Ninja Creami machine.",
+      "Hit \"Lite Ice Cream\" Cycle; Remove. (Ice cream will initially look somewhat powdery).",
+      "Create small hole in center with spoon; add 1-2 T. milk. (1 for thicker, 2 for softer).",
+      "Place container back in Ninja Creami machine; hit \"Respin\" cycle; remove. For a thicker consistency 1 respin cycle. For soft serve, 2 respin cycles. Note: You do not need to add additional liquid with each \"Respin\" cycle.",
+      "Create small hole in center; break 1 ball of cookie dough into 3rds and place inside hole, followed by 1 Oreo thin.",
+      "Select \"Mix In\" cycle; remove.",
+      "Top with remaining Oreo thin (crumbled) and additional cookie dough if desired."
     ],
     "aliases": [
-      "chocolate_cookie_dough_oreo_protein_ice_cream",
+      "chocolate_cookie_dough_oreo",
+      "slm_chocolate_cookie_dough_oreo",
       "shandi_chocolate_cookie_dough_oreo"
     ]
   },
